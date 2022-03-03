@@ -226,7 +226,7 @@ local int PanSkip, dir;
 				PanSkip = Int(Treads[i].TPanCount/CycleStep);
 				Treads[i].TPanCount -= (CycleStep * PanSkip);
 	
-				PanSkip = Min(PanSkip,7);
+				PanSkip = Max(0, Min(PanSkip,7));
 				Treads[i].CurrentTPan += PanSkip;
 				if (Treads[i].CurrentTPan > 15)
 					Treads[i].CurrentTPan -= 15;
@@ -242,7 +242,7 @@ local int PanSkip, dir;
 				PanSkip = Abs(Int(Treads[i].TPanCount/CycleStep));
 				Treads[i].TPanCount += (CycleStep * PanSkip);
 	
-				PanSkip = Min(PanSkip,7);
+				PanSkip = Max(0, Min(PanSkip,7));
 				Treads[i].CurrentTPan -= PanSkip;
 				if (Treads[i].CurrentTPan < 0)
 					Treads[i].CurrentTPan += 15;

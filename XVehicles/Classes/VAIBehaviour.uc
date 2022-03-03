@@ -45,8 +45,8 @@ function vector GetNextMoveTarget()
 {
 	local int i, best;
 	local float Dist, BestDist;
-	Local vector V, HitLocation, HitNormal;
-	local actor Visible[ArrayCount(VehicleOwner.Driver.RouteCache)];
+	Local vector V, S, HitLocation, HitNormal;
+	local NavigationPoint Visible[ArrayCount(VehicleOwner.Driver.RouteCache)], NP;
 	
 	if( VehicleOwner.Driver.Target!=None && VehicleOwner.Driver.LineOfSightTo(VehicleOwner.Driver.Target) &&
 		!VehicleOwner.Driver.IsInState('Fallback'))
@@ -59,15 +59,24 @@ function vector GetNextMoveTarget()
 		BestDist = -1;
 		V.X = VehicleOwner.CollisionRadius;
 		V.Y = VehicleOwner.CollisionRadius;
-		V.Z = VehicleOwner.CollisionHeight;
-		V.Z = 1;
+		V.Z = VehicleOwner.CollisionHeight - VehicleOwner.MaxObstclHeight/2;
+		S = VehicleOwner.Location;
+		S.Z += VehicleOwner.MaxObstclHeight/2;
 		for (i = 0; i < ArrayCount(VehicleOwner.Driver.RouteCache); i++)
 		{
-			if (!VehicleOwner.Driver.LineOfSightTo(VehicleOwner.Driver.RouteCache[i]) || 
-				VehicleOwner.Trace(HitLocation, HitNormal, VehicleOwner.Driver.RouteCache[i].Location, , true, V) != None)
+			NP = VehicleOwner.Driver.RouteCache[i];
+			if (NP == None)
+				break;
+			HitLocation = NP.Location;
+			HitLocation.Z -= NP.CollisionHeight - VehicleOwner.CollisionHeight - VehicleOwner.MaxObstclHeight/2;
+			if (!VehicleOwner.Driver.LineOfSightTo(NP) || 
+				VehicleOwner.Trace(HitLocation, HitNormal, HitLocation, S, true, V) != None)
+			{
+//				if (i == 0) Log(i @ NP @ HitLocation @ HitNormal);
 				continue;
-			Visible[i] = VehicleOwner.Driver.RouteCache[i];
-			Dist = VSize(Visible[i].Location - VehicleOwner.Location);
+			}
+			Visible[i] = NP;
+			Dist = VSize(NP.Location - VehicleOwner.Location);
 			if (BestDist < 0 || dist < BestDist)
 			{
 				BestDist = dist;
@@ -77,6 +86,9 @@ function vector GetNextMoveTarget()
 		if (BestDist < 0)
 		{
 //			Log("Use driver MoveTarget" @ VehicleOwner.Driver.MoveTarget @ VehicleOwner.Driver.MoveTarget.getHumanName());
+			if (VehicleOwner.Driver.RouteCache[0] != None && 
+				Inventory(VehicleOwner.Driver.MoveTarget) != None)
+				return VehicleOwner.Driver.RouteCache[0].Location;
 			Return VehicleOwner.Driver.MoveTarget.Location;
 		}
 			
@@ -103,7 +115,7 @@ function vector GetNextMoveTarget()
 //		Log("Use driver RouteCache" @ best @ Visible[best] @ Visible[best].getHumanName());
 		V = Visible[best].Location;
 		if (FlagBase(Visible[best]) != None)
-			V -= (Normal(VehicleOwner.ExitOffset)*(VehicleOwner.CollisionRadius + 10)) >> VehicleOwner.Rotation;
+			V -= (Normal(VehicleOwner.ExitOffset)*(VehicleOwner.CollisionRadius + 10 - Visible[best].CollisionRadius/2)) >> VehicleOwner.Rotation;
 		return V;
 
 			

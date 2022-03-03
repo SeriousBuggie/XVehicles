@@ -457,6 +457,8 @@ function FireTurret( byte Mode, optional bool bForceFire )
 	local Actor A;
 	local byte i;
 	local xVehProjDummy xWFX;
+	
+	//Log(self @ OwnerVehicle @ WeaponController.getHumanName() @ WeaponController.bFire @ WeaponController.bAltFire);
 
 	if( bAltFireZooms && Mode==1 )
 	{
@@ -644,6 +646,9 @@ function Timer()
 	bFireRestrict = False;
 	if( WeaponController==None )
 		Return;
+	if (Bot(WeaponController) != None && WeaponController.bFire + WeaponController.bAltFire > 0 && 
+		WeaponController.Enemy == None && !Bot(WeaponController).bComboPaused && !Bot(WeaponController).bComboPaused)
+		Bot(WeaponController).StopFiring();
 	if( WeaponController.bFire!=0 )
 		FireTurret(0);
 	else if( WeaponController.bAltFire!=0 )

@@ -437,9 +437,6 @@ function int ShouldTurnFor( vector AcTarget, optional float YawAdjust, optional 
 	local vector X,Y,Z;
 	local rotator R;
 	local float Res, res2;
-	
-	if (DeadZone == 0)
-		DeadZone = 0.1;
 		
 	YawAdjust = WheelYaw*FMin(1, Vsize(Velocity)/400);
 

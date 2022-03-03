@@ -166,6 +166,15 @@ function Destroyed()
 function Projectile ProjectileFire(class<projectile> ProjClass, float ProjSpeed, bool bWarn);
 function TraceFire( float Accuracy );
 
+function SetupWeapon(WeaponAttachment WA)
+{
+	if (WA == None)
+		return;
+	bInstantHit = WA.WeapSettings[0].bInstantHit;
+	bSplashDamage = !bInstantHit;
+	bAltWarnTarget = WA.bAltFireZooms;
+}
+
 defaultproperties
 {
       VehicleOwner=None
@@ -173,18 +182,18 @@ defaultproperties
       bPassengerGun=False
       SeatNumber=0
       UseStandardCrosshair=False
+      bWarnTarget=True
       AIRating=1.000000
       PickupMessage="You got a vehicle"
       ItemName="Vehicle"
-      PlayerViewMesh=LodMesh'Botpack.flakm'
-      PickupViewMesh=LodMesh'Botpack.Flak2Pick'
-      ThirdPersonMesh=LodMesh'Botpack.FlakHand'
+      PlayerViewMesh=LodMesh'Botpack.AutoML'
+      PickupViewMesh=LodMesh'Botpack.MagPick'
+      ThirdPersonMesh=LodMesh'Botpack.AutoHand'
       Charge=1
       MaxDesireability=10.000000
       bHidden=True
-      bTrailerPrePivot=True
       Physics=PHYS_Trailer
-      Mesh=LodMesh'Botpack.Flak2Pick'
+      Mesh=LodMesh'Botpack.MagPick'
       bGameRelevant=True
       bCarriedItem=True
 }

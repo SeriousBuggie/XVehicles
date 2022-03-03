@@ -735,11 +735,13 @@ function DriverWeapon SpawnWeapon(class<DriverWeapon> DriverWeaponClass, optiona
 	if (Seat == 0) // driver
 	{
 		wep.ItemName = VehicleName;
+		wep.SetupWeapon(DriverGun);
 	}
 	else
 	{
 		Seat--;
 		wep.ItemName = PassengerSeats[Seat].SeatName;
+		wep.SetupWeapon(PassengerSeats[Seat].PGun);
 		wep.InventoryGroup = Seat + 2;
 		wep.Charge = wep.InventoryGroup; // hack for net
 		if (wep.ItemName == "")
@@ -902,6 +904,7 @@ function ChangeCollision(Pawn Other, bool bInside)
 	{
 		if (bInside)
 		{
+			Bot.bCanSwim = bIsWaterResistant; // not help :(
 			Bot.FootStep1 = None;
 			Bot.FootStep2 = None;
 			Bot.FootStep3 = None;
@@ -914,6 +917,7 @@ function ChangeCollision(Pawn Other, bool bInside)
 		}
 		else
 		{
+			Bot.bCanSwim = Bot.default.bCanSwim;
 			Bot.FootStep1 = Bot.default.FootStep1;
 			Bot.FootStep2 = Bot.default.FootStep2;
 			Bot.FootStep3 = Bot.default.FootStep3;
@@ -1814,7 +1818,8 @@ simulated function UpdatePassengerPos()
 			if (Bot(Passengers[i]) != None)
 			{
 				if ((Passengers[i].PlayerReplicationInfo.HasFlag != None && PlayerPawn(Driver) == None) ||
-					(Driver == None && WaitForDriver < Level.TimeSeconds))
+					(Driver == None && WaitForDriver < Level.TimeSeconds) || 
+					(Bot(Driver) != None && Bot(Driver).Orders == 'Follow' && Bot(Driver).OrderObject == Passengers[i]))
 					ChangeSeat(0, true, i); // become driver
 				else if (CTFFlag(Passengers[i].MoveTarget) != None && 
 					Passengers[i].PlayerReplicationInfo.HasFlag == None)
@@ -1912,6 +1917,8 @@ function bool CrewFit(Pawn Other)
 			(DBot != None && DBot.Orders == Bot.Orders && Bot.OrderObject == DBot.OrderObject);
 	if (DBot == None)
 		return false;
+	if (Dbot.Orders == 'Follow' && DBot.OrderObject == Bot)
+		return true;
 	if (Bot.Orders == 'Attack')
 		return DBot.Orders == 'Attack';
 	// Defend, Hold and other unknown possible orders
@@ -1958,10 +1965,11 @@ function ReadBotInput( float Delta )
 		bHasMoveTarget = True;
 		V = MoveDest;
 		MoveDest = VehicleAI.GetNextMoveTarget();
-		if (V == MoveDest && Trace(HitLocation, HitNormal, Location + 2*CollisionRadius*GetMovementDir()*(MoveDest - Location),,true,
+		if (V == MoveDest && Trace(HitLocation, HitNormal, Location + 2*CollisionRadius*GetMovementDir()*Normal(MoveDest - Location),,true,
 			vect(1,1,0)*CollisionRadius + vect(0,0,1)*(CollisionHeight - MaxObstclHeight)) != None && Driver.PointReachable(MoveDest))
 		{
 			Driver.SetCollisionSize(CollisionRadius, CollisionHeight);
+//			log(self @ driver @ MoveDest @ Driver.PointReachable(MoveDest));
 			if (!Driver.PointReachable(MoveDest))
 			{				
 				V = ExitOffset; // hack for prevent bot looping
@@ -2006,6 +2014,8 @@ function bool NeedStop(Pawn pDriver)
 {
 	if (pDriver == None || PlayerPawn(pDriver) != None)
 		return false;
+	if (VehicleExit(pDriver.MoveTarget) != None)
+		return true;
 	if (pDriver.PlayerReplicationInfo != None)
 	{
 		if (CTFFlag(pDriver.MoveTarget) != None && pDriver.PlayerReplicationInfo.HasFlag != pDriver.MoveTarget)
@@ -2072,7 +2082,7 @@ function int ShouldTurnFor( vector AcTarget, optional float YawAdjust, optional 
 	local float Res;
 	
 	if (DeadZone == 0)
-		DeadZone = 0.1;
+		DeadZone = 0.001;
 		
 	R = Rotation;
 	R.Yaw += YawAdjust;
