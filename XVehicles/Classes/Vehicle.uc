@@ -617,6 +617,8 @@ simulated function PostBeginPlay()
 	//}
 	
 	ShowState();
+	
+	SetTimer(0.5, true);
 }
 
 function ChangeBackView()
@@ -876,6 +878,7 @@ function DebugDump(coerce string Place) {
 function ChangeCollision(Pawn Other, bool bInside)
 {
 	Local vector L;
+	Local Bot Bot;
 	if (bInside)
 	{
 		Other.DrawScale = 0;
@@ -894,23 +897,30 @@ function ChangeCollision(Pawn Other, bool bInside)
 		Other.bCollideWorld = True;
 		Other.SetCollisionSize(Other.default.CollisionRadius, Other.default.CollisionHeight);
 	}
-	if (Bot(Other) != None)
+	Bot = Bot(Other);
+	if (Bot != None)
 	{
 		if (bInside)
 		{
-			Bot(Other).FootStep1 = None;
-			Bot(Other).FootStep2 = None;
-			Bot(Other).FootStep3 = None;
-			Bot(Other).JumpSound = None;
+			Bot.FootStep1 = None;
+			Bot.FootStep2 = None;
+			Bot.FootStep3 = None;
+			Bot.JumpSound = None;
+			Bot.LandGrunt = None;
+			Bot.Land = None;
+			Bot.WaterStep = None;
 			Other.bCollideWorld = True; // for paths work
 			Other.SetCollisionSize(Other.default.CollisionRadius, Other.default.CollisionHeight);
 		}
 		else
 		{
-			Bot(Other).FootStep1 = Bot(Other).default.FootStep1;
-			Bot(Other).FootStep2 = Bot(Other).default.FootStep2;
-			Bot(Other).FootStep3 = Bot(Other).default.FootStep3;
-			Bot(Other).JumpSound = Bot(Other).default.JumpSound;
+			Bot.FootStep1 = Bot.default.FootStep1;
+			Bot.FootStep2 = Bot.default.FootStep2;
+			Bot.FootStep3 = Bot.default.FootStep3;
+			Bot.JumpSound = Bot.default.JumpSound;
+			Bot.LandGrunt = Bot.default.LandGrunt;
+			Bot.Land = Bot.default.Land;
+			Bot.WaterStep = Bot.default.WaterStep;
 		}
 	}
 }
@@ -954,7 +964,7 @@ local vector ExitVect;
 			Driver = None;
 		else
 		{
-			Log(self @ Level.TimeSeconds @ "DriverLeft" @ Driver @ bForcedLeave @ Reason);
+//			Log(self @ Level.TimeSeconds @ "DriverLeft" @ Driver @ bForcedLeave @ Reason);
 			Driver.DrawScale = Driver.Default.DrawScale;
 			if( PlayerPawn(Driver)!=None )
 			{
@@ -1801,8 +1811,15 @@ simulated function UpdatePassengerPos()
 					R.Yaw = PassengerSeats[i].PGun.TurretYaw;
 			ResetPawn(Passengers[i], R, PassengerSeats[i].PHGun);
 			
-			if (Bot(Passengers[i]) != None && Driver == None && WaitForDriver < Level.TimeSeconds)
-				ChangeSeat(0, true, i); // become driver				
+			if (Bot(Passengers[i]) != None)
+			{
+				if ((Passengers[i].PlayerReplicationInfo.HasFlag != None && PlayerPawn(Driver) == None) ||
+					(Driver == None && WaitForDriver < Level.TimeSeconds))
+					ChangeSeat(0, true, i); // become driver
+				else if (CTFFlag(Passengers[i].MoveTarget) != None && 
+					Passengers[i].PlayerReplicationInfo.HasFlag == None)
+					PassengerLeave(i,false);
+			}
 		}
 	}
 }
@@ -1885,6 +1902,8 @@ function bool CrewFit(Pawn Other)
 		return true;
 	Bot = Bot(Other);
 	if (Bot == None || Bot.Orders == 'Freelance')
+		return true;
+	if (PlayerPawn(Driver) != None && Other.PlayerReplicationInfo != None && Other.PlayerReplicationInfo.HasFlag != None)
 		return true;
 	DBot = Bot(Driver);
 	if (Bot.Orders == 'Follow')
@@ -2095,7 +2114,7 @@ Auto State EmptyVehicle
 {
 Ignores FireWeapon,ReadDriverInput,ReadBotInput,DriverLeft;
 
-	function ServerPerformMove( int InRise, int InTurn, int InAccel )
+	function ServerPerformPackedMove( byte Bits )
 	{
 		Turning = 0;
 		Rising = 0;
@@ -2137,6 +2156,13 @@ Ignores FireWeapon,ReadDriverInput,ReadBotInput,DriverLeft;
 				PlayerPawn(Other).ClientPlaySound(Sound'Hijacked');
 		}
 		DriverEnter(Pawn(Other));
+	}
+	function Timer()
+	{
+		local PlayerPawn PP;
+		foreach RadiusActors(class'PlayerPawn', PP, CollisionRadius + 100)
+			if (CanEnter(PP))
+				Bump(PP);
 	}
 	function BeginState()
 	{
@@ -2185,6 +2211,14 @@ State VehicleDriving
 		if( Other == None || Other.bDeleteMe || !Other.bIsPawn || !CanAddPassenger(Pawn(Other),Fr) || !VehicleAI.PawnCanPassenge(Pawn(Other),Fr) )
 			Return;
 		PassengerEnter(Pawn(Other),Fr);
+	}
+	function Timer()
+	{
+		local PlayerPawn PP;
+		local byte Fr;
+		foreach RadiusActors(class'PlayerPawn', PP, CollisionRadius + 100)
+			if (CanAddPassenger(PP, fr))
+				Bump(PP);
 	}
 	function Touch( Actor Other )
 	{
@@ -2927,12 +2961,11 @@ singular simulated function Bump( Actor Other )
 
 function PushDeco(Decoration Deco)
 {
-local float speed, oldZ;
+	local float speed, oldZ;
 
 	if (Deco != None)
 	{
-
-	Deco.bBobbing = false;
+		Deco.bBobbing = false;
         oldZ = Deco.Velocity.Z;
         speed = VSize(Velocity);
         Deco.Velocity = Velocity * FMin(120.0, 20 + speed)/speed;

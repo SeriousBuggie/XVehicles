@@ -13,6 +13,7 @@ defaultproperties
       PickupViewMesh=LodMesh'Botpack.PAmmo'
       Mesh=LodMesh'Botpack.PAmmo'
       bGameRelevant=True
+      MultiSkins(1)=Texture'FixGun.Skins.JPammo_01'
       CollisionRadius=20.000000
       CollisionHeight=12.000000
 }
