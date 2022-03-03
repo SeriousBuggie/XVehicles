@@ -9,6 +9,7 @@ var float NextRespawnTimer;
 var bool bInitAct;
 var byte InitialTeamNum;
 var() bool bDisableTeamSpawn;
+var() bool bUseMultipleSpawn;
 
 function PostBeginPlay()
 {
@@ -26,7 +27,23 @@ function Timer()
 		Error("Missing vehicle class!");
 		Return;
 	}
-	if( MyVehicle==None || MyVehicle.bDeleteMe )
+	if (MyVehicle != None && MyVehicle.bDeleteMe)
+		MyVehicle = None;
+	if (MyVehicle != None && VSize(MyVehicle.Location - Location) > 2*MyVehicle.CollisionRadius)
+	{
+		MyVehicle.CheckForEmpty();
+		if (bUseMultipleSpawn)
+		{
+			PrepareNew();
+			return;
+		}
+	}
+	if( MyVehicle==None && NextRespawnTimer > Level.TimeSeconds )
+	{
+		SetTimer((NextRespawnTimer-Level.TimeSeconds),False);
+		return;
+	}
+	if( MyVehicle==None )
 	{
 		MyVehicle = Spawn(VehicleClass);
 		if( MyVehicle==None )
@@ -43,14 +60,21 @@ function Timer()
 
 		MyVehicle.bDisableTeamSpawn = (MyVehicle.bDisableTeamSpawn || bDisableTeamSpawn);
 	}
+	SetTimer(1,False);
 }
-function NotifyVehicleDestroyed()
+function PrepareNew()
 {
+	MyVehicle = None;
 	NextRespawnTimer = Level.TimeSeconds+VehicleRespawnTime;
 	if( !bInitialActive )
 		Return;
-	MyVehicle = None;
 	SetTimer(VehicleRespawnTime,False);
+}
+function NotifyVehicleDestroyed(Vehicle InVehicle)
+{
+	if (bUseMultipleSpawn && MyVehicle != InVehicle)
+		return;
+	PrepareNew();
 }
 function Reset()
 {
@@ -93,7 +117,7 @@ event UnTrigger( Actor Other, Pawn EventInstigator )
 }
 function Destroyed()
 {
-	if( MyVehicle!=None && MyVehicle.bDeleteMe )
+	if( MyVehicle!=None && !MyVehicle.bDeleteMe )
 	{
 		if( !MyVehicle.bHadADriver )
 		{
@@ -118,8 +142,10 @@ defaultproperties
       bInitAct=False
       InitialTeamNum=0
       bDisableTeamSpawn=True
+      bUseMultipleSpawn=False
       bHidden=True
       RemoteRole=ROLE_None
+      bDirectional=True
       DrawType=DT_Mesh
       Mesh=LodMesh'UnrealShare.WoodenBoxM'
       bCollideWhenPlacing=True

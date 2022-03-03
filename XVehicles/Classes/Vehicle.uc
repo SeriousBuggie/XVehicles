@@ -546,8 +546,7 @@ simulated function PostBeginPlay()
 		{
 			if( DriverWeaponClass==None )
 				DriverWeaponClass = Class'DriverWeapon';
-			DWeapon = Spawn(DriverWeaponClass,Self);
-			DWeapon.VehicleOwner = Self;
+			DWeapon = SpawnWeapon(DriverWeaponClass);
 		}
 		RotZeroRoll = Rotation;
 		RotZeroRoll.Roll = 0;
@@ -620,17 +619,16 @@ function FireWeapon( bool bAltFire )
 
 	if (bDriverHorn && ((bHornPrimaryOnly && !bAltFire) || !bHornPrimaryOnly))
 	{
-
-	if( PlayerPawn(Driver)==None || NextHornTime>Level.TimeSeconds )
+		if( PlayerPawn(Driver)==None || NextHornTime>Level.TimeSeconds )
+			Return;
+		NextHornTime = Level.TimeSeconds+HornTimeInterval;
+		if( Instigator!=None )
+			MakeNoise(5);
+	
+		if( HornSnd!=None )
+			PlaySound(HornSnd,SLOT_Misc,2,,1600);
+	
 		Return;
-	NextHornTime = Level.TimeSeconds+HornTimeInterval;
-	if( Instigator!=None )
-		MakeNoise(5);
-
-	if( HornSnd!=None )
-		PlaySound(HornSnd,SLOT_Misc,2,,1600);
-
-	Return;
 	}
 
 	if( bAltFire )
@@ -659,6 +657,28 @@ function ServerPreformMove( byte InRise, byte InTurn, byte InAccel )
 		Accel = 1;
 }
 
+function DriverWeapon SpawnWeapon(class<DriverWeapon> DriverWeaponClass, optional int Seat, optional Actor Owned)
+{
+	local DriverWeapon wep;
+	
+	if (Owned == None)
+		Owned = self;
+	wep = Spawn(DriverWeaponClass,Owned);
+	wep.VehicleOwner = Self;
+	if (Seat == 0) // driver
+	{
+		wep.ItemName = VehicleName;
+	}
+	else
+	{
+		Seat--;
+		wep.ItemName = PassengerSeats[Seat].SeatName;
+		if (wep.ItemName == "")
+			wep.ItemName = VehicleName;
+	}
+	return wep;
+}
+
 function DriverEnter( Pawn Other )
 {
 	local rotator R;
@@ -676,10 +696,7 @@ function DriverEnter( Pawn Other )
 	if( DriverGun!=None )
 		DriverGun.WeaponController = Other;
 	if( DWeapon==None )
-	{
-		DWeapon = Spawn(DriverWeaponClass,Self);
-		DWeapon.VehicleOwner = Self;
-	}
+		DWeapon = SpawnWeapon(DriverWeaponClass);
 	DWeapon.NotifyNewDriver(Other);
 	DWeapon.SetOwner(Other);
 	if( Other.Weapon!=None )
@@ -702,7 +719,7 @@ function DriverEnter( Pawn Other )
 	}
 	GoToState('VehicleDriving');
 }
-function DriverLeft( optional bool bForcedLeave )
+singular function DriverLeft( optional bool bForcedLeave )
 {
 local vector ExitVect;
 
@@ -725,10 +742,10 @@ local vector ExitVect;
 			ExitVect = ExitOffset;
 			if ((Normal(Velocity) Dot Normal(ExitVect >> Rotation)) > 0.35)
 				ExitVect.Y = -ExitVect.Y;
-			if( !bForcedLeave && !Driver.SetLocation(Location+(ExitVect >> Rotation)) )
+			if( !bForcedLeave && !Driver.Move(Location+(ExitVect >> Rotation) - Driver.Location) )
 			{
 				ExitVect.Y = -ExitVect.Y;
-				if (!bForcedLeave && !Driver.SetLocation(Location+(ExitVect >> Rotation)))
+				if (!bForcedLeave && !Driver.Move(Location+(ExitVect >> Rotation) - Driver.Location))
 				{
 					Driver.SetCollision(False,False,False);
 					Driver.SetCollisionSize(0,0);
@@ -795,7 +812,7 @@ simulated function Destroyed()
 			PassengerSeats[i].PassengerCam.Destroy();
 	}
 	if( MyFactory!=None )
-		MyFactory.NotifyVehicleDestroyed();
+		MyFactory.NotifyVehicleDestroyed(self);
 	For( W=AttachmentList; W!=None; W=NW )
 	{
 		NW = W.NextAttachment;
@@ -1163,15 +1180,29 @@ simulated function UpdateAttachment(WeaponAttachment vat, float Delta)
 local vector WPosA;
 local rotator WRotA;
 local byte i;
+local Actor AttachBase;
+local WeaponAttachment WA;
+
+	AttachBase = vat.Base;
+	if (AttachBase == None)
+		AttachBase = self;
+	if (vat.bRotWithOtherWeap && WeaponAttachment(vat.Base) == None && vat.WAtt != None)
+		AttachBase = vat.WAtt;
+//	if (Vat.base != AttachBase)
+//		Log(self @ vat @ Vat.base @ AttachBase @ vat.bRotWithOtherWeap);
 
 	if (bSlopedPhys && GVT!=None)
 		WPosA = GVT.PrePivot + Location + (vat.TurretOffset >> Rotation);
 	else
 		WPosA = Location + (vat.TurretOffset >> Rotation);
 
-	vat.SetLocation(WPosA);
-	if (Vat.base != self)
-		vat.setBase(self);
+	if (!vat.Move(WPosA - vat.Location))
+		vat.SetLocation(WPosA);
+	if (Vat.base != AttachBase)
+		vat.setBase(AttachBase);
+		
+	if (Vat.base != AttachBase)
+		Log(Vat.base @ AttachBase);
 
 	if (vat.PitchPart != None)
 	{
@@ -1189,9 +1220,11 @@ local byte i;
 			else
 				WRotA = vat.TransformForGroundRot(vat.TurretYaw,FloorNormal,vat.TurretPitch);
 		}
-		vat.PitchPart.SetLocation(WPosA + (vat.PitchActorOffset >> WRotA));
-		if (Vat.PitchPart.base != self)
-			vat.PitchPart.setBase(self);
+		WPosA += (vat.PitchActorOffset >> WRotA);
+		if (!vat.PitchPart.Move(WPosA - vat.PitchPart.Location))
+			vat.PitchPart.SetLocation(WPosA);
+		if (Vat.PitchPart.base != AttachBase)
+			vat.PitchPart.setBase(AttachBase);
 	}
 }
 
@@ -1545,7 +1578,8 @@ function int ShouldTurnFor( vector AcTarget )
 // Pawn can enter this vehicle?
 function bool CanEnter( Pawn Other, optional bool bIgnoreDuck )
 {
-	if( Other.Health<=0 || (!bIgnoreDuck && PlayerPawn(Other)!=None && Other.bDuck==0) || DriverWeapon(Other.Weapon)!=None )
+	if( Other.Health<=0 || (!bIgnoreDuck && PlayerPawn(Other)!=None && Other.bDuck==0) || DriverWeapon(Other.Weapon)!=None ||
+		Other.IsInState('PlayerWaiting') || !Other.bCollideActors )
 		Return False;
 	Return True;
 }
@@ -1577,7 +1611,7 @@ Ignores FireWeapon,ReadDriverInput,ReadBotInput,DriverLeft;
 				P.ReceiveLocalizedMessage( class'EnterMessagePlus', 0, None, None, self );
 		}
 	}
-	function Bump( Actor Other )
+	singular function Bump( Actor Other )
 	{
 		Global.Bump(Other);
 		if( Other.bDeleteMe )
@@ -1643,7 +1677,7 @@ Begin:
 
 State VehicleDriving
 {
-	function Bump( Actor Other )
+	singular function Bump( Actor Other )
 	{
 		local byte Fr;
 
@@ -1702,9 +1736,21 @@ simulated function ClientSetTranslatorMsg()
 		Count++;
 	}
 }
+simulated function vector FixCameraPos(vector V, vector S)
+{
+	local vector HL,HN,X,Y,Z;
+	local float P;
+	if( Trace(HL,HN,V,S,False) != None )
+		V = HL+HN*5;
+	GetAxes(Rotation, X, Y, Z);
+	P = (V - S) dot Z;
+	if (P < 0)
+		V -= P*Z;
+	return V;
+}
 simulated function CalcCameraPos( out vector Pos, out rotator Rot, float Mult, optional byte SeatNumber )
 {
-	local vector V,S,HL,HN;
+	local vector V,S;
 
 	if( SeatNumber>0 )
 	{
@@ -1719,9 +1765,7 @@ simulated function CalcCameraPos( out vector Pos, out rotator Rot, float Mult, o
 		else
 			S = Location+((PassengerSeats[SeatNumber].PassengerWOffset+PassengerSeats[SeatNumber].CameraOffset*Mult) >> Rotation);
 		V = S+((PassengerSeats[SeatNumber].CamBehindviewOffset*Mult) >> Rot);
-		if( Trace(HL,HN,V,S,False)==None )
-			Pos = V;
-		else Pos = HL+HN*5;
+		Pos = FixCameraPos(V, S);
 		Return;
 	}
 	if( Pawn(Owner)==None )
@@ -1758,9 +1802,7 @@ simulated function CalcCameraPos( out vector Pos, out rotator Rot, float Mult, o
 		else
 			V = DriverGun.Location+((BehinViewViewOffset*Mult) >> Rot);
 	}
-	if( Trace(HL,HN,V,Location,False)==None )
-		Pos = V;
-	else Pos = HL+HN*5;
+	Pos = FixCameraPos(V, Location);
 }
 function rotator GetFiringRot( float ProjSpeed, bool bInstantHit, vector PStartPos, optional byte SeatN )
 {
@@ -1779,11 +1821,12 @@ function rotator GetFiringRot( float ProjSpeed, bool bInstantHit, vector PStartP
 			CalcCameraPos(Start,Aim,PassengerSeats[SeatN].PassengerCam.CurrentViewMult,SeatN+1);
 		else
 			CalcCameraPos(Start,Aim,1.0,SeatN+1);
-			
 		End = Start+vector(Aim)*8000;
+
 		if( Trace(HL,HN,End,Start,True)==None )
 			return rotator(End-PStartPos);
-		else return rotator(HL-PStartPos);
+		else 
+			return rotator(HL-PStartPos);
 	}
 	if( PlayerPawn(Driver)==None )
 		Return Driver.AdjustAim(ProjSpeed,PStartPos,200,True,True);
@@ -1796,7 +1839,8 @@ function rotator GetFiringRot( float ProjSpeed, bool bInstantHit, vector PStartP
 	End = Start+vector(Aim)*40000;
 	if( Trace(HL,HN,End,Start,True)==None )
 		return rotator(End-PStartPos);
-	else return rotator(HL-PStartPos);
+	else 
+		return rotator(HL-PStartPos);
 }
 simulated function vector CalcPlayerAimPos( optional byte SeatN )
 {
@@ -1820,18 +1864,19 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 	local float X,Y,XS,HP,XL,YL;
 	local byte i,o;
 
-	// Draw health bar:
-	
-	C.Style = 1;
-
-	C.DrawColor.R = 192;
-	C.DrawColor.G = 192;
-	C.DrawColor.B = 192;
+	// Draw health bar:	
+	C.Style = ERenderStyle.STY_Normal;
 
 	Y = C.ClipY/6*5;
 	//XS = C.ClipX/3*2;
 	XS = C.ClipX/4;
-	X = C.ClipX/2-XS/2;
+	X = C.ClipX/2;
+	DrawHealthBar(C, Health, FirstHealth, X, Y, XS, 24);
+/*
+	C.DrawColor.R = 192;
+	C.DrawColor.G = 192;
+	C.DrawColor.B = 192;
+
 	C.SetPos(X,Y);
 	C.DrawTile(Texture'Misc',XS,24,0,0,122,16);
 
@@ -1869,13 +1914,16 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 	HP = float(Health)/float(FirstHealth);
 	C.SetPos(X,Y);
 	C.DrawTile(Texture'Misc',XS*HP,24,0,16,122.f*HP,16);
-
+*/
 	//C.Font = Font'MedFont';
 	C.Font = Font'VehFont';
 
-	C.DrawColor.R = 192;
-	C.DrawColor.G = 192;
-	C.DrawColor.B = 192;
+//	C.DrawColor.R = 192;
+//	C.DrawColor.G = 192;
+//	C.DrawColor.B = 192;
+	C.DrawColor.R = 0;
+	C.DrawColor.G = 0;
+	C.DrawColor.B = 0;
 
 	C.StrLen(string(Health),XL,YL);
 	C.SetPos(C.ClipX/2-XL/2,Y+5);
@@ -1942,6 +1990,7 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 		C.DrawIcon(PassCrosshairTex[Seat-1],PassCrossScale[Seat-1]);
 		Cam.GunAttachM.WRenderOverlay(C);
 	}
+	C.Style = ERenderStyle.STY_Normal;
 
 	o = CurrentTeam;
 	if( o>3 )
@@ -2072,25 +2121,45 @@ simulated function DrawHealthBar(Canvas C, int Health, int MaxHealth, int X, int
 	C.DrawColor.B = 255;
 
 	C.SetPos(X - HBWeight*0.5, Y);
-	C.DrawTile(Texture'BorderBoxD',HBWeight,HBHeight,0,0,64,64);
+//	C.DrawTile(Texture'BorderBoxD',HBWeight,HBHeight,0,0,64,64);
+	C.DrawTile(Texture'Misc',HBWeight,HBHeight,60,60,64,64);
 	
-	HealthPct = 1.0f * Health / MaxHealth;
+	HealthPct = float(Health) / float(MaxHealth);
 	
-	if (HealthPct < 0.35)
+	if (Health < (MaxHealth/5))
 	{
+		C.DrawColor.R = 96;
 		C.DrawColor.G = 0;
 		C.DrawColor.B = 0;
 	}
-	else if (HealthPct < 0.70)
+	else if (Health < (MaxHealth/4))
+	{
+		C.DrawColor.R = 255;
+		C.DrawColor.G = 0;
 		C.DrawColor.B = 0;
+	}
+	else if (Health < (MaxHealth/3))
+	{
+		C.DrawColor.R = 255;
+		C.DrawColor.G = 128;
+		C.DrawColor.B = 0;
+	}
+	else if (Health < (MaxHealth/2))
+	{
+		C.DrawColor.R = 192;
+		C.DrawColor.G = 192;
+		C.DrawColor.B = 0;
+	}
 	else
 	{
 		C.DrawColor.R = 0;
-		C.DrawColor.B = 0;
+		C.DrawColor.G = 255;
+		C.DrawColor.B = 64;
 	}
 	
 	C.SetPos(X - HBWeight * 0.5, Y);
-	C.DrawTile(Texture'HealthBar',HBWeight * HealthPct, HBHeight,0,0,64,64);
+//	C.DrawTile(Texture'HealthBar',HBWeight * HealthPct, HBHeight,0,0,64,64);
+	C.DrawTile(Texture'Misc',HBWeight * HealthPct, HBHeight,60,60,64,64);
 }
 
 function vector VectorProjection(vector VProjector, vector VProjectedOn)
@@ -2098,7 +2167,7 @@ function vector VectorProjection(vector VProjector, vector VProjectedOn)
 	return VProjectedOn + Normal(-VProjectedOn)*(((-VProjectedOn) dot ( VProjector - VProjectedOn )) / VSize( VProjectedOn));
 }
 
-simulated function Bump( Actor Other )
+singular simulated function Bump( Actor Other )
 {
 	local vector OtVel,MyVel;
 	local float Sp;
@@ -2260,48 +2329,63 @@ simulated function bool CanGetOver( float MSHV, float AllowedZVal ) // Check if 
 	
 	if (bSlopedPhys && GVT!=None)
 	{
-	if( MSHV<=0 )
-		Return False;
-	Ex.X = CollisionRadius;
-	Ex.Y = Ex.X;
-	Start = Location;
-	Start.Z-=(CollisionHeight-MSHV);
-	NVe = Velocity;
-	NVe.Z = 0;
-	NVe = Normal(NVe);
-	End = Start+NVe*64;
-	A = Trace(HL,HN,End,Start,True,Ex);
+		if( MSHV<=0 )
+			Return False;
+		Ex.X = CollisionRadius;
+		Ex.Y = Ex.X;
+		Start = Location;
+		Start.Z-=(CollisionHeight-MSHV);
+		NVe = Velocity;
+		NVe.Z = 0;
+		NVe = Normal(NVe);
+		End = Start+NVe*64;
+		A = Trace(HL,HN,End,Start,True,Ex);
+//Log(A @ VSize(HL-Start) @ MSHV @ (HL-Start) @ HN);
+		if( A!=None )
+		{
+//			if( HN.Z>=AllowedZVal )
+			if (VSize(Start-HL) >= 2*MSHV) // 30 degrees, almost same as AllowedZVal = 0.85, which is 31 degrees.
+			{
+				MSHV = HL.Z - (Location.Z - CollisionHeight) + 1;
+//				MovVect = vect(0,0,1)*MSHV+NVe*VSize(Start-HL);
+				Move(vect(0,0,1)*MSHV);
+				Move(NVe*Min(12, VSize(Start-HL)));
+				//Move(MovVect);
+				//SetLocation(Location + MovVect);
+				HitWall(HN,A);
+				Return True;
+			}
+//			else
+//				MoveSmooth(HN*16);
+	
+			Return False;
+		}
+		Start = End;
+		End.Z-=MSHV;
+		A = Trace(HL,HN,End,Start,True,Ex);
+		
+		if (A!=None)
+			MSHV = HL.Z - (Location.Z - CollisionHeight) + 1;
+		Move(vect(0,0,1)*MSHV);
+		Move(NVe*12);
+		//Move(MovVect);
+		//SetLocation(Location + MovVect);
+		HitWall(HN,A);
+		Return True;
 
-	if( A!=None )
-	{
-		if( HN.Z>=AllowedZVal )
+		/*
+		if( A!=None && HN.Z>=AllowedZVal)
 		{
 			MSHV = HL.Z - (Location.Z - CollisionHeight) + 1;
-			MovVect = vect(0,0,1)*MSHV+NVe*VSize(Start-HL);
+			MovVect = vect(0,0,1)*MSHV+NVe*12;
 			//Move(MovVect);
 			SetLocation(Location + MovVect);
 			HitWall(HN,A);
 			Return True;
 		}
-		else
-			MoveSmooth(HN*16);
-
+	
 		Return False;
-	}
-	Start = End;
-	End.Z-=MSHV;
-	A = Trace(HL,HN,End,Start,True,Ex);
-	if( A!=None && HN.Z>=AllowedZVal)
-	{
-		MSHV = HL.Z - (Location.Z - CollisionHeight) + 1;
-		MovVect = vect(0,0,1)*MSHV+NVe*12;
-		//Move(MovVect);
-		SetLocation(Location + MovVect);
-		HitWall(HN,A);
-		Return True;
-	}
-
-	Return False;
+		*/
 	}
 	else
 		Super.CanGetOver( MSHV, AllowedZVal);
@@ -2455,73 +2539,75 @@ function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 
 	if (!bVehicleBlewUp)
 	{
-	if( bDeleteMe || Level.NetMode==NM_Client )
-		Return;
-	if( Driver==None )
-	{
+		if( bDeleteMe || Level.NetMode==NM_Client )
+			Return;
+		if( Driver==None )
+		{
+			For( i=0; i<Arraycount(Passengers); i++ )
+			{
+				if( Passengers[i]!=None )
+				{
+					bHadPass = True;
+					Damage = Level.Game.ReduceDamage(Damage,DamageType,Passengers[i],instigatedBy);
+					Break;
+				}
+			}
+			if( !bTakeAlwaysDamage && !bHadPass && instigatedBy!=None && instigatedBy.PlayerReplicationInfo!=None && CurrentTeam==instigatedBy.PlayerReplicationInfo.Team )
+				Damage = 0;
+		}
+		else if( Driver.ReducedDamageType=='All' ) // God mode on!
+			Damage = 0;
+		else Damage = Level.Game.ReduceDamage(Damage,DamageType,Driver, instigatedBy);
+		if( Driver!=None )
+			Driver.damageAttitudeTo(instigatedBy);
 		For( i=0; i<Arraycount(Passengers); i++ )
 		{
 			if( Passengers[i]!=None )
-			{
-				bHadPass = True;
-				Damage = Level.Game.ReduceDamage(Damage,DamageType,Passengers[i],instigatedBy);
-				Break;
-			}
+				Passengers[i].damageAttitudeTo(instigatedBy);
 		}
-		if( !bTakeAlwaysDamage && !bHadPass && instigatedBy!=None && instigatedBy.PlayerReplicationInfo!=None && CurrentTeam==instigatedBy.PlayerReplicationInfo.Team )
-			Damage = 0;
-	}
-	else if( Driver.ReducedDamageType=='All' ) // God mode on!
-		Damage = 0;
-	else Damage = Level.Game.ReduceDamage(Damage,DamageType,Driver, instigatedBy);
-	if( Driver!=None )
-		Driver.damageAttitudeTo(instigatedBy);
-	For( i=0; i<Arraycount(Passengers); i++ )
-	{
-		if( Passengers[i]!=None )
-			Passengers[i].damageAttitudeTo(instigatedBy);
-	}
-
-	For (i=0; i<ArrayCount(ArmorType); i++)
-	{
-		if (ArmorType[i].ArmorLevel < 0.0 || ArmorType[i].ArmorLevel > 1.0)
-			ArmorType[i].ArmorLevel = 1.0;
-
-		if (ArmorType[i].ProtectionType != '' && ArmorType[i].ProtectionType == damageType)
-			Damage -= (Damage*ArmorType[i].ArmorLevel);
-	}
-
-	if (bEnableShield)
-	{
-		For (i=0; i<16; i++)
+	
+		For (i=0; i<ArrayCount(ArmorType); i++)
 		{
-			if (ShieldType[i] != '')
-			{
-				shldset++;
-
-				if (ShieldType[i] != '' && bProtectAgainst && ShieldType[i] == damageType)
-					Damage -= (Damage*ShieldLevel);
-				else if (!bProtectAgainst && ShieldType[i] != damageType)
-					shldtkn++;
-			}
+			if (ArmorType[i].ArmorLevel < 0.0 || ArmorType[i].ArmorLevel > 1.0)
+				ArmorType[i].ArmorLevel = 1.0;
+	
+			if (ArmorType[i].ProtectionType != '' && ArmorType[i].ProtectionType == damageType)
+				Damage -= (Damage*ArmorType[i].ArmorLevel);
 		}
-
-		if (!bProtectAgainst && shldset == shldtkn)
-			Damage -= (Damage*ShieldLevel);
-	}
-
-	if( damageType!='BumpWall' && Damage > 0)
-		PlaySound(BulletHitSounds[Rand(ArrayCount(BulletHitSounds))],SLOT_Pain,FClamp(float(Damage)/20,0.75,2));
-	else if (damageType=='BumpWall')
-		PlaySound(ImpactSounds[Rand(ArrayCount(ImpactSounds))],SLOT_Pain,FClamp(float(Damage)/50,0.75,2));
-
-	Health-=Damage;
-	Velocity+=momentum/Mass;
-	if( Health<=0 )
-	{
-		KillDriver(instigatedBy);
-		GoToState('BlownUp');
-	}
+	
+		if (bEnableShield)
+		{
+			For (i=0; i<16; i++)
+			{
+				if (ShieldType[i] != '')
+				{
+					shldset++;
+	
+					if (ShieldType[i] != '' && bProtectAgainst && ShieldType[i] == damageType)
+						Damage -= (Damage*ShieldLevel);
+					else if (!bProtectAgainst && ShieldType[i] != damageType)
+						shldtkn++;
+				}
+			}
+	
+			if (!bProtectAgainst && shldset == shldtkn)
+				Damage -= (Damage*ShieldLevel);
+		}
+	
+		if( damageType!='BumpWall' && Damage > 0)
+			PlaySound(BulletHitSounds[Rand(ArrayCount(BulletHitSounds))],SLOT_Pain,FClamp(float(Damage)/20,0.75,2));
+		else if (damageType=='BumpWall')
+			PlaySound(ImpactSounds[Rand(ArrayCount(ImpactSounds))],SLOT_Pain,FClamp(float(Damage)/50,0.75,2));
+	
+		Health-=Damage;
+		Velocity+=momentum/Mass;
+		if( Health<=0 )
+		{
+			KillDriver(instigatedBy);
+			GoToState('BlownUp');
+		} 
+		else if (Damage > 0)
+			CheckForEmpty();
 	}
 }
 
@@ -2947,8 +3033,7 @@ function PassengerEnter( Pawn Other, byte Seat )
 	}
 	if( PassengerSeats[Seat].PHGun==None )
 	{
-		PassengerSeats[Seat].PHGun = Spawn(DriverWeaponClass,Other);
-		PassengerSeats[Seat].PHGun.VehicleOwner = Self;
+		PassengerSeats[Seat].PHGun = SpawnWeapon(DriverWeaponClass,Seat + 1,Other);
 		PassengerSeats[Seat].PHGun.bPassengerGun = True;
 		PassengerSeats[Seat].PHGun.SeatNumber = Seat;
 	}

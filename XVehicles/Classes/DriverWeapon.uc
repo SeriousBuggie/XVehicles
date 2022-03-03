@@ -15,6 +15,8 @@ function PostBeginPlay()
 	MyNotifier = Spawn(Class'DriverWNotifier');
 	MyNotifier.WeaponOwner = Self;
 	Inventory = MyNotifier;
+	
+	setTimer(1, true);
 }
 event TravelPostAccept()
 {
@@ -34,6 +36,24 @@ Ignores BringUp,Finish;
 			VehicleOwner.ChangeBackView();
 		return true;
 	}
+}
+
+function float SwitchPriority()
+{
+	return 340282346638528870000000000000000000000.0; // max float
+}
+
+function Timer()
+{
+	if (!IsInState('ClientActive'))
+		GotoState('ClientActive');
+	if (Pawn(Owner) != None && Pawn(Owner).Weapon != self)
+	{
+		Pawn(Owner).PendingWeapon = self;
+		if (Pawn(Owner).Weapon != None)
+			Pawn(Owner).Weapon.GoToState('');
+		Pawn(Owner).Weapon = self;
+	}	
 }
 
 /* Functions used by Unreal Tournament */
@@ -88,8 +108,9 @@ defaultproperties
       bPassengerGun=False
       SeatNumber=0
       UseStandardCrosshair=False
-      DeathMessage=""
+      ThirdPersonMesh=LodMesh'UnrealI.SMini3'
       bHidden=True
+      Mesh=LodMesh'UnrealI.SMini3'
       bGameRelevant=True
       bCarriedItem=True
 }

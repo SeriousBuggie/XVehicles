@@ -106,7 +106,7 @@ replication
 	// Variables the server should send to the client.
 	reliable if( Role==ROLE_Authority )
 		bInvisGun,TurretOffset,FireFXCounter,
-		PitchPart,TurretYaw,TurretPitch;
+		PitchPart,TurretYaw,TurretPitch,WAtt;
 	reliable if( Role==ROLE_Authority && bNetOwner )
 		PassengerNum;
 	reliable if( Role==ROLE_Authority && !bDriverWeapon && (!bInvisGun || bNetOwner) )
@@ -436,6 +436,16 @@ local byte i;
 
 simulated function DelayFX(byte Mode);	//Called at the same time as ActivateDelay (to easilly spawn further effects in the delay time)
 
+function Projectile FixProj(Projectile Proj)
+{
+	local vector HitLocation, HitNormal, TraceEnd, TraceStart;
+	if (Proj != None && Proj.Trace(HitLocation, HitNormal, Proj.Location, Location, false) != None)
+	{
+		Proj.SetLocation(HitLocation);
+	}
+	return Proj;
+}
+
 function FireTurret( byte Mode, optional bool bForceFire )
 {
 	local vector P, Pdual;
@@ -460,14 +470,14 @@ function FireTurret( byte Mode, optional bool bForceFire )
 
 	if (!bForceFire)
 	{
-	if( bFireRestrict || bInFiringProcess > 0)
-		Return;
-	else if (WeapSettings[Mode].FireDelay > 0 && firec <= 0)
-	{
-		ActivateDelay(Mode);
-		DelayFX(Mode);
-		Return;
-	}
+		if( bFireRestrict || bInFiringProcess > 0)
+			Return;
+		else if (WeapSettings[Mode].FireDelay > 0 && firec <= 0)
+		{
+			ActivateDelay(Mode);
+			DelayFX(Mode);
+			Return;
+		}
 	}
 
 	//if( Level.NetMode!=NM_DedicatedServer )
@@ -542,20 +552,21 @@ function FireTurret( byte Mode, optional bool bForceFire )
 
 	if (!bPhysicalGunAimOnly)
 	{
-	if (!WeapSettings[Mode].bInstantHit)
-		R = OwnerVehicle.GetFiringRot(WeapSettings[Mode].ProjectileClass.Default.Speed,False,P,PassengerNum);
-	else
-		R = OwnerVehicle.GetFiringRot(9999,True,P,PassengerNum);
-
-	TR = Normalize(R-Rotation);
+		if (!WeapSettings[Mode].bInstantHit)
+			R = OwnerVehicle.GetFiringRot(WeapSettings[Mode].ProjectileClass.Default.Speed,False,P,PassengerNum);
+		else
+			R = OwnerVehicle.GetFiringRot(9999,True,P,PassengerNum);
+	
+		TR = Normalize(R-Rotation);
 	}
 
-	if( bPhysicalGunAimOnly || TR.Yaw>3500 || TR.Yaw<-3500 || TR.Pitch>3500 || TR.Pitch<-3500 )
+	if( bPhysicalGunAimOnly || TR.Yaw>3500 || TR.Yaw<-3500 || TR.Pitch>3500 || TR.Pitch<-3500 ) {
 		R = PR;
+	}
 	Instigator = WeaponController;
 
 	if (!WeapSettings[Mode].bInstantHit)
-		Spawn(WeapSettings[Mode].ProjectileClass,OwnerVehicle,,P,R);
+		FixProj(Spawn(WeapSettings[Mode].ProjectileClass,OwnerVehicle,,P,R));
 	else
 	{
 		S = P;
@@ -569,7 +580,7 @@ function FireTurret( byte Mode, optional bool bForceFire )
 	}
 
 	if (WeapSettings[Mode].DualMode == 2 && !WeapSettings[Mode].bInstantHit)
-		Spawn(WeapSettings[Mode].ProjectileClass,OwnerVehicle,,Pdual,R);
+		FixProj(Spawn(WeapSettings[Mode].ProjectileClass,OwnerVehicle,,Pdual,R));
 	else if (WeapSettings[Mode].DualMode == 2)
 	{
 		S = Pdual;
@@ -683,19 +694,14 @@ simulated function Tick( float Delta )
 	{
 		if (UpdateAttachInfoC >= 0.2 && UpdateAttachInfoC < 1.0)
 		{
-			For ( vat=OwnerVehicle.AttachmentList; vat!=None; vat=vat.NextAttachment )
-			{
-				if (WeaponAttachment(vat)!=None)
-				{
-					if (WeaponAttachment(vat).PassengerNum == RotWithOtherWeapPassN)
+			if (Role == ROLE_Authority && (WAtt == None || WAtt.PassengerNum != RotWithOtherWeapPassN))
+				for ( vat=OwnerVehicle.AttachmentList; vat!=None; vat=vat.NextAttachment )
+					if (WeaponAttachment(vat)!=None && WeaponAttachment(vat).PassengerNum == RotWithOtherWeapPassN)
 					{
 						WAtt = WeaponAttachment(vat);
 						break;
 					}
-				}
-			}
 			UpdateAttachInfoC = 2.0;
-			
 		}
 		else if (UpdateAttachInfoC < 0.2)
 			UpdateAttachInfoC += Delta;
@@ -807,7 +813,6 @@ simulated function Tick( float Delta )
 		else if( Ro.Pitch>CarTopAllowedPitch.Max )
 			Ro.Pitch = CarTopAllowedPitch.Max;
 	}
-
 	
 	OldY = TurretYaw;
 	OldP = TurretPitch;

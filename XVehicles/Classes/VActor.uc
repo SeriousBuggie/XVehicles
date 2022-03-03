@@ -24,6 +24,10 @@ struct IntRange
 	var() int Max,Min;
 };
 
+// simulated event BaseChange() { Log(self @ "BaseChange" @ Base); }
+// simulated event Attach( Actor Other ) { Log(self @ "Attach" @ Other); }
+// simulated event Detach( Actor Other ) { Log(self @ "Detach" @ Other); }
+
 simulated function PostBeginPlay()
 {
 	LODBias = DistDetail;

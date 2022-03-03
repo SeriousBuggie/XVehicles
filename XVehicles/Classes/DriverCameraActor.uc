@@ -11,6 +11,10 @@ replication
 	// Variables the server should send to the client.
 	reliable if( Role==ROLE_Authority && bNetOwner && Class!=Class'DriverCameraActor' )
 		VehicleOwner,SeatNum,GunAttachM;
+	reliable if( Role==ROLE_Authority && bNetOwner )
+		DesiredViewMult;
+	reliable if( Role<ROLE_Authority && bNetOwner )
+		SetPlayerViewOffset;
 }
 
 function KeepView()
@@ -89,6 +93,9 @@ simulated function Tick( float Delta )
 	}
 	VehicleOwner.CalcCameraPos(V,R,CurrentViewMult);
 	Move(V-Location);
+	
+	if (Owner != None && PlayerPawn(Owner.Owner) != None)
+		SetPlayerViewOffset(Location - Owner.Owner.Location);
 
 	//Vertical shake support
 	MoveSmooth(PlayerPawn(Owner.Owner).ShakeVert * 0.01 * vect(0,0,1));
@@ -101,9 +108,15 @@ simulated function RenderOverlays( canvas Canvas )
 	VehicleOwner.RenderCanvasOverlays(Canvas,Self,SeatNum);
 }
 
+simulated function SetPlayerViewOffset(vector PlayerViewOffset)
+{
+	if (Owner != None && PlayerPawn(Owner.Owner) != None && DriverWeapon(PlayerPawn(Owner.Owner).Weapon) != None)
+		DriverWeapon(PlayerPawn(Owner.Owner).Weapon).PlayerViewOffset = PlayerViewOffset;
+}
+
 simulated function Destroyed()
 {
-	if (PlayerPawn(Owner.Owner) != None)
+	if (Owner != None && PlayerPawn(Owner.Owner) != None)
 		PlayerPawn(Owner.Owner).ViewTarget = None;
 
 	Super.Destroyed();
