@@ -1,4 +1,4 @@
-Class DriverWeapon extends Weapon;
+class DriverWeapon expands TournamentWeapon;
 
 var Vehicle VehicleOwner;
 var DriverWNotifier MyNotifier;
@@ -6,6 +6,12 @@ var bool bPassengerGun;
 var byte SeatNumber;
 
 var() config bool UseStandardCrosshair;
+
+simulated function PostNetBeginPlay()
+{
+	Super.PostNetBeginPlay();
+	InventoryGroup = Charge; // hack for net
+}
 
 simulated event RenderOverlays( canvas Canvas );
 
@@ -65,6 +71,12 @@ function ForceAltFire()
 {
 	AltFire(0);
 }
+simulated function PlaySelect()
+{
+	bForceFire = false;
+	bForceAltFire = false;
+	bCanClientFire = false;
+}
 
 function Fire(float F)
 {
@@ -108,9 +120,13 @@ defaultproperties
       bPassengerGun=False
       SeatNumber=0
       UseStandardCrosshair=False
-      ThirdPersonMesh=LodMesh'UnrealI.SMini3'
+      PlayerViewMesh=LodMesh'Botpack.flakm'
+      PickupViewMesh=LodMesh'Botpack.Flak2Pick'
+      ThirdPersonMesh=LodMesh'Botpack.FlakHand'
+      Charge=1
       bHidden=True
-      Mesh=LodMesh'UnrealI.SMini3'
+      Physics=PHYS_Trailer
+      Mesh=LodMesh'Botpack.Flak2Pick'
       bGameRelevant=True
       bCarriedItem=True
 }

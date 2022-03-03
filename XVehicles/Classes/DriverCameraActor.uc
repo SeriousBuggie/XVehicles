@@ -121,7 +121,7 @@ simulated function Tick( float Delta )
 	SetRotation(R);
 }
 
-function Pawn GetCamOwner()
+simulated function Pawn GetCamOwner()
 {
 	if (Class != Class'DriverCameraActor')
 		return Pawn(Owner);

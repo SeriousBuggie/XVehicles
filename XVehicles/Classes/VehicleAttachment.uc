@@ -15,6 +15,13 @@ replication
 		OwnerVehicle;
 }
 
+simulated function Detach(Actor Other)
+{
+	Super.Detach(Other);
+	if (Pawn(Other) != None && OwnerVehicle != None)
+		Other.Velocity += OwnerVehicle.Velocity; // inertial detach
+}
+
 // Called if bAutoDestroyWithVehicle is false.
 simulated function NotifyVehicleDestroyed();
 

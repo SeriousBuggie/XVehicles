@@ -106,7 +106,7 @@ replication
 	// Variables the server should send to the client.
 	reliable if( Role==ROLE_Authority )
 		bInvisGun,TurretOffset,FireFXCounter,
-		PitchPart,TurretYaw,TurretPitch,WAtt;
+		PitchPart,TurretYaw,TurretPitch,WAtt,ClientFireEffect;
 	reliable if( Role==ROLE_Authority && bNetOwner )
 		PassengerNum;
 	reliable if( Role==ROLE_Authority && !bDriverWeapon && (!bInvisGun || bNetOwner) )
@@ -564,6 +564,10 @@ function FireTurret( byte Mode, optional bool bForceFire )
 		R = PR;
 	}
 	Instigator = WeaponController;
+	
+	FireEffect();
+	if (Level.NetMode == NM_DedicatedServer)
+		ClientFireEffect();
 
 	if (!WeapSettings[Mode].bInstantHit)
 		FixProj(Spawn(WeapSettings[Mode].ProjectileClass,OwnerVehicle,,P,R));
@@ -596,6 +600,18 @@ function FireTurret( byte Mode, optional bool bForceFire )
 	if (!bFireRateByAnim)
 		SetTimer(WeapSettings[Mode].RefireRate,False);
 	bFireRestrict = True;
+}
+
+simulated function ClientFireEffect()
+{
+	FireEffect();
+}
+
+simulated function FireEffect()
+{
+	if (WeaponController != None && DriverWeapon(WeaponController.Weapon) != None &&
+		DriverWeapon(WeaponController.Weapon).Affector != None)
+		DriverWeapon(WeaponController.Weapon).Affector.FireEffect();
 }
 
 function SpawnFireEffects(byte Mode);		//Spawn Firing Effects here

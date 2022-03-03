@@ -27,5 +27,6 @@ defaultproperties
       Physics=PHYS_Trailer
       RemoteRole=ROLE_None
       DrawType=DT_None
+      bGameRelevant=True
       CollisionHeight=35.000000
 }

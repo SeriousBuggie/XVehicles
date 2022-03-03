@@ -12,7 +12,7 @@ replication
 simulated function Tick(float Delta)
 {
 	if (SlopedPart != None)
-		if (Vehicle(SlopedPart) != None)
+		if (Vehicle(SlopedPart) != None && Vehicle(SlopedPart).GVT != None)
 			PrePivot = Vehicle(SlopedPart).GVT.PrePivot;
 		else
 			PrePivot = SlopedPart.PrePivot;

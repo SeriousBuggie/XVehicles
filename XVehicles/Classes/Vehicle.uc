@@ -236,6 +236,7 @@ var const float RefMaxWaterSpeed;
 var float SecCount;
 var ZoneInfo FootVehZone[8];
 
+var float LastTeleportTime; // for fix flicker teleport between two locations
 
 //Damage FX
 struct VDamageGFX
@@ -682,6 +683,8 @@ function DriverWeapon SpawnWeapon(class<DriverWeapon> DriverWeaponClass, optiona
 	{
 		Seat--;
 		wep.ItemName = PassengerSeats[Seat].SeatName;
+		wep.InventoryGroup = Seat + 2;
+		wep.Charge = wep.InventoryGroup; // hack for net
 		if (wep.ItemName == "")
 			wep.ItemName = VehicleName;
 	}
@@ -714,6 +717,8 @@ function DriverEnter( Pawn Other )
 		Other.Weapon.GoToState('');
 	}
 	Other.Weapon = DWeapon;
+	if (Other.Inventory != None)
+		Other.Inventory.ChangedWeapon();
 	if( PlayerPawn(Other)!=None )
 	{
 		ClientSetTranslatorMsg();
@@ -790,6 +795,7 @@ local vector ExitVect;
 				}
 			}
 			Driver.SetCollision(True,True,True);
+			Driver.Velocity += Velocity; // inertial exit
 			if( PlayerPawn(Driver)!=None )
 			{
 				MyCameraAct.SetCamOwner(None);
@@ -798,7 +804,9 @@ local vector ExitVect;
 				Driver.ClientSetRotation(Rotation);
 			}
 			Driver.Weapon = Driver.PendingWeapon;
-			if( Driver.Weapon!=None )
+			if (Driver.Inventory != None)
+				Driver.Inventory.ChangedWeapon();
+			if( Driver.Weapon != None && Driver.Weapon.Owner != None )
 				Driver.Weapon.BringUp();
 		}
 	}
@@ -1949,6 +1957,8 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 {
 	local float X,Y,XS,HP,XL,YL;
 	local byte i,o;
+	Local Pawn CamOwner;
+	local ChallengeHud HUD;
 
 	// Draw health bar:	
 	C.Style = ERenderStyle.STY_Normal;
@@ -2100,8 +2110,9 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 			o++;
 		}
 	}
+	HUD = ChallengeHud(C.Viewport.Actor.myHUD);
 	// draw only if HP not visible
-	if (ChallengeHud(C.Viewport.Actor.myHUD) == None || ChallengeHud(C.Viewport.Actor.myHUD).bHideAllWeapons)
+	if (HUD == None || HUD.bHideAllWeapons)
 	{
 		if( !bActorKeysInit )
 			InitKeysInfo();
@@ -2117,6 +2128,20 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 				XS+=YL;
 			}
 		}
+	}
+	// note for spectators
+	CamOwner = Cam.GetCamOwner();
+	if (CamOwner != None && HUD != None && C.Viewport.Actor != CamOwner)
+	{	
+		C.Font = class'FontInfo'.Static.GetStaticSmallFont( C.ClipX );
+		C.bCenter = true;
+		C.Style = ERenderStyle.STY_Normal;
+		C.DrawColor = class'ChallengeHUD'.default.CyanColor * HUD.TutIconBlink;
+		C.SetPos(4, C.ClipY - 96 * HUD.Scale);
+		C.DrawText( HUD.LiveFeed $ CamOwner.PlayerReplicationInfo.PlayerName, true );
+		C.bCenter = false;
+		C.DrawColor = HUD.WhiteColor;
+		C.Style = HUD.Style;
 	}
 	
 	if( AttachmentList!=None )
@@ -3156,6 +3181,8 @@ function PassengerEnter( Pawn Other, byte Seat )
 		Other.Weapon.GoToState('');
 	}
 	Other.Weapon = PassengerSeats[Seat].PHGun;
+	if (Other.Inventory != None)
+		Other.Inventory.ChangedWeapon();
 	if( PlayerPawn(Other)!=None )
 	{
 		Other.ClientMessage(PassengerSeats[Seat].SeatName,'Pickup');
@@ -3212,6 +3239,7 @@ local vector ExitVect;
 				}
 			}
 			Passengers[Seat].SetCollision(True,True,True);
+			Passengers[Seat].Velocity += Velocity; // inertial exit
 			if( PlayerPawn(Passengers[Seat])!=None )
 			{
 				PassengerSeats[Seat].PassengerCam.setCamOwner(None);
@@ -3220,6 +3248,8 @@ local vector ExitVect;
 				Passengers[Seat].ClientSetRotation(Rotation);
 			}
 			Passengers[Seat].Weapon = Passengers[Seat].PendingWeapon;
+			if (Passengers[Seat].Inventory != None)
+				Passengers[Seat].Inventory.ChangedWeapon();
 			if( Passengers[Seat].Weapon!=None )
 				Passengers[Seat].Weapon.BringUp();
 		}
@@ -3290,6 +3320,21 @@ function bool IsWorthyPassengerSeats()
 simulated function vector GetAimPosition()
 {
 	Return Location;
+}
+
+simulated function Detach(Actor Other)
+{
+	Super.Detach(Other);
+	if (Pawn(Other) != None)
+		Other.Velocity += Velocity; // inertial detach
+}
+
+simulated function bool PreTeleport( Teleporter InTeleporter )
+{
+	if (LastTeleportTime > 0 && Level.TimeSeconds < LastTeleportTime + 2)
+		return true; // block
+	LastTeleportTime = Level.TimeSeconds;
+	return false; // allow
 }
 
 defaultproperties
@@ -3560,6 +3605,7 @@ defaultproperties
       FootVehZone(5)=None
       FootVehZone(6)=None
       FootVehZone(7)=None
+      LastTeleportTime=0.000000
       bDamageFXInWater=False
       DamageGFX(0)=(bHaveThisGFX=False,bHaveFlames=False,DmgFXOffset=(X=0.000000,Y=0.000000,Z=0.000000),FXRange=0,DmgFlamesClass=Class'XVehicles.VehDmgFire',DmgBlackSmkClass=Class'XVehicles.VehEngBlackSmoke',DmgLightSmkClass=Class'XVehicles.VehEngLightSmoke')
       DamageGFX(1)=(bHaveThisGFX=False,bHaveFlames=False,DmgFXOffset=(X=0.000000,Y=0.000000,Z=0.000000),FXRange=0,DmgFlamesClass=Class'XVehicles.VehDmgFire',DmgBlackSmkClass=Class'XVehicles.VehEngBlackSmoke',DmgLightSmkClass=Class'XVehicles.VehEngLightSmoke')

@@ -43,4 +43,5 @@ defaultproperties
       WeaponOwner=None
       bHidden=True
       RemoteRole=ROLE_None
+      bGameRelevant=True
 }
