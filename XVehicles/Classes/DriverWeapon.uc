@@ -22,6 +22,33 @@ simulated function PostNetBeginPlay()
 //	SetName();
 }
 
+function PreBeginPlay()
+{
+	Super.PreBeginPlay();
+	VehicleOwner = Vehicle(Owner);
+	MaxDesireability = VehicleOwner.AIRating*100;
+	AIRating = VehicleOwner.AIRating;
+	setCollisionSize(VehicleOwner.CollisionRadius + 10, CollisionHeight);
+	PrePivot.Z = CollisionHeight - VehicleOwner.CollisionHeight;
+}
+
+event float BotDesireability( pawn Bot )
+{
+	return VehicleOwner.BotAttract.BotDesireability(Bot);
+}
+
+function float SuggestAttackStyle()
+{
+	if (VehicleOwner.Health < 0.5*VehicleOwner.default.Health)
+		return -10.0; // cautious
+	return 20.0; // aggressive	
+}
+
+function float SuggestDefenseStyle()
+{
+	return -10.0; // run away, vehicle override usage of this
+}
+
 simulated event RenderOverlays( canvas Canvas );
 
 function PostBeginPlay()
@@ -146,11 +173,16 @@ defaultproperties
       bPassengerGun=False
       SeatNumber=0
       UseStandardCrosshair=False
+      AIRating=1.000000
+      PickupMessage="You got a vehicle"
+      ItemName="Vehicle"
       PlayerViewMesh=LodMesh'Botpack.flakm'
       PickupViewMesh=LodMesh'Botpack.Flak2Pick'
       ThirdPersonMesh=LodMesh'Botpack.FlakHand'
       Charge=1
+      MaxDesireability=10.000000
       bHidden=True
+      bTrailerPrePivot=True
       Physics=PHYS_Trailer
       Mesh=LodMesh'Botpack.Flak2Pick'
       bGameRelevant=True

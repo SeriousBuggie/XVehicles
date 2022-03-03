@@ -40,6 +40,9 @@ local bool b;
 
 function ChangeView()
 {
+	if (Bot(GetCamOwner()) != None)
+		return;
+
 	if (KeepWait <= 0)
 	{
 		if (DesiredViewMult == 1.0)
@@ -155,6 +158,8 @@ function SetCamOwner(Actor NewOwner)
 		PlayerPawn(NewOwner).bHiddenEd = PlayerPawn(NewOwner).bBehindView;
 		PlayerPawn(NewOwner).bBehindView = false;
 	}
+	else if (Bot(NewOwner) != None)
+		DesiredViewMult = default.DesiredViewMult;
 	if (NewOwner == None)
 		ChangeCam(self, CamOwner);
 	else

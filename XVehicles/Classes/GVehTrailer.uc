@@ -5,20 +5,32 @@
 // This apllies to the ground vehicle types: wheeledphys and treadedphys, the rest don't need their slope correction apllied
 Class GVehTrailer extends Effects;
 
+var Decal Shadow;
+
 function PostBeginPlay()
 {
 	SetTimer(0.2,True);
+	
+	if ( Level.NetMode != NM_DedicatedServer )
+		Shadow = Spawn(class'VehicleShadow', self);
 }
 
 function Timer()
 {
-
 	If (Owner == None)
 		Destroy();
 }
 
+simulated function Destroyed()
+{
+	if (Shadow != None)
+		Shadow.Destroy();
+	Super.Destroyed();
+}
+
 defaultproperties
 {
+      Shadow=None
       bNetTemporary=False
       bTrailerSameRotation=True
       bTrailerPrePivot=True

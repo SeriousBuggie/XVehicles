@@ -172,7 +172,6 @@ simulated function UpdateDriverInput( float Delta )
 
 	MoveSmooth(RotateByTraction( TractionWheelsPosition, OldWheeledRot.Yaw*rot(0,1,0), Rotation.Yaw*rot(0,1,0)));
 
-
 	DesTurn = WheelMaxYaw*Turning*-1;
 	if( WheelYaw!=DesTurn )
 	{
@@ -381,14 +380,6 @@ simulated function UpdateDriverInput( float Delta )
 	Ac = Ac*MaxGroundSpeed*FMax(Region.Zone.ZoneGroundFriction,WheelsTraction)/10;
 	Velocity = Normal(Velocity+Ac)*DeAcc;
 }
-// 1 - Forward
-// -1 - Reversed
-simulated function int GetMovementDir()
-{
-	if( (Normal(Velocity) dot vector(Rotation))>0 )
-		Return 1;
-	else Return -1;
-}
 
 simulated function int GetIcedMovementDir()
 {
@@ -400,6 +391,12 @@ simulated function int GetIcedMovementDir()
 function int ShouldAccelFor( vector AcTarget )
 {
 	local bool bStuck;
+	local vector X,Y,Z;
+	local float Res;
+	local int ret;
+	
+	if (AboutToCrash(ret))
+		return ret;
 
 	if( bReversing )
 	{
@@ -412,6 +409,13 @@ function int ShouldAccelFor( vector AcTarget )
 		Return -1;
 	}
 	bStuck = VSize(Velocity)<MaxGroundSpeed/5;
+	if (!bStuck)
+	{
+		GetAxes(Rotation,X,Y,Z);
+		Res = Normal(AcTarget-Location) dot X;
+//		Log("ShouldAccelFor" @ res);
+		bStuck = Res < 0.7; // direction not in forward way
+	}
 	if( bWasStuckOnW!=bStuck )
 	{
 		bWasStuckOnW = bStuck;
@@ -426,11 +430,36 @@ function int ShouldAccelFor( vector AcTarget )
 	}
 	Return 1;
 }
-function int ShouldTurnFor( vector AcTarget )
+function int ShouldTurnFor( vector AcTarget, optional float YawAdjust, optional float DeadZone )
 {
+	local int ret;
+	
+	local vector X,Y,Z;
+	local rotator R;
+	local float Res, res2;
+	
+	if (DeadZone == 0)
+		DeadZone = 0.1;
+		
+	YawAdjust = WheelYaw*FMin(1, Vsize(Velocity)/400);
+
+	ret = Super.ShouldTurnFor(AcTarget, YawAdjust, DeadZone);
+/*	
+	GetAxes(Rotation,X,Y,Z);
+	Res = Normal(AcTarget-Location) dot Y;	
+	
+	R = Rotation;
+	R.Yaw += YawAdjust;
+
+	GetAxes(R,X,Y,Z);
+	Res2 = Normal(AcTarget-Location) dot Y;
+	
+	log("ShouldTurnFor" @ "VehicleYaw" @ VehicleYaw @ "WheelYaw" @ WheelYaw @ "YawAdjust" @ YawAdjust @ "ret" @ ret @ "res" @ res @ "res2" @ res2);
+*/	
 	if( bReversing )
-		Return Super.ShouldTurnFor(AcTarget)*-1;
-	else Return Super.ShouldTurnFor(AcTarget);
+		Return ret*-1;
+	else
+		Return ret;
 }
 
 function vector GetVirtualSpeedOnIce(float Delta)

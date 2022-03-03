@@ -271,31 +271,40 @@ simulated static final operator(16) quat Qmulti ( quat Q1 , quat Q2 )
 }
 //==============================================================================
 // Vector math functions:
-simulated function rotator TransformForGroundRot( int CurrentYaw, vector GroundNormal, optional int CurrentPitch )
+simulated function rotator TransformForGroundRot( int CurrentYaw, vector GroundNormal, optional int CurrentPitch, optional bool bReverse )
 {
-	local vector CrossDir,FwdDir,OldFwdDir,X,Y,Z;
+	local vector CrossDir,FwdDir,OldFwdDir,X,Y,Z,A,B;
 	local rotator R;
 	
 	R.Yaw = CurrentYaw;
 	R.Pitch = CurrentPitch;
 	if( Abs(GroundNormal.Z - 1) < 0.0000001 )
-	{
 		Return R;
-	}
 
 	GetAxes(R,X,Y,Z);
 
+	if (bReverse)
+	{
+		A = vect(0,0,1);
+		B = GroundNormal;		
+	}
+	else
+	{
+		A = GroundNormal;
+		B = vect(0,0,1);
+	}
+
 	// translate view direction
-	CrossDir = Normal(GroundNormal Cross vect(0,0,1));
-	FwdDir = CrossDir Cross GroundNormal;
-	OldFwdDir = CrossDir Cross vect(0,0,1);
-	X = GroundNormal * (vect(0,0,1) Dot X)
+	CrossDir = Normal(A Cross B);
+	FwdDir = CrossDir Cross A;
+	OldFwdDir = CrossDir Cross B;
+	X = A * (B Dot X)
 			+ CrossDir * (CrossDir Dot X)
 			+ FwdDir * (OldFwdDir Dot X);
 	X = Normal(X);
-	Z = GroundNormal;
+	Z = A;
 	Z = Normal(Z);
-	Y = Normal(GroundNormal Cross X);
+	Y = Normal(A Cross X);
 	return OrthoRotation(X,Y,Z);
 }
 // Vel = vector value to bouch off a "surface"
@@ -438,6 +447,13 @@ simulated static function bool WorldToScreen(Vector WorldLocation, Pawn ThePlaye
 	X = RelativeToPlayer.Y / RelativeToPlayer.X * Scale + ScreenWidth / 2;
 	Y = - RelativeToPlayer.Z / RelativeToPlayer.X * Scale + ScreenHeight / 2;
 	return (X>0 && Y>0 && X<ScreenWidth && Y<ScreenHeight);
+}
+
+simulated static function vector NormalWeightSum(float ratioA, vector A, vector B)
+{
+	if (ratioA >= 1f)
+		return Normal(A);
+	return Normal(ratioA*A + (1f - ratioA)*B);
 }
 
 defaultproperties

@@ -806,14 +806,11 @@ simulated function Tick( float Delta )
 	OldAimRotation = Ro;
 	
 	if (OwnerVehicle.bSlopedPhys && OwnerVehicle.GVT!=None)
-		RAdj = Normalize(TransformForGroundRot(Ro.Yaw,OwnerVehicle.GVTNormal,Ro.Pitch));
+		RAdj = Normalize(TransformForGroundRot(Ro.Yaw,OwnerVehicle.GVTNormal,Ro.Pitch,true));
 	else
-		RAdj = Normalize(TransformForGroundRot(Ro.Yaw,OwnerVehicle.FloorNormal,Ro.Pitch));
+		RAdj = Normalize(TransformForGroundRot(Ro.Yaw,OwnerVehicle.FloorNormal,Ro.Pitch,true));
 	if( RAdj!=Ro )
-	{
-		Ro.Pitch-=(RAdj.Pitch-Ro.Pitch);
-		Ro.Yaw-=(RAdj.Yaw-Ro.Yaw);
-	}
+		Ro = RAdj;
 
 	if (!bLimitPitchByCarTop || (bLimitPitchByCarTop && (vector(Rotation) dot vector(OwnerVehicle.Rotation))<CarTopRange))
 	{
@@ -917,12 +914,48 @@ simulated function rotator GetDriverInput( float Delta )
 }
 function rotator GetBotInput( float Delta )
 {
-	if( WeaponController.Target!=None )
-		RepAimPos = WeaponController.Target.Location;
-	else if( WeaponController.FaceTarget!=None )
-		RepAimPos = WeaponController.FaceTarget.Location;
-	else RepAimPos = WeaponController.Focus;
+	if( !SeeEnemy(WeaponController.Target) &&
+		!SeeEnemy(WeaponController.Enemy) &&
+		!SeeEnemy(WeaponController.FaceTarget) )
+	{
+		if (WeaponController.MoveTarget != None && Pawn(WeaponController.MoveTarget) == None && 
+			Vsize(WeaponController.Focus - WeaponController.MoveTarget.Location) < 10)
+			RepAimPos = OwnerVehicle.MoveDest;
+		else if (PassengerNum > 0 && OwnerVehicle.Driver != None && WeaponController.MoveTarget == None &&
+			Vsize(WeaponController.Focus - WeaponController.Destination) < 10)
+			RepAimPos = OwnerVehicle.MoveDest;
+		else
+			RepAimPos = WeaponController.Focus;
+	}
 	Return rotator(RepAimPos-(Location + (eVect(0,0,ZAimOffset)>>OwnerVehicle.Rotation)));
+}
+function bool SeeEnemy(Actor Enemy)
+{
+	local vector P;
+	local rotator R;
+	if( Enemy==None || (Pawn(Enemy) != None && Pawn(Enemy).Health <= 0) || !WeaponController.LineOfSightTo(Enemy) )
+		return false;
+	RepAimPos = Enemy.Location;
+	if (WeapSettings[0].ProjectileClass != None)
+	{
+		if (PitchPart != None)
+		{
+			P = PitchPart.Location;
+			R = PitchPart.Rotation;
+		}
+		else
+		{
+			P = Location;
+			R = Rotation;
+		}
+	
+		P += (WeapSettings[0].FireStartOffset >> R);
+	
+		RepAimPos += Enemy.Velocity * VSize(Enemy.Location - P)/Fmax(1, WeapSettings[0].ProjectileClass.default.Speed);
+		if ( !FastTrace(RepAimPos))
+			RepAimPos = 0.5 * (RepAimPos + Enemy.Location);
+	}
+	return true;
 }
 simulated function bool AimingIsOK()
 {
@@ -935,7 +968,42 @@ local rotator TurRo;
 	return (vector(TurRo) dot vector(OldAimRotation)) > 0.855;
 	//return (vector(TurRo) dot vector(OldAimRotation)) > 0.915;
 }
-simulated function WRenderOverlay( Canvas C );
+simulated function WRenderOverlay( Canvas C )
+{
+	local vector HL, HN, CamLoc;
+	local rotator CamRot;
+	local Actor ViewActor;
+	local float X, Y;
+	local Texture Crossh;
+	
+	if (PitchPart != None)
+		ViewActor = PitchPart;
+	else
+		ViewActor = self;
+	CamLoc = vector(ViewActor.Rotation);
+	HL = Location + CamLoc*40000;
+	HN = ViewActor.Location;
+	if (OwnerVehicle != None)
+	{
+		X = (CamLoc dot (OwnerVehicle.Location - HN));
+		if (X > 0)
+			HN += CamLoc*2*X;
+	}
+	if (OwnerVehicle != None && OwnerVehicle.MyCameraAct != None)
+		ViewActor = OwnerVehicle.MyCameraAct; // try use actor with small size
+	else
+		ViewActor = self;
+	ViewActor.Trace(HL, HN, HL, HN,true);
+	
+	C.ViewPort.Actor.PlayerCalcView(ViewActor, CamLoc, CamRot);
+	WorldToScreen(HL,C.ViewPort.Actor,CamLoc,CamRot,C.ClipX,C.ClipY,X,Y);
+
+	Crossh = Texture'Botpack.Crosshair6';
+	C.SetPos(X - Crossh.USize/2, Y - Crossh.VSize/2);
+	C.DrawColor = class'ChallengeHUD'.default.WhiteColor;
+	C.Style = ERenderStyle.STY_Translucent;
+	C.DrawIcon(Crossh,1.0);
+}
 
 defaultproperties
 {

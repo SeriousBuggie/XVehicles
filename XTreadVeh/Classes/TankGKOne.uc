@@ -111,6 +111,7 @@ defaultproperties
       MaxEngPitch=96
       WreckTrackColHeight=32.000000
       WreckTrackColRadius=64.000000
+      AIRating=3.000000
       VehicleGravityScale=3.000000
       WAccelRate=350.000000
       Health=1350

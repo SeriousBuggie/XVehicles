@@ -113,6 +113,7 @@ defaultproperties
       TreadsTraction=5.000000
       WreckTrackColHeight=64.000000
       WreckTrackColRadius=96.000000
+      AIRating=8.000000
       VehicleGravityScale=5.500000
       WAccelRate=320.000000
       Health=2800

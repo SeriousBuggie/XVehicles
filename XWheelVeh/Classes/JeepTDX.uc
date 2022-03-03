@@ -24,6 +24,7 @@ defaultproperties
       MaxEngPitch=75
       WheelsRadius=27.500000
       TractionWheelsPosition=-80.000000
+      AIRating=2.000000
       VehicleGravityScale=2.350000
       WAccelRate=480.000000
       Health=900

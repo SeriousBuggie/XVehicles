@@ -6,6 +6,9 @@ var float CurTurnSpeed,NextAUpdTime;
 var byte TurningRep,NumMoveAnimFrames,CurrentAnimFrame;
 var bool bHasAnimTread;
 
+var bool bWasStuckOnW,bReversing;
+var float StuckTimer,ReverseTimer;
+
 var() texture TreadPan[16], AltTreadPan[16];	//Treads moving texture
 
 //Treads
@@ -357,7 +360,7 @@ simulated function UpdateDriverInput( float Delta )
 	VehicleYaw+=CurTurnSpeed*Delta;
 	if( !bCameraOnBehindView && Driver!=None )
 		Driver.ViewRotation.Yaw+=CurTurnSpeed*Delta;
-		
+
 	if( Level.NetMode==NM_Client && !IsNetOwner(Driver) )
 	{
 		UpdateTreads(Delta);
@@ -543,19 +546,84 @@ simulated function UpdateDriverInput( float Delta )
 	if (Driver != None)
 		ShouldTurnFor(vector(Driver.ViewRotation)*20000+Location);
 }
-// 1 - Forward
-// -1 - Reversed
-simulated function int GetMovementDir()
+function int ShouldAccel( vector AcTarget )
 {
-	if( (vector(Rotation) dot Normal(Velocity))>0 )
+	local float dir;
+	local vector A, B, V;
+	
+	A = AcTarget-Location;
+	A.Z = 0;
+	V = Velocity;
+	V.Z = 0;
+//	if (VSize(V) > Vsize(A)) Return 0;
+	B = vector(Rotation);
+	B.Z = 0;
+	dir = Normal(A) dot Normal(B);
+	if( dir>0.82 )
 		Return 1;
-	else Return -1;
+	else if (dir < -0.82) 
+		Return -1;
+	else
+		Return 0;
 }
 function int ShouldAccelFor( vector AcTarget )
 {
-	if( (Normal(AcTarget-Location) dot vector(Rotation))>0.82 )
-		Return 1;
-	else Return 0;
+	local int ret;
+	ret = ShouldAccelFor2(AcTarget);
+	if (ret == -1)
+		Turning *= -1;
+	return ret;
+}
+function int ShouldAccelFor2( vector AcTarget )
+{
+	local bool bStuck;
+	local vector X,Y,Z;
+	local float Res;
+	local int ret;
+	
+	if (AboutToCrash(ret))
+		return ret;
+		
+	ret = ShouldAccel(AcTarget);
+
+	if( bReversing )
+	{
+		if( ReverseTimer<Level.TimeSeconds )
+		{
+			bReversing = False;
+			StuckTimer = Level.TimeSeconds+3;
+			Return ret;
+		}
+		Return -ret;
+	}
+	bStuck = ret != 0 && VSize(Velocity)<MaxGroundSpeed/5;
+	if( bWasStuckOnW!=bStuck )
+	{
+		bWasStuckOnW = bStuck;
+		if( bStuck )
+			StuckTimer = Level.TimeSeconds+2;
+	}
+	if( bStuck && StuckTimer<Level.TimeSeconds )
+	{
+		bReversing = True;
+		ReverseTimer = Level.TimeSeconds+2;
+		Return -ret;
+	}
+	Return ret;
+}
+function int ShouldTurnFor( vector AcTarget, optional float YawAdjust, optional float DeadZone )
+{
+	local int ret;
+	
+	YawAdjust = CurTurnSpeed;
+	
+	if( bReversing )
+		if (int(Level.TimeSeconds/10) % 2 == 0)
+			YawAdjust += 12000;
+		else
+			YawAdjust -= 12000;
+
+	return Super.ShouldTurnFor(AcTarget, YawAdjust, DeadZone);
 }
 simulated function int GetIcedMovementDir()
 {
@@ -823,6 +891,10 @@ defaultproperties
       NumMoveAnimFrames=0
       CurrentAnimFrame=0
       bHasAnimTread=False
+      bWasStuckOnW=False
+      bReversing=False
+      StuckTimer=0.000000
+      ReverseTimer=0.000000
       TreadPan(0)=None
       TreadPan(1)=None
       TreadPan(2)=None
@@ -881,6 +953,7 @@ defaultproperties
       VWaterT(5)=None
       VWaterT(6)=None
       VWaterT(7)=None
+      AIRating=2.000000
       WAccelRate=800.000000
       Health=1000
       bFPViewUseRelRot=True
