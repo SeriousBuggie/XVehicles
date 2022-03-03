@@ -64,6 +64,12 @@ var() enum EEffectStyle
 	ES_ExplNegative60,
 } EffectStyle;
 
+replication
+{
+	// Variables the server should send to the client.
+	reliable if( Role==ROLE_Authority )
+		eOffset;
+}
 
 simulated function PostBeginPlay()
 {
@@ -149,6 +155,7 @@ defaultproperties
       currentAnimR=0.000000
       eOffset=(X=0.000000,Y=0.000000,Z=0.000000)
       EffectStyle=ES_ImplNormal00
+      bNetTemporary=False
       RemoteRole=ROLE_SimulatedProxy
       LifeSpan=10.000000
       DrawType=DT_Mesh

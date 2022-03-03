@@ -100,7 +100,7 @@ function SpawnShotOverlayer()
 	BodyOv.DrawScale = DrawScale;
 	BodyOv.MultiSkins[1] = Texture'TankMLBodyOv01';
 	BodyOv.MultiSkins[2] = Texture'TankMLBodyOv02';
-	BodyOv.SlopedPart = GVT;
+	BodyOv.SlopedPart = self;
 	BodyOv.bTrailerPrePivot = True;
 	BodyOv.LodBias = LodBias;
 	

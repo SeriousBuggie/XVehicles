@@ -288,7 +288,8 @@ replication
 {
 	// Variables the server should send to the client.
 	reliable if( Role==ROLE_Authority )
-		VehPos,VehVeloc,Driver,bDriving,Health,bVehicleBlewUp,ReplicOverlayMat,bTeamLocked,CurrentTeam,Passengers;
+		VehPos,VehVeloc,Driver,bDriving,Health,bVehicleBlewUp,ReplicOverlayMat,bTeamLocked,CurrentTeam,Passengers,
+		bReadyToRun, Specials; // new ones
 	reliable if( Role==ROLE_Authority && bNetOwner )
 		bCameraOnBehindView,MyCameraAct,WAccelRate,DriverGun;
 	reliable if( Role==ROLE_Authority && bShouldRepVehYaw )
@@ -455,13 +456,7 @@ simulated function PostBeginPlay()
 	Super.PostBeginPlay();
 
 	FirstHealth = Health;
-
-	if (InitialDamage > 0)
-		TakeImpactDamage(InitialDamage,None);
-
-	if (!bReadyToRun && (Self.IsA('WheeledCarPhys') || Self.IsA('TreadCraftPhys')))
-		SetPhysics(PHYS_Falling);
-
+	
 	//*****************************************
 	//Ground handling
 	//*****************************************
@@ -487,6 +482,15 @@ simulated function PostBeginPlay()
 		BackWide.Z = Abs(BackWide.Z);
 	}
 	//*****************************************
+	
+	if( Level.NetMode==NM_Client )
+		return;	
+
+	if (InitialDamage > 0)
+		TakeImpactDamage(InitialDamage,None);
+
+	if (!bReadyToRun && (Self.IsA('WheeledCarPhys') || Self.IsA('TreadCraftPhys')))
+		SetPhysics(PHYS_Falling);
 
 
 	//*****************************************
@@ -523,7 +527,7 @@ simulated function PostBeginPlay()
 	if (!bHaveGroundWaterFX)
 		VehFoot = Spawn(Class'VehWaterAttach',Self);
 
-	/*if( Level.NetMode!=NM_Client )
+	/*if( Level.NetMode!=NM_Client ) // fixed above
 	{*/
 		VehicleYaw = Rotation.Yaw;
 		if( VehicleAI==None )
@@ -755,15 +759,7 @@ local vector ExitVect;
 	Driver = None;
 	//SetOwner(None); Set to none 1 sec later to avoid unwanted functions errors.
 	if( !bDeleteMe && Health>0 )
-	{
-		if( MyFactory!=None )
-		{
-			if( HasPassengers() )
-				ResetTimer = Default.ResetTimer;
-			else ResetTimer = Level.TimeSeconds+MyFactory.VehicleResetTime;
-		}
-		GoToState('EmptyVehicle');
-	}
+		CheckForEmpty();
 }
 simulated function VehicleAttachment AddAttachment( class<VehicleAttachment> AttachClass )
 {
@@ -780,7 +776,7 @@ simulated function VehicleAttachment AddAttachment( class<VehicleAttachment> Att
 		W.NextAttachment = AttachmentList;
 		AttachmentList = W;
 	}
-	Return W;
+	return W;
 }
 simulated function Destroyed()
 {
@@ -984,9 +980,7 @@ local float f;
 		VeryOldVel[0] = VeryOldVel[1] * bHitAnActor;
 		bHitAnActor = 0;
 	}
-
-	if (!bDisableTeamSpawn)
-	{
+	
 	if( Level.NetMode==NM_Client )
 	{
 		if( bVehicleBlewUp )
@@ -999,39 +993,45 @@ local float f;
 			Return;
 		}
 		ClientUpdateState(Delta);
-		if( ReplicOverlayMat.MatTexture!=None )
+	}
+
+	if (!bDisableTeamSpawn)
+	{
+		if( Level.NetMode==NM_Client )
 		{
-			SetOverlayMat(ReplicOverlayMat.MatTexture,float(ReplicOverlayMat.MatDispTime)/25.f);
+			if( ReplicOverlayMat.MatTexture!=None )
+			{
+				SetOverlayMat(ReplicOverlayMat.MatTexture,float(ReplicOverlayMat.MatDispTime)/25.f);
+				ReplicOverlayMat.MatTexture = None;
+			}
+		}
+		else if( bResetOLRep && OverlayResetTime<Level.TimeSeconds )
+		{
+			bResetOLRep = False;
 			ReplicOverlayMat.MatTexture = None;
+			ReplicOverlayMat.MatDispTime = 0;
 		}
-	}
-	else if( bResetOLRep && OverlayResetTime<Level.TimeSeconds )
-	{
-		bResetOLRep = False;
-		ReplicOverlayMat.MatTexture = None;
-		ReplicOverlayMat.MatDispTime = 0;
-	}
-	if( Level.NetMode!=NM_DedicatedServer)
-	{
-		if( OverlayMat!=None )
+		if( Level.NetMode!=NM_DedicatedServer)
 		{
-			if( OverlayMActor==None )
-				OverlayMActor = Spawn(Class'MatOverlayFX',Self);
-			OverlayMActor.Texture = OverlayMat;
-			if( OverlayTime>=1 )
-				OverlayMActor.ScaleGlow = 1;
-			else OverlayMActor.ScaleGlow = (OverlayTime/1);
-			OverlayMActor.AmbientGlow = OverlayMActor.ScaleGlow * 255;
-			OverlayTime-=Delta;
-			if( OverlayTime<=0 )
-				OverlayMat = None;
+			if( OverlayMat!=None )
+			{
+				if( OverlayMActor==None )
+					OverlayMActor = Spawn(Class'MatOverlayFX',Self);
+				OverlayMActor.Texture = OverlayMat;
+				if( OverlayTime>=1 )
+					OverlayMActor.ScaleGlow = 1;
+				else OverlayMActor.ScaleGlow = (OverlayTime/1);
+				OverlayMActor.AmbientGlow = OverlayMActor.ScaleGlow * 255;
+				OverlayTime-=Delta;
+				if( OverlayTime<=0 )
+					OverlayMat = None;
+			}
+			else if( OverlayMActor!=None )
+			{
+				OverlayMActor.Destroy();
+				OverlayMActor = None;
+			}
 		}
-		else if( OverlayMActor!=None )
-		{
-			OverlayMActor.Destroy();
-			OverlayMActor = None;
-		}
-	}
 	}
 	if( bDriving && (Level.NetMode<NM_Client || IsNetOwner(Driver)) )
 	{
@@ -1158,46 +1158,51 @@ function float ArcAmount(vector VelArc)
 	return VehicleGravityScale*Abs(Region.Zone.ZoneGravity.Z/950)*RefMaxArcSpeed/FMax(VSize(VelArc),MinArcSpeed*VehicleGravityScale);
 }
 
-simulated function AttachmentsTick( float Delta ) // Update attachment's location here!
+simulated function UpdateAttachment(WeaponAttachment vat, float Delta)
 {
-local VehicleAttachment vat;
 local vector WPosA;
 local rotator WRotA;
 local byte i;
 
+	if (bSlopedPhys && GVT!=None)
+		WPosA = GVT.PrePivot + Location + (vat.TurretOffset >> Rotation);
+	else
+		WPosA = Location + (vat.TurretOffset >> Rotation);
+
+	vat.SetLocation(WPosA);
+	if (Vat.base != self)
+		vat.setBase(self);
+
+	if (vat.PitchPart != None)
+	{
+		if( vat.bHasPitchPart )
+		{
+			if (bSlopedPhys && GVT!=None)
+				WRotA = vat.TransformForGroundRot(vat.TurretYaw,GVTNormal);
+			else
+				WRotA = vat.TransformForGroundRot(vat.TurretYaw,FloorNormal);
+		}
+		else
+		{
+			if (bSlopedPhys && GVT!=None)
+				WRotA = vat.TransformForGroundRot(vat.TurretYaw,GVTNormal,vat.TurretPitch);
+			else
+				WRotA = vat.TransformForGroundRot(vat.TurretYaw,FloorNormal,vat.TurretPitch);
+		}
+		vat.PitchPart.SetLocation(WPosA + (vat.PitchActorOffset >> WRotA));
+		if (Vat.PitchPart.base != self)
+			vat.PitchPart.setBase(self);
+	}
+}
+
+simulated function AttachmentsTick( float Delta ) // Update attachment's location here!
+{
+local VehicleAttachment vat;
+
 	For ( vat=AttachmentList; vat!=None; vat=vat.NextAttachment )
 	{
 		if (WeaponAttachment(vat)!=None)
-		{
-			if (bSlopedPhys && GVT!=None)
-				WPosA = GVT.PrePivot + Location + (WeaponAttachment(vat).TurretOffset >> Rotation);
-			else
-				WPosA = Location + (WeaponAttachment(vat).TurretOffset >> Rotation);
-
-			WeaponAttachment(vat).SetLocation(WPosA);
-
-			if (WeaponAttachment(vat).PitchPart != None)
-			{
-				if( WeaponAttachment(vat).bHasPitchPart )
-				{
-					if (bSlopedPhys && GVT!=None)
-						WRotA = WeaponAttachment(vat).TransformForGroundRot(WeaponAttachment(vat).TurretYaw,GVTNormal);
-					else
-						WRotA = WeaponAttachment(vat).TransformForGroundRot(WeaponAttachment(vat).TurretYaw,FloorNormal);
-					
-					WeaponAttachment(vat).PitchPart.SetLocation(WPosA + (WeaponAttachment(vat).PitchActorOffset >> WRotA));
-				}
-				else
-				{
-					if (bSlopedPhys && GVT!=None)
-						WRotA = WeaponAttachment(vat).TransformForGroundRot(WeaponAttachment(vat).TurretYaw,GVTNormal,WeaponAttachment(vat).TurretPitch);
-					else
-						WRotA = WeaponAttachment(vat).TransformForGroundRot(WeaponAttachment(vat).TurretYaw,FloorNormal,WeaponAttachment(vat).TurretPitch);
-
-					WeaponAttachment(vat).PitchPart.SetLocation(WPosA + (WeaponAttachment(vat).PitchActorOffset >> WRotA));
-				}
-			}
-		}
+			UpdateAttachment(WeaponAttachment(vat), Delta);
 	}
 
 	if (VehFoot != None && Location != OldLocation)
@@ -1258,7 +1263,8 @@ simulated function bool CheckOnGround()
 			if (ActualGVTNormal.Z < 0)
 				ActualGVTNormal = -ActualGVTNormal;
 			GVTLoc = MLoc + ActualGVTNormal*CollisionHeight;
-			GVT.PrePivot = GVTLoc - Location;
+			if (GVT != None)
+				GVT.PrePivot = GVTLoc - Location;
 
 			/*isNotAble = ((sHN[0].Z > sHN[2].Z && sHN[0].Z > 0 && sHN[2].Z > 0 && (sHN[0].Z - sHN[2].Z) > 0.45
 				&& sHN[1].Z > sHN[3].Z && sHN[1].Z > 0 && sHN[3].Z > 0 && (sHN[1].Z - sHN[3].Z) > 0.45)
@@ -1456,8 +1462,8 @@ simulated function ReadDriverInput( PlayerPawn Other, float DeltaTime )
 	else
 		DoSpecialSpaceKey();
 		
-	/*if( Level.NetMode==NM_Client )
-		ServerPreformMove(byte(Rising+1),byte(Turning+1),byte(Accel+1));*/
+	if( Level.NetMode==NM_Client )
+		ServerPreformMove(byte(Rising+1),byte(Turning+1),byte(Accel+1));
 	/*if( MyCameraAct!=None )
 	{
 		if( Other.bBehindView && Other.ViewTarget==MyCameraAct )
@@ -1567,7 +1573,8 @@ Ignores FireWeapon,ReadDriverInput,ReadBotInput,DriverLeft;
 		{
 			if( P.bIsPlayer && PlayerPawn(P)!=None && VSize(P.Location-Location)<(CollisionRadius+100+P.CollisionRadius) && CanEnter(P,True)
 			 && !IsTeamLockedFor(P) )
-				P.ClientMessage("Hold 'Crouch' key to enter this"@VehicleName,'Pickup');
+//				P.ClientMessage("Hold 'Crouch' key to enter this"@VehicleName,'Pickup');
+				P.ReceiveLocalizedMessage( class'EnterMessagePlus', 0, None, None, self );
 		}
 	}
 	function Bump( Actor Other )
@@ -1892,7 +1899,8 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 		C.DrawColor.G = 255;
 		C.DrawColor.B = 110;*/
 
-		if (Level.Game.IsA('DeathMatchPlus') && PlayerPawn(Driver) != None && class'DriverWeapon'.default.UseStandardCrosshair)
+		if (PlayerPawn(Driver) != None && class'DriverWeapon'.default.UseStandardCrosshair && 
+			ClassIsChildOf(class<GameInfo>(DynamicLoadObject(C.ViewPort.Actor.GameReplicationInfo.GameClass, class'Class')), class'DeathMatchPlus'))
 		{
 			if (PlayerPawn(Driver).Handedness == -1)
 				C.SetPos(C.ClipX*0.503-(DriverCrosshairTex.USize*DriverCrossScale/2),C.ClipY*0.504-(DriverCrosshairTex.VSize*DriverCrossScale/2));
@@ -1916,7 +1924,8 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 		C.DrawColor.G = 255;
 		C.DrawColor.B = 110;*/
 
-		if (Level.Game.IsA('DeathMatchPlus') && PlayerPawn(Cam.GunAttachM.WeaponController) != None)
+		if (PlayerPawn(Cam.GunAttachM.WeaponController) != None && 
+			ClassIsChildOf(class<GameInfo>(DynamicLoadObject(C.ViewPort.Actor.GameReplicationInfo.GameClass, class'Class')), class'DeathMatchPlus'))
 		{
 			if (PlayerPawn(Cam.GunAttachM.WeaponController).Handedness == -1)
 				C.SetPos(C.ClipX*0.503-(PassCrosshairTex[Seat-1].USize*PassCrossScale[Seat-1]/2),C.ClipY*0.504-(PassCrosshairTex[Seat-1].VSize*PassCrossScale[Seat-1]/2));
@@ -2446,8 +2455,8 @@ function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 
 	if (!bVehicleBlewUp)
 	{
-	/*if( bDeleteMe || Level.NetMode==NM_Client )
-		Return;*/
+	if( bDeleteMe || Level.NetMode==NM_Client )
+		Return;
 	if( Driver==None )
 	{
 		For( i=0; i<Arraycount(Passengers); i++ )
@@ -2677,21 +2686,31 @@ simulated function SpawnExplosionFX()
 		NW = W.NextAttachment;
 		if( W.bAutoDestroyWithVehicle )
 		{
-			if( Level.NetMode!=NM_DedicatedServer ) // Make these parts "fly off" with the vehicle.
+			if( RemoteRole != ROLE_None || Level.NetMode!=NM_DedicatedServer ) // Make these parts "fly off" with the vehicle.
 			{
 				WT = Spawn(Class'TornOffCarPartActor',Self,,W.Location,W.Rotation);
-				WT.CopyDisplayFrom(W,Self);
-				WT.SetInitialSpeed(W.PartMass);
-				WT.SetCollisionSize(W.CollisionRadius,W.CollisionHeight);
+				if (WT != None)
+				{
+					if (Level.NetMode==NM_DedicatedServer)
+						WT.RemoteRole = ROLE_SimulatedProxy;
+					WT.CopyDisplayFrom(W,Self);
+					WT.SetInitialSpeed(W.PartMass);
+					WT.SetCollisionSize(W.CollisionRadius,W.CollisionHeight);
+				}
 
 				if (W.IsA('WeaponAttachment'))
 				{
 					if (WeaponAttachment(W).bHasPitchPart && WeaponAttachment(W).PitchPart!=None)
 					{
 						WT = Spawn(Class'TornOffCarPartActor',Self,,WeaponAttachment(W).PitchPart.Location,WeaponAttachment(W).PitchPart.Rotation);
-						WT.CopyDisplayFrom(WeaponAttachment(W).PitchPart,Self);
-						WT.SetInitialSpeed(WeaponAttachment(W).PitchPart.PartMass);
-						WT.SetCollisionSize(WeaponAttachment(W).PitchPart.CollisionRadius,WeaponAttachment(W).PitchPart.CollisionHeight);
+						if (WT != None)
+						{
+							if (Level.NetMode==NM_DedicatedServer)
+								WT.RemoteRole = ROLE_SimulatedProxy;
+							WT.CopyDisplayFrom(WeaponAttachment(W).PitchPart,Self);
+							WT.SetInitialSpeed(WeaponAttachment(W).PitchPart.PartMass);
+							WT.SetCollisionSize(WeaponAttachment(W).PitchPart.CollisionRadius,WeaponAttachment(W).PitchPart.CollisionHeight);
+						}
 					}
 				}
 			}
@@ -2707,9 +2726,12 @@ simulated function SpawnExplosionFX()
 	else
 		WT = Spawn(Class'TornOffCarPartActor',Self,,Location,Rotation);
 
-	WT.CopyDisplayFrom(Self,Self);
-	WT.SetInitialSpeed(Byte(VehicleGravityScale-1));
-	WT.SetCollisionSize(WreckPartColRadius,WreckPartColHeight);
+	if (WT != None)
+	{
+		WT.CopyDisplayFrom(Self,Self);
+		WT.SetInitialSpeed(Byte(VehicleGravityScale-1));
+		WT.SetCollisionSize(WreckPartColRadius,WreckPartColHeight);
+	}
 
 	SpawnFurtherParts();
 
@@ -2779,18 +2801,18 @@ simulated function SetOverlayMat( Texture MatTex, float MatDispTime )
 {
 	if (!bDisableTeamSpawn)
 	{
-	if( Level.NetMode>NM_StandAlone && Level.NetMode<NM_Client )
-	{
-		ReplicOverlayMat.MatTexture = MatTex;
-		ReplicOverlayMat.MatDispTime = byte(MatDispTime*25.f);
-		bResetOLRep = True;
-		OverlayResetTime = Level.TimeSeconds+0.25;
-	}
-	if( Level.NetMode!=NM_DedicatedServer )
-	{
-		OverlayMat = MatTex;
-		OverlayTime = MatDispTime;
-	}
+		if( Level.NetMode>NM_StandAlone && Level.NetMode<NM_Client )
+		{
+			ReplicOverlayMat.MatTexture = MatTex;
+			ReplicOverlayMat.MatDispTime = byte(MatDispTime*25.f);
+			bResetOLRep = True;
+			OverlayResetTime = Level.TimeSeconds+0.25;
+		}
+		if( Level.NetMode!=NM_DedicatedServer )
+		{
+			OverlayMat = MatTex;
+			OverlayTime = MatDispTime;
+		}
 	}
 }
 
@@ -2958,6 +2980,8 @@ function PassengerEnter( Pawn Other, byte Seat )
 		PlayerPawn(Other).bBehindView = False;
 		Other.GoToState('PlayerFlying');
 	}
+	
+	CheckForEmpty();
 }
 function PassengerLeave( byte Seat, optional bool bForcedLeave )
 {
@@ -3016,12 +3040,8 @@ local vector ExitVect;
 	if( PassengerSeats[Seat].PassengerCam!=None && PassengerSeats[Seat].PassengerCam.Owner!=None )
 		PassengerSeats[Seat].PassengerCam.SetOwner(None);
 	Passengers[Seat] = None;
-	if( MyFactory!=None )
-	{
-		if( Driver!=None || HasPassengers() )
-			ResetTimer = Default.ResetTimer;
-		else ResetTimer = Level.TimeSeconds+MyFactory.VehicleResetTime;
-	}
+
+	CheckForEmpty();
 }
 function PassengerFireWeapon( bool bAltFire, byte Seat )
 {
@@ -3032,6 +3052,19 @@ function PassengerFireWeapon( bool bAltFire, byte Seat )
 	if( bAltFire )
 		i = 1;
 	PassengerSeats[Seat].PGun.FireTurret(i);
+}
+
+simulated function CheckForEmpty()
+{
+	local bool bEmpty;
+	
+	bEmpty = Driver == None && Health > 0 && !bDeleteMe;
+	if( !bEmpty || HasPassengers() || MyFactory == None )
+		ResetTimer = Default.ResetTimer;
+	else
+		ResetTimer = Level.TimeSeconds+MyFactory.VehicleResetTime;
+	if (bEmpty)
+		GoToState('EmptyVehicle');
 }
 
 /*simulated function vector GetPassengerWOffset( byte Seat )

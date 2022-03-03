@@ -56,28 +56,30 @@ simulated function PostBeginPlay()
 {
 	local byte i;
 
-	For (i=0; i<ArrayCount(Treads); i++)
+	if( Level.NetMode!=NM_DedicatedServer )
 	{
-		if (Treads[i].TreadMesh != None)
+		For (i=0; i<ArrayCount(Treads); i++)
 		{
-		Treads[i].TTread = Spawn(Class'TreadsTrailer',Self);
-		Treads[i].TTread.PrePivotRel = Treads[i].TreadOffset;
-		Treads[i].TTread.Mesh = Treads[i].TreadMesh;
-		if (!Treads[i].bUseAltTread)
-			Treads[i].TTread.MultiSkins[Treads[i].TreadSkinN] = TreadPan[0];
-		else
-			Treads[i].TTread.MultiSkins[Treads[i].TreadSkinN] = AltTreadPan[0];
-		Treads[i].TTread.DrawScale = Treads[i].TreadScale;
-		Treads[i].TTread.AnimSequence = Treads[i].WheelAnimSet;
-
-		//Water Trail FX points creation
-		if (bHaveGroundWaterFX && bSlopedPhys)
-		{
-			VWaterT[i] = Spawn(Class'VehWaterAttach',Self);
-			VWaterT[i].WaveSize = Treads[i].TTread.DrawScale * Treads[i].TrackWidth * 2;
-			VWaterT[i].SoundRadius = Max(32,Min(Max(CollisionRadius,CollisionHeight)/2.5,255));
-		}
-
+			if (Treads[i].TreadMesh != None)
+			{
+				Treads[i].TTread = Spawn(Class'TreadsTrailer',Self);
+				Treads[i].TTread.PrePivotRel = Treads[i].TreadOffset;
+				Treads[i].TTread.Mesh = Treads[i].TreadMesh;
+				if (!Treads[i].bUseAltTread)
+					Treads[i].TTread.MultiSkins[Treads[i].TreadSkinN] = TreadPan[0];
+				else
+					Treads[i].TTread.MultiSkins[Treads[i].TreadSkinN] = AltTreadPan[0];
+				Treads[i].TTread.DrawScale = Treads[i].TreadScale;
+				Treads[i].TTread.AnimSequence = Treads[i].WheelAnimSet;
+		
+				//Water Trail FX points creation
+				if (bHaveGroundWaterFX && bSlopedPhys)
+				{
+					VWaterT[i] = Spawn(Class'VehWaterAttach',Self);
+					VWaterT[i].WaveSize = Treads[i].TTread.DrawScale * Treads[i].TrackWidth * 2;
+					VWaterT[i].SoundRadius = Max(32,Min(Max(CollisionRadius,CollisionHeight)/2.5,255));
+				}	
+			}
 		}
 	}
 
@@ -94,9 +96,12 @@ local TornOffCarPartActor WT;
 		if (Treads[i].TTread != None)
 		{
 			WT = Spawn(Class'TornOffCarPartActor',Self,,Location + Treads[i].TTread.PrePivot,Rotation);
-			WT.CopyDisplayFrom(Treads[i].TTread,Self);
-			WT.SetInitialSpeed(2);
-			WT.SetCollisionSize(WreckTrackColRadius,WreckTrackColHeight);
+			if (WT != None)
+			{
+				WT.CopyDisplayFrom(Treads[i].TTread,Self);
+				WT.SetInitialSpeed(2);
+				WT.SetCollisionSize(WreckTrackColRadius,WreckTrackColHeight);
+			}
 			Treads[i].TTread.Destroy();
 		}
 	}
@@ -182,7 +187,7 @@ simulated function UpdateTreads(float Delta)
 {
 local byte i;
 local float YDelta, TLinSpeed, TWheelAng, MaxFrT, CycleStep;
-local int PanSkip;
+local int PanSkip, dir;
 
 	//Treads control
 	if (FMax(Region.Zone.ZoneGroundFriction,TreadsTraction) > 4.0)
@@ -195,64 +200,74 @@ local int PanSkip;
 		if (Treads[i].TTread != None)
 		{
 			if (FMax(Region.Zone.ZoneGroundFriction,TreadsTraction) > 4.0 && bOnGround)
-				TLinSpeed = GetTreadLinSpeed(VSize(Velocity),i,YDelta,Delta,OldTTurnDir,OldAccelD);
+			{
+				dir = OldAccelD;
+				if( Level.NetMode==NM_Client && !IsNetOwner(Driver) )
+					dir = GetMovementDir();
+				TLinSpeed = GetTreadLinSpeed(VSize(Velocity),i,YDelta,Delta,OldTTurnDir,dir);
+			}
 			else
-				TLinSpeed = GetTreadLinSpeed(VSize(GetVirtualSpeedOnIce(Delta)),i,YDelta,Delta,OldTTurnDir,VirtOldAccel);
+			{
+				dir = VirtOldAccel;
+				if( Level.NetMode==NM_Client && !IsNetOwner(Driver) )
+					dir = GetIcedMovementDir();
+				TLinSpeed = GetTreadLinSpeed(VSize(GetVirtualSpeedOnIce(Delta)),i,YDelta,Delta,OldTTurnDir,dir);
+			}
 
-		if (TLinSpeed > 10 || TLinSpeed < -10)	//Bug fix on stopped tracks moving on big slopes
-			Treads[i].TPanCount += (TLinSpeed*Delta);
-		CycleStep = Treads[i].MovPerTreadCycle/16;
-
-		if (Treads[i].TPanCount > CycleStep)
-		{
-			PanSkip = Int(Treads[i].TPanCount/CycleStep);
-			Treads[i].TPanCount -= (CycleStep * PanSkip);
-
-			PanSkip = Min(PanSkip,7);
-			Treads[i].CurrentTPan += PanSkip;
-			if (Treads[i].CurrentTPan > 15)
-				Treads[i].CurrentTPan -= 15;
-			
-
-			if (!Treads[i].bUseAltTread)
-				Treads[i].TTread.MultiSkins[Treads[i].TreadSkinN] = TreadPan[Treads[i].CurrentTPan];
-			else
-				Treads[i].TTread.MultiSkins[Treads[i].TreadSkinN] = AltTreadPan[Treads[i].CurrentTPan];
-		}
-		else if (Treads[i].TPanCount < 0)
-		{
-			PanSkip = Abs(Int(Treads[i].TPanCount/CycleStep));
-			Treads[i].TPanCount += (CycleStep * PanSkip);
-
-			PanSkip = Min(PanSkip,7);
-			Treads[i].CurrentTPan -= PanSkip;
-			if (Treads[i].CurrentTPan < 0)
-				Treads[i].CurrentTPan += 15;
-
-			if (!Treads[i].bUseAltTread)
-				Treads[i].TTread.MultiSkins[Treads[i].TreadSkinN] = TreadPan[Treads[i].CurrentTPan];
-			else
-				Treads[i].TTread.MultiSkins[Treads[i].TreadSkinN] = AltTreadPan[Treads[i].CurrentTPan];
-		}
-
-		if (Treads[i].bHaveAnimTWheels)
-		{
 			if (TLinSpeed > 10 || TLinSpeed < -10)	//Bug fix on stopped tracks moving on big slopes
-				TWheelAng = GetAngularSpeed(TLinSpeed,Delta,Treads[i].WheelSize);
-			MaxFrT = (Treads[i].WheelFramesN-1)/Treads[i].WheelFramesN;
-
-			if (!Treads[i].bWheenAnimInverted)
-				Treads[i].CurrentWheelFrame += (TWheelAng * MaxFrT / 65536);
-			else
-				Treads[i].CurrentWheelFrame -= (TWheelAng * MaxFrT / 65536);
-
-			if (Treads[i].CurrentWheelFrame > MaxFrT)
-				Treads[i].CurrentWheelFrame = 0;
-			else if (Treads[i].CurrentWheelFrame < 0)
-				Treads[i].CurrentWheelFrame = MaxFrT;
-
-			Treads[i].TTread.AnimFrame = Treads[i].CurrentWheelFrame;
-		}
+				Treads[i].TPanCount += (TLinSpeed*Delta);
+			CycleStep = Treads[i].MovPerTreadCycle/16;
+	
+			if (Treads[i].TPanCount > CycleStep)
+			{
+				PanSkip = Int(Treads[i].TPanCount/CycleStep);
+				Treads[i].TPanCount -= (CycleStep * PanSkip);
+	
+				PanSkip = Min(PanSkip,7);
+				Treads[i].CurrentTPan += PanSkip;
+				if (Treads[i].CurrentTPan > 15)
+					Treads[i].CurrentTPan -= 15;
+				
+	
+				if (!Treads[i].bUseAltTread)
+					Treads[i].TTread.MultiSkins[Treads[i].TreadSkinN] = TreadPan[Treads[i].CurrentTPan];
+				else
+					Treads[i].TTread.MultiSkins[Treads[i].TreadSkinN] = AltTreadPan[Treads[i].CurrentTPan];
+			}
+			else if (Treads[i].TPanCount < 0)
+			{
+				PanSkip = Abs(Int(Treads[i].TPanCount/CycleStep));
+				Treads[i].TPanCount += (CycleStep * PanSkip);
+	
+				PanSkip = Min(PanSkip,7);
+				Treads[i].CurrentTPan -= PanSkip;
+				if (Treads[i].CurrentTPan < 0)
+					Treads[i].CurrentTPan += 15;
+	
+				if (!Treads[i].bUseAltTread)
+					Treads[i].TTread.MultiSkins[Treads[i].TreadSkinN] = TreadPan[Treads[i].CurrentTPan];
+				else
+					Treads[i].TTread.MultiSkins[Treads[i].TreadSkinN] = AltTreadPan[Treads[i].CurrentTPan];
+			}
+	
+			if (Treads[i].bHaveAnimTWheels)
+			{
+				if (TLinSpeed > 10 || TLinSpeed < -10)	//Bug fix on stopped tracks moving on big slopes
+					TWheelAng = GetAngularSpeed(TLinSpeed,Delta,Treads[i].WheelSize);
+				MaxFrT = (Treads[i].WheelFramesN-1)/Treads[i].WheelFramesN;
+	
+				if (!Treads[i].bWheenAnimInverted)
+					Treads[i].CurrentWheelFrame += (TWheelAng * MaxFrT / 65536);
+				else
+					Treads[i].CurrentWheelFrame -= (TWheelAng * MaxFrT / 65536);
+	
+				if (Treads[i].CurrentWheelFrame > MaxFrT)
+					Treads[i].CurrentWheelFrame = 0;
+				else if (Treads[i].CurrentWheelFrame < 0)
+					Treads[i].CurrentWheelFrame = MaxFrT;
+	
+				Treads[i].TTread.AnimFrame = Treads[i].CurrentWheelFrame;
+			}
 		}
 	}
 }
@@ -342,13 +357,15 @@ simulated function UpdateDriverInput( float Delta )
 	VehicleYaw+=CurTurnSpeed*Delta;
 	if( !bCameraOnBehindView && Driver!=None )
 		Driver.ViewRotation.Yaw+=CurTurnSpeed*Delta;
-
-	/*if( Level.NetMode==NM_Client && !IsNetOwner(Driver) )
-		Return;*/
+		
+	if( Level.NetMode==NM_Client && !IsNetOwner(Driver) )
+	{
+		UpdateTreads(Delta);
+		Return;
+	}
 
 	if( bOnGround )
 		Velocity+=CalcGravityStrength(Region.Zone.ZoneGravity*(VehicleGravityScale/GroundPower),FloorNormal)*Delta/(Region.Zone.ZoneGroundFriction/8.f+1.f);
-
 
 	//Treads control
 	UpdateTreads(Delta);
@@ -424,34 +441,34 @@ simulated function UpdateDriverInput( float Delta )
 		{
 			if (FMax(Region.Zone.ZoneGroundFriction,TreadsTraction) > 4.0)
 			{
-			if (bUseSignalLights && Accel==-1)
-			{
-				For (i=0; i<ArrayCount(StopLights); i++)
+				if (bUseSignalLights && Accel==-1)
 				{
-					if (StopLights[i].VLC != None)
-						StopLights[i].VLC.bHidden = True;
+					For (i=0; i<ArrayCount(StopLights); i++)
+					{
+						if (StopLights[i].VLC != None)
+							StopLights[i].VLC.bHidden = True;
+					}
+	
+					For (i=0; i<ArrayCount(BackwardsLights); i++)
+					{
+						if (BackwardsLights[i].VLC != None)
+							BackwardsLights[i].VLC.bHidden = False;
+					}
 				}
-
-				For (i=0; i<ArrayCount(BackwardsLights); i++)
+				else if (bUseSignalLights)
 				{
-					if (BackwardsLights[i].VLC != None)
-						BackwardsLights[i].VLC.bHidden = False;
+					For (i=0; i<ArrayCount(StopLights); i++)
+					{
+						if (StopLights[i].VLC != None)
+							StopLights[i].VLC.bHidden = True;
+					}
+	
+					For (i=0; i<ArrayCount(BackwardsLights); i++)
+					{
+						if (BackwardsLights[i].VLC != None)
+							BackwardsLights[i].VLC.bHidden = True;
+					}
 				}
-			}
-			else if (bUseSignalLights)
-			{
-				For (i=0; i<ArrayCount(StopLights); i++)
-				{
-					if (StopLights[i].VLC != None)
-						StopLights[i].VLC.bHidden = True;
-				}
-
-				For (i=0; i<ArrayCount(BackwardsLights); i++)
-				{
-					if (BackwardsLights[i].VLC != None)
-						BackwardsLights[i].VLC.bHidden = True;
-				}
-			}
 			}
 
 			OldAccelD = Accel;

@@ -15,9 +15,10 @@ class TankMLProjFX expands xTreadVehEffects;
 defaultproperties
 {
       bAnimByOwner=True
+      bNetTemporary=False
       bTrailerSameRotation=True
       Physics=PHYS_Trailer
-      RemoteRole=ROLE_SimulatedProxy
+      RemoteRole=ROLE_None
       DrawType=DT_Mesh
       Style=STY_Translucent
       Texture=Texture'XVehicles.Misc.TransInvis'

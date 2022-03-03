@@ -21,7 +21,7 @@ event TravelPostAccept()
 	Destroy();
 }
 
-Auto State DoNothing
+Auto State ClientActive
 {
 Ignores BringUp,Finish;
 

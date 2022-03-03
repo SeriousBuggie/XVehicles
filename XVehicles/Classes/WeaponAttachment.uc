@@ -16,7 +16,7 @@ var byte PassengerNum;
 var VehicleAttachment PitchPart;
 var() class<VehicleAttachment> TurretPitchActor;
 var() vector PitchActorOffset;
-var bool bHasPitchPart;
+var bool bHasPitchPart, bTurretYawInit;
 var vector PassWPosOffset[8]; 
 var bool bUpdatedPassOffsets;
 var rotator OldAimRotation;
@@ -101,12 +101,12 @@ struct xShakeWeap
 
 var(Shake) xShakeWeap FiringShaking[4];
 
-
 replication
 {
 	// Variables the server should send to the client.
 	reliable if( Role==ROLE_Authority )
-		bInvisGun,TurretOffset,FireFXCounter;
+		bInvisGun,TurretOffset,FireFXCounter,
+		PitchPart,TurretYaw,TurretPitch;
 	reliable if( Role==ROLE_Authority && bNetOwner )
 		PassengerNum;
 	reliable if( Role==ROLE_Authority && !bDriverWeapon && (!bInvisGun || bNetOwner) )
@@ -142,29 +142,30 @@ local byte i;
 
 	if (bUseEnergyFX)
 	{
-	For (i=0; i<16; i++)
-	{
-		EnergyPartsA[i].delayc = EnergyPartsA[i].FirstDelay;
-		EnergyPartsA[i].repeatc = EnergyPartsA[i].RepeatTimes + 1;
-		EnergyPartsB[i].delayc = EnergyPartsB[i].FirstDelay;
-		EnergyPartsB[i].repeatc = EnergyPartsB[i].RepeatTimes + 1;
-
-		if (EnergyPartsA[i].bWaitForPreviousFX && i!=0)
-			EnergyPartsA[i].delayc = 99999.0;
-		if (EnergyPartsB[i].bWaitForPreviousFX && i!=0)
-			EnergyPartsB[i].delayc = 99999.0;
-
-		if (EnergyPartsA[i].EnLnClass == None)
-			EnergyPartsA[i].EnLnClass = Class'EnLnPartics';
-		if (EnergyPartsB[i].EnLnClass == None)
-			EnergyPartsB[i].EnLnClass = Class'EnLnPartics';
-	}
+		For (i=0; i<16; i++)
+		{
+			EnergyPartsA[i].delayc = EnergyPartsA[i].FirstDelay;
+			EnergyPartsA[i].repeatc = EnergyPartsA[i].RepeatTimes + 1;
+			EnergyPartsB[i].delayc = EnergyPartsB[i].FirstDelay;
+			EnergyPartsB[i].repeatc = EnergyPartsB[i].RepeatTimes + 1;
+	
+			if (EnergyPartsA[i].bWaitForPreviousFX && i!=0)
+				EnergyPartsA[i].delayc = 99999.0;
+			if (EnergyPartsB[i].bWaitForPreviousFX && i!=0)
+				EnergyPartsB[i].delayc = 99999.0;
+	
+			if (EnergyPartsA[i].EnLnClass == None)
+				EnergyPartsA[i].EnLnClass = Class'EnLnPartics';
+			if (EnergyPartsB[i].EnLnClass == None)
+				EnergyPartsB[i].EnLnClass = Class'EnLnPartics';
+		}
 	}
 
 	bHasPitchPart = (TurretPitchActor!=None);
-	if( bHasPitchPart /*&& Level.NetMode!=NM_DedicatedServer */)
+	if( bHasPitchPart)
 	{
-		PitchPart = Spawn(TurretPitchActor,Self);
+		if (Level.NetMode!=NM_Client)
+			PitchPart = Spawn(TurretPitchActor,Self);
 
 		if (!bAltFireZooms)
 			ZAimOffset = (WeapSettings[0].FireStartOffset.Z + WeapSettings[1].FireStartOffset.Z)/2 + PitchActorOffset.Z;
@@ -178,6 +179,14 @@ local byte i;
 		else
 			ZAimOffset = WeapSettings[0].FireStartOffset.Z;
 	}
+}
+
+simulated function PostNetBeginPlay()
+{
+	Super.PostNetBeginPlay();
+	
+	if (Level.NetMode==NM_Client)
+		OlVehYaw = TurretYaw;
 }
 
 simulated function Destroyed()
@@ -224,24 +233,24 @@ local int prog;
 
 		if (EnergyPartsA[i].bProgressive && EnergyPartsA[i].RepeatTimes >= 6 && e != None)
 		{
-
-		prog = Abs(EnergyPartsA[i].RepeatTimes - EnergyPartsA[i].repeatc);
-
-		if (EnergyPartsA[i].RepeatTimes / 6 > 0)
-		{
-			if (prog < (5*EnergyPartsA[i].RepeatTimes/6))
-				e.MultiSkins[2] = Texture'TransInvis';
-			if (prog < (4*EnergyPartsA[i].RepeatTimes/6))
-				e.MultiSkins[5] = Texture'TransInvis';
-			if (prog < (3*EnergyPartsA[i].RepeatTimes/6))
-				e.MultiSkins[4] = Texture'TransInvis';
-			if (prog < (2*EnergyPartsA[i].RepeatTimes/6))
-				e.MultiSkins[3] = Texture'TransInvis';
-			if (prog < (EnergyPartsA[i].RepeatTimes/6))
-				e.MultiSkins[6] = Texture'TransInvis';
-		}
-
-		e.ExtInit( Float(EnergyPartsA[i].repeatc)/Float(EnergyPartsA[i].RepeatTimes));
+	
+			prog = Abs(EnergyPartsA[i].RepeatTimes - EnergyPartsA[i].repeatc);
+	
+			if (EnergyPartsA[i].RepeatTimes / 6 > 0)
+			{
+				if (prog < (5*EnergyPartsA[i].RepeatTimes/6))
+					e.MultiSkins[2] = Texture'TransInvis';
+				if (prog < (4*EnergyPartsA[i].RepeatTimes/6))
+					e.MultiSkins[5] = Texture'TransInvis';
+				if (prog < (3*EnergyPartsA[i].RepeatTimes/6))
+					e.MultiSkins[4] = Texture'TransInvis';
+				if (prog < (2*EnergyPartsA[i].RepeatTimes/6))
+					e.MultiSkins[3] = Texture'TransInvis';
+				if (prog < (EnergyPartsA[i].RepeatTimes/6))
+					e.MultiSkins[6] = Texture'TransInvis';
+			}
+	
+			e.ExtInit( Float(EnergyPartsA[i].repeatc)/Float(EnergyPartsA[i].RepeatTimes));
 
 		}
 	}
@@ -258,23 +267,23 @@ local int prog;
 		if (EnergyPartsB[i].bProgressive && EnergyPartsB[i].RepeatTimes >= 6 && e != None)
 		{
 
-		prog = Abs(EnergyPartsB[i].RepeatTimes - EnergyPartsB[i].repeatc);
-
-		if (EnergyPartsB[i].RepeatTimes / 6 > 0)
-		{
-			if (prog < (5*EnergyPartsB[i].RepeatTimes/6))
-				e.MultiSkins[2] = Texture'TransInvis';
-			if (prog < (4*EnergyPartsB[i].RepeatTimes/6))
-				e.MultiSkins[5] = Texture'TransInvis';
-			if (prog < (3*EnergyPartsB[i].RepeatTimes/6))
-				e.MultiSkins[4] = Texture'TransInvis';
-			if (prog < (2*EnergyPartsB[i].RepeatTimes/6))
-				e.MultiSkins[3] = Texture'TransInvis';
-			if (prog < (EnergyPartsB[i].RepeatTimes/6))
-				e.MultiSkins[6] = Texture'TransInvis';
-		}
-
-		e.ExtInit( Float(EnergyPartsB[i].repeatc)/Float(EnergyPartsB[i].RepeatTimes));
+			prog = Abs(EnergyPartsB[i].RepeatTimes - EnergyPartsB[i].repeatc);
+	
+			if (EnergyPartsB[i].RepeatTimes / 6 > 0)
+			{
+				if (prog < (5*EnergyPartsB[i].RepeatTimes/6))
+					e.MultiSkins[2] = Texture'TransInvis';
+				if (prog < (4*EnergyPartsB[i].RepeatTimes/6))
+					e.MultiSkins[5] = Texture'TransInvis';
+				if (prog < (3*EnergyPartsB[i].RepeatTimes/6))
+					e.MultiSkins[4] = Texture'TransInvis';
+				if (prog < (2*EnergyPartsB[i].RepeatTimes/6))
+					e.MultiSkins[3] = Texture'TransInvis';
+				if (prog < (EnergyPartsB[i].RepeatTimes/6))
+					e.MultiSkins[6] = Texture'TransInvis';
+			}
+	
+			e.ExtInit( Float(EnergyPartsB[i].repeatc)/Float(EnergyPartsB[i].RepeatTimes));
 
 		}
 	}
@@ -690,9 +699,7 @@ simulated function Tick( float Delta )
 		}
 		else if (UpdateAttachInfoC < 0.2)
 			UpdateAttachInfoC += Delta;
-	}
-	
-	
+	}	
 
 	if (!bUpdatedPassOffsets)
 	{
@@ -708,7 +715,9 @@ simulated function Tick( float Delta )
 	}
 	//if( OwnerVehicle.AttachmentList==Self )
 	if(bMasterPart && OwnerVehicle != None)
-		OwnerVehicle.AttachmentsTick(Delta);
+		OwnerVehicle.AttachmentsTick(Delta);	
+	if( Level.NetMode==NM_Client /* || Level.NetMode==NM_DedicatedServer */ )
+		OwnerVehicle.UpdateAttachment(self, Delta);
 	if( bDriverWeapon && WeaponController!=OwnerVehicle.Driver )
 		WeaponController = OwnerVehicle.Driver;
 	if( Level.NetMode!=NM_DedicatedServer && !bInvisGun )
@@ -729,6 +738,11 @@ simulated function Tick( float Delta )
 			OverlayMActor = None;
 		}
 	}
+	if (!bTurretYawInit)
+	{
+		bTurretYawInit = true;
+		SetTurretYaw();
+	}
 	GetTurretCoords(Po,Ro,PRo);
 	if( PitchPart!=None )
 	{
@@ -746,22 +760,7 @@ simulated function Tick( float Delta )
 		}
 	}*/
 	
-	if (!bRotWithOtherWeap || WAtt == None || WeaponController!=None)
-	{
-		if( OlVehYaw!=OwnerVehicle.VehicleYaw)
-		{
-			TurretYaw+=(OwnerVehicle.VehicleYaw-OlVehYaw);
-			OlVehYaw = OwnerVehicle.VehicleYaw;
-		}
-	}
-	else
-	{
-		if( OlVehYaw!=WAtt.TurretYaw)
-		{
-			TurretYaw+=(WAtt.TurretYaw-OlVehYaw);
-			OlVehYaw = WAtt.TurretYaw;
-		}
-	}
+	SetTurretYaw();
 
 	if( WeaponController==None )
 	{
@@ -841,15 +840,38 @@ simulated function GetTurretCoords( optional out vector Pos, optional out rotato
 		}
 	}
 	else if (OwnerVehicle.bSlopedPhys && OwnerVehicle.GVT!=None)
+	{
 		TurRot = TransformForGroundRot(TurretYaw,OwnerVehicle.GVTNormal,TurretPitch);
+	}
 	else
+	{
 		TurRot = TransformForGroundRot(TurretYaw,OwnerVehicle.FloorNormal,TurretPitch);
+	}
 }
 
+simulated function SetTurretYaw()
+{
+	if (!bRotWithOtherWeap || WAtt == None || WeaponController!=None)
+	{
+		if( OlVehYaw!=OwnerVehicle.VehicleYaw)
+		{
+			TurretYaw = (TurretYaw + OwnerVehicle.VehicleYaw-OlVehYaw) & 65535;
+			OlVehYaw = OwnerVehicle.VehicleYaw;
+		}
+	}
+	else
+	{
+		if( OlVehYaw!=WAtt.TurretYaw)
+		{
+			TurretYaw = (TurretYaw + WAtt.TurretYaw-OlVehYaw) & 65535;
+			OlVehYaw = WAtt.TurretYaw;
+		}
+	}
+}
 
 // Called on client and local servers whenever FireFXCounter is added by 1. - Not anymore
 // Fire Sound Playing
-simulated function MakeFireFX(byte Mode )
+/*simulated*/ function MakeFireFX(byte Mode )
 {
 	PlaySound(WeapSettings[Mode].FireSound,SLOT_Misc,WeapSettings[Mode].FireSndVolume,,WeapSettings[Mode].FireSndRange*62.5);
 }
@@ -918,6 +940,7 @@ defaultproperties
       TurretPitchActor=None
       PitchActorOffset=(X=0.000000,Y=0.000000,Z=0.000000)
       bHasPitchPart=False
+      bTurretYawInit=False
       PassWPosOffset(0)=(X=0.000000,Y=0.000000,Z=0.000000)
       PassWPosOffset(1)=(X=0.000000,Y=0.000000,Z=0.000000)
       PassWPosOffset(2)=(X=0.000000,Y=0.000000,Z=0.000000)

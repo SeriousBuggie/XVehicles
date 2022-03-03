@@ -49,17 +49,19 @@ class JeepSDX expands WheeledCarPhys;
 var JSDXIceWheelSup IronBars[4];
 var() sound IronOn, IronOff;
 
-function ActivateSpecial( byte SpecialN)
+simulated function Tick(float Delta)
 {
-local byte i;
-
-	if (SpecialN == 7 && !Specials[7].bSpeOn)	//Iron wheels for icy/snowy surfaces
-	{
-		Specials[7].bSpeOn = True;
+	Super.Tick(Delta);
 	
-		if (IronOn != None)
-			PlaySound(IronOn);
+	SetIronBars();
+}
 
+simulated function SetIronBars()
+{
+	local int i;
+
+	if (Specials[7].bSpeOn && IronBars[0] == None)
+	{
 		For( i=0; i<4; i++ )
 		{
 			IronBars[i] = Spawn(Class'JSDXIceWheelSup',MyWheels[i]);
@@ -70,21 +72,35 @@ local byte i;
 		Velocity = VelFriction;
 		WheelsTraction = 8.0;
 	}
+	else if (!Specials[7].bSpeOn && IronBars[0] != None)
+	{
+		For( i=0; i<4; i++ )
+		{
+			if (IronBars[i] != None)
+				IronBars[i].Destroy();
+			IronBars[i] = None;
+		}
+	
+		VelFriction = Velocity;
+		WheelsTraction = 0.1;
+	}
+}
+
+function ActivateSpecial( byte SpecialN)
+{
+	if (SpecialN == 7 && !Specials[7].bSpeOn)	//Iron wheels for icy/snowy surfaces
+	{
+		Specials[7].bSpeOn = True;
+	
+		if (IronOn != None)
+			PlaySound(IronOn);
+	}
 	else if (SpecialN == 7 && Specials[7].bSpeOn)
 	{
 		Specials[7].bSpeOn = False;
 
 		if (IronOff != None)
 			PlaySound(IronOff);
-
-		For( i=0; i<4; i++ )
-		{
-			if (IronBars[i] != None)
-				IronBars[i].Destroy();
-		}
-	
-		VelFriction = Velocity;
-		WheelsTraction = 0.1;
 	}
 }
 

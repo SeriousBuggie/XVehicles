@@ -5,6 +5,13 @@ class KrahtFFX expands xTreadVehEffects;
 var vector PrePivotRel;
 var() bool bFadeIn;
 
+replication
+{
+	// Variables the server should send to the client.
+	reliable if( Role==ROLE_Authority )
+		PrePivotRel;
+}
+
 simulated function Tick( float DeltaTime)
 {
 	if (bFadeIn)

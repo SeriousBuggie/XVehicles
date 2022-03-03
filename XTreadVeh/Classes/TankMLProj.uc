@@ -22,24 +22,34 @@ var() const float ProjLength;
 var TankMLProjCor TMLTrail;
 var() vector TMLTrailOffset;
 
+replication
+{
+	// Variables the server should send to the client.
+	reliable if( Role==ROLE_Authority )
+		RandTexFX, TProjTrail, TMLTrail;
+}
+
 simulated function PostBeginPlay()
 {
 	Super.PostBeginPlay();
 	
-	TProjTrail = Spawn(Class'TankMLProjFX', Self);
-	TProjTrail.DrawScale = DrawScale;
-	TProjTrail.ScaleGlow = ScaleGlow;
+	if (Level.NetMode != NM_Client)
+	{
+		TProjTrail = Spawn(Class'TankMLProjFX', Self);
+		TProjTrail.DrawScale = DrawScale;
+		TProjTrail.ScaleGlow = ScaleGlow;
+		
+		ApplyRandomParticles(Self);
+		ApplyRandomParticles(TProjTrail);
+		
+		Velocity = Speed * vector(Rotation);
+		LoopAnim('RevolveLoop', Speed/ProjLength/10);
+		
+		TMLTrail = Spawn(Class'TankMLProjCor', Self,, Location + (TMLTrailOffset >> Rotation));
+		TMLTrail.PrePivot = TMLTrailOffset >> Rotation;
+	}
 	
-	ApplyRandomParticles(Self);
-	ApplyRandomParticles(TProjTrail);
-	
-	Velocity = Speed * vector(Rotation);
-	LoopAnim('RevolveLoop', Speed/ProjLength/10);
-	
-	TMLTrail = Spawn(Class'TankMLProjCor', Self,, Location + (TMLTrailOffset >> Rotation));
-	TMLTrail.PrePivot = TMLTrailOffset >> Rotation;
-	
-	SetTimer(0.1,True);
+	SetTimer(0.1, True);
 }
 
 simulated function Timer()
@@ -65,7 +75,7 @@ simulated function Destroyed()
 		TProjTrail.Destroy();
 	if (TMLTrail != None)
 		TMLTrail.Destroy();
-		
+
 	Super.Destroyed();
 }
 
@@ -75,21 +85,21 @@ simulated function ProcessTouch (Actor Other, Vector HitLocation)
 		Explode(HitLocation, vect(0,0,1));
 }
 
-    function BlowTheHellUp(vector HitLocation, vector HitNormal)
-    {
+function BlowTheHellUp(vector HitLocation, vector HitNormal)
+{
 	local byte i;
 
-		HurtRadiusOwned(Damage , 1400.0, MyDamageType, MomentumTransfer, HitLocation);
-	   
-		Spawn(Class'TankMLProjExplController',,, HitLocation, rotator(HitNormal));
-		Spawn(Class'TankMLSmkRing',,, HitLocation, rotator(HitNormal));
-		Spawn(Class'TankMLSmkRing',,, HitLocation, rotator(HitNormal) + rot(0,0,2731));
-		Spawn(Class'TankMLShockRing',,, HitLocation + HitNormal, rotator(HitNormal));
+	HurtRadiusOwned(Damage, 1400.0, MyDamageType, MomentumTransfer, HitLocation);
+   
+	Spawn(Class'TankMLProjExplController',,, HitLocation, rotator(HitNormal));
+	Spawn(Class'TankMLSmkRing',,, HitLocation, rotator(HitNormal));
+	Spawn(Class'TankMLSmkRing',,, HitLocation, rotator(HitNormal) + rot(0,0,2731));
+	Spawn(Class'TankMLShockRing',,, HitLocation + HitNormal, rotator(HitNormal));
 
-		ClientShakes(1500);
-	
-        MakeNoise(3.75);
-    }
+	ClientShakes(1500);
+
+    MakeNoise(3.75);
+}
 
 simulated function Explode(vector HitLocation, vector HitNormal)
 {

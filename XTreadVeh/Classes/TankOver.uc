@@ -2,10 +2,20 @@ Class TankOver extends xTreadVehEffects;
 
 var actor SlopedPart;
 
-function Tick(float Delta)
+replication
+{
+	// Variables the server should send to the client.
+	reliable if( Role==ROLE_Authority )
+		SlopedPart;
+}
+
+simulated function Tick(float Delta)
 {
 	if (SlopedPart != None)
-		PrePivot = SlopedPart.PrePivot;
+		if (Vehicle(SlopedPart) != None)
+			PrePivot = Vehicle(SlopedPart).GVT.PrePivot;
+		else
+			PrePivot = SlopedPart.PrePivot;
 		
 	if (LifeSpan > 3.0)
 		ScaleGlow = (4 - LifeSpan) * Default.ScaleGlow;

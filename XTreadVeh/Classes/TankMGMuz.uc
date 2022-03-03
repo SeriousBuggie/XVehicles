@@ -2,6 +2,13 @@ class TankMGMuz expands xTreadVehEffects;
 
 var vector PrePivotRel;
 
+replication
+{
+	// Variables the server should send to the client.
+	reliable if( Role==ROLE_Authority )
+		PrePivotRel;
+}
+
 simulated function PostBeginPlay()
 {
 	LoopAnim('Shoot');

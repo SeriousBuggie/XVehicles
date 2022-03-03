@@ -4,6 +4,13 @@ class LPlasmaFireFX expands xWheelVehEffects;
 
 var vector PrePivotRel;
 
+replication
+{
+	// Variables the server should send to the client.
+	reliable if( Role==ROLE_Authority && bNetInitial )
+		PrePivotRel;
+}
+
 simulated function Tick( float DeltaTime)
 {
 	DrawScale = LifeSpan * Default.DrawScale / Default.LifeSpan;

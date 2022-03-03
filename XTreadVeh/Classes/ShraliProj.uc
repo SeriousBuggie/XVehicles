@@ -9,14 +9,32 @@ var float DistCount;
 var bool bFirstSmk;
 var ShraliProjSpirHead spsh;
 
+replication
+{
+	// Variables the server should send to the client.
+	reliable if( Role==ROLE_Authority )
+		spsh;
+}
+
 simulated function PostBeginPlay()
 {
-	Velocity = Speed * vector(Rotation);
-
-	spsh = Spawn(Class'ShraliProjSpirHead',Self);
-	spsh.PrePivotRel = vect(-40,0,0);
+	if (Level.NetMode != NM_Client)
+	{
+		Velocity = Speed * vector(Rotation);
+		
+		spsh = Spawn(Class'ShraliProjSpirHead',Self);
+		spsh.PrePivotRel = vect(-40,0,0);
+	}
 
 	Super.PostBeginPlay();
+}
+
+simulated function PostNetBeginPlay()
+{
+	if (Level.NetMode == NM_Client)
+		SetRotation(rotator(Velocity));
+
+	Super.PostNetBeginPlay();
 }
 
 simulated function Tick(float DeltaTime)
@@ -62,11 +80,11 @@ simulated function ProcessTouch (Actor Other, Vector HitLocation)
 		Explode(HitLocation, vect(0,0,1));
 }
 
-    function BlowTheHellUp(vector HitLocation, vector HitNormal)
-    {
+function BlowTheHellUp(vector HitLocation, vector HitNormal)
+{
 	local byte i;
 
-        HurtRadiusOwned(Damage , 1350.0, MyDamageType, MomentumTransfer, HitLocation);
+    HurtRadiusOwned(Damage , 1350.0, MyDamageType, MomentumTransfer, HitLocation);
 	
 	Spawn(Class'BigRockSpawner',,, HitLocation, rotator(HitNormal));
 
@@ -83,10 +101,8 @@ simulated function ProcessTouch (Actor Other, Vector HitLocation)
 	ClientShakes(3125);
 	ClientFlashes();
 	
-        MakeNoise(7.5);
-    }
-	
-	
+    MakeNoise(7.5);
+}	
 
 simulated function Explode(vector HitLocation, vector HitNormal)
 {
@@ -105,6 +121,7 @@ defaultproperties
       MomentumTransfer=300000
       MyDamageType="NaliEnergy"
       ExplosionDecal=Class'XTreadVeh.ShraliProjDecal'
+      bNetTemporary=False
       RemoteRole=ROLE_SimulatedProxy
       AmbientSound=Sound'XTreadVeh.Shrali.ShraliProjLoop'
       DrawType=DT_Sprite

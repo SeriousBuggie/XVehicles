@@ -6,7 +6,7 @@ defaultproperties
       bTrailerSameRotation=True
       bTrailerPrePivot=True
       Physics=PHYS_Trailer
-      RemoteRole=ROLE_SimulatedProxy
+      RemoteRole=ROLE_None
       DrawType=DT_Sprite
       Style=STY_Translucent
       Texture=Texture'XTreadVeh.Effects.ShraliProjCor'

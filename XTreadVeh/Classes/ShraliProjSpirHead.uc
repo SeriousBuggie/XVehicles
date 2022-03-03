@@ -16,7 +16,14 @@ class ShraliProjSpirHead expands xTreadVehEffects;
 var vector PrePivotRel;
 var rotator OwnerRot;
 
-function Tick(float Delta)
+replication
+{
+	// Variables the server should send to the client.
+	reliable if( Role==ROLE_Authority )
+		PrePivotRel;
+}
+
+simulated function Tick(float Delta)
 {
 	if (PrePivotRel != vect(0,0,0) && Owner != None && Owner.Rotation != OwnerRot)
 	{

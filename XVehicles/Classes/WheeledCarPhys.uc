@@ -96,7 +96,7 @@ simulated function PostBeginPlay()
 				bHasWheelMeshes = True;
 		}
 	}
-
+			
 	if (MyWheels[0] != None)
 		MyWheels[0].bMasterPart = True;
 	else if (DriverWeapon.WeaponClass==None)
@@ -198,8 +198,8 @@ simulated function UpdateDriverInput( float Delta )
 		FallingLenghtZ += Abs(OldLocation.Z - Location.Z);
 		Return;
 	}
-	/*if( Level.NetMode==NM_Client && !IsNetOwner(Owner) )
-		Return;*/
+	if( Level.NetMode==NM_Client && !IsNetOwner(Owner) )
+		Return;
 
 	if( bOnGround)
 		Velocity+=CalcGravityStrength(Region.Zone.ZoneGravity*(VehicleGravityScale/GroundPower),FloorNormal)*Delta/(FMax(Region.Zone.ZoneGroundFriction,WheelsTraction)/8.f+1.f);

@@ -4,6 +4,13 @@ Class HeadSpotLight extends Light;
 var bool bReady;
 var vector POffSet;
 
+replication
+{
+	// Variables the server should send to the client.
+	reliable if( Role==ROLE_Authority )
+		POffSet;
+}
+
 function PostBeginPlay()
 {
 	SetTimer(0.2,True);
@@ -11,12 +18,11 @@ function PostBeginPlay()
 
 function Timer()
 {
-
 	If (Owner == None)
 		Destroy();
 }
 
-function Tick(float Delta)
+simulated function Tick(float Delta)
 {
 	if (Vehicle(Owner)!=None)
 	{

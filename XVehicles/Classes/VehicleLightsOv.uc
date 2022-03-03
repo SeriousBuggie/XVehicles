@@ -10,12 +10,11 @@ function PostBeginPlay()
 
 function Timer()
 {
-
 	If (Owner == None)
 		Destroy();
 }
 
-function Tick(float Delta)
+simulated function Tick(float Delta)
 {
 	if (Vehicle(Owner)!=None)
 	{

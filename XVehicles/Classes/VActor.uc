@@ -274,8 +274,10 @@ simulated function rotator TransformForGroundRot( int CurrentYaw, vector GroundN
 	
 	R.Yaw = CurrentYaw;
 	R.Pitch = CurrentPitch;
-	if( GroundNormal.Z==1 )
+	if( Abs(GroundNormal.Z - 1) < 0.0000001 )
+	{
 		Return R;
+	}
 
 	GetAxes(R,X,Y,Z);
 
@@ -290,7 +292,7 @@ simulated function rotator TransformForGroundRot( int CurrentYaw, vector GroundN
 	Z = GroundNormal;
 	Z = Normal(Z);
 	Y = Normal(GroundNormal Cross X);
-	Return OrthoRotation(X,Y,Z);
+	return OrthoRotation(X,Y,Z);
 }
 // Vel = vector value to bouch off a "surface"
 // GNormal = The surface normal

@@ -29,24 +29,24 @@ local LPlasmaFireFX LPl;
 
 	if (PitchPart != None)
 	{
-	ROffset = WeapSettings[Mode].FireStartOffset;
-
-	if (Mode == 0)
-	{
-		if (bTurnFire)
+		ROffset = WeapSettings[Mode].FireStartOffset;
+	
+		if (Mode == 0)
+		{
+			if (bTurnFire)
+				ROffset.Y = -ROffset.Y;
+			LPl = Spawn(Class'LPlasmaFireFX',PitchPart,,PitchPart.Location + (ROffset >> PitchPart.Rotation));
+			LPl.PrePivotRel = ROffSet;
+			
+		}
+		else
+		{
+			LPl = Spawn(Class'LPlasmaFireFX',PitchPart,,PitchPart.Location + (ROffset >> PitchPart.Rotation));
+			LPl.PrePivotRel = ROffSet;
 			ROffset.Y = -ROffset.Y;
-		LPl = Spawn(Class'LPlasmaFireFX',PitchPart,,PitchPart.Location + (ROffset >> PitchPart.Rotation));
-		LPl.PrePivotRel = ROffSet;
-		
-	}
-	else
-	{
-		LPl = Spawn(Class'LPlasmaFireFX',PitchPart,,PitchPart.Location + (ROffset >> PitchPart.Rotation));
-		LPl.PrePivotRel = ROffSet;
-		ROffset.Y = -ROffset.Y;
-		LPl = Spawn(Class'LPlasmaFireFX',PitchPart,,PitchPart.Location + (ROffset >> PitchPart.Rotation));
-		LPl.PrePivotRel = ROffSet;
-	}
+			LPl = Spawn(Class'LPlasmaFireFX',PitchPart,,PitchPart.Location + (ROffset >> PitchPart.Rotation));
+			LPl.PrePivotRel = ROffSet;
+		}
 	}
 }
 
