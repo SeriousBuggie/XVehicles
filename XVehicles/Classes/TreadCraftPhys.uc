@@ -395,47 +395,52 @@ simulated function UpdateDriverInput( float Delta )
 				DeAccRat = DeAcc;
 			Ac = GetAccelDir(Turning,Rising,OldAccelD);
 			if (FMax(Region.Zone.ZoneGroundFriction,TreadsTraction) <= 4.0)
-			{
+			{	
+				if( DeAcc>0 )
+				{
+					DeAcc-=WDeAccelRate*Delta;
+					if( DeAcc<0 )
+						DeAcc = 0;
+				}
+				else DeAcc-=WDeAccelRate*3*Delta/100;
 	
-			if( DeAcc>0 )
-			{
-				DeAcc-=WDeAccelRate*Delta;
-				if( DeAcc<0 )
-					DeAcc = 0;
-			}
-			else DeAcc-=WDeAccelRate*3*Delta/100;
-
-			NVeloc = Normal(Velocity);
-			if( DeAcc>50 && (Ac Dot NVeloc)<0.4 )
-			{
-				Velocity-=Ac*FMax(Region.Zone.ZoneGroundFriction,TreadsTraction)*WDeAccelRate*3*Delta*2.f;
-				Return;
-			}
-			Ac = Ac*MaxGroundSpeed*FMax(Region.Zone.ZoneGroundFriction,TreadsTraction)/10;
-			Velocity = Normal(Velocity+Ac)*DeAcc;
+				NVeloc = Normal(Velocity);
+				if( DeAcc>50 && (Ac Dot NVeloc)<0.4 )
+				{
+					Velocity-=Ac*FMax(Region.Zone.ZoneGroundFriction,TreadsTraction)*WDeAccelRate*3*Delta*2.f;
+					Return;
+				}
+				Ac = Ac*MaxGroundSpeed*FMax(Region.Zone.ZoneGroundFriction,TreadsTraction)/10;
+				Velocity = Normal(Velocity+Ac)*DeAcc;
 			}
 			else
 			{
-				Velocity-=Normal(Velocity)*DeAccRat;
-				Velocity = VSize(Velocity)*Normal(Ac);
+				if (DeAccRat >= VSize(Velocity))
+					Velocity = vect(0,0,0);
+				else
+					Velocity-=Normal(Velocity)*DeAccRat;
+				if (Velocity dot Ac > 0)
+					Velocity = VSize(Velocity)*Normal(Ac);
+				else
+					OldAccelD = -OldAccelD;
 			}
 
 			if (FMax(Region.Zone.ZoneGroundFriction,TreadsTraction) > 4.0)
 			{
-			if (bUseSignalLights)
-			{
-				For (i=0; i<ArrayCount(StopLights); i++)
+				if (bUseSignalLights)
 				{
-					if (StopLights[i].VLC != None)
-						StopLights[i].VLC.bHidden = False;
+					For (i=0; i<ArrayCount(StopLights); i++)
+					{
+						if (StopLights[i].VLC != None)
+							StopLights[i].VLC.bHidden = False;
+					}
+	
+					For (i=0; i<ArrayCount(BackwardsLights); i++)
+					{
+						if (BackwardsLights[i].VLC != None)
+							BackwardsLights[i].VLC.bHidden = True;
+					}
 				}
-
-				For (i=0; i<ArrayCount(BackwardsLights); i++)
-				{
-					if (BackwardsLights[i].VLC != None)
-						BackwardsLights[i].VLC.bHidden = True;
-				}
-			}
 			}
 
 			Return;
@@ -496,43 +501,47 @@ simulated function UpdateDriverInput( float Delta )
 			}
 			else DeAcc-=WDeAccelRate*Delta/100;
 
-		NVeloc = Normal(Velocity);
-		if( DeAcc>50 && (Ac Dot NVeloc)<0.4 )
-		{
-			Velocity-=Ac*FMax(Region.Zone.ZoneGroundFriction,TreadsTraction)*WDeAccelRate*Delta*2.f;
-			Return;
-		}
-		Ac = Ac*MaxGroundSpeed*FMax(Region.Zone.ZoneGroundFriction,TreadsTraction)/10;
-		Velocity = Normal(Velocity+Ac)*DeAcc;
+			NVeloc = Normal(Velocity);
+			if( DeAcc>50 && (Ac Dot NVeloc)<0.4 )
+			{
+				Velocity-=Ac*FMax(Region.Zone.ZoneGroundFriction,TreadsTraction)*WDeAccelRate*Delta*2.f;
+				Return;
+			}
+			Ac = Ac*MaxGroundSpeed*FMax(Region.Zone.ZoneGroundFriction,TreadsTraction)/10;
+			Velocity = Normal(Velocity+Ac)*DeAcc;
 		}
 		else
 		{
-			Velocity-=Normal(Velocity)*DeAccRat;
-			Velocity = VSize(Velocity)*Normal(Ac);
+			if (DeAccRat >= VSize(Velocity))
+				Velocity = vect(0,0,0);
+			else
+				Velocity-=Normal(Velocity)*DeAccRat;
+			if (Velocity dot Ac > 0)
+				Velocity = VSize(Velocity)*Normal(Ac);
+			else
+				OldAccelD = -OldAccelD;
 		}
 
 		if (FMax(Region.Zone.ZoneGroundFriction,TreadsTraction) > 4.0)
 		{
-		if (bUseSignalLights)
-		{
-			For (i=0; i<ArrayCount(StopLights); i++)
+			if (bUseSignalLights)
 			{
-				if (StopLights[i].VLC != None)
-					StopLights[i].VLC.bHidden = True;
-			}
-
-			For (i=0; i<ArrayCount(BackwardsLights); i++)
-			{
-				if (BackwardsLights[i].VLC != None)
-					BackwardsLights[i].VLC.bHidden = True;
+				For (i=0; i<ArrayCount(StopLights); i++)
+				{
+					if (StopLights[i].VLC != None)
+						StopLights[i].VLC.bHidden = True;
+				}
+	
+				For (i=0; i<ArrayCount(BackwardsLights); i++)
+				{
+					if (BackwardsLights[i].VLC != None)
+						BackwardsLights[i].VLC.bHidden = True;
+				}
 			}
 		}
-		}
-
 		Return;
 	}
 	DeAcc = VSize(Velocity);
-
 	if( DeAcc<MaxGroundSpeed )
 	{
 		DeAcc+=WAccelRate*Delta;

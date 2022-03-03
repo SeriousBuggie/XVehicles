@@ -172,6 +172,7 @@ function SetupWeapon(WeaponAttachment WA)
 		return;
 	bInstantHit = WA.WeapSettings[0].bInstantHit;
 	bSplashDamage = !bInstantHit;
+	bRecommendSplashDamage = bSplashDamage;
 	bAltWarnTarget = WA.bAltFireZooms;
 }
 

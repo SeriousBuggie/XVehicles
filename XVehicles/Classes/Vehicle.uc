@@ -824,6 +824,12 @@ function TryDropFlag(Pawn Other)
 		Other.PlayerReplicationInfo.HasFlag.Drop(vect(0,0,0));
 }
 
+function AddShield(Pawn Other)
+{
+	if (Other.FindInventoryType(Class'DriverShield') == None)
+		Other.AddInventory( Other.Spawn(Class'DriverShield')); 
+}
+
 function DriverEnter( Pawn Other )
 {
 	local rotator R;
@@ -850,6 +856,7 @@ function DriverEnter( Pawn Other )
 		Other.Weapon.TweenDown(); // for remove ambient sound
 	}
 	Other.Weapon = DWeapon;
+	AddShield(Other);
 	if (Other.Inventory != None)
 		Other.Inventory.ChangedWeapon();
 	if (Other.CarriedDecoration != None)
@@ -1211,7 +1218,6 @@ simulated function Tick( float Delta )
 {
 local bool bSlopedG;
 local float f;
-
 	if (bLastTeleport)
 	{
 		AfterTeleport(Rotation.Yaw - LastTeleportYaw);		
@@ -1559,12 +1565,12 @@ simulated function bool CheckOnGround()
 {
 	local vector End,Start,Ex,HL,HN;
 
-	local vector sHL[4],sHN[4], ePointsOffSet[4], MLoc, CrossedVect[2], GVTLoc, CurArcDir;
+	local vector S, E, sHL[4],sHN[4], ePointsOffSet[4], MLoc, CrossedVect[2], GVTLoc, CurArcDir;
 	local actor Ac[4];
 	local byte b, AcCount;
 	local actor WAs, WBs, PossibleBase;
 	local vector WHL, WHN, WSt, WEnd, WExt;
-	local bool isNotAble;
+	local bool isNotAble, ret;
 
 	Start = Location;
 	Start.Z-=(CollisionHeight-1);
@@ -1585,9 +1591,9 @@ simulated function bool CheckOnGround()
 
 		For (b=0; b<4; b++)
 		{
-			Start = Location + (ePointsOffSet[b] >> Rotation);
-			End = Start + (eVect(0,0,-Abs(ZRange)) >> Rotation);
-			Ac[b] = Trace(sHL[b],sHN[b],End,Start,False);
+			S = Location + (ePointsOffSet[b] >> Rotation);
+			E = S + (eVect(0,0,-Abs(ZRange)) >> Rotation);
+			Ac[b] = Trace(sHL[b],sHN[b],E,S,False);
 			if (Ac[b] != None)
 				AcCount++;
 		}
@@ -1616,7 +1622,8 @@ simulated function bool CheckOnGround()
 				&& sHN[1].Z < sHN[3].Z && sHN[1].Z > 0 && sHN[3].Z > 0 && (sHN[3].Z - sHN[1].Z) > 0.45))
 				&& VehicleGravityScale*(Region.Zone.ZoneGravity.Z/8) < VSize(Velocity)/350;*/
 
-			if (Trace(HL,HN,End,Start,False)!=None)
+			// always false :(
+			if (false && Trace(HL,HN,End,Start,False)!=None)
 			{
 				For (b=0; b<4; b++)
 				{
@@ -1629,13 +1636,13 @@ simulated function bool CheckOnGround()
 			if (!isNotAble)
 			{
 				ActualFloorNormal = ActualGVTNormal;
-				CheckBase(PossibleBase, Ac);
-				return True;
+				ret = True;
+				ret = ActualFloorNormal.Z >= 0.7;
 			}
 		}
 
 		CheckBase(PossibleBase, Ac);
-		return False;
+		return ret;
 	}
 
 	if (bSlopedPhys && GVT!=None)
@@ -1681,9 +1688,9 @@ simulated function bool CheckOnGround()
 
 			For (b=0; b<4; b++)
 			{
-				Start = Location + (ePointsOffSet[b] >> Rotation);
-				End = Start + (eVect(0,0,-Abs(ZRange)) >> Rotation);
-				Ac[b] = Trace(sHL[b],sHN[b],End,Start,False);
+				S = Location + (ePointsOffSet[b] >> Rotation);
+				E = S + (eVect(0,0,-Abs(ZRange)) >> Rotation);
+				Ac[b] = Trace(sHL[b],sHN[b],E,S,False);
 				if (Ac[b] != None && (sHN[b] dot WHN > 0.5) /*&& (ActualFloorNormal dot sHN[b] >= 0.3)*/)
 					AcCount++;
 			}
@@ -1714,6 +1721,7 @@ simulated function bool CheckOnGround()
 		ActualFloorNormal = HN;
 		
 	CheckBase(PossibleBase, Ac);
+	return ActualFloorNormal.Z >= 0.7;
 	Return True;
 }
 
@@ -2816,7 +2824,7 @@ singular simulated function Bump( Actor Other )
 	
 	if (Other == None || Other.bDeleteMe)
 		return;
-
+// log(Self @ Level.TimeSeconds @ "Bump" @ Other);
 	if( Vehicle(Other)!=None )
 	{
 		Dir = Other.Location-Location;
@@ -3079,7 +3087,7 @@ simulated singular function HitWall( vector HitNormal, Actor Wall )
 	local vector OtherHitN;
 //	Log(self @ Level.TimeSeconds @ "HitWall" @ HitNormal @ Wall);
 	OtherHitN = HitNormal;
-	
+
 	if (Bot(Driver) != None)
 		Driver.HitWall(HitNormal, Wall);
 
@@ -3089,7 +3097,7 @@ simulated singular function HitWall( vector HitNormal, Actor Wall )
 		SetPhysics(PHYS_Projectile);
 		return;
 	}
-
+	
 	if ((GVTNormal.Z < -0.7 || FloorNormal.Z < -0.7) && HitNormal.Z > 0.7 && bDestroyUpsideDown)	//Upside down
 	{
 		TakeImpactDamage(Health*2, None, "HitWall_1"/* @ GVTNormal @ FloorNormal @ HitNormal*/);
@@ -3204,7 +3212,7 @@ simulated singular function HitWall( vector HitNormal, Actor Wall )
 
 function TakeImpactDamage( int Damage, Pawn InstigatedBy, optional coerce string Reason )
 {
-	//if (Damage > 0) Log(self @ Level.TimeSeconds @ "TakeImpactDamage" @ Damage @ InstigatedBy @ Reason);
+// if (Damage > 0) Log(self @ Level.TimeSeconds @ "TakeImpactDamage" @ Damage @ InstigatedBy @ Reason);
 	TakeDamage(Damage,InstigatedBy,Location,vect(0,0,0),'BumpWall');
 }
 
@@ -3762,6 +3770,7 @@ function PassengerEnter( Pawn Other, byte Seat )
 		Other.Weapon.TweenDown(); // for remove ambient sound
 	}
 	Other.Weapon = PassengerSeats[Seat].PHGun;
+	AddShield(Other);
 	if (Other.Inventory != None)
 		Other.Inventory.ChangedWeapon();	
 	if (Other.CarriedDecoration != None)
