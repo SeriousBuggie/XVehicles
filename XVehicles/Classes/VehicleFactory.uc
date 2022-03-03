@@ -8,7 +8,7 @@ var Vehicle MyVehicle;
 var float NextRespawnTimer;
 var bool bInitAct;
 var byte InitialTeamNum;
-var() bool bDisableTeamSpawn;
+var bool bDisableTeamSpawn; // replaced by class'VehiclesConfig'.default.bDisableTeamSpawn
 var() bool bUseMultipleSpawn;
 
 function PostBeginPlay()
@@ -31,7 +31,8 @@ function Timer()
 		MyVehicle = None;
 	if (MyVehicle != None && VSize(MyVehicle.Location - Location) > 2*MyVehicle.CollisionRadius)
 	{
-		MyVehicle.CheckForEmpty();
+		if (MyVehicle.ResetTimer <= 0)
+			MyVehicle.CheckForEmpty();
 		if (bUseMultipleSpawn)
 		{
 			PrepareNew();
@@ -55,10 +56,11 @@ function Timer()
 		MyVehicle.CurrentTeam = TeamNum;
 		MyVehicle.bTeamLocked = bStartTeamLocked;
 
-		if (!MyVehicle.bDisableTeamSpawn && !bDisableTeamSpawn)
+		if (!class'VehiclesConfig'.default.bDisableTeamSpawn)
 			MyVehicle.SetOverlayMat(MyVehicle.TeamOverlays[TeamNum],0.5);
 
-		MyVehicle.bDisableTeamSpawn = (MyVehicle.bDisableTeamSpawn || bDisableTeamSpawn);
+		//MyVehicle.bDisableTeamSpawn = (MyVehicle.bDisableTeamSpawn || bDisableTeamSpawn);
+		MyVehicle.ShowState();
 	}
 	SetTimer(1,False);
 }

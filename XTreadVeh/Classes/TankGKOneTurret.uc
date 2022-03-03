@@ -46,5 +46,5 @@ defaultproperties
       SoundRadius=150
       SoundVolume=255
       CollisionRadius=80.000000
-      CollisionHeight=18.000000
+      CollisionHeight=32.000000
 }

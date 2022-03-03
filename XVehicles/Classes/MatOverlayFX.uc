@@ -16,6 +16,12 @@ simulated function Tick(float DeltaTime)
 	Mesh = Owner.Mesh;
 	DrawScale = Owner.DrawScale;
 	bOwnerNoSee = Owner.bOwnerNoSee;
+	
+	if (Vehicle(Owner) != None && Vehicle(Owner).bSlopedPhys && Vehicle(Owner).GVT!=None)
+	{
+		PrePivot = Vehicle(Owner).GVT.PrePivot;
+		bHidden = false;
+	}
 }
 
 defaultproperties

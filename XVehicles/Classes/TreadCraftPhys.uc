@@ -540,7 +540,8 @@ simulated function UpdateDriverInput( float Delta )
 
 	Ac = GetAccelDir(Turning,Rising,OldAccelD)*MaxGroundSpeed*FMax(Region.Zone.ZoneGroundFriction,TreadsTraction)/10;
 	Velocity = Normal(Velocity+Ac)*DeAcc;
-	ShouldTurnFor(vector(Driver.ViewRotation)*20000+Location);
+	if (Driver != None)
+		ShouldTurnFor(vector(Driver.ViewRotation)*20000+Location);
 }
 // 1 - Forward
 // -1 - Reversed

@@ -7,10 +7,19 @@ var byte SeatNumber;
 
 var() config bool UseStandardCrosshair;
 
+/*replication
+{
+	// Variables the server should send to the client.
+	reliable if( Role==ROLE_Authority )
+		VehicleOwner,SeatNumber;
+}*/
+
 simulated function PostNetBeginPlay()
 {
 	Super.PostNetBeginPlay();
 	InventoryGroup = Charge; // hack for net
+	
+//	SetName();
 }
 
 simulated event RenderOverlays( canvas Canvas );
@@ -49,8 +58,25 @@ function float SwitchPriority()
 	return 340282346638528870000000000000000000000.0; // max float
 }
 
-function Timer()
+simulated function SetName()
 {
+	if (ItemName == "Weapon")
+	{
+		if (VehicleOwner != None)
+			ItemName = VehicleOwner.GetWeaponName(SeatNumber);
+		else
+			SetTimer(1, false);
+	}
+}
+
+simulated function Timer()
+{
+/*	if (Role < ROLE_Authority) 
+	{
+		SetName();
+		return;
+	}*/
+
 	if (!IsInState('ClientActive'))
 		GotoState('ClientActive');
 	if (Pawn(Owner) != None && Pawn(Owner).Weapon != self)

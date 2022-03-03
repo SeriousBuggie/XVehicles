@@ -144,7 +144,7 @@ var(SlopedPhys) float ZRange;
 var(SlopedPhys) float MaxObstclHeight;
 var() bool bDestroyUpsideDown;
 var GVehTrailer GVT;
-var() bool bDisableTeamSpawn;
+var bool bDisableTeamSpawn; // replaced by class'VehiclesConfig'.default.bDisableTeamSpawn
 var() float WDeAccelRate;
 var int OldAccelD, VirtOldAccel;
 var(Sounds) sound HornSnd;
@@ -238,6 +238,20 @@ var ZoneInfo FootVehZone[8];
 
 var float LastTeleportTime; // for fix flicker teleport between two locations
 
+enum EDropFlag
+{
+	DF_None,                // Not drop flag at all.
+	DF_Driver,				// Only driver, not passengers.
+	DF_All,					// All.
+};
+var() EDropFlag DropFlag;
+
+var VehicleFlag VehicleFlag;
+var VehicleState VehicleState;
+
+var float LastFix;
+var() Sound FixSounds[4];
+
 //Damage FX
 struct VDamageGFX
 {
@@ -290,7 +304,7 @@ replication
 	// Variables the server should send to the client.
 	reliable if( Role==ROLE_Authority )
 		VehPos,VehVeloc,Driver,bDriving,Health,bVehicleBlewUp,ReplicOverlayMat,bTeamLocked,CurrentTeam,Passengers,
-		bReadyToRun, Specials, DriverGun; // new ones
+		bReadyToRun, Specials, DriverGun, VehicleState; // new ones
 	reliable if( Role==ROLE_Authority && bNetOwner )
 		bCameraOnBehindView,MyCameraAct,WAccelRate;
 	reliable if( Role==ROLE_Authority && bShouldRepVehYaw )
@@ -585,6 +599,8 @@ simulated function PostBeginPlay()
 			}
 		}
 	//}
+	
+	ShowState();
 }
 
 function ChangeBackView()
@@ -667,6 +683,14 @@ function ServerPreformMove( byte InRise, byte InTurn, byte InAccel )
 		Accel = 1;
 }
 
+simulated function string GetWeaponName(byte Seat)
+{
+	if (Seat == 0)
+		return VehicleName;
+	else
+		return PassengerSeats[--Seat].SeatName;
+}
+
 function DriverWeapon SpawnWeapon(class<DriverWeapon> DriverWeaponClass, optional int Seat, optional Actor Owned)
 {
 	local DriverWeapon wep;
@@ -689,6 +713,80 @@ function DriverWeapon SpawnWeapon(class<DriverWeapon> DriverWeaponClass, optiona
 			wep.ItemName = VehicleName;
 	}
 	return wep;
+}
+
+simulated function vector GetStateOffset()
+{
+	local vector Offset;
+	
+	if (DriverWeapon.WeaponClass == None)
+		Offset = vect(0, 0, 1) * CollisionHeight;
+	else
+	{
+		Offset = DriverWeapon.WeaponOffset;
+		Offset.Z += DriverWeapon.WeaponClass.default.CollisionHeight;
+	}
+	return Offset;
+}
+
+function ShowFlagOnRoof()
+{
+	local Decoration HasFlag;
+	local int i;
+	
+	if (Driver != None && Driver.PlayerReplicationInfo != None && Driver.PlayerReplicationInfo.HasFlag != None)
+		HasFlag = Driver.PlayerReplicationInfo.HasFlag;
+	else
+		for (i=0; i<Arraycount(Passengers); i++)
+			if (Passengers[i] != None && Passengers[i].PlayerReplicationInfo != None && Passengers[i].PlayerReplicationInfo.HasFlag != None)
+				HasFlag = Passengers[i].PlayerReplicationInfo.HasFlag;
+	
+	if (HasFlag == None && VehicleFlag != None)
+	{
+		VehicleFlag.Destroy();
+		VehicleFlag = None;
+	}
+	else if (HasFlag != None && (VehicleFlag == None || VehicleFlag.MyFlag != HasFlag))
+	{
+		if (VehicleFlag == None)
+			VehicleFlag = Spawn(class'VehicleFlag', self);
+		// set prepivot
+		VehicleFlag.SetFlag(HasFlag);
+	}
+}
+
+function ShowState()
+{
+	local int i;
+	local bool bUsed;
+	
+	ShowFlagOnRoof();
+	
+	if (class'VehiclesConfig'.default.bHideState)
+	{
+		if (VehicleState != None)
+			VehicleState.Destroy();
+		return;
+	}
+	// show state icon
+	
+	if (VehicleState == None)
+		VehicleState = Spawn(class'VehicleState', self);
+		
+	if (Driver != None)
+		bUsed = true;
+	else
+		for (i=0; i<Arraycount(Passengers); i++)
+			if (Passengers[i] != None)
+				bUsed = true;
+	
+	VehicleState.SetState(CurrentTeam, bTeamLocked, bUsed);
+}
+
+function TryDropFlag(Pawn Other)
+{
+	if (Other.PlayerReplicationInfo!=None && Other.PlayerReplicationInfo.HasFlag!=None)
+		Other.PlayerReplicationInfo.HasFlag.Drop(vect(0,0,0));
 }
 
 function DriverEnter( Pawn Other )
@@ -719,6 +817,10 @@ function DriverEnter( Pawn Other )
 	Other.Weapon = DWeapon;
 	if (Other.Inventory != None)
 		Other.Inventory.ChangedWeapon();
+	if (Other.CarriedDecoration != None)
+		Other.DropDecoration();
+	if (DropFlag != DF_None)
+		TryDropFlag(Other);
 	if( PlayerPawn(Other)!=None )
 	{
 		ClientSetTranslatorMsg();
@@ -727,11 +829,11 @@ function DriverEnter( Pawn Other )
 		PlayerPawn(Other).ClientSetRotation(R);
 		MyCameraAct.SetCamOwner(Other);
 		PlayerPawn(Other).bBehindView = False;
-		if( Other.PlayerReplicationInfo!=None && Other.PlayerReplicationInfo.HasFlag!=None )
-			Other.GoToState('FeigningDeath');
 		Other.GoToState('PlayerFlying');
 	}
 	GoToState('VehicleDriving');
+	CheckForEmpty();
+	ShowState();
 }
 
 function RestartPawn(Pawn Other)
@@ -821,6 +923,7 @@ local vector ExitVect;
 	//SetOwner(None); Set to none 1 sec later to avoid unwanted functions errors.
 	if( !bDeleteMe && Health>0 )
 		CheckForEmpty();
+	ShowState();
 }
 simulated function VehicleAttachment AddAttachment( class<VehicleAttachment> AttachClass )
 {
@@ -873,6 +976,10 @@ simulated function Destroyed()
 	}
 	if( DWeapon!=None )
 		DWeapon.Destroy();
+	if (VehicleFlag != None)
+		VehicleFlag.Destroy();
+	if (VehicleState != None)
+		VehicleState.Destroy();
 	Super.Destroyed();
 }
 // Client update vehicle pos/rot/vel
@@ -1055,8 +1162,11 @@ local float f;
 		}
 		ClientUpdateState(Delta);
 	}
+	
+	if (VehicleState != None && Level.NetMode != NM_DedicatedServer && Level.NetMode != NM_ListenServer)
+		VehicleState.bHidden = VehicleState.Mass >= Level.TimeSeconds;
 
-	if (!bDisableTeamSpawn)
+	if (!class'VehiclesConfig'.default.bDisableTeamSpawn)
 	{
 		if( Level.NetMode==NM_Client )
 		{
@@ -1358,7 +1468,11 @@ simulated function bool CheckOnGround()
 
 		if (AcCount == 4)
 		{
+			Disable('Bump');
+			Disable('HitWall');
 			MoveSmooth(vect(0,0,-1));
+			Enable('Bump');
+			Enable('HitWall');
 			MLoc = (sHL[0] + sHL[1] + sHL[2] + sHL[3]) / 4;
 			CrossedVect[0] = Normal(sHL[0] - sHL[3]);
 			CrossedVect[1] = Normal(sHL[1] - sHL[2]);
@@ -1691,22 +1805,22 @@ Ignores FireWeapon,ReadDriverInput,ReadBotInput,DriverLeft;
 			Return;
 		if( !Other.bIsPawn || !CanEnter(Pawn(Other)) )
 			Return;
+		if( !VehicleAI.PawnCanDrive(Pawn(Other)) )
+			Return;
 		if( IsTeamLockedFor(Pawn(Other)) )
 		{
-			Pawn(Other).ClientMessage("This"@VehicleName@"is team locked.",'RedCriticalEvent');
+			Pawn(Other).ClientMessage("This"@VehicleName@"is team locked.",'CriticalEvent');
 			Return;
 		}
 		else if( Pawn(Other).PlayerReplicationInfo!=None && Pawn(Other).PlayerReplicationInfo.Team<=3
-		 && Pawn(Other).PlayerReplicationInfo.Team!=CurrentTeam && bTeamLocked)
+		 && Pawn(Other).PlayerReplicationInfo.Team!=CurrentTeam)
 		{
 			CurrentTeam = Pawn(Other).PlayerReplicationInfo.Team;
 			SetOverlayMat(TeamOverlays[CurrentTeam],0.5);
-			PlaySound(Sound'CarAlarm01',SLOT_Misc,2,,400);
+			PlaySound(Sound'CarAlarm01',SLOT_None,2,,400);
 			if( PlayerPawn(Other)!=None )
 				PlayerPawn(Other).ClientPlaySound(Sound'Hijacked');
 		}
-		if( !VehicleAI.PawnCanDrive(Pawn(Other)) )
-			Return;
 		DriverEnter(Pawn(Other));
 	}
 	function BeginState()
@@ -1922,6 +2036,11 @@ function rotator GetFiringRot( float ProjSpeed, bool bInstantHit, vector PStartP
 		else 
 			return rotator(HL-PStartPos);
 	}
+	if (Driver == None)
+		if (DriverGun != None)
+			return DriverGun.Rotation;
+		else
+			return Rotation;
 	if( PlayerPawn(Driver)==None )
 		Return Driver.AdjustAim(ProjSpeed,PStartPos,200,True,True);
 		
@@ -1959,6 +2078,7 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 	local byte i,o;
 	Local Pawn CamOwner;
 	local ChallengeHud HUD;
+	local string str;
 
 	// Draw health bar:	
 	C.Style = ERenderStyle.STY_Normal;
@@ -2024,6 +2144,12 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 	C.StrLen(string(Health),XL,YL);
 	C.SetPos(C.ClipX/2-XL/2,Y+5);
 	C.DrawText(string(Health),False);
+	
+	if (VehicleState != None)
+	{
+		VehicleState.bHidden = true;
+		VehicleState.Mass = Level.TimeSeconds + 1;
+	}
 
 	if( bRenderVehicleOnFP && Seat==0 && !bCameraOnBehindView )
 	{
@@ -2129,6 +2255,16 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 			}
 		}
 	}
+	// draw info most important info
+	str = "Main keys: <ThrowWeapon> = exit";
+	if (Seat > 0)
+		str = str $ ", <1> = change seat";
+	else if (PassengerSeats[0].bIsAvailable)
+		str = str $ ", <2> = change seat";
+	C.Font = class'FontInfo'.Static.GetStaticSmallFont( C.ClipX );
+	C.TextSize(str, XL, YL);
+	C.SetPos((C.ClipX - XL)/2, class'PickupMessagePlus'.static.GetOffset(0, YL, C.ClipY) + YL);
+	C.DrawText(str);
 	// note for spectators
 	CamOwner = Cam.GetCamOwner();
 	if (CamOwner != None && HUD != None && C.Viewport.Actor != CamOwner)
@@ -2414,6 +2550,7 @@ singular simulated function Bump( Actor Other )
 		}
 		else if (VSize(VeryOldVel[1]) > 300)
 		{
+			//if (!IsUTracing()) SetUTracing(true);
 			if (Role == ROLE_Authority)
 				TakeImpactDamage(VSize(VeryOldVel[1])/(Mass/500),None, "Bump");
 		}
@@ -2664,6 +2801,37 @@ function TakeImpactDamage( int Damage, Pawn InstigatedBy, optional coerce string
 	TakeDamage(Damage,InstigatedBy,Location,vect(0,0,0),'BumpWall');
 }
 
+function FixDamage(int Damage, Pawn EventInstigator, vector HitLocation, vector Momentum, name DamageType)
+{
+	local string str;
+	local Actor A;
+	
+	if (Health <= 0 || Health >= FirstHealth)
+		return;
+	Health += Damage;
+	if (Health > FirstHealth)
+		Health = FirstHealth;
+	
+	A = spawn(class'UT_SpriteSmokePuff', , , HitLocation);
+	
+	if (Health == FirstHealth || Level.TimeSeconds - LastFix > 1)
+	{
+		if (A != None && int(Level.TimeSeconds) % 3 == 0)
+			A.PlaySound(FixSounds[Rand(ArrayCount(FixSounds))]);
+		if (EventInstigator != None)
+		{
+			str = VehicleName;
+			if (str == "")
+				str = GetHumanName();
+			EventInstigator.ClientMessage("You fix" @ str @ "damage up to" @ Health @ "out of" @ FirstHealth);
+		}
+		if (Pawn(Owner) != None && Owner != Instigator)
+			Pawn(Owner).ClientMessage("Your vehicle is being fixed!", 'CriticalEvent');
+	
+		LastFix = Level.TimeSeconds;
+	}
+}
+
 
 function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 						Vector momentum, name damageType)
@@ -2677,7 +2845,13 @@ function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 	{
 		if( bDeleteMe || Level.NetMode==NM_Client )
 			Return;
-		if( Driver==None )
+		if (damageType == 'zapped' && class'VehiclesConfig'.default.bPulseAltHeal &&
+			instigatedBy.PlayerReplicationInfo != None && instigatedBy.PlayerReplicationInfo.Team == CurrentTeam)
+		{
+			FixDamage(Damage, instigatedBy, hitlocation, momentum, damageType);
+			return;
+		}
+		else if( Driver==None )
 		{
 			For( i=0; i<Arraycount(Passengers); i++ )
 			{
@@ -3021,7 +3195,7 @@ simulated function SpawnFurtherParts();	//use this to spawn further destroyed pa
 
 simulated function SetOverlayMat( Texture MatTex, float MatDispTime )
 {
-	if (!bDisableTeamSpawn)
+	if (!class'VehiclesConfig'.default.bDisableTeamSpawn)
 	{
 		if( Level.NetMode>NM_StandAlone && Level.NetMode<NM_Client )
 		{
@@ -3182,7 +3356,11 @@ function PassengerEnter( Pawn Other, byte Seat )
 	}
 	Other.Weapon = PassengerSeats[Seat].PHGun;
 	if (Other.Inventory != None)
-		Other.Inventory.ChangedWeapon();
+		Other.Inventory.ChangedWeapon();	
+	if (Other.CarriedDecoration != None)
+		Other.DropDecoration();
+	if (DropFlag == DF_All)
+		TryDropFlag(Other);
 	if( PlayerPawn(Other)!=None )
 	{
 		Other.ClientMessage(PassengerSeats[Seat].SeatName,'Pickup');
@@ -3205,6 +3383,7 @@ function PassengerEnter( Pawn Other, byte Seat )
 	}
 	
 	CheckForEmpty();
+	ShowState();
 }
 function PassengerLeave( byte Seat, optional bool bForcedLeave )
 {
@@ -3269,6 +3448,7 @@ local vector ExitVect;
 	Passengers[Seat] = None;
 
 	CheckForEmpty();
+	ShowState();
 }
 function PassengerFireWeapon( bool bAltFire, byte Seat )
 {
@@ -3288,9 +3468,9 @@ simulated function CheckForEmpty()
 	bEmpty = Driver == None && Health > 0 && !bDeleteMe;
 	if( !bEmpty || HasPassengers() || MyFactory == None )
 		ResetTimer = Default.ResetTimer;
-	else
+	else if (ResetTimer <= 0)
 		ResetTimer = Level.TimeSeconds+MyFactory.VehicleResetTime;
-	if (bEmpty)
+	if (bEmpty && !IsInState('EmptyVehicle'))
 		GoToState('EmptyVehicle');
 }
 
@@ -3606,6 +3786,14 @@ defaultproperties
       FootVehZone(6)=None
       FootVehZone(7)=None
       LastTeleportTime=0.000000
+      DropFlag=DF_None
+      VehicleFlag=None
+      VehicleState=None
+      LastFix=0.000000
+      FixSounds(0)=Sound'UnrealShare.Dispersion.number1'
+      FixSounds(1)=Sound'UnrealShare.Dispersion.number2'
+      FixSounds(2)=Sound'UnrealShare.Dispersion.number3'
+      FixSounds(3)=Sound'UnrealShare.Dispersion.number4'
       bDamageFXInWater=False
       DamageGFX(0)=(bHaveThisGFX=False,bHaveFlames=False,DmgFXOffset=(X=0.000000,Y=0.000000,Z=0.000000),FXRange=0,DmgFlamesClass=Class'XVehicles.VehDmgFire',DmgBlackSmkClass=Class'XVehicles.VehEngBlackSmoke',DmgLightSmkClass=Class'XVehicles.VehEngLightSmoke')
       DamageGFX(1)=(bHaveThisGFX=False,bHaveFlames=False,DmgFXOffset=(X=0.000000,Y=0.000000,Z=0.000000),FXRange=0,DmgFlamesClass=Class'XVehicles.VehDmgFire',DmgBlackSmkClass=Class'XVehicles.VehEngBlackSmoke',DmgLightSmkClass=Class'XVehicles.VehEngLightSmoke')

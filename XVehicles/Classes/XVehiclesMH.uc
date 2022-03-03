@@ -15,6 +15,9 @@ Function SetShield()
 	local class<Vehicle> classes[6], cl;
 	local int i;
 	
+	class'VehiclesConfig'.default.bHideState = true;
+	class'VehiclesConfig'.default.bDisableTeamSpawn = true;
+	
 	classes[0] = Class'JeepSDX';
 	classes[1] = Class'JeepTDX';
 	classes[2] = Class'Kraht';

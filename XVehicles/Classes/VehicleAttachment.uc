@@ -41,7 +41,7 @@ simulated function Tick( float Delta )
 	//if( OwnerVehicle.AttachmentList==Self )
 	if (bMasterPart && OwnerVehicle!=None)
 		OwnerVehicle.AttachmentsTick(Delta);
-	if( Level.NetMode!=NM_DedicatedServer && !OwnerVehicle.bDisableTeamSpawn)
+	if( Level.NetMode!=NM_DedicatedServer && !class'VehiclesConfig'.default.bDisableTeamSpawn)
 	{
 		if( OwnerVehicle.OverlayMat!=None )
 		{
