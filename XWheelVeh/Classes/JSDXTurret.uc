@@ -69,4 +69,5 @@ defaultproperties
       SoundVolume=255
       CollisionRadius=18.000000
       CollisionHeight=4.000000
+      NetPriority=3.000000
 }

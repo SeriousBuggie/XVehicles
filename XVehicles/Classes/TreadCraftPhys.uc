@@ -176,9 +176,9 @@ simulated function FellToGround()
 	if (FallingLenghtZ > 0)
 	{
 		if ((FallingLenghtZ * VehicleGravityScale) > 1500)
-			TakeImpactDamage(FallingLenghtZ*VehicleGravityScale/15,None);
+			TakeImpactDamage(FallingLenghtZ*VehicleGravityScale/15,None, "FellToGround_1");
 		else if ((FallingLenghtZ * VehicleGravityScale) > 120)
-			TakeImpactDamage(0,None);
+			TakeImpactDamage(0,None, "FellToGround_2");
 		FallingLenghtZ = 0;
 	}
 }
@@ -886,7 +886,7 @@ defaultproperties
       bFPRepYawUpdatesView=True
       VehicleName="Tread Craft"
       TranslatorDescription="This is a Tread Craft, press [Fire] or [AltFire] to fire the different firemodes. Use your Strafe keys to turn this vehicle and Move Forward/Backward keys to accelerate/deaccelerate. To leave this vehicle, press your [ThrowWeapon] key."
-      VehicleKeyInfoStr="Tread craft keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to turn|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%ThrowWeapon% to exit the vehicle"
+      VehicleKeyInfoStr="Tread craft keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to turn|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%PrevWeapon%, %NextWeapon%, %SwitchToBestWeapon% to change camera|%ThrowWeapon% to exit the vehicle"
       bDestroyUpsideDown=True
       WDeAccelRate=35.000000
       bArcMovement=True

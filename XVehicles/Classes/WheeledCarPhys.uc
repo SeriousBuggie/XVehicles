@@ -128,9 +128,9 @@ simulated function FellToGround()
 	if (FallingLenghtZ > 0)
 	{
 		if ((FallingLenghtZ * VehicleGravityScale) > 1500)
-			TakeImpactDamage(FallingLenghtZ*VehicleGravityScale/15,None);
+			TakeImpactDamage(FallingLenghtZ*VehicleGravityScale/15,None, "FellToGround_3");
 		else if ((FallingLenghtZ * VehicleGravityScale) > 120)
-			TakeImpactDamage(0,None);
+			TakeImpactDamage(0,None, "FellToGround_4");
 		FallingLenghtZ = 0;
 	}
 }
@@ -786,7 +786,7 @@ defaultproperties
       VehicleName="Wheeled Car"
       TranslatorDescription="This is a wheeled vehicle, press [Fire] or [AltFire] to fire the different firemodes. Use your Strafe keys to turn this vehicle and Move Forward/Backward keys to accelerate/deaccelerate. To leave this vehicle, press your [ThrowWeapon] key."
       bMaster=True
-      VehicleKeyInfoStr="Wheeled car keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to turn|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%ThrowWeapon% to exit the vehicle"
+      VehicleKeyInfoStr="Wheeled car keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to turn|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%PrevWeapon%, %NextWeapon%, %SwitchToBestWeapon% to change camera|%ThrowWeapon% to exit the vehicle"
       bDestroyUpsideDown=True
       WDeAccelRate=50.000000
       bArcMovement=True

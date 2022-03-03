@@ -1012,4 +1012,5 @@ defaultproperties
       FiringShaking(3)=(bShakeEnabled=False,bShakeByStep=False,ShakeStart=SHK_DuringAltFire,ShakeRadius=0.000000,shaketime=0.000000,ShakeVertMag=0.000000,ShakeRollMag=0.000000,StepInterval=0.000000,StepAmount=0,StepShkCount=0.000000)
       RemoteRole=ROLE_SimulatedProxy
       bCarriedItem=True
+      NetPriority=3.000000
 }

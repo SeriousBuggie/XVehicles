@@ -487,7 +487,7 @@ simulated function PostBeginPlay()
 		return;	
 
 	if (InitialDamage > 0)
-		TakeImpactDamage(InitialDamage,None);
+		TakeImpactDamage(InitialDamage,None, "InitialDamage");
 
 	if (!bReadyToRun && (Self.IsA('WheeledCarPhys') || Self.IsA('TreadCraftPhys')))
 		SetPhysics(PHYS_Falling);
@@ -1100,7 +1100,7 @@ local float f;
 		if (bOldOnGround && VSize(Velocity) > MinArcSpeed * 2.5)
 		{
 			FloorNormal = ArcInitDir[0];
-			GVTNormal = ArcInitDir[0];
+			GVTNormal = ArcInitDir[1];
 		}
 			
 
@@ -1169,7 +1169,7 @@ local float f;
 		AttachmentsTick(Delta);
 }
 
-function float ArcAmount(vector VelArc)
+simulated function float ArcAmount(vector VelArc)
 {
 	VelArc.Z = 0;
 	return VehicleGravityScale*Abs(Region.Zone.ZoneGravity.Z/950)*RefMaxArcSpeed/FMax(VSize(VelArc),MinArcSpeed*VehicleGravityScale);
@@ -1200,9 +1200,6 @@ local WeaponAttachment WA;
 		vat.SetLocation(WPosA);
 	if (Vat.base != AttachBase)
 		vat.setBase(AttachBase);
-		
-	if (Vat.base != AttachBase)
-		Log(Vat.base @ AttachBase);
 
 	if (vat.PitchPart != None)
 	{
@@ -1249,6 +1246,34 @@ local VehicleAttachment vat;
 	}
 }
 
+simulated function CheckBase(Actor PossibleBase, Actor Ac[4])
+{
+	local int i, j, score, best, all;
+	
+	if (PossibleBase == None)
+	{
+		for (i = 0; i < ArrayCount(Ac); i++)
+		{
+			if (Ac[i] == None)
+				all++;
+			if (Mover(Ac[i]) == None)
+				continue;
+			score = 1;
+			for (j = i + 1; j < ArrayCount(Ac); j++)
+				if (Ac[j] == Ac[i])
+					score++;
+			if (PossibleBase != None && score <= best)
+				continue;
+			PossibleBase = Ac[i];
+			best = score;
+		}
+		if (PossibleBase != None && (all - best) >= best)
+			PossibleBase = None;
+	}
+	if (Base != PossibleBase)
+		SetBase(PossibleBase);
+}
+
 // Vehicle is currently on ground?
 simulated function bool CheckOnGround()
 {
@@ -1257,7 +1282,7 @@ simulated function bool CheckOnGround()
 	local vector sHL[4],sHN[4], ePointsOffSet[4], MLoc, CrossedVect[2], GVTLoc, CurArcDir;
 	local actor Ac[4];
 	local byte b, AcCount;
-	local actor WAs, WBs;
+	local actor WAs, WBs, PossibleBase;
 	local vector WHL, WHN, WSt, WEnd, WExt;
 	local bool isNotAble;
 
@@ -1268,7 +1293,8 @@ simulated function bool CheckOnGround()
 	Ex.X = CollisionRadius;
 	Ex.Y = Ex.X;
 
-	if( Trace(HL,HN,End,Start,False,Ex)==None )
+	PossibleBase = Trace(HL,HN,End,Start,False,Ex);
+	if( PossibleBase == None )
 	{
 		ePointsOffSet[0] = FrontWide;
 		ePointsOffSet[1] = ePointsOffSet[0];
@@ -1319,10 +1345,12 @@ simulated function bool CheckOnGround()
 			if (!isNotAble)
 			{
 				ActualFloorNormal = ActualGVTNormal;
+				CheckBase(PossibleBase, Ac);
 				return True;
 			}
 		}
 
+		CheckBase(PossibleBase, Ac);
 		return False;
 	}
 
@@ -1400,7 +1428,8 @@ simulated function bool CheckOnGround()
 
 	if ((Location != OldLocation || !bSlopedPhys) /*&& (HN dot ActualFloorNormal) <= 0.5*/)
 		ActualFloorNormal = HN;
-	
+		
+	CheckBase(PossibleBase, Ac);
 	Return True;
 }
 
@@ -1614,7 +1643,7 @@ Ignores FireWeapon,ReadDriverInput,ReadBotInput,DriverLeft;
 	singular function Bump( Actor Other )
 	{
 		Global.Bump(Other);
-		if( Other.bDeleteMe )
+		if( Other == None || Other.bDeleteMe )
 			Return;
 		if( !Other.bIsPawn || !CanEnter(Pawn(Other)) )
 			Return;
@@ -1682,7 +1711,7 @@ State VehicleDriving
 		local byte Fr;
 
 		Global.Bump(Other);
-		if( Other.bDeleteMe || !Other.bIsPawn || !CanAddPassenger(Pawn(Other),Fr) || !VehicleAI.PawnCanPassenge(Pawn(Other),Fr) )
+		if( Other == None || Other.bDeleteMe || !Other.bIsPawn || !CanAddPassenger(Pawn(Other),Fr) || !VehicleAI.PawnCanPassenge(Pawn(Other),Fr) )
 			Return;
 		PassengerEnter(Pawn(Other),Fr);
 	}
@@ -1992,16 +2021,16 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 	}
 	C.Style = ERenderStyle.STY_Normal;
 
-	o = CurrentTeam;
+	o = 3; /*CurrentTeam; // use yellow always
 	if( o>3 )
-		o = 0;
+		o = 0;*/
 	C.DrawColor = Class'UnrealTeamScoreBoard'.Default.TeamColor[o];
-	C.Font = Font'SmallFont';
+	C.Font = class'FontInfo'.Static.GetStaticSmallFont(C.ClipX);
 	C.StrLen("ATST",XL,YL);
 	if( Seat>0 && Driver!=None && Driver.PlayerReplicationInfo!=None )
 	{
-		C.SetPos(15,C.ClipY-50);
-		C.DrawText("Driver -"@Driver.PlayerReplicationInfo.PlayerName);
+		C.SetPos(0,C.ClipY*2/3);
+		C.DrawText(" Driver -"@Driver.PlayerReplicationInfo.PlayerName);
 		o = 1;
 	}
 	else o = 0;
@@ -2009,14 +2038,15 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 	{
 		if( Passengers[i]!=None && Passengers[i].PlayerReplicationInfo!=None && (i+1)!=Seat )
 		{
-			C.SetPos(15,C.ClipY-50-YL*o);
-			C.DrawText(PassengerSeats[i].SeatName@"-"@Passengers[i].PlayerReplicationInfo.PlayerName);
+			C.SetPos(0,C.ClipY*2/3-YL*o);
+			C.DrawText(""@PassengerSeats[i].SeatName@"-"@Passengers[i].PlayerReplicationInfo.PlayerName);
 			o++;
 		}
 	}
 	if( !bActorKeysInit )
 		InitKeysInfo();
-	XS = 34;
+	C.Font = class'FontInfo'.Static.GetStaticAReallySmallFont(C.ClipX);
+	XS = 4;
 	For( i=0; i<NumKeysInfo; i++ )
 	{
 		if( KeysInfo[i]!="" )
@@ -2070,7 +2100,7 @@ simulated function DrawVehicleStatus( Canvas C, vector CameraPos, rotator Camera
 		if( CurrentTeam<=3 )
 		{
 			C.DrawColor = Class'UnrealTeamScoreBoard'.Default.TeamColor[CurrentTeam];
-			C.Font = Font'SmallFont';
+			C.Font = class'FontInfo'.Static.GetStaticSmallFont(C.ClipX);
 			For( i=0; i<ArrayCount(PassengerSeats); i++ )
 			{
 				if( Passengers[i]!=None && Passengers[i].PlayerReplicationInfo!=None )
@@ -2088,7 +2118,7 @@ simulated function DrawVehicleStatus( Canvas C, vector CameraPos, rotator Camera
 	 && WorldToScreen(Location+vect(0,0,1)*CollisionHeight*1.1,C.ViewPort.Actor,CameraPos,CameraRot,C.ClipX,C.ClipY,X,Y) )
 	{
 		C.DrawColor = Class'UnrealTeamScoreBoard'.Default.TeamColor[CurrentTeam];
-		C.Font = Font'SmallFont';
+		C.Font = class'FontInfo'.Static.GetStaticSmallFont(C.ClipX);
 		if( Driver!=None && Driver.PlayerReplicationInfo!=None )
 		{
 			C.StrLen(Driver.PlayerReplicationInfo.PlayerName,XL,YL);
@@ -2173,6 +2203,9 @@ singular simulated function Bump( Actor Other )
 	local float Sp;
 	local vector V, Dir;
 	local vector befOtVel, befMyVel, NVelH;
+	
+	if (Other == None || Other.bDeleteMe)
+		return;
 
 	if( Vehicle(Other)!=None )
 	{
@@ -2200,63 +2233,74 @@ singular simulated function Bump( Actor Other )
 
 		if (Other.Mass/Mass >= 2.0 && (Normal(Velocity) Dot Dir)>0 )
 		{
-			Other.TakeDamage(VSize(Other.Velocity) * (Mass/Other.Mass) / 20,Instigator,Location,Velocity*Mass,'Crushed');
-			TakeDamage(VSize(Velocity) * (Other.Mass/Mass) / 20,Instigator,Location,Velocity*Mass,'Crushed');
+			if (Role == ROLE_Authority)
+			{
+				Other.TakeDamage(VSize(Other.Velocity) * (Mass/Other.Mass) / 20,Instigator,Location,Velocity*Mass,'Crushed');
+				TakeDamage(VSize(Velocity) * (Other.Mass/Mass) / 20,Instigator,Location,Velocity*Mass,'Crushed');
+			}
 			Velocity *= 0.25;
 		}
 		else if (Other.Mass/Mass >= 2.0)
 		{
-			Other.TakeDamage(VSize(Other.Velocity) * (Mass/Other.Mass) / 20,Instigator,Location,Velocity*Mass,'Crushed');
-			TakeDamage(VSize(Velocity) * (Other.Mass/Mass) / 20,Instigator,Location,Velocity*Mass,'Crushed');
+			if (Role == ROLE_Authority)
+			{
+				Other.TakeDamage(VSize(Other.Velocity) * (Mass/Other.Mass) / 20,Instigator,Location,Velocity*Mass,'Crushed');
+				TakeDamage(VSize(Velocity) * (Other.Mass/Mass) / 20,Instigator,Location,Velocity*Mass,'Crushed');
+			}
 			Velocity = Other.Velocity * 1.15;
 			Move((Other.Location - Other.OldLocation)*1.5);
 		}
 		else if (Mass/Other.Mass >= 2.0 && (Normal(Velocity) Dot Dir)>0 )
 		{
-			Other.TakeDamage(VSize(Velocity) * (Mass/Other.Mass) / 20,Instigator,Location,Velocity*Mass,'Crushed');
-			TakeDamage(VSize(Velocity) * (Other.Mass/Mass) / 20,Instigator,Location,Velocity*Mass,'Crushed');
+			if (Role == ROLE_Authority)
+			{
+				Other.TakeDamage(VSize(Velocity) * (Mass/Other.Mass) / 20,Instigator,Location,Velocity*Mass,'Crushed');
+				TakeDamage(VSize(Velocity) * (Other.Mass/Mass) / 20,Instigator,Location,Velocity*Mass,'Crushed');
+			}
 			Other.Velocity = Velocity * 1.15;
 			Other.Move((Location - OldLocation)*1.5);
 			bHitASmallerVehicle = True;
 		}
 		else if (Mass/Other.Mass >= 2.0)
 		{
-			Other.TakeDamage(VSize(Other.Velocity) * (Mass/Other.Mass) / 20,Instigator,Location,Velocity*Mass,'Crushed');
-			TakeDamage(VSize(Other.Velocity) * (Other.Mass/Mass) / 20,Instigator,Location,Velocity*Mass,'Crushed');
+			if (Role == ROLE_Authority)
+			{
+				Other.TakeDamage(VSize(Other.Velocity) * (Mass/Other.Mass) / 20,Instigator,Location,Velocity*Mass,'Crushed');
+				TakeDamage(VSize(Other.Velocity) * (Other.Mass/Mass) / 20,Instigator,Location,Velocity*Mass,'Crushed');
+			}
 			Other.Velocity *= 0.25;
 		}
 		else
 		{
-
-		Sp = FMax(VSize(Velocity),VSize(Other.Velocity)) * (Mass/Other.Mass);
-		if( Sp>250 )
-			Other.TakeDamage((Sp-200)/10,Instigator,Location,Velocity*Mass,'Crushed');
-
-		Sp = FMax(VSize(Velocity),VSize(Other.Velocity)) * (Other.Mass/Mass);
-		if( Sp>250 )
-			TakeDamage((Sp-200)/10,Other.Instigator,Other.Location,OtVel*Other.Mass,'Crushed');
-
-		NVelH = (Mass*befMyVel + Other.Mass*befOtVel) / (Mass+Other.Mass);	//Inelastic collision calculation (not the most realistic for vehicles, but good, reliable and simple enough for the main objectve)
-
-		if (Self.IsA('WheeledCarPhys') || Self.IsA('TreadCraftPhys'))
-		{
-			if ( Vector(Rotation) Dot Normal(NVelH) > 0)
+			Sp = FMax(VSize(Velocity),VSize(Other.Velocity)) * (Mass/Other.Mass);
+			if( Sp>250 && Role == ROLE_Authority )
+				Other.TakeDamage((Sp-200)/10,Instigator,Location,Velocity*Mass,'Crushed');
+	
+			Sp = FMax(VSize(Velocity),VSize(Other.Velocity)) * (Other.Mass/Mass);
+			if( Sp>250 && Role == ROLE_Authority )
+				TakeDamage((Sp-200)/10,Other.Instigator,Other.Location,OtVel*Other.Mass,'Crushed');
+	
+			NVelH = (Mass*befMyVel + Other.Mass*befOtVel) / (Mass+Other.Mass);	//Inelastic collision calculation (not the most realistic for vehicles, but good, reliable and simple enough for the main objectve)
+	
+			if (Self.IsA('WheeledCarPhys') || Self.IsA('TreadCraftPhys'))
 			{
-				NVelH = VectorProjection(NVelH, vector(Rotation)*65535);
-				OldAccelD = 1;
+				if ( Vector(Rotation) Dot Normal(NVelH) > 0)
+				{
+					NVelH = VectorProjection(NVelH, vector(Rotation)*65535);
+					OldAccelD = 1;
+				}
+				else
+				{
+					NVelH = VectorProjection(NVelH, -vector(Rotation)*65535);
+					OldAccelD = -1;
+				}
+	
+	
+				Vehicle(Other).OldAccelD = OldAccelD;
 			}
-			else
-			{
-				NVelH = VectorProjection(NVelH, -vector(Rotation)*65535);
-				OldAccelD = -1;
-			}
-
-
-			Vehicle(Other).OldAccelD = OldAccelD;
-		}
-
-		Other.Velocity = NVelH;
-		Velocity = NVelH*0.99;
+	
+			Other.Velocity = NVelH;
+			Velocity = NVelH*0.99;
 		}
 		
 	}
@@ -2264,31 +2308,34 @@ singular simulated function Bump( Actor Other )
 	{
 		if (!Other.bStatic && Other.bMovable)
 		{
-
-		if (Other.bIsPawn)
-		{
-			if ((Other.Mass + Mass)/2 < Mass/3*2 && Mass > Other.Mass)
-				bHitAPawn = True;
-		}
-		else if (Other.IsA('Decoration'))
-		{
-			if (Decoration(Other).bPushable)
+			if (Other.bIsPawn)
 			{
-				bHitAnActor = (Mass*1.5 - Other.Mass) / (Mass*1.5);
-				PushDeco(Decoration(Other));
+				if ((Other.Mass + Mass)/2 < Mass/3*2 && Mass > Other.Mass)
+					bHitAPawn = True;
 			}
-		}
-
-		if( VSize(Velocity)>200)
-			Other.TakeDamage((VSize(Velocity)-100)/7*Mass/500.f,Instigator,Other.Location+Normal(Location-Other.Location)*Other.CollisionRadius
-			 ,Velocity*Other.Mass,'Crushed');
+			else if (Other.IsA('Decoration'))
+			{
+				if (Decoration(Other).bPushable)
+				{
+					bHitAnActor = (Mass*1.5 - Other.Mass) / (Mass*1.5);
+					PushDeco(Decoration(Other));
+				}
+			}
+	
+			if( VSize(Velocity)>200 && Role == ROLE_Authority )
+				Other.TakeDamage((VSize(Velocity)-100)/7*Mass/500.f,Instigator,Other.Location+Normal(Location-Other.Location)*Other.CollisionRadius,
+					Velocity*Other.Mass,'Crushed');
 		}
 		else if (VSize(VeryOldVel[1]) > 300)
-			TakeImpactDamage(VSize(VeryOldVel[1])/(Mass/500),None);
+		{
+			if (Role == ROLE_Authority)
+				TakeImpactDamage(VSize(VeryOldVel[1])/(Mass/500),None, "Bump");
+		}
 		else if (bHitAPawn && VSize(Velocity)>16)
 		{
-			Other.TakeDamage(0,Instigator,Other.Location+Normal(Location-Other.Location)*Other.CollisionRadius
-			 ,Velocity*2**Other.Mass,'Crushed');
+			if (Role == ROLE_Authority)
+				Other.TakeDamage(0,Instigator,Other.Location+Normal(Location-Other.Location)*Other.CollisionRadius,
+					Velocity*2**Other.Mass,'Crushed');
 		}
 		else if (bHitAPawn)
 			Other.Move(vector(Rotation)*Accel*3);
@@ -2395,6 +2442,7 @@ simulated function FellToGround();
 
 simulated singular function Landed( vector HitNormal)
 {
+//	Log(self @ Level.TimeSeconds @ "Landed" @ HitNormal);
 	HitWall(HitNormal, None);
 }
 
@@ -2403,7 +2451,7 @@ simulated singular function HitWall( vector HitNormal, Actor Wall )
 	local vector V;
 	local float BMulti,VSpee;
 	local vector OtherHitN;
-
+//	Log(self @ Level.TimeSeconds @ "HitWall" @ HitNormal @ Wall);
 	OtherHitN = HitNormal;
 
 	if (!bReadyToRun && (Self.IsA('WheeledCarPhys') || Self.IsA('TreadCraftPhys')))
@@ -2413,9 +2461,9 @@ simulated singular function HitWall( vector HitNormal, Actor Wall )
 		return;
 	}
 
-	if ((GVTNormal.Z < 0 || FloorNormal.Z < 0) && HitNormal.Z > 0 && bDestroyUpsideDown)	//Upside down
+	if ((GVTNormal.Z < -0.7 || FloorNormal.Z < -0.7) && HitNormal.Z > 0.7 && bDestroyUpsideDown)	//Upside down
 	{
-		TakeImpactDamage(Health*2, None);
+		TakeImpactDamage(Health*2, None, "HitWall_1"/* @ GVTNormal @ FloorNormal @ HitNormal*/);
 		return;
 	}
 
@@ -2431,13 +2479,13 @@ simulated singular function HitWall( vector HitNormal, Actor Wall )
 		BMulti = (Normal(V) Dot Normal(Velocity));
 		VSpee = VSize(V);
 		if( VSpee>500 && BMulti<-0.2 )
-			TakeImpactDamage((VSpee-500)/2,None);
+			TakeImpactDamage((VSpee-500)/2,None, "HitWall_2");
 		else if( VSpee>600 && BMulti<0 )
-			TakeImpactDamage((VSpee-600)/4,None);
+			TakeImpactDamage((VSpee-600)/4,None, "HitWall_3");
 		else if( VSpee>1300 && BMulti<0.3 )
-			TakeImpactDamage((VSpee-1300)/5,None);
+			TakeImpactDamage((VSpee-1300)/5,None, "HitWall_4");
 		else if (HitNormal.Z<0.45)
-			TakeImpactDamage(0,None);
+			TakeImpactDamage(0,None, "HitWall_5");
 
 		MoveSmooth(-Normal(Velocity)*16);
 		return;
@@ -2504,13 +2552,13 @@ simulated singular function HitWall( vector HitNormal, Actor Wall )
 		BMulti = (Normal(V) Dot Normal(Velocity));
 		VSpee = VSize(V);
 		if( VSpee>500 && BMulti<-0.2 )
-			TakeImpactDamage((VSpee-500)/2,None);
+			TakeImpactDamage((VSpee-500)/2,None, "HitWall_6");
 		else if( VSpee>600 && BMulti<0 )
-			TakeImpactDamage((VSpee-600)/4,None);
+			TakeImpactDamage((VSpee-600)/4,None, "HitWall_7");
 		else if( VSpee>1300 && BMulti<0.3 )
-			TakeImpactDamage((VSpee-1300)/5,None);
+			TakeImpactDamage((VSpee-1300)/5,None, "HitWall_8");
 		else if (HitNormal.Z<0.45)
-			TakeImpactDamage(0,None);
+			TakeImpactDamage(0,None, "HitWall_9");
 
 		//Move(OtherHitN*3);
 	}
@@ -2524,8 +2572,9 @@ simulated singular function HitWall( vector HitNormal, Actor Wall )
 }
 
 
-simulated function TakeImpactDamage( int Damage, Pawn InstigatedBy )
+function TakeImpactDamage( int Damage, Pawn InstigatedBy, optional coerce string Reason )
 {
+//	Log(self @ Level.TimeSeconds @ "TakeImpactDamage" @ Damage @ InstigatedBy @ Reason);
 	TakeDamage(Damage,InstigatedBy,Location,vect(0,0,0),'BumpWall');
 }
 
@@ -2536,6 +2585,7 @@ function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 	local byte i;
 	local bool bHadPass;
 	local byte shldset, shldtkn;
+//	Log(self @ Level.TimeSeconds @ "TakeDamage" @ Damage @ InstigatedBy @ hitlocation @ momentum @ damageType);
 
 	if (!bVehicleBlewUp)
 	{
@@ -3432,7 +3482,7 @@ defaultproperties
       FallingLenghtZ=0.000000
       FirstHealth=0
       bBigVehicle=False
-      RefMaxArcSpeed=550.000000
+      RefMaxArcSpeed=250.000000
       MinArcSpeed=250.000000
       bArcMovement=False
       bHaveGroundWaterFX=True
@@ -3520,4 +3570,5 @@ defaultproperties
       bProjTarget=True
       bBounce=True
       Mass=900.000000
+      NetPriority=3.000000
 }

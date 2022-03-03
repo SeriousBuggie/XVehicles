@@ -123,6 +123,7 @@ defaultproperties
       bDriverWOffset=True
       DriverWeapon=(WeaponClass=Class'XTreadVeh.TankGKOneTurret',WeaponOffset=(X=-63.750000,Z=71.875000))
       PassengerSeats(0)=(PassengerWeapon=Class'XTreadVeh.TankMGRot',PassengerWOffset=(X=-63.750000,Z=98.750000),CameraOffset=(Z=37.500000),CamBehindviewOffset=(X=-82.500000,Z=17.500000),bIsAvailable=True,SeatName="Machine Gun")
+      VehicleKeyInfoStr="Tank GK-1 keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to turn|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%PrevWeapon%, %NextWeapon%, %SwitchToBestWeapon% to change camera|%ThrowWeapon% to exit the vehicle"
       bSlopedPhys=True
       FrontWide=(X=103.750000,Y=98.125000,Z=-10.000000)
       BackWide=(X=-138.750000,Y=98.125000,Z=-10.000000)
