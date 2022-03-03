@@ -917,11 +917,14 @@ simulated function rotator GetDriverInput( float Delta )
 }
 function rotator GetBotInput( float Delta )
 {
-	if( !SeeEnemy(WeaponController.Target) &&
+	if( !WeaponController.IsInState('GameEnded') &&
+		!SeeEnemy(WeaponController.Target) &&
 		!SeeEnemy(WeaponController.Enemy) &&
 		!SeeEnemy(WeaponController.FaceTarget) )
 	{
-		if (WeaponController.MoveTarget != None && Pawn(WeaponController.MoveTarget) == None && 
+		if (FindEnemy() && WeaponController.Target != None)
+			RepAimPos = WeaponController.Target.Location;
+		else if (WeaponController.MoveTarget != None && Pawn(WeaponController.MoveTarget) == None && 
 			Vsize(WeaponController.Focus - WeaponController.MoveTarget.Location) < 10)
 			RepAimPos = OwnerVehicle.MoveDest;
 		else if (PassengerNum > 0 && OwnerVehicle.Driver != None && WeaponController.MoveTarget == None &&
@@ -931,6 +934,55 @@ function rotator GetBotInput( float Delta )
 			RepAimPos = WeaponController.Focus;
 	}
 	Return rotator(RepAimPos-(Location + (eVect(0,0,ZAimOffset)>>OwnerVehicle.Rotation)));
+}
+function bool FindEnemy()
+{
+	local Pawn P, Best;
+	local Bot Bot;
+	local float Dist, BestDist;
+	local Actor ViewActor, Hit;
+	local vector HL, HN;
+	Bot = Bot(WeaponController);
+	if (Bot == None || Bot.Enemy != None || (Bot.bComboPaused && Bot.GetStateName() == 'RangedAttack'))
+		return false;
+	if (OwnerVehicle != None && OwnerVehicle.MyCameraAct != None)
+		ViewActor = OwnerVehicle.MyCameraAct; // try use actor with small size
+	else
+		ViewActor = Bot;
+	For( P=Level.PawnList; P!=None; P=P.NextPawn )
+	{
+		if (P.Health <= 0 || (P.PlayerReplicationInfo != None && 
+			(P.PlayerReplicationInfo.bIsSpectator || P.PlayerReplicationInfo.Team == OwnerVehicle.CurrentTeam)))
+			continue; // check not spectator and other stuff
+//		if (!Bot.LineOfSightTo(P)) continue;
+		HL = P.Location;
+		if (PitchPart != None)
+			HN = PitchPart.Location;
+		else
+			HN = Location;
+		Hit = ViewActor.Trace(HL, HN, HL, HN, true);
+		if (Hit != P && (DriverWeapon(P.Weapon) == None || DriverWeapon(P.Weapon).VehicleOwner != Hit))
+			continue;
+		Dist = Vsize(P.Location - OwnerVehicle.Location);
+		if (Best == None || BestDist > Dist)
+		{
+			Best = P;
+			BestDist = Dist;
+		}
+	}
+	if (Best == None)
+		return false;
+	Bot.Target = Best;
+	Bot.bComboPaused = true;
+	Bot.SpecialPause = 1.0; // calculate exact time for shoot
+//	Log(Bot @ "FindEnemy" @ Best @ BestDist @ Hit @ Bot.GetStateName() @ Bot.NextState @ Bot.NextLabel);
+	if (Bot.GetStateName() != 'RangedAttack')
+	{
+		Bot.NextState = Bot.GetStateName();
+		Bot.NextLabel = 'Begin';
+	}
+	Bot.GotoState('RangedAttack');
+	return true;
 }
 function bool SeeEnemy(Actor Enemy)
 {
@@ -998,7 +1050,7 @@ simulated function WRenderOverlay( Canvas C )
 		ViewActor = OwnerVehicle.MyCameraAct; // try use actor with small size
 	else
 		ViewActor = self;
-	ViewActor.Trace(HL, HN, HL, HN,true);
+	ViewActor.Trace(HL, HN, HL, HN, true);
 	
 	C.ViewPort.Actor.PlayerCalcView(ViewActor, CamLoc, CamRot);
 	WorldToScreen(HL,C.ViewPort.Actor,CamLoc,CamRot,C.ClipX,C.ClipY,X,Y);
