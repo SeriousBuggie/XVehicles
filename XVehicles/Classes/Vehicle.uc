@@ -289,9 +289,9 @@ replication
 	// Variables the server should send to the client.
 	reliable if( Role==ROLE_Authority )
 		VehPos,VehVeloc,Driver,bDriving,Health,bVehicleBlewUp,ReplicOverlayMat,bTeamLocked,CurrentTeam,Passengers,
-		bReadyToRun, Specials; // new ones
+		bReadyToRun, Specials, DriverGun; // new ones
 	reliable if( Role==ROLE_Authority && bNetOwner )
-		bCameraOnBehindView,MyCameraAct,WAccelRate,DriverGun;
+		bCameraOnBehindView,MyCameraAct,WAccelRate;
 	reliable if( Role==ROLE_Authority && bShouldRepVehYaw )
 		ReplVehicleYaw;
 	// Functions client can call.
@@ -594,8 +594,17 @@ function ChangeBackView()
 
 function PassengerChangeBackView( byte SeatN)
 {
-	if (SeatN < 8 && PassengerSeats[SeatN].PassengerCam != None)
+	if (SeatN < ArrayCount(PassengerSeats) && PassengerSeats[SeatN].PassengerCam != None)
 		PassengerSeats[SeatN].PassengerCam.ChangeView();
+}
+
+function DriverCameraActor GetCam(DriverWeapon Weapon)
+{
+	if (!Weapon.bPassengerGun)
+		return MyCameraAct;
+	if (Weapon.SeatNumber < ArrayCount(PassengerSeats))
+		return PassengerSeats[Weapon.SeatNumber].PassengerCam;
+	return None;
 }
 
 function KeepCams()
@@ -711,7 +720,7 @@ function DriverEnter( Pawn Other )
 		R.Yaw = VehicleYaw;
 		R.Pitch = -4000;
 		PlayerPawn(Other).ClientSetRotation(R);
-		PlayerPawn(Other).ViewTarget = MyCameraAct;
+		MyCameraAct.SetCamOwner(Other);
 		PlayerPawn(Other).bBehindView = False;
 		if( Other.PlayerReplicationInfo!=None && Other.PlayerReplicationInfo.HasFlag!=None )
 			Other.GoToState('FeigningDeath');
@@ -719,6 +728,30 @@ function DriverEnter( Pawn Other )
 	}
 	GoToState('VehicleDriving');
 }
+
+function RestartPawn(Pawn Other)
+{
+    local ENetRole OldRole;
+    local PlayerPawn PP;
+    
+    Other.ClientRestart();
+    PP = PlayerPawn(Other);
+
+	// OldUnreal fix: ClientReStart only runs on the client side if we call this on a dedicated server
+	// The server _tries_ to call the function, but ProcessRemoteFunction absorbs the call because RemoteRole==ROLE_AutonomousProxy
+	// This horrible hack ensures the server also calls ClientReStart so the client and server sync up
+	//
+	// Without this fix, the player gets stuck in state CheatFlying and PHYS_Falling when switching from ghost/fly to walk
+	// As for tanks it make on server player walk in water;
+    if ( PP != None && NetConnection(PP.Player) != None )
+    {
+        OldRole = PP.RemoteRole;
+        PP.RemoteRole = ROLE_None;
+        PP.ClientRestart();
+        PP.RemoteRole = OldRole;
+    }
+}
+
 singular function DriverLeft( optional bool bForcedLeave )
 {
 local vector ExitVect;
@@ -732,10 +765,12 @@ local vector ExitVect;
 		else
 		{
 			Driver.DrawScale = Driver.Default.DrawScale;
-			if( PlayerPawn(Driver)!=None && Driver.Health>0 )
-				Driver.GoToState('PlayerWalking');
 			if( PlayerPawn(Driver)!=None )
-				Driver.ClientRestart();
+			{
+				if (Driver.Health>0)
+					Driver.GoToState('PlayerWalking');
+				RestartPawn(Driver);
+			}
 			Driver.SetCollision(True,False,False);
 			Driver.SetCollisionSize(Driver.Default.CollisionRadius,Driver.Default.CollisionHeight);
 
@@ -757,6 +792,7 @@ local vector ExitVect;
 			Driver.SetCollision(True,True,True);
 			if( PlayerPawn(Driver)!=None )
 			{
+				MyCameraAct.SetCamOwner(None);
 				PlayerPawn(Driver).ViewTarget = None;
 				PlayerPawn(Driver).EndZoom();
 				Driver.ClientSetRotation(Rotation);
@@ -1786,9 +1822,16 @@ simulated function CalcCameraPos( out vector Pos, out rotator Rot, float Mult, o
 		SeatNumber--;
 		if( Passengers[SeatNumber]==None )
 			Rot = Rotation;
-		else Rot = Passengers[SeatNumber].ViewRotation;
+		else if (PlayerPawn(Passengers[SeatNumber]) != None && PlayerPawn(Passengers[SeatNumber]).Player != None)
+			Rot = Passengers[SeatNumber].ViewRotation;
+		else 
+		{
+			if (bSlopedPhys && GVT!=None)
+				Rot = TransformForGroundRot(Rot.Yaw,GVTNormal,Rot.Pitch);
+			else
+				Rot = TransformForGroundRot(Rot.Yaw,FloorNormal,Rot.Pitch);
+		}
 		bOwnerNoSee = False;
-
 		if (bSlopedPhys && GVT!=None)
 			S = GVT.PrePivot + Location+((PassengerSeats[SeatNumber].PassengerWOffset+PassengerSeats[SeatNumber].CameraOffset*Mult) >> Rotation);
 		else
@@ -1799,7 +1842,21 @@ simulated function CalcCameraPos( out vector Pos, out rotator Rot, float Mult, o
 	}
 	if( Pawn(Owner)==None )
 		Rot = Rotation;
-	else Rot = Pawn(Owner).ViewRotation;
+	else if (PlayerPawn(Owner) != None && PlayerPawn(Owner).Player != None)
+		Rot = Pawn(Owner).ViewRotation;
+	else if (DriverGun != None)
+	{
+		Rot = DriverGun.TurretYaw*rot(0,1,0) + DriverGun.TurretPitch*rot(1,0,0);
+		if (bSlopedPhys && GVT!=None)
+			Rot = TransformForGroundRot(Rot.Yaw,GVTNormal,Rot.Pitch);
+		else
+			Rot = TransformForGroundRot(Rot.Yaw,FloorNormal,Rot.Pitch);
+	}
+	else if (Velocity dot vector(Rotation) >= 0)
+	 	Rot = Rotation;
+	else
+		Rot = Rotation + rot(0,32768,0);
+
 	if( !bCameraOnBehindView )
 	{
 		if (bSlopedPhys && GVT!=None)
@@ -2043,18 +2100,22 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 			o++;
 		}
 	}
-	if( !bActorKeysInit )
-		InitKeysInfo();
-	C.Font = class'FontInfo'.Static.GetStaticAReallySmallFont(C.ClipX);
-	XS = 4;
-	For( i=0; i<NumKeysInfo; i++ )
+	// draw only if HP not visible
+	if (ChallengeHud(C.Viewport.Actor.myHUD) == None || ChallengeHud(C.Viewport.Actor.myHUD).bHideAllWeapons)
 	{
-		if( KeysInfo[i]!="" )
+		if( !bActorKeysInit )
+			InitKeysInfo();
+		C.Font = class'FontInfo'.Static.GetStaticAReallySmallFont(C.ClipX);
+		XS = 4;
+		For( i=0; i<NumKeysInfo; i++ )
 		{
-			C.TextSize(KeysInfo[i],XL,YL);
-			C.SetPos(C.ClipX-XL-4,XS);
-			C.DrawText(KeysInfo[i]);
-			XS+=YL;
+			if( KeysInfo[i]!="" )
+			{
+				C.TextSize(KeysInfo[i],XL,YL);
+				C.SetPos(C.ClipX-XL-4,XS);
+				C.DrawText(KeysInfo[i]);
+				XS+=YL;
+			}
 		}
 	}
 	
@@ -3111,7 +3172,7 @@ function PassengerEnter( Pawn Other, byte Seat )
 			PassengerSeats[Seat].PassengerCam.GunAttachM = PassengerSeats[Seat].PGun;
 		}
 		else PassengerSeats[Seat].PassengerCam.SetOwner(Other);
-		PlayerPawn(Other).ViewTarget = PassengerSeats[Seat].PassengerCam;
+		PassengerSeats[Seat].PassengerCam.setCamOwner(Other);
 		PlayerPawn(Other).bBehindView = False;
 		Other.GoToState('PlayerFlying');
 	}
@@ -3131,7 +3192,7 @@ local vector ExitVect;
 			Passengers[Seat].DrawScale = Passengers[Seat].Default.DrawScale;
 			if( PlayerPawn(Passengers[Seat])!=None && Passengers[Seat].Health>0 )
 				Passengers[Seat].GoToState('PlayerWalking');
-			Passengers[Seat].ClientRestart();
+			RestartPawn(Passengers[Seat]);
 			Passengers[Seat].SetCollision(True,False,False);
 			Passengers[Seat].SetCollisionSize(Passengers[Seat].Default.CollisionRadius,Passengers[Seat].Default.CollisionHeight);
 
@@ -3153,6 +3214,7 @@ local vector ExitVect;
 			Passengers[Seat].SetCollision(True,True,True);
 			if( PlayerPawn(Passengers[Seat])!=None )
 			{
+				PassengerSeats[Seat].PassengerCam.setCamOwner(None);
 				PlayerPawn(Passengers[Seat]).ViewTarget = None;
 				PlayerPawn(Passengers[Seat]).EndZoom();
 				Passengers[Seat].ClientSetRotation(Rotation);
@@ -3173,7 +3235,7 @@ local vector ExitVect;
 		PassengerSeats[Seat].PHGun.SetOwner(None);
 	}
 	if( PassengerSeats[Seat].PassengerCam!=None && PassengerSeats[Seat].PassengerCam.Owner!=None )
-		PassengerSeats[Seat].PassengerCam.SetOwner(None);
+		PassengerSeats[Seat].PassengerCam.SetCamOwner(None);
 	Passengers[Seat] = None;
 
 	CheckForEmpty();
@@ -3250,7 +3312,7 @@ defaultproperties
       CurrentTeam=0
       VehicleName="Vehicle"
       TranslatorDescription=""
-      MsgVehicleDesc="Press F2, to bring up your translator with vehicle description."
+      MsgVehicleDesc="Zoom out the HUD to read the help in the top right corner of the screen."
       ExitOffset=(X=0.000000,Y=45.000000,Z=0.000000)
       BehinViewViewOffset=(X=-650.000000,Y=0.000000,Z=120.000000)
       InsideViewOffset=(X=5.000000,Y=-15.000000,Z=0.000000)

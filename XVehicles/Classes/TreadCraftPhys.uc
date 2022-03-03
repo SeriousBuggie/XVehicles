@@ -889,6 +889,5 @@ defaultproperties
       VehicleKeyInfoStr="Tread craft keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to turn|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%PrevWeapon%, %NextWeapon%, %SwitchToBestWeapon% to change camera|%ThrowWeapon% to exit the vehicle"
       bDestroyUpsideDown=True
       WDeAccelRate=35.000000
-      bArcMovement=True
       Mesh=LodMesh'UnrealShare.WoodenBoxM'
 }

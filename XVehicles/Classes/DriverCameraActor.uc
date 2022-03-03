@@ -9,12 +9,15 @@ var float DesiredViewMult, CurrentViewMult, OldDesiredViewMult, KeepWait;
 replication
 {
 	// Variables the server should send to the client.
-	reliable if( Role==ROLE_Authority && bNetOwner && Class!=Class'DriverCameraActor' )
-		VehicleOwner,SeatNum,GunAttachM;
-	reliable if( Role==ROLE_Authority && bNetOwner )
-		DesiredViewMult;
-	reliable if( Role<ROLE_Authority && bNetOwner )
-		SetPlayerViewOffset;
+	reliable if( Role==ROLE_Authority )
+		VehicleOwner,SeatNum,GunAttachM,DesiredViewMult;
+}
+
+simulated function PostBeginPlay()
+{
+	Super.PostBeginPlay();
+	
+	class'CameraMaster'.static.Init(self);	
 }
 
 function KeepView()
@@ -55,6 +58,9 @@ simulated function Tick( float Delta )
 	local vector V;
 	local rotator R;
 	local float RRoll;
+	local Pawn P;
+	local PlayerPawn PP;
+	local bool bPasengerCam;
 	
 	if (KeepWait <= 0)
 	{
@@ -73,51 +79,127 @@ simulated function Tick( float Delta )
 		KeepWait -= Delta;
 
 	RRoll = Rotation.Roll;
-
-	if( Owner==None )
-		Return;
-	if( VehicleOwner==None )
-	{
-		VehicleOwner = Vehicle(Owner);
-		if( VehicleOwner==None )
-			Return;
-	}
-	if( Owner==None || PlayerPawn(Owner.Owner)==None )
-		Return;
-	if(!VehicleOwner.bVehicleBlewUp )
-	{
-		if( PlayerPawn(Owner.Owner).ViewTarget==None && VehicleOwner.bDriving ) // In case player typed 'ViewSelf'
-			PlayerPawn(Owner.Owner).ViewTarget = Self;
-		else if( PlayerPawn(Owner.Owner).ViewTarget==Self && !VehicleOwner.bDriving )
-			PlayerPawn(Owner.Owner).ViewTarget = None;
-	}
-	VehicleOwner.CalcCameraPos(V,R,CurrentViewMult);
-	Move(V-Location);
 	
-	if (Owner != None && PlayerPawn(Owner.Owner) != None)
-		SetPlayerViewOffset(Location - Owner.Owner.Location);
+	bPasengerCam = Class != Class'DriverCameraActor';
+
+	if (bPasengerCam)
+	{
+		P = Pawn(Owner);
+		if (GunAttachM != None)
+			R = GunAttachM.TurretYaw*rot(0,1,0) + GunAttachM.TurretPitch*rot(1,0,0);
+		else if (VehicleOwner != None)
+			R = VehicleOwner.Rotation;
+	}
+	else
+	{
+		if( Owner==None)
+			Return;
+		if( VehicleOwner==None )
+			VehicleOwner = Vehicle(Owner);
+		P = Pawn(Owner.Owner);
+	}
+	if( P == None || VehicleOwner==None )
+		Return;
+	PP = PlayerPawn(P);
+	if( PP != None && Level.NetMode!=NM_Client && !VehicleOwner.bVehicleBlewUp )
+	{
+		if( PP.ViewTarget==None && (bPasengerCam || VehicleOwner.bDriving) ) // In case player typed 'ViewSelf'
+			PP.ViewTarget = Self;
+		else if( !bPasengerCam && PP.ViewTarget==Self && !VehicleOwner.bDriving )
+			PP.ViewTarget = None;
+		else if( bPasengerCam && PP.bBehindView && PP.ViewTarget==Self )
+			PP.bBehindView = False;
+	}
+	VehicleOwner.CalcCameraPos(V,R,CurrentViewMult,SeatNum);
+	Move(V-Location);
 
 	//Vertical shake support
-	MoveSmooth(PlayerPawn(Owner.Owner).ShakeVert * 0.01 * vect(0,0,1));
+	if (PP != None)
+		MoveSmooth(PP.ShakeVert * 0.01 * vect(0,0,1));
 
 	R.Roll = RRoll;
 	SetRotation(R);
 }
-simulated function RenderOverlays( canvas Canvas )
+
+function Pawn GetCamOwner()
 {
-	VehicleOwner.RenderCanvasOverlays(Canvas,Self,SeatNum);
+	if (Class != Class'DriverCameraActor')
+		return Pawn(Owner);
+	If (Owner == None)
+		return None;
+	return Pawn(Owner.Owner);
 }
 
-simulated function SetPlayerViewOffset(vector PlayerViewOffset)
+function SetCamOwner(Actor NewOwner)
 {
-	if (Owner != None && PlayerPawn(Owner.Owner) != None && DriverWeapon(PlayerPawn(Owner.Owner).Weapon) != None)
-		DriverWeapon(PlayerPawn(Owner.Owner).Weapon).PlayerViewOffset = PlayerViewOffset;
+	local Pawn CamOwner;
+	
+	CamOwner = GetCamOwner();
+	
+	if (NewOwner == None && CamOwner == None)
+		return;
+	if (NewOwner != None && CamOwner != None)
+	{
+		if (PlayerPawn(CamOwner) != None)
+		{
+			PlayerPawn(CamOwner).ViewTarget = None;
+			PlayerPawn(CamOwner).bBehindView = false;
+		}
+		ChangeCam(self, CamOwner);
+	}
+	if (Class != Class'DriverCameraActor')
+		SetOwner(NewOwner);
+	if (PlayerPawn(NewOwner) != None)
+	{
+		PlayerPawn(NewOwner).ViewTarget = self;
+		PlayerPawn(NewOwner).bHiddenEd = PlayerPawn(NewOwner).bBehindView;
+		PlayerPawn(NewOwner).bBehindView = false;
+	}
+	if (NewOwner == None)
+		ChangeCam(self, CamOwner);
+	else
+		ChangeCam(NewOwner, self);
+}
+
+function ChangeCam(Actor IfView, Actor ThenView)
+{
+	Local Pawn P;
+	local PlayerPawn Player;
+
+	for (P=Level.PawnList; P!=None; P=P.nextPawn)
+	{
+		Player = PlayerPawn(P);
+		if (Player != None && Player.ViewTarget == IfView)
+			{
+				Player.ViewTarget = ThenView;
+				if (ThenView == self)
+				{
+					Player.bHiddenEd = Player.bBehindView;
+					Player.bBehindView = false;					
+				}
+				else if (ThenView == None)
+					Player.bBehindView = false;
+				else
+					Player.bBehindView = Player.bHiddenEd;
+			}
+	}
+}
+
+simulated function RenderOverlays( canvas Canvas )
+{
+	if (VehicleOwner != None)
+		VehicleOwner.RenderCanvasOverlays(Canvas,Self,SeatNum);
 }
 
 simulated function Destroyed()
 {
-	if (Owner != None && PlayerPawn(Owner.Owner) != None)
+/*
+	if (PlayerPawn(Owner) != None) // passenger
+		PlayerPawn(Owner).ViewTarget = None;
+	else if (Owner != None && PlayerPawn(Owner.Owner) != None) // driver
 		PlayerPawn(Owner.Owner).ViewTarget = None;
+*/
+	SetCamOwner(None);
 
 	Super.Destroyed();
 }
