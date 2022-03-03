@@ -17,6 +17,8 @@ function bool InVehicle(Actor Other)
 function float GetVehAIRating( Pawn Seeker )
 {
 	local float ret;
+	if (VehicleOwner.LastDriver == Seeker && Level.TimeSeconds - VehicleOwner.LastDriverTime < 1)
+		return -1; // for avoid bot loops exit/enter
 	if (VehicleOwner.HealthTooLowFor(Seeker) || VehicleOwner.NeedStop(Seeker) || !VehicleOwner.CrewFit(Seeker))
 		return -1;
 	ret = VehicleOwner.AIRating*VehicleOwner.Health/VehicleOwner.Default.Health;

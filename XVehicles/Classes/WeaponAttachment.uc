@@ -106,7 +106,9 @@ replication
 	// Variables the server should send to the client.
 	reliable if( Role==ROLE_Authority )
 		bInvisGun,TurretOffset,FireFXCounter,
-		PitchPart,TurretYaw,TurretPitch,WAtt,ClientFireEffect;
+		PitchPart,WAtt,ClientFireEffect;
+	reliable if( Role==ROLE_Authority && bNetInitial )
+		TurretYaw,TurretPitch;
 	reliable if( Role==ROLE_Authority && bNetOwner )
 		PassengerNum;
 	reliable if( Role==ROLE_Authority && !bDriverWeapon && (!bInvisGun || bNetOwner) )
@@ -185,7 +187,7 @@ simulated function PostNetBeginPlay()
 {
 	Super.PostNetBeginPlay();
 	
-	if (Level.NetMode==NM_Client)
+	if (Role != ROLE_Authority)
 		OlVehYaw = TurretYaw;
 }
 
@@ -666,7 +668,7 @@ simulated function Tick( float Delta )
 {
 	local vector Po;
 	local rotator Ro,RAdj,PRo;
-	local int OldY,OldP;
+	local int Diff,OldY,OldP;
 	local byte j;
 	local VehicleAttachment vat;
 	local byte i;
@@ -831,6 +833,7 @@ simulated function Tick( float Delta )
 	OldP = TurretPitch;
 	TurretYaw = CalcTurnSpeed(RotatingSpeed*Delta,TurretYaw,Ro.Yaw);
 	TurretPitch = CalcTurnSpeed(RotatingSpeed*Delta,TurretPitch,Ro.Pitch);
+	
 	bRotatingBarrel = (OldY!=TurretYaw || OldP!=TurretPitch);
 	if( BarrelTurnSound==None /*|| Level.NetMode==NM_ListenServer || Level.NetMode==NM_DedicatedServer */)
 		Return;
@@ -936,6 +939,7 @@ function bool SeeEnemy(Actor Enemy)
 	if( Enemy==None || (Pawn(Enemy) != None && Pawn(Enemy).Health <= 0) || !WeaponController.LineOfSightTo(Enemy) )
 		return false;
 	RepAimPos = Enemy.Location;
+/*
 	if (WeapSettings[0].ProjectileClass != None)
 	{
 		if (PitchPart != None)
@@ -955,6 +959,7 @@ function bool SeeEnemy(Actor Enemy)
 		if ( !FastTrace(RepAimPos))
 			RepAimPos = 0.5 * (RepAimPos + Enemy.Location);
 	}
+*/
 	return true;
 }
 simulated function bool AimingIsOK()

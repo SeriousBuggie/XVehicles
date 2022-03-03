@@ -7,14 +7,16 @@ simulated function PostBeginPlay()
 {
 	Super.PostBeginPlay();
 	
-	FixOffset();
+	if (Level.NetMode != NM_DedicatedServer)
+		FixOffset();
 }
 
 simulated function PostNetBeginPlay()
 {
 	Super.PostNetBeginPlay();
 	
-	FixOffset();
+	if (Level.NetMode != NM_DedicatedServer)
+		FixOffset();
 }
 
 simulated function FixOffset()
@@ -38,7 +40,8 @@ simulated function Tick(float Delta)
 {
 	Super.Tick(Delta);
 	
-	FixOffset();
+	if (Level.NetMode != NM_DedicatedServer)
+		FixOffset();
 }
 
 function SetState(byte CurrentTeam, bool bTeamLocked, bool bUsed)

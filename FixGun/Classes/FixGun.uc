@@ -12,6 +12,14 @@ simulated event RenderOverlays( canvas Canvas )
 	MultiSkins[1] = Default.MultiSkins[1];
 }
 
+function float RateSelf( out int bUseAltMode )
+{
+	local int Ignored;
+	
+	bUseAltMode = 0; // never use for Bot.
+	return Super.RateSelf(Ignored);
+}
+
 defaultproperties
 {
       WeaponDescription="Classification: Fix RiflenPrimary Fire: Medium sized, fast moving plasma balls are fired at a fast rate of fire.nSecondary Fire: A bolt of blue lightning is expelled for 100 meters, which will fix vehicles.nTechniques: Firing and keeping the secondary fire's beam on a vehicle will fix them in seconds."
@@ -19,6 +27,7 @@ defaultproperties
       PickupAmmoCount=200
       ProjectileClass=Class'FixGun.FixSphere'
       AltProjectileClass=Class'FixGun.StarterFixBolt'
+      AIRating=1.000000
       MessageNoAmmo=" has no ammo."
       NameColor=(R=0,G=0,B=255)
       PickupMessage="You got a Fixing Gun"

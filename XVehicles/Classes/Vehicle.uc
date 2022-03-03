@@ -106,6 +106,9 @@ var bool bReadyToRun;
 var int Turning,Rising,Accel;
 var int VehicleYaw,ReplVehicleYaw;
 
+var byte LastPackedMove;
+var float LastPackedMoveTime;
+
 // Driving pawn
 var Pawn Driver,Passengers[8];
 
@@ -135,7 +138,6 @@ var(Info) localized string VehicleKeyInfoStr;
 var string KeysInfo[16];
 var byte NumKeysInfo;
 var bool bHasInitKeysInfo,bActorKeysInit;
-
 
 //New ground special handling
 var(SlopedPhys) bool bSlopedPhys;
@@ -240,6 +242,9 @@ var float LastTeleportTime; // for fix flicker teleport between two locations
 var int LastTeleportYaw; // for support teleports with change yaw
 var bool bLastTeleport;
 
+var Pawn LastDriver;
+var float LastDriverTime;
+
 enum EDropFlag
 {
 	DF_None,                // Not drop flag at all.
@@ -310,17 +315,16 @@ replication
 	// Variables the server should send to the client.
 	reliable if( Role==ROLE_Authority )
 		VehPos,VehVeloc,Driver,bDriving,Health,bVehicleBlewUp,ReplicOverlayMat,bTeamLocked,CurrentTeam,Passengers,
-		bReadyToRun, Specials, DriverGun, VehicleState; // new ones
+		bReadyToRun, Specials, DriverGun, VehicleState, // new ones
+		// Functions server can call.
+		ClientSetTranslatorMsg;
 	reliable if( Role==ROLE_Authority && bNetOwner )
 		bCameraOnBehindView,MyCameraAct,WAccelRate;
 	reliable if( Role==ROLE_Authority && bShouldRepVehYaw )
 		ReplVehicleYaw;
 	// Functions client can call.
 	reliable if( Role<ROLE_Authority )
-		ServerPreformMove,ServerSetBehindView;
-	// Functions server can call.
-	reliable if( Role==ROLE_Authority )
-		ClientSetTranslatorMsg;
+		ServerPerformPackedMove,ServerSetBehindView;
 }
 
 function AnalyzeZone( ZoneInfo newZone)
@@ -683,11 +687,24 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 }
 
 // Client -> Server, the players movement keys pressed.
-function ServerPreformMove( byte InRise, byte InTurn, byte InAccel )
+simulated function ServerPerformMove( int InRise, int InTurn, int InAccel )
 {
-	Turning = int(InTurn)-1;
-	Rising = int(InRise)-1;
-	Accel = int(InAccel)-1;
+	local byte Bits;
+	Bits += (InRise + 1) & 3;
+	Bits += ((InTurn + 1) & 3) << 2;
+	Bits += ((InAccel + 1) & 3) << 4;
+	if (Bits == LastPackedMove && Level.TimeSeconds - LastPackedMoveTime < 0.5)
+		return;
+	LastPackedMove = Bits;
+	LastPackedMoveTime = Level.TimeSeconds;
+	ServerPerformPackedMove(Bits);
+}
+
+function ServerPerformPackedMove(byte Bits)
+{
+	Rising = (Bits & 3) - 1;
+	Turning = ((Bits >> 2) & 3) - 1;
+	Accel = ((Bits >> 4) & 3) - 1;
 	if( Turning>1 )
 		Turning = 1;
 	if( Rising>1 )
@@ -848,6 +865,7 @@ function DriverEnter( Pawn Other )
 	GoToState('VehicleDriving');
 	CheckForEmpty();
 	ShowState();
+	Other.ClearPaths();
 }
 
 function DebugDump(coerce string Place) {
@@ -924,7 +942,7 @@ function RestartPawn(Pawn Other)
     }
 }
 
-singular function DriverLeft( optional bool bForcedLeave )
+singular function DriverLeft( optional bool bForcedLeave, optional coerce string Reason )
 {
 local vector ExitVect;
 
@@ -936,6 +954,7 @@ local vector ExitVect;
 			Driver = None;
 		else
 		{
+			Log(self @ Level.TimeSeconds @ "DriverLeft" @ Driver @ bForcedLeave @ Reason);
 			Driver.DrawScale = Driver.Default.DrawScale;
 			if( PlayerPawn(Driver)!=None )
 			{
@@ -976,6 +995,8 @@ local vector ExitVect;
 				Driver.Inventory.ChangedWeapon();
 			if( Driver.Weapon != None && Driver.Weapon.Owner != None )
 				Driver.Weapon.BringUp();
+			LastDriver = Driver;
+			LastDriverTime = Level.TimeSeconds;
 		}
 	}
 	if( DriverGun!=None )
@@ -990,6 +1011,8 @@ local vector ExitVect;
 		WaitForDriver = Level.TimeSeconds + 30;
 	else
 		WaitForDriver = Level.TimeSeconds + 10;
+	if (Driver != None)
+		Driver.ClearPaths();
 	Driver = None;
 	//SetOwner(None); Set to none 1 sec later to avoid unwanted functions errors.
 	if( !bDeleteMe && Health>0 )
@@ -1019,7 +1042,7 @@ simulated function Destroyed()
 	local byte i;
 
 	if( Driver!=None )
-		DriverLeft(True);
+		DriverLeft(True, "Destroyed");
 	For( i=0; i<ArrayCount(Passengers); i++ )
 	{
 		if( Passengers[i]!=None )
@@ -1305,7 +1328,7 @@ local float f;
 					Driver.DrawScale = Driver.Default.DrawScale;
 				if( Driver!=None && Driver.bDeleteMe )
 					Driver = None;
-				DriverLeft(True);
+				DriverLeft(True, "Tick");
 			}
 		}
 		else if( PlayerPawn(Driver)==None )
@@ -1822,7 +1845,7 @@ simulated function ReadDriverInput( PlayerPawn Other, float DeltaTime )
 		DoSpecialSpaceKey();
 		
 	if( Level.NetMode==NM_Client )
-		ServerPreformMove(byte(Rising+1),byte(Turning+1),byte(Accel+1));
+		ServerPerformMove(Rising, Turning, Accel);
 	/*if( MyCameraAct!=None )
 	{
 		if( Other.bBehindView && Other.ViewTarget==MyCameraAct )
@@ -1886,7 +1909,7 @@ function ReadBotInput( float Delta )
 		return;
 	
 	if (HealthTooLowFor(Driver))
-		DriverLeft(False);
+		DriverLeft(False, "HealthTooLowFor");
 	if (Driver == None)
 		return;
 	if (NeedStop(Driver))
@@ -1894,9 +1917,9 @@ function ReadBotInput( float Delta )
 		Bot = Bot(Driver);
 		S = VSize(Driver.MoveTarget.Location - Location);
 		if (S < CollisionRadius*2)
-			DriverLeft(False);
+			DriverLeft(False, "NeedStop near");
 		else if (VSize(Velocity) < 50 && S < 1500 && Driver.LineOfSightTo(Driver.MoveTarget))
-			DriverLeft(False);
+			DriverLeft(False, "NeedStop stuck");
 		if (Driver == None && Bot != None)
 		{
 			Bot.EnemyDropped = DWeapon; // bot must want return back, after take flag
@@ -1926,7 +1949,7 @@ function ReadBotInput( float Delta )
 				ExitOffset = (MoveDest - Location) << Rotation;
 				ExitOffset.Z = 0;
 				ExitOffset = Normal(ExitOffset)*VSize(V);
-				DriverLeft(False);
+				DriverLeft(False, "PointReachable");
 				ExitOffset = V;
 			}
 			else
@@ -2072,7 +2095,7 @@ Auto State EmptyVehicle
 {
 Ignores FireWeapon,ReadDriverInput,ReadBotInput,DriverLeft;
 
-	function ServerPreformMove( byte InRise, byte InTurn, byte InAccel )
+	function ServerPerformMove( int InRise, int InTurn, int InAccel )
 	{
 		Turning = 0;
 		Rising = 0;
@@ -3284,7 +3307,7 @@ function KillDriver( Pawn Killer )
 	if( Driver!=None )
 	{
 		D = Driver;
-		DriverLeft(True);
+		DriverLeft(True, "KillDriver");
 		D.Died(Killer,'Gibbed',Location);
 	}
 	For( i=0; i<ArrayCount(Passengers); i++ )
@@ -3574,7 +3597,7 @@ function ChangeSeat( byte SeatNum, bool bWasPassenger, byte PassengerNum )
 				Return;
 			// Allow player swap places with bots!
 			OthPawn = Driver;
-			DriverLeft(True);
+			DriverLeft(True, "ChangeSeat 1");
 			PassengerLeave(PassengerNum,True);
 			DriverEnter(InvPawn);
 			PassengerEnter(OthPawn,PassengerNum);
@@ -3595,7 +3618,7 @@ function ChangeSeat( byte SeatNum, bool bWasPassenger, byte PassengerNum )
 				Return;
 			if( bWasPassenger )
 				PassengerLeave(PassengerNum,True);
-			else DriverLeft(True);
+			else DriverLeft(True, "ChangeSeat 2");
 			OthPawn = Passengers[SeatNum-1];
 			PassengerLeave(SeatNum-1,True);
 			PassengerEnter(InvPawn,SeatNum-1);
@@ -3607,7 +3630,7 @@ function ChangeSeat( byte SeatNum, bool bWasPassenger, byte PassengerNum )
 		{
 			if( bWasPassenger )
 				PassengerLeave(PassengerNum,True);
-			else DriverLeft(True);
+			else DriverLeft(True, "ChangeSeat 3");
 			PassengerEnter(InvPawn,SeatNum-1);
 		}
 	}
@@ -3932,6 +3955,8 @@ defaultproperties
       Accel=0
       VehicleYaw=0
       ReplVehicleYaw=0
+      LastPackedMove=0
+      LastPackedMoveTime=0.000000
       Driver=None
       Passengers(0)=None
       Passengers(1)=None
@@ -4129,6 +4154,8 @@ defaultproperties
       LastTeleportTime=0.000000
       LastTeleportYaw=-1
       bLastTeleport=False
+      LastDriver=None
+      LastDriverTime=0.000000
       DropFlag=DF_None
       VehicleFlag=None
       VehicleState=None
