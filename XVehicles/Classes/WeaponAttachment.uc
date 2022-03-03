@@ -942,8 +942,12 @@ function bool FindEnemy()
 	local float Dist, BestDist;
 	local Actor ViewActor, Hit;
 	local vector HL, HN;
+	local name BotState;
 	Bot = Bot(WeaponController);
-	if (Bot == None || Bot.Enemy != None || (Bot.bComboPaused && Bot.GetStateName() == 'RangedAttack'))
+	if (Bot == None || Bot.Enemy != None)
+		return false;
+	BotState = Bot.GetStateName();
+	if (BotState == 'RangedAttack' || BotState == 'FallingState' || BotState == 'TakeHit' || BotState == 'ImpactJumping')
 		return false;
 	if (OwnerVehicle != None && OwnerVehicle.MyCameraAct != None)
 		ViewActor = OwnerVehicle.MyCameraAct; // try use actor with small size
@@ -976,11 +980,9 @@ function bool FindEnemy()
 	Bot.bComboPaused = true;
 	Bot.SpecialPause = 1.0; // calculate exact time for shoot
 //	Log(Bot @ "FindEnemy" @ Best @ BestDist @ Hit @ Bot.GetStateName() @ Bot.NextState @ Bot.NextLabel);
-	if (Bot.GetStateName() != 'RangedAttack')
-	{
-		Bot.NextState = Bot.GetStateName();
-		Bot.NextLabel = 'Begin';
-	}
+//	log(Bot @ self @ BotState @ Bot.NextState @ Bot.NextLabel);
+	Bot.NextState = BotState;
+	Bot.NextLabel = 'Begin';
 	Bot.GotoState('RangedAttack');
 	return true;
 }

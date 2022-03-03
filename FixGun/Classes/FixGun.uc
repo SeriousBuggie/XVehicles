@@ -49,13 +49,16 @@ function MyTimer()
 	Local Inventory Inv;
 	local FixGun FG;
 	local Bot Bot;
+	local name BotState;
 
 	Bot = Bot(Owner);
 	if (Bot == None || Bot.Weapon != self || Bot.PlayerReplicationInfo == None ||
 		(Bot.Enemy != None && Bot.Enemy != Bot) ||
-		CTFFlag(Bot.Target) != None || Bot.PlayerReplicationInfo.HasFlag != None ||
-		(Bot.GetStateName() == 'RangedAttack' && Bot.bComboPaused))
+		CTFFlag(Bot.Target) != None || Bot.PlayerReplicationInfo.HasFlag != None)
 		return;
+	BotState = Bot.GetStateName();
+	if (BotState == 'RangedAttack' || BotState == 'FallingState' || BotState == 'TakeHit' || BotState == 'ImpactJumping')
+		return;	
 
 	for (P = Level.PawnList; P != None; P = P.nextPawn)
 		if (P.Weapon != None && P.Weapon.isA('DriverWeapon') && 
@@ -70,11 +73,9 @@ function MyTimer()
 			Bot.Target = Actor;
 			Bot.bComboPaused = true;
 			Bot.SpecialPause = 1.0; // calculate exact time for heal
-			if (Bot.GetStateName() != 'RangedAttack')
-			{
-				Bot.NextState = Bot.GetStateName();
-				Bot.NextLabel = 'Begin';
-			}
+//			log(Bot @ self @ BotState @ Bot.NextState @ Bot.NextLabel);
+			Bot.NextState = BotState;
+			Bot.NextLabel = 'Begin';
 			Bot.GotoState('RangedAttack');
 			break;
 		}
