@@ -98,7 +98,7 @@ simulated function UpdateDriverInput( float Delta )
 	VehicleYaw = CalcTurnSpeed(TurnSpeed,VehicleYaw,R.Yaw);
 	VehiclePitch = CalcTurnSpeed(TurnSpeed,VehiclePitch,R.Pitch);
 }
-function ServerPreformMove( byte InRise, byte InTurn, byte InAccel );
+simulated function ServerPerformMove( int InRise, int InTurn, int InAccel );
 
 // Nothing here to constantly replicate.
 simulated function ClientUpdateState( float Delta );
