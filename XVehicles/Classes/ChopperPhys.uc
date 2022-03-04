@@ -55,6 +55,141 @@ simulated singular function HitWall( vector HitNormal, Actor Wall )
 		bOnGround = True;
 	}
 }
+
+// Return normal for acceleration direction.
+simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
+{
+	local rotator R;
+	local vector X,Y,Z;
+
+	if( PlayerPawn(Driver)==None )
+	{
+		if( Driver.Target!=None )
+			X = Driver.Target.Location;
+		else X = MoveDest;
+		Return Normal(X-Location);
+	}
+	if( InTurn==0 && InRise==0 && InAccel==0 )
+		Return vect(0,0,0);
+	R.Yaw = VehicleYaw;
+	GetAxes(R,X,Y,Z);
+	Return Normal(X*InAccel+Y*-InTurn+Z*InRise);
+}
+
+simulated function UpdateDriverInput( float Delta )
+{
+	local vector Ac,X,Y,Z,HL,HN,En;
+	local rotator R,Rr;
+	local float Changed,DeAcc,DeAccRat;
+	local Actor A;
+	local byte i;
+
+	if( bHasRotorDmg && !bOnGround && NextCutTime<Level.TimeSeconds )
+	{
+		NextCutTime = Level.TimeSeconds+0.05;
+		GetAxes(Rotation,X,Y,Z);
+		Ac = Location+(RotorOffset >> Rotation);
+		For( i=0; i<8; i++ )
+		{
+			DeAcc = (float(i)+FRand());
+			En = Ac+X*RotorSize.X*Sin(DeAcc)+Y*RotorSize.Y*Cos(DeAcc);
+			A = Trace(HL,HN,En,Ac,True);
+			if( A!=None )
+			{
+				if( A.bIsPawn || Carcass(A)!=None )
+					A.TakeDamage(50+Rand(60),Driver,HL,vect(0,0,0),'cutted');
+				else if( Vehicle(A)!=None )
+				{
+					A.TakeDamage(50+Rand(60),Driver,HL,HN,'crushed');
+					A.Velocity-=HN*500;
+					TakeDamage(30+Rand(20),None,HL,HN,'crushed');
+					Velocity+=HN*500;
+				}
+				else
+				{
+					TakeDamage(50+Rand(60),Driver,HL,HN,'crushed');
+					Velocity+=HN*500;
+				}
+			}
+		}
+	}
+	if( bOnGround )
+		R = TransformForGroundRot(VehicleYaw,FloorNormal);
+	else
+	{
+		R = Normalize(Rotation);
+		R.Yaw = VehicleYaw;
+		R.Roll/=2;
+		R.Pitch/=2;
+	}
+	if( !bDriving && !bOnGround )
+	{
+		bOnGround = CheckOnGround();
+		if( !bOnGround )
+		{
+			Velocity+=Region.Zone.ZoneGravity*Delta*VehicleGravityScale;
+			Return;
+		}
+	}
+	if( Level.NetMode!=NM_DedicatedServer && !bOnGround && bDriving )
+	{
+		Rr.Yaw = VehicleYaw;
+		Ac = (Velocity << Rr)*10f;
+		if( Ac.Y>MaxYawRates[0] )
+			Ac.Y = MaxYawRates[0];
+		else if( Ac.Y<MaxYawRates[1] )
+			Ac.Y = MaxYawRates[1];
+		if( Ac.X>MaxYawRates[0] )
+			Ac.X = MaxYawRates[0];
+		else if( Ac.X<MaxYawRates[1] )
+			Ac.X = MaxYawRates[1];
+		if( Abs(R.Roll)<Abs(Ac.Y) )
+			R.Roll = Ac.Y;
+		if( Abs(R.Pitch)<Abs(Ac.X) )
+			R.Pitch = -Ac.X;
+		GetAxes(R,X,Y,Z);
+		ActualFloorNormal = Z;
+		FloorNormal = Z;
+	}
+	if( Rotation!=R )
+		SetRotation(R);
+	if( !bDriving )
+	{
+		DeAcc = VSize(Velocity);
+		DeAccRat = Delta*WAccelRate*Region.Zone.ZoneGroundFriction;
+		if( DeAccRat>DeAcc )
+			DeAccRat = DeAcc;
+		Velocity-=Normal(Velocity)*DeAccRat;
+		Return;
+	}
+	if( Level.NetMode==NM_Client && !IsNetOwner(Owner) )
+		Return;
+	if( Driver!=None )
+	{
+		Changed = CalcTurnSpeed(CurrentYawSpeed*Delta,VehicleYaw,Driver.ViewRotation.Yaw);
+		Changed-=VehicleYaw;
+		if( Changed==0 )
+			CurrentYawSpeed = 5;
+		else if( CurrentYawSpeed<YawTurnSpeed )
+		{
+			CurrentYawSpeed+=Delta*0.5*YawTurnSpeed;
+			if( CurrentYawSpeed>YawTurnSpeed )
+				CurrentYawSpeed = YawTurnSpeed;
+		}
+		VehicleYaw+=Changed;
+	}
+	Ac = GetAccelDir(Turning,Rising,Accel)*WAccelRate*Delta;
+	if( VSize(Velocity)>MaxAirSpeed && VSize(Normal(Velocity)-Normal(Ac))<0.85 )
+		Velocity+=(Ac*0.1);
+	else Velocity+=Ac;
+	if( Rising==0 && PlayerPawn(Driver)!=None )
+		Velocity.Z*=(1.f-Delta);
+	if( Turning==0 && Accel==0 )
+	{
+		Velocity.X*=(1.f-Delta);
+		Velocity.Y*=(1.f-Delta);
+	}
+}
 simulated function vector GetMovementSpeeds()
 {
 	local vector V;
@@ -62,6 +197,19 @@ simulated function vector GetMovementSpeeds()
 	V = (Velocity << Rotation);
 	V.Z = 0;
 	Return Normal(V);
+}
+simulated function AttachmentsTick( float Delta )
+{
+	if( MyRotor!=None )
+	{
+		if( bOnGround )
+			RotorYaw+=80000*Delta;
+		else RotorYaw+=80000*(VSize(Velocity)/500+2.f)*Delta;
+		While( RotorYaw>65536 )
+			RotorYaw-=65536;
+		MyRotor.Move(Location+(RotorOffset >> Rotation)-MyRotor.Location);
+		MyRotor.SetRotation(TransformForGroundRot(RotorYaw,FloorNormal));
+	}
 }
 
 defaultproperties
