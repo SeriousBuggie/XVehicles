@@ -1,6 +1,8 @@
 // redirect all damage to vehicle
 class DriverShield expands Inventory;
 
+var bool bKeysSet;
+
 function Vehicle GetVehicle()
 {
 	if (Pawn(Owner) != None && DriverWeapon(Pawn(Owner).Weapon) != None)
@@ -54,8 +56,47 @@ function int ArmorAbsorbDamage(int Damage, name DamageType, vector HitLocation)
 		return Damage;
 }
 
+simulated function Tick(float delta)
+{
+	Super.Tick(delta);
+	if (Level.NetMode != NM_DedicatedServer && !bKeysSet)
+		BindKeys();
+}
+
+simulated function BindKeys()
+{
+	local PlayerPawn PP;
+	local int i, pos;
+	local string KeyName, KeyBinding, KeyBindingLow, Cmd;
+	
+	if (Level.NetMode == NM_DedicatedServer || bKeysSet)
+		return;
+	
+	PP = PlayerPawn(Owner);
+	if (PP == None || PP.Player == None)
+		return;
+		
+	bKeysSet = true;
+		
+	for (i = 0; i < 256; i++)
+	{
+		KeyName = PP.ConsoleCommand("KeyName" @ i);
+		KeyBinding = PP.ConsoleCommand("KeyBinding" @ KeyName);
+		KeyBindingLow = Locs(KeyBinding);
+		if (InStr(KeyBindingLow, "jump") != -1 && InStr(KeyBindingLow, "onrelease xvjumpreleased|") == -1)
+			PP.ConsoleCommand("Set Input" @ KeyName @ "OnRelease XVJumpReleased|" $ KeyBinding);
+	}
+}
+
+exec function XVJumpReleased()
+{
+	if (PlayerPawn(Owner) != None)
+		PlayerPawn(Owner).bPressedJump = false;
+}
+
 defaultproperties
 {
+      bKeysSet=False
       bIsAnArmor=True
       bHidden=True
       bGameRelevant=True

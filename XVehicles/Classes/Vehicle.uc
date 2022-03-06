@@ -131,7 +131,7 @@ var DriverCameraActor MyCameraAct;
 var OverlayMatDispRep ReplicOverlayMat;
 
 var VehicleFactory MyFactory;
-var const EPhysics ReqPPPhysics;
+var() const EPhysics ReqPPPhysics;
 
 // Full vehicles keys display info, write it in form like this: "Press %MoveForward to accelerate|Press %Fire to Fire weapon"
 var(Info) localized string VehicleKeyInfoStr;
@@ -1169,39 +1169,37 @@ local vector CDmgOffSet;
 	For( i=0; i<4; i++)
 	{
 		if (DamageGFX[i].bHaveThisGFX)
-		{
-
-		CDmgOffSet = DamageGFX[i].DmgFXOffset;
-		CDmgOffSet.X += Rand(DamageGFX[i].FXRange*2) - DamageGFX[i].FXRange;
-		CDmgOffSet.Y += Rand(DamageGFX[i].FXRange*2) - DamageGFX[i].FXRange;
-
-		if (bSlopedPhys && GVT!=None)
-		{
-			if (Mode == 0 || Mode == 1)
-				Spawn(DamageGFX[i].DmgLightSmkClass,,, Location + GVT.PrePivot + (CDmgOffSet >> Rotation));
-			else if (Mode == 2)
-				Spawn(DamageGFX[i].DmgBlackSmkClass,,, Location + GVT.PrePivot + (CDmgOffSet >> Rotation));
+		{	
+			CDmgOffSet = DamageGFX[i].DmgFXOffset;
+			CDmgOffSet.X += Rand(DamageGFX[i].FXRange*2) - DamageGFX[i].FXRange;
+			CDmgOffSet.Y += Rand(DamageGFX[i].FXRange*2) - DamageGFX[i].FXRange;
+	
+			if (bSlopedPhys && GVT!=None)
+			{
+				if (Mode == 0 || Mode == 1)
+					Spawn(DamageGFX[i].DmgLightSmkClass,,, Location + GVT.PrePivot + (CDmgOffSet >> Rotation));
+				else if (Mode == 2)
+					Spawn(DamageGFX[i].DmgBlackSmkClass,,, Location + GVT.PrePivot + (CDmgOffSet >> Rotation));
+				else
+				{
+					Spawn(DamageGFX[i].DmgBlackSmkClass,,, Location + GVT.PrePivot + (CDmgOffSet >> Rotation));
+					if (DamageGFX[i].bHaveFlames)
+						Spawn(DamageGFX[i].DmgFlamesClass,,, Location + GVT.PrePivot + (CDmgOffSet >> Rotation));
+				}
+			}
 			else
 			{
-				Spawn(DamageGFX[i].DmgBlackSmkClass,,, Location + GVT.PrePivot + (CDmgOffSet >> Rotation));
-				if (DamageGFX[i].bHaveFlames)
-					Spawn(DamageGFX[i].DmgFlamesClass,,, Location + GVT.PrePivot + (CDmgOffSet >> Rotation));
+				if (Mode == 0 || Mode == 1)
+					Spawn(DamageGFX[i].DmgLightSmkClass,,, Location + (CDmgOffSet >> Rotation));
+				else if (Mode == 2)
+					Spawn(DamageGFX[i].DmgBlackSmkClass,,, Location + (CDmgOffSet >> Rotation));
+				else
+				{
+					Spawn(DamageGFX[i].DmgBlackSmkClass,,, Location + (CDmgOffSet >> Rotation));
+					if (DamageGFX[i].bHaveFlames)
+						Spawn(DamageGFX[i].DmgFlamesClass,,, Location + (CDmgOffSet >> Rotation));
+				}
 			}
-		}
-		else
-		{
-			if (Mode == 0 || Mode == 1)
-				Spawn(DamageGFX[i].DmgLightSmkClass,,, Location + (CDmgOffSet >> Rotation));
-			else if (Mode == 2)
-				Spawn(DamageGFX[i].DmgBlackSmkClass,,, Location + (CDmgOffSet >> Rotation));
-			else
-			{
-				Spawn(DamageGFX[i].DmgBlackSmkClass,,, Location + (CDmgOffSet >> Rotation));
-				if (DamageGFX[i].bHaveFlames)
-					Spawn(DamageGFX[i].DmgFlamesClass,,, Location + (CDmgOffSet >> Rotation));
-			}
-		}
-
 		}
 	}
 }

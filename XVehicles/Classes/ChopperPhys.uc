@@ -166,7 +166,7 @@ simulated function UpdateDriverInput( float Delta )
 		Return;
 	if( Driver!=None )
 	{
-		Changed = CalcTurnSpeed(CurrentYawSpeed*Delta,VehicleYaw,Driver.ViewRotation.Yaw);
+		Changed = CalcTurnSpeed(Max(1, CurrentYawSpeed*Delta),VehicleYaw,Driver.ViewRotation.Yaw);
 		Changed-=VehicleYaw;
 		if( Changed==0 )
 			CurrentYawSpeed = 5;
@@ -177,17 +177,17 @@ simulated function UpdateDriverInput( float Delta )
 				CurrentYawSpeed = YawTurnSpeed;
 		}
 		VehicleYaw+=Changed;
-	}
+	}	
 	Ac = GetAccelDir(Turning,Rising,Accel)*WAccelRate*Delta;
 	if( VSize(Velocity)>MaxAirSpeed && VSize(Normal(Velocity)-Normal(Ac))<0.85 )
 		Velocity+=(Ac*0.1);
 	else Velocity+=Ac;
 	if( Rising==0 && PlayerPawn(Driver)!=None )
-		Velocity.Z*=(1.f-Delta);
+		Velocity.Z*=FMax(0f, 1.f-Delta);
 	if( Turning==0 && Accel==0 )
 	{
-		Velocity.X*=(1.f-Delta);
-		Velocity.Y*=(1.f-Delta);
+		Velocity.X*=FMax(0f, 1.f-Delta);
+		Velocity.Y*=FMax(0f, 1.f-Delta);
 	}
 }
 simulated function vector GetMovementSpeeds()
@@ -200,6 +200,7 @@ simulated function vector GetMovementSpeeds()
 }
 simulated function AttachmentsTick( float Delta )
 {
+	Super.AttachmentsTick(Delta);
 	if( MyRotor!=None )
 	{
 		if( bOnGround )
