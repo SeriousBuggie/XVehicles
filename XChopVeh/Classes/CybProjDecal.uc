@@ -1,0 +1,13 @@
+//////////////////////////////////////////////////////////////
+//				Feralidragon (16-01-2010)
+//
+// NW3 CYBOT LAUNCHER BUILD 1.00
+//////////////////////////////////////////////////////////////
+
+class CybProjDecal expands NWDecal;
+
+defaultproperties
+{
+      Texture=Texture'Botpack.ripperblast'
+      DrawScale=0.250000
+}
