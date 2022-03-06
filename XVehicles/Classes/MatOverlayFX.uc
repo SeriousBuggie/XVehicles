@@ -14,6 +14,9 @@ simulated function Tick(float DeltaTime)
 	Fatness = Owner.Fatness+1;
 	bHidden = Owner.bHidden;
 	Mesh = Owner.Mesh;
+	AnimSequence = Owner.AnimSequence;
+	AnimFrame = Owner.AnimFrame;
+	PrePivot = Owner.PrePivot;
 	DrawScale = Owner.DrawScale;
 	bOwnerNoSee = Owner.bOwnerNoSee;
 	

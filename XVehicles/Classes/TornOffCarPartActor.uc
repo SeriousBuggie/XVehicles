@@ -115,6 +115,9 @@ function CopyDisplayFrom( Actor Other, Vehicle OwnVeh )
 local byte i;
 
 	Mesh = Other.Mesh;
+	AnimSequence = Other.AnimSequence;
+	AnimFrame = Other.AnimFrame;
+	PrePivot = Other.PrePivot;
 	Style = Other.Style;
 	DrawType = Other.DrawType;
 	DrawScale = Other.DrawScale;
