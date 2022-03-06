@@ -451,7 +451,7 @@ function Projectile FixProj(Projectile Proj)
 function FireTurret( byte Mode, optional bool bForceFire )
 {
 	local vector P, Pdual;
-	local rotator R,TR,PR;
+	local rotator R,Rdual,TR,PR;
 	local vector RealFireOffset;
 	local vector E,S,HL,HN;
 	local Actor A;
@@ -550,6 +550,7 @@ function FireTurret( byte Mode, optional bool bForceFire )
 	{
 		RealFireOffset.Y = -RealFireOffset.Y;
 		Pdual+=(RealFireOffset >> R);
+		Rdual = R;
 	}
 
 	SpawnFireEffects(Mode);
@@ -557,15 +558,24 @@ function FireTurret( byte Mode, optional bool bForceFire )
 	if (!bPhysicalGunAimOnly)
 	{
 		if (!WeapSettings[Mode].bInstantHit)
+		{
 			R = OwnerVehicle.GetFiringRot(WeapSettings[Mode].ProjectileClass.Default.Speed,False,P,PassengerNum);
+			if (WeapSettings[Mode].DualMode == 2)
+				Rdual = OwnerVehicle.GetFiringRot(WeapSettings[Mode].ProjectileClass.Default.Speed,False,Pdual,PassengerNum);
+		}
 		else
+		{
 			R = OwnerVehicle.GetFiringRot(9999,True,P,PassengerNum);
+			if (WeapSettings[Mode].DualMode == 2)
+				Rdual = OwnerVehicle.GetFiringRot(9999,True,Pdual,PassengerNum);
+		}
 	
 		TR = Normalize(R-Rotation);
 	}
 
 	if( bPhysicalGunAimOnly || TR.Yaw>3500 || TR.Yaw<-3500 || TR.Pitch>3500 || TR.Pitch<-3500 ) {
 		R = PR;
+		Rdual = PR;
 	}
 	Instigator = WeaponController;
 	
@@ -588,11 +598,11 @@ function FireTurret( byte Mode, optional bool bForceFire )
 	}
 
 	if (WeapSettings[Mode].DualMode == 2 && !WeapSettings[Mode].bInstantHit)
-		FixProj(Spawn(WeapSettings[Mode].ProjectileClass,OwnerVehicle,,Pdual,R));
+		FixProj(Spawn(WeapSettings[Mode].ProjectileClass,OwnerVehicle,,Pdual,Rdual));
 	else if (WeapSettings[Mode].DualMode == 2)
 	{
 		S = Pdual;
-		Pdual = Normal(vector(R)+VRand()*WeapSettings[Mode].HitError);
+		Pdual = Normal(vector(Rdual)+VRand()*WeapSettings[Mode].HitError);
 		E = S+Pdual*80000;
 		SpawnTraceEffects(PDual);
 		A = OwnerVehicle.Trace(HL,HN,E,S,True);
