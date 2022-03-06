@@ -67,7 +67,7 @@ simulated function BindKeys()
 {
 	local PlayerPawn PP;
 	local int i, pos;
-	local string KeyName, KeyBinding, KeyBindingLow, Cmd;
+	local string KeyName, KeyBinding, KeyBindingCaps, Cmd;
 	
 	if (Level.NetMode == NM_DedicatedServer || bKeysSet)
 		return;
@@ -82,13 +82,13 @@ simulated function BindKeys()
 	{
 		KeyName = PP.ConsoleCommand("KeyName" @ i);
 		KeyBinding = PP.ConsoleCommand("KeyBinding" @ KeyName);
-		KeyBindingLow = Locs(KeyBinding);
-		if (InStr(KeyBindingLow, "jump") != -1 && InStr(KeyBindingLow, "onrelease xvjumpreleased|") == -1)
+		KeyBindingCaps = Caps(KeyBinding);
+		if (InStr(KeyBindingCaps, "JUMP") != -1 && InStr(KeyBindingCaps, "ONRELEASE XVJUMPRELEASED|") == -1)
 			PP.ConsoleCommand("Set Input" @ KeyName @ "OnRelease XVJumpReleased|" $ KeyBinding);
 	}
 }
 
-exec function XVJumpReleased()
+simulated exec function XVJumpReleased()
 {
 	if (PlayerPawn(Owner) != None)
 		PlayerPawn(Owner).bPressedJump = false;
