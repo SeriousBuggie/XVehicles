@@ -12,7 +12,7 @@ simulated function PostBeginPlay()
 auto state StartingUp
 {
 Begin:
-	PlaySound(Sound'MyLevel.CybTransformSnd',,12.0,,1200.0);
+	PlaySound(Sound'CybTransformSnd',,12.0,,1200.0);
 	PlayAnim('Transform', 5.0);
 	Sleep(0.1);
 	FinishAnim();
@@ -54,25 +54,25 @@ function ChangeColor()
 	switch (CurrentTeam)
 	{
 		case 1: 
-			Core = Texture'MyLevel.CybotCoreBlue'; 
-			Laser = Texture'MyLevel.SentinelLaserFXBlue';
-			Proj = Class'MyLevel.CybProjB';
+			Core = Texture'CybotCoreBlue'; 
+			Laser = Texture'SentinelLaserFXBlue';
+			Proj = Class'CybProjB';
 			break;
 		case 2: 
-			Core = Texture'MyLevel.CybotCoreGreen'; 
-			Laser = Texture'MyLevel.SentinelLaserFXGreen'; 
-			Proj = Class'MyLevel.CybProjG';
+			Core = Texture'CybotCoreGreen'; 
+			Laser = Texture'SentinelLaserFXGreen'; 
+			Proj = Class'CybProjG';
 			break;
 		case 3: 
-			Core = Texture'MyLevel.CybotCoreYellow'; 
-			Laser = Texture'MyLevel.SentinelLaserFXYellow'; 
-			Proj = Class'MyLevel.CybProjY';
+			Core = Texture'CybotCoreYellow'; 
+			Laser = Texture'SentinelLaserFXYellow'; 
+			Proj = Class'CybProjY';
 			break;
 		case 0: 
 		default: 
-			Core = Texture'MyLevel.CybotCoreRed'; 
-			Laser = Texture'MyLevel.SentinelLaserFXRed'; 
-			Proj = Class'MyLevel.CybProj';
+			Core = Texture'CybotCoreRed'; 
+			Laser = Texture'SentinelLaserFXRed'; 
+			Proj = Class'CybProj';
 			break;
 	}
 	MultiSkins[4] = Core;

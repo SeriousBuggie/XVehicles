@@ -3,7 +3,7 @@ class CybBlades expands xChopVehWeapon;
 auto state StartingUp
 {
 Begin:
-	PlaySound(Sound'MyLevel.CybTransformSnd',,12.0,,1200.0);
+	PlaySound(Sound'CybTransformSnd',,12.0,,1200.0);
 	PlayAnim('Transform', 5.0);
 	Sleep(0.1);
 	FinishAnim();
@@ -25,6 +25,8 @@ function SpawnFireEffects(byte Mode)
 
 defaultproperties
 {
+      RotatingSpeed=16000000.000000
+      PitchRange=(Max=32767,Min=-32767)
       TurretPitchActor=Class'XChopVeh.CybPitch'
       PitchActorOffset=(X=188.000000,Z=-58.000000)
       WeapSettings(0)=(ProjectileClass=Class'XChopVeh.CybProj',FireStartOffset=(Y=96.000000),RefireRate=0.200000,FireSound=Sound'XChopVeh.rfire',DualMode=1)

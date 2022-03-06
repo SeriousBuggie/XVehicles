@@ -570,7 +570,10 @@ function FireTurret( byte Mode, optional bool bForceFire )
 				Rdual = OwnerVehicle.GetFiringRot(9999,True,Pdual,PassengerNum);
 		}
 	
-		TR = Normalize(R-Rotation);
+		TR = Rotation;
+		if (PitchPart != None)
+			TR = PitchPart.Rotation;
+		TR = Normalize(R-TR);
 	}
 
 	if( bPhysicalGunAimOnly || TR.Yaw>3500 || TR.Yaw<-3500 || TR.Pitch>3500 || TR.Pitch<-3500 ) {

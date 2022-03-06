@@ -63,8 +63,8 @@ defaultproperties
       bNeverHurtInstigator=True
       bNoHurtTeam=True
       bDirectionalBlow=True
-      speed=1800.000000
-      MaxSpeed=2500.000000
+      speed=10000.000000
+      MaxSpeed=22500.000000
       Damage=30.000000
       MomentumTransfer=25500
       MyDamageType="CybotLaser"
