@@ -2187,7 +2187,7 @@ Ignores FireWeapon,ReadDriverInput,ReadBotInput,DriverLeft;
 		{
 			CurrentTeam = Pawn(Other).PlayerReplicationInfo.Team;
 			SetOverlayMat(TeamOverlays[CurrentTeam],0.5);
-			PlaySound(Sound'CarAlarm01',SLOT_None,2,,400);
+			PlaySound(Sound'CarAlarm01',SLOT_None,2,,2000);
 			if( PlayerPawn(Other)!=None )
 				PlayerPawn(Other).ClientPlaySound(Sound'Hijacked');
 		}
