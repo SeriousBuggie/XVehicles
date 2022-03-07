@@ -1061,8 +1061,8 @@ simulated function WRenderOverlay( Canvas C )
 	else
 		ViewActor = self;
 	CamLoc = vector(ViewActor.Rotation);
-	HL = Location + CamLoc*40000;
 	HN = ViewActor.Location;
+	HL = HN + CamLoc*40000;
 	if (OwnerVehicle != None)
 	{
 		X = (CamLoc dot (OwnerVehicle.Location - HN));
