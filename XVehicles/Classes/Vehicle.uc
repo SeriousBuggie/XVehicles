@@ -2833,7 +2833,8 @@ function vector VectorProjection(vector VProjector, vector VProjectedOn)
 	return VProjectedOn + Normal(-VProjectedOn)*(((-VProjectedOn) dot ( VProjector - VProjectedOn )) / VSize( VProjectedOn));
 }
 
-singular simulated function Bump( Actor Other )
+// not singular because v436 share singularity flag with state version of function
+simulated function Bump( Actor Other )
 {
 	local vector OtVel,MyVel;
 	local float Sp;
@@ -2920,11 +2921,11 @@ singular simulated function Bump( Actor Other )
 		{
 			Sp = FMax(VSize(Velocity),VSize(Other.Velocity)) * (Mass/Other.Mass);
 			if( Sp>250 && Role == ROLE_Authority )
-				Other.TakeDamage((Sp-200)/10,Instigator,Location,Velocity*Mass,'Crushed');
+				Other.TakeDamage((Sp-200)/10,Instigator,Location,200*Normal(Velocity)*Mass,'Crushed');
 	
 			Sp = FMax(VSize(Velocity),VSize(Other.Velocity)) * (Other.Mass/Mass);
 			if( Sp>250 && Role == ROLE_Authority )
-				TakeDamage((Sp-200)/10,Other.Instigator,Other.Location,OtVel*Other.Mass,'Crushed');
+				TakeDamage((Sp-200)/10,Other.Instigator,Other.Location,200*Normal(OtVel)*Other.Mass,'Crushed');
 	
 			NVelH = (Mass*befMyVel + Other.Mass*befOtVel) / (Mass+Other.Mass);	//Inelastic collision calculation (not the most realistic for vehicles, but good, reliable and simple enough for the main objectve)
 	
@@ -2956,26 +2957,30 @@ singular simulated function Bump( Actor Other )
 		{
 			if (Other.bIsPawn)
 			{
-				if ((Other.Mass + Mass)/2 < Mass/3*2 && Mass > Other.Mass)
+				if (Other.Mass < Mass/3)
 					bHitAPawn = True;
 			}
 			else if (Other.IsA('Decoration'))
 			{
 				if (Decoration(Other).bPushable)
 				{
-					bHitAnActor = (Mass*1.5 - Other.Mass) / (Mass*1.5);
+					bHitAnActor = 1.0f - 1.5*Other.Mass/Mass;
 					PushDeco(Decoration(Other));
 				}
 			}
 	
 			if (Role == ROLE_Authority)
 			{
+				Dir = Normal(Other.Location - Location);
+				Sp = Velocity dot Dir;
 				if ((Owner == Other) || (Level.Game.bTeamGame && Pawn(Other) != None && Pawn(Other).PlayerReplicationInfo != None && 
 					Pawn(Other).PlayerReplicationInfo.Team == CurrentTeam))
 					; // not make any damage for same team, also for driver which exit recently too
-				else if( VSize(Velocity)>200 && Role == ROLE_Authority )
-					Other.TakeDamage((VSize(Velocity)-100)/7*Mass/500.f,Instigator,Other.Location+Normal(Location-Other.Location)*Other.CollisionRadius,
-						Velocity*Other.Mass,'Crushed');
+				else if( Sp > 200 )
+					Other.TakeDamage((Sp-100)/7*Mass/500.f,Instigator,Other.Location+Normal(Location-Other.Location)*Other.CollisionRadius,
+						100*Normal(Velocity)*Mass,'Crushed');
+				else if (bHitAPawn)
+					Other.MoveSmooth(Dir*3);
 			}
 		}
 		else if (VSize(VeryOldVel[1]) > 300)
@@ -2984,14 +2989,6 @@ singular simulated function Bump( Actor Other )
 			if (Role == ROLE_Authority)
 				TakeImpactDamage(VSize(VeryOldVel[1])/(Mass/500),None, "Bump");
 		}
-		else if (bHitAPawn && VSize(Velocity)>16)
-		{
-			if (Role == ROLE_Authority)
-				Other.TakeDamage(0,Instigator,Other.Location+Normal(Location-Other.Location)*Other.CollisionRadius,
-					Velocity*2**Other.Mass,'Crushed');
-		}
-		else if (bHitAPawn)
-			Other.Move(vector(Rotation)*Accel*3);
 	}
 }
 
