@@ -84,7 +84,10 @@ function ChangeColor()
 defaultproperties
 {
       CurrentTeamColor=0
-      WAccelRate=660.000000
+      MaxAirSpeed=2000.000000
+      YawTurnSpeed=36000.000000
+      AIRating=5.000000
+      WAccelRate=2000.000000
       Health=360
       VehicleName="Cybot Helico"
       TranslatorDescription="This is a Cybot Helico, you can fire different firemodes using [Fire] and [AltFire] buttons. To move higher or lover use [Jump] and [Crouch] buttons and to move around use movement keys. To leave this vehicle press [ThrowWeapon] key."
@@ -108,6 +111,7 @@ defaultproperties
       BulletHitSounds(5)=Sound'XChopVeh.Damage.CybSndArmorDmg2'
       DriverWeapon=(WeaponClass=Class'XChopVeh.CybBlades')
       VehicleKeyInfoStr="Cybot Helico keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to strafe|%Jump%, %Duck% to move up/down|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%ThrowWeapon% to exit the vehicle"
+      WDeAccelRate=200.000000
       DropFlag=DF_All
       DamageGFX(0)=(bHaveThisGFX=True,bHaveFlames=True,DmgFXOffset=(X=-32.000000,Z=20.000000),FXRange=15)
       DestroyedExplDmg=70

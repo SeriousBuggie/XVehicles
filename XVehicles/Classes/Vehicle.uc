@@ -54,7 +54,14 @@ var float NextWaterDamageTime;
 var() int Health, InitialDamage;
 var() class<VAIBehaviour> AIClass;
 var() class<DriverWeapon> DriverWeaponClass;
-var() bool bTeamLocked,bShouldRepVehYaw,bFPViewUseRelRot,bFPRepYawUpdatesView,bStationaryTurret,bRenderVehicleOnFP,bIsWaterResistant;
+var() bool bTeamLocked,
+	bShouldRepVehYaw,
+	bFPViewUseRelRot,
+	bFPRepYawUpdatesView,
+	bStationaryTurret,
+	bRenderVehicleOnFP,
+	bIsWaterResistant,
+	bCanFly;
 var() byte CurrentTeam;
 var() localized string VehicleName,TranslatorDescription,MsgVehicleDesc;
 var() vector ExitOffset,BehinViewViewOffset,InsideViewOffset;
@@ -942,8 +949,12 @@ function RestartPawn(Pawn Other)
     local PlayerPawn PP;
     
     // fix UT bug
-    if (Bot(Other) != None && Bot(Other).PlayerReStartState == 'PlayerWalking')
-	    Bot(Other).PlayerReStartState = 'Attacking';
+    if (Bot(Other) != None) 
+    {
+    	Other.SetPhysics(PHYS_Falling);
+	    if (Bot(Other).PlayerReStartState == 'PlayerWalking')
+		    Bot(Other).PlayerReStartState = 'Attacking';
+	}
     
     Other.ClientRestart();
     PP = PlayerPawn(Other);
@@ -981,8 +992,8 @@ local vector ExitVect;
 			{
 				if (Driver.Health>0)
 					Driver.GoToState('PlayerWalking');
-				RestartPawn(Driver);
 			}
+			RestartPawn(Driver);
 			ChangeCollision(Driver, false);
 
 			ExitVect = ExitOffset;
@@ -1729,7 +1740,11 @@ simulated function ResetPhysics(Pawn Other)
 
 	if (PlayerPawn(Other) != None)
 		Desired = ReqPPPhysics;
-	else // bot
+	else if (bCanFly)
+		Desired = Phys_Flying;
+	else if (SubmarinePhys(self) != None)
+		Desired = Phys_Swimming;
+	else
 		Desired = Phys_Walking;
 	if (Other.Physics != Desired)
 		Other.SetPhysics(Desired);
@@ -2010,7 +2025,7 @@ function ReadBotInput( float Delta )
 		Return;
 	}
 	Turning = ShouldTurnFor(MoveDest);
-	Rising = 0;
+	Rising = ShouldRiseFor(MoveDest);
 	Accel = ShouldAccelFor(MoveDest);
 	
 //	if (Accel == 0) log(self @ "Move" @ v @ Turning @ Accel @ (Normal(MoveDest-Location) dot vector(Rotation)));
@@ -2103,6 +2118,11 @@ function int ShouldTurnFor( vector AcTarget, optional float YawAdjust, optional 
 	else Return 1;
 }
 
+function int ShouldRiseFor( vector AcTarget )
+{
+	return 0;
+}
+
 // Pawn can enter this vehicle?
 function bool CanEnter( Pawn Other, optional bool bIgnoreDuck )
 {
@@ -2121,7 +2141,7 @@ function bool IsTeamLockedFor( Pawn Other )
 // -1 - Reversed
 simulated function int GetMovementDir()
 {
-	if( (vector(Rotation) dot Normal(Velocity))>0 )
+	if( (vector(Rotation) dot Velocity)>0 )
 		Return 1;
 	else Return -1;
 }
@@ -3252,7 +3272,7 @@ function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 	local byte i;
 	local bool bHadPass;
 	local byte shldset, shldtkn;
-//	Log(self @ Level.TimeSeconds @ "TakeDamage" @ Damage @ InstigatedBy @ hitlocation @ momentum @ damageType);
+//	Log(self @ Level.TimeSeconds @ "TakeDamage" @ Damage @ InstigatedBy @ hitlocation @ momentum @ damageType @ InstigatedBy.DamageScaling);
 
 	if (!bVehicleBlewUp)
 	{
@@ -3293,7 +3313,6 @@ function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 		{
 			if (ArmorType[i].ArmorLevel < 0.0 || ArmorType[i].ArmorLevel > 1.0)
 				ArmorType[i].ArmorLevel = 1.0;
-	
 			if (ArmorType[i].ProtectionType != '' && ArmorType[i].ProtectionType == damageType)
 				Damage -= (Damage*ArmorType[i].ArmorLevel);
 		}
@@ -3305,14 +3324,12 @@ function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 				if (ShieldType[i] != '')
 				{
 					shldset++;
-	
 					if (ShieldType[i] != '' && bProtectAgainst && ShieldType[i] == damageType)
 						Damage -= (Damage*ShieldLevel);
 					else if (!bProtectAgainst && ShieldType[i] != damageType)
 						shldtkn++;
 				}
 			}
-	
 			if (!bProtectAgainst && shldset == shldtkn)
 				Damage -= (Damage*ShieldLevel);
 		}
@@ -3321,7 +3338,6 @@ function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 			PlaySound(BulletHitSounds[Rand(ArrayCount(BulletHitSounds))],SLOT_Pain,FClamp(float(Damage)/20,0.75,2));
 		else if (damageType=='BumpWall')
 			PlaySound(ImpactSounds[Rand(ArrayCount(ImpactSounds))],SLOT_Pain,FClamp(float(Damage)/50,0.75,2));
-	
 		Health-=Damage;
 		Velocity+=momentum/Mass;
 		if( Health<=0 )
@@ -3948,6 +3964,7 @@ defaultproperties
       bStationaryTurret=False
       bRenderVehicleOnFP=False
       bIsWaterResistant=False
+      bCanFly=False
       CurrentTeam=0
       VehicleName="Vehicle"
       TranslatorDescription=""

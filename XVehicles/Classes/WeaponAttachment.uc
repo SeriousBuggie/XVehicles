@@ -948,7 +948,10 @@ function rotator GetBotInput( float Delta )
 		else if (PassengerNum > 0 && OwnerVehicle.Driver != None && WeaponController.MoveTarget == None &&
 			Vsize(WeaponController.Focus - WeaponController.Destination) < 10)
 			RepAimPos = OwnerVehicle.MoveDest;
-		else
+		else if (WeaponController.MoveTarget == None && 
+			Vsize(WeaponController.Focus - WeaponController.Destination) < 10)
+			RepAimPos = OwnerVehicle.MoveDest;
+		else		
 			RepAimPos = WeaponController.Focus;
 	}
 	Return rotator(RepAimPos-(Location + (eVect(0,0,ZAimOffset)>>OwnerVehicle.Rotation)));

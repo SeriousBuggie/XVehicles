@@ -96,6 +96,7 @@ defaultproperties
       bStayStillWhenNotDriving=False
       WAccelRate=200.000000
       Health=2000
+      bCanFly=True
       VehicleName="Air Ship"
       TranslatorDescription="This is a Air Ship, press [Fire] or [AltFire] to fire the different firemodes. Use your Strafe keys and Move Forward/Backward keys to strafe/accelerate/deaccelerate. To leave this vehicle, press your [ThrowWeapon] key."
       VehicleKeyInfoStr="Airship keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to strafe|%Jump%, %Duck% to move up/down|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%ThrowWeapon% to exit the vehicle"

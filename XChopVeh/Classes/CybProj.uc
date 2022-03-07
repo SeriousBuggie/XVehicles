@@ -60,6 +60,7 @@ defaultproperties
       WaterSplashType=2
       bDirectHit=True
       ExplosionNoise=1.000000
+      DmgRadius=64.000000
       bNeverHurtInstigator=True
       bNoHurtTeam=True
       bDirectionalBlow=True

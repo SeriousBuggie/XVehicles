@@ -61,16 +61,13 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 {
 	local rotator R;
 	local vector X,Y,Z;
+	
+//	log("Turn" @ InTurn @ "Accel" @ InAccel @ "Rise" @ InRise @ "VehicleYaw" @ VehicleYaw);
 
 	if( PlayerPawn(Driver)==None )
-	{
-		if( Driver.Target!=None )
-			X = Driver.Target.Location;
-		else X = MoveDest;
-		Return Normal(X-Location);
-	}
+		Return Normal(MoveDest-Location);
 	if( InTurn==0 && InRise==0 && InAccel==0 )
-		Return vect(0,0,0);
+		return vect(0,0,0);
 	R.Yaw = VehicleYaw;
 	GetAxes(R,X,Y,Z);
 	Return Normal(X*InAccel+Y*-InTurn+Z*InRise);
@@ -134,7 +131,7 @@ simulated function UpdateDriverInput( float Delta )
 	if( Level.NetMode!=NM_DedicatedServer && !bOnGround && bDriving )
 	{
 		Rr.Yaw = VehicleYaw;
-		Ac = (Velocity << Rr)*10f;
+		Ac = (Velocity << Rr)*MaxYawRates[0]/MaxAirSpeed;
 		if( Ac.Y>MaxYawRates[0] )
 			Ac.Y = MaxYawRates[0];
 		else if( Ac.Y<MaxYawRates[1] )
@@ -156,7 +153,7 @@ simulated function UpdateDriverInput( float Delta )
 	if( !bDriving )
 	{
 		DeAcc = VSize(Velocity);
-		DeAccRat = Delta*WAccelRate*Region.Zone.ZoneGroundFriction;
+		DeAccRat = Delta*WDeAccelRate*Region.Zone.ZoneGroundFriction;
 		if( DeAccRat>DeAcc )
 			DeAccRat = DeAcc;
 		Velocity-=Normal(Velocity)*DeAccRat;
@@ -179,17 +176,40 @@ simulated function UpdateDriverInput( float Delta )
 		VehicleYaw+=Changed;
 	}	
 	Ac = GetAccelDir(Turning,Rising,Accel)*WAccelRate*Delta;
+/*	
 	if( VSize(Velocity)>MaxAirSpeed && VSize(Normal(Velocity)-Normal(Ac))<0.85 )
 		Velocity+=(Ac*0.1);
 	else Velocity+=Ac;
-	if( Rising==0 && PlayerPawn(Driver)!=None )
-		Velocity.Z*=FMax(0f, 1.f-Delta);
-	if( Turning==0 && Accel==0 )
+*/
+	Velocity += Ac;
+	if (VSize(Velocity) > MaxAirSpeed)
+		Velocity = MaxAirSpeed*Normal(Velocity);
+	
+	if (PlayerPawn(Driver) != None)
 	{
-		Velocity.X*=FMax(0f, 1.f-Delta);
-		Velocity.Y*=FMax(0f, 1.f-Delta);
+		if( Rising==0)
+			Velocity.Z*=FMax(0f, 1.f-Delta);
+		if( Turning==0 && Accel==0 )
+		{
+			Velocity.X*=FMax(0f, 1.f-Delta);
+			Velocity.Y*=FMax(0f, 1.f-Delta);
+		}
 	}
 }
+// bot can travel at any drection directly
+function int ShouldAccelFor( vector AcTarget )
+{
+	return 0;
+}
+function int ShouldTurnFor( vector AcTarget, optional float YawAdjust, optional float DeadZone )
+{
+	return 0;
+}
+function int ShouldRiseFor( vector AcTarget )
+{
+	return 0;
+}
+
 simulated function vector GetMovementSpeeds()
 {
 	local vector V;
@@ -229,6 +249,7 @@ defaultproperties
       bHasRotorDmg=False
       WAccelRate=900.000000
       Health=300
+      bCanFly=True
       VehicleName="Helicopter"
       TranslatorDescription="This is a chopper vehicle, you can fire different firemodes using [Fire] and [AltFire] buttons. To move higher or lover use [Jump] and [Crouch] buttons and to move around use movement keys. To leave this vehicle press [ThrowWeapon] key."
       VehicleKeyInfoStr="Chopper craft keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to strafe|%Jump%, %Duck% to move up/down|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%ThrowWeapon% to exit the vehicle"

@@ -23,6 +23,15 @@ function SpawnFireEffects(byte Mode)
 	OwnerVehicle.PlayAnim(Anim, 10.0 - Mode*8);
 }
 
+function FireTurret( byte Mode, optional bool bForceFire )
+{
+	if (Bot(WeaponController) != None && Mode == 0 && 
+		class'XV_SeekingRocket'.static.IsGoodTarget(WeaponController, WeaponController.Target))
+		Mode = 1; // use alt fire for rocket
+
+	Super.FireTurret(Mode, bForceFire);	
+}
+
 defaultproperties
 {
       RotatingSpeed=16000000.000000

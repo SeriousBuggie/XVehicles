@@ -41,103 +41,125 @@ function float GetVehAIRating( Pawn Seeker )
 	return ret;
 }
 
+function vector AdjustLocation(Actor NP)
+{
+	local vector ret, HL, HN, pos;
+	local float offset;
+	ret = NP.Location;	
+	if (VehicleOwner.bCanFly && PathNode(NP) != None)
+	{
+		offset = VehicleOwner.CollisionHeight*6;
+		pos = ret + offset*vect(0,0,1);
+		if (NP.Trace(HL, HN, pos) != None)
+		{
+			offset = VSize(HL - ret) - VehicleOwner.CollisionHeight*1.5;
+			if (offset > 0)
+				ret += offset*vect(0,0,1);
+		}
+		else ret = pos;
+	}
+	return ret;
+}
+
 function vector GetNextMoveTarget()
 {
 	local int i, best;
 	local float Dist, BestDist;
-	Local vector V, S, HitLocation, HitNormal;
+	Local vector V, S, T, HitLocation, HitNormal;
+	local string dbg;
 	local NavigationPoint Visible[ArrayCount(VehicleOwner.Driver.RouteCache)], NP;
+	local vector Pos[ArrayCount(VehicleOwner.Driver.RouteCache)];
 	
 	if( VehicleOwner.Driver.Target!=None && VehicleOwner.Driver.LineOfSightTo(VehicleOwner.Driver.Target) &&
 		!VehicleOwner.Driver.IsInState('Fallback'))
 	{
 //		Log("Use driver Target" @ VehicleOwner.Driver.Target @ VehicleOwner.Driver.Target.getHumanName());
-		Return VehicleOwner.Driver.Target.Location;
+		Return AdjustLocation(VehicleOwner.Driver.Target);
 	}
-	else if( VehicleOwner.Driver.MoveTarget!=None )
+	else if( VehicleOwner.Driver.MoveTarget!=None || 
+		(VehicleOwner.Driver.RouteCache[0] != None && 
+		Vsize(VehicleOwner.Driver.RouteCache[0].Location - VehicleOwner.Driver.Destination) < 10))
 	{
 		BestDist = -1;
 		V.X = VehicleOwner.CollisionRadius;
 		V.Y = VehicleOwner.CollisionRadius;
 		V.Z = VehicleOwner.CollisionHeight - VehicleOwner.MaxObstclHeight/2;
 		S = VehicleOwner.Location;
-		S.Z += VehicleOwner.MaxObstclHeight/2;
+		S.Z += VehicleOwner.MaxObstclHeight/2;		
+//		dbg = "";
 		for (i = 0; i < ArrayCount(VehicleOwner.Driver.RouteCache); i++)
 		{
 			NP = VehicleOwner.Driver.RouteCache[i];
 			if (NP == None)
 				break;
-			HitLocation = NP.Location;
-			HitLocation.Z -= NP.CollisionHeight - VehicleOwner.CollisionHeight - VehicleOwner.MaxObstclHeight/2;
-			if (!VehicleOwner.Driver.LineOfSightTo(NP) || 
-				VehicleOwner.Trace(HitLocation, HitNormal, HitLocation, S, true, V) != None)
+			T = AdjustLocation(NP);
+			Pos[i] = T;
+			T.Z -= NP.CollisionHeight - VehicleOwner.CollisionHeight - VehicleOwner.MaxObstclHeight/2;
+			if (//!VehicleOwner.Driver.LineOfSightTo(NP) || 
+				VehicleOwner.Trace(HitLocation, HitNormal, T, S, true, V) != None)
 			{
 //				if (i == 0) Log(i @ NP @ HitLocation @ HitNormal);
+//				dbg = dbg @ "-";				
 				continue;
 			}
 			Visible[i] = NP;
-			Dist = VSize(NP.Location - VehicleOwner.Location);
+			Dist = VSize(T - VehicleOwner.Location);
 			if (BestDist < 0 || dist < BestDist)
 			{
 				BestDist = dist;
 				best = i;
-			}				
-		}		
+//				dbg = dbg @ "X";
+			}
+//			else dbg = dbg @ "+";
+		}
+//		log(VehicleOwner.Driver @ 1 @ dbg);
 		if (BestDist < 0)
 		{
 //			Log("Use driver MoveTarget" @ VehicleOwner.Driver.MoveTarget @ VehicleOwner.Driver.MoveTarget.getHumanName());
+			if( VehicleOwner.Driver.MoveTarget == None)
+			{
+//				Log("Use driver Destination 2" @ VehicleOwner.Driver.Destination);
+				VehicleOwner.Driver.MoveTimer = -1f; // time to refresh path
+				return VehicleOwner.Driver.Destination;
+			}
 			if (VehicleOwner.Driver.RouteCache[0] != None && 
 				Inventory(VehicleOwner.Driver.MoveTarget) != None)
-				return VehicleOwner.Driver.RouteCache[0].Location;
-			Return VehicleOwner.Driver.MoveTarget.Location;
+				return Pos[0];
+			Return AdjustLocation(VehicleOwner.Driver.MoveTarget);
 		}
 			
 //		v = Normal(VehicleOwner.Velocity);
 		v = vector(VehicleOwner.Rotation);
 			
-		BestDist = V dot Normal(Visible[best].Location - Location);
+		BestDist = V dot Normal(Pos[best] - Location);
 		
+//		dbg = "";
 		for (i = best + 1; i < ArrayCount(Visible); i++)
 		{
 			if (Visible[i] == None)
+			{
+				dbg = dbg @ ".";
 				continue;
-			Dist = V dot Normal(Visible[i].Location - Location);
+			}
+			Dist = V dot Normal(Pos[i] - Location);
+//			dbg = dbg @ "+";
 			if (dist > BestDist)
 			{
 				BestDist = dist;
 				best = i;
+//				dbg = dbg @ "!";
 			}				
 		}
+//		log(VehicleOwner.Driver @ 2 @ dbg);
 		
 		if (i >= 14) // too old?
 			VehicleOwner.Driver.MoveTimer = -1f; // time to refresh path
 		
 //		Log("Use driver RouteCache" @ best @ Visible[best] @ Visible[best].getHumanName());
-		V = Visible[best].Location;
+		V = Pos[best];
 		if (FlagBase(Visible[best]) != None)
 			V -= (Normal(VehicleOwner.ExitOffset)*(VehicleOwner.CollisionRadius + 10 - Visible[best].CollisionRadius/2)) >> VehicleOwner.Rotation;
 		return V;
-
-			
-		if (best + 1 < ArrayCount(VehicleOwner.Driver.RouteCache) && 
-			VehicleOwner.Driver.LineOfSightTo(VehicleOwner.Driver.RouteCache[best + 1]))
-			best++;
-		
-		if (best + 1 < ArrayCount(VehicleOwner.Driver.RouteCache) && 
-			VehicleOwner.Driver.LineOfSightTo(VehicleOwner.Driver.RouteCache[best + 1]))
-			best++;	
-		
-		//VehicleOwner.Driver.MoveTarget = VehicleOwner.Driver.RouteCache[best];
-		return VehicleOwner.Driver.RouteCache[best].Location;
-		/*
-		if( VehicleOwner.Driver.RouteCache[2]!=None && VehicleOwner.Driver.LineOfSightTo(VehicleOwner.Driver.RouteCache[2]) )
-			Return VehicleOwner.Driver.RouteCache[2].Location;
-		else if( VehicleOwner.Driver.RouteCache[1]!=None && VehicleOwner.Driver.LineOfSightTo(VehicleOwner.Driver.RouteCache[1]) )
-			Return VehicleOwner.Driver.RouteCache[1].Location;
-		else if( VehicleOwner.Driver.RouteCache[0]!=None && VehicleOwner.Driver.LineOfSightTo(VehicleOwner.Driver.RouteCache[0]) )
-			Return VehicleOwner.Driver.RouteCache[0].Location;
-		*/
-		Return VehicleOwner.Driver.MoveTarget.Location;
 	}
 //	Log("Use driver Destination" @ VehicleOwner.Driver.Destination);
 	Return VehicleOwner.Driver.Destination;
