@@ -317,6 +317,8 @@ var(Shielding) bool bProtectAgainst;	//If true, shield will 'protect against' Sh
 var(Shielding) name ShieldType[16];
 var(Shielding) float ShieldLevel;
 
+const SmallDrawScale = 0.0001;
+
 replication
 {
 	// Variables the server should send to the client.
@@ -897,7 +899,7 @@ function ChangeCollision(Pawn Other, bool bInside)
 	Local Bot Bot;
 	if (bInside)
 	{
-		Other.DrawScale = 0;
+		Other.DrawScale = SmallDrawScale;
 		Other.SetCollision(False,False,False);
 		L = Location;
 		L.Z += Other.default.CollisionHeight - CollisionHeight;
@@ -1785,7 +1787,7 @@ simulated function ResetPawn(Pawn Other, rotator R, Weapon Weap)
 	{
 		if( Other.bCollideActors )
 			Other.SetCollision(false);
-		Other.DrawScale = 0;
+		Other.DrawScale = SmallDrawScale;
 		Other.SetRotation(R);
 		if( PlayerPawn(Other)==None )
 			Other.ViewRotation = R;
@@ -2979,8 +2981,9 @@ simulated function Bump( Actor Other )
 				else if( Sp > 200 )
 					Other.TakeDamage((Sp-100)/7*Mass/500.f,Instigator,Other.Location+Normal(Location-Other.Location)*Other.CollisionRadius,
 						100*Normal(Velocity)*Mass,'Crushed');
-				else if (bHitAPawn)
-					Other.MoveSmooth(Dir*3);
+				// bad idea can cause recursive calls if pawn in middle between two vehicles.				
+				/* else if (bHitAPawn)
+					Other.MoveSmooth(Dir*3); */
 			}
 		}
 		else if (VSize(VeryOldVel[1]) > 300)
