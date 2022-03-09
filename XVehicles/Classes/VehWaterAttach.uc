@@ -3,7 +3,7 @@ class VehWaterAttach expands Effects;
 var float WaveSize, WaveLenght;
 var ZoneInfo OldWaterZone;
 
-function PostBeginPlay()
+simulated function PostBeginPlay()
 {
 	if (class'Vehicle'.default.bHaveGroundWaterFX)
 		SetTimer(0.1,True);
@@ -11,7 +11,7 @@ function PostBeginPlay()
 		SetTimer(0.35,True);
 }
 
-function Timer()
+simulated function Timer()
 {
 local VehWaterTrail vwt;
 local float LScale;
@@ -22,7 +22,9 @@ local rotator RYaw;
 
 		LScale = WaveSize / 128;
 
-		if (OldWaterZone != None && OldWaterZone.IsA('xZoneInfo') && WaveSize > 0 && (VSize(OldWaterZone.ZoneVelocity) > 150 || (Abs(WaveLenght) > WaveSize/2 && !Vehicle(Owner).bBigVehicle) || (Abs(WaveLenght) > WaveSize/6.5 && Vehicle(Owner).bBigVehicle)))
+		if (OldWaterZone != None && OldWaterZone.IsA('xZoneInfo') && WaveSize > 0 && 
+			(VSize(OldWaterZone.ZoneVelocity) > 150 || (!Vehicle(Owner).bBigVehicle && Abs(WaveLenght) > WaveSize/2) || 
+			(Vehicle(Owner).bBigVehicle && Abs(WaveLenght) > WaveSize/6.5)))
 		{
 			RYaw.Yaw = Owner.Rotation.Yaw;
 
@@ -30,7 +32,6 @@ local rotator RYaw;
 				vwt = Spawn(Class'VehWaterTrail',,,, RYaw);
 			else
 				vwt = Spawn(Class'VehWaterTrail',,,, rotator(-vector(RYaw)));
-
 			if (vwt != None)
 			{
 				vwt.AnimFrame = FMin(FMax(WaveSize, Abs(WaveLenght)) / (2560*LScale),0.5);
@@ -40,6 +41,7 @@ local rotator RYaw;
 					vwt.MultiSkins[1] = OldWaterZone.Skin;
 			}
 		}
+//		if (WaveLenght > 0) log(self @ Level.TimeSeconds @ "WaveLenght" @ WaveLenght);
 
 		WaveLenght = 0;
 	}
@@ -55,6 +57,7 @@ defaultproperties
       WaveLenght=0.000000
       OldWaterZone=None
       bHidden=True
+      RemoteRole=ROLE_None
       SoundRadius=255
       CollisionRadius=0.500000
       CollisionHeight=0.500000

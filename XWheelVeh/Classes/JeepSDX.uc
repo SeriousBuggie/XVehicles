@@ -65,7 +65,7 @@ simulated function SetIronBars()
 		For( i=0; i<4; i++ )
 		{
 			IronBars[i] = Spawn(Class'JSDXIceWheelSup',MyWheels[i]);
-			if (MyWheels[i].bMirroredWheel)
+			if (MyWheels[i] != None && MyWheels[i].bMirroredWheel)
 				IronBars[i].Mesh = Mesh'JSDXIceWheelSupMir';
 		}
 

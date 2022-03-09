@@ -8,10 +8,7 @@ function PreBeginPlay()
 {
 	Super.PreBeginPlay();
 	VehicleOwner = Vehicle(Owner);
-	MaxDesireability = VehicleOwner.AIRating*100;
-	setCollisionSize(VehicleOwner.CollisionRadius + 10, CollisionHeight);
-	PrePivot.Z = CollisionHeight - VehicleOwner.CollisionHeight;
-	ItemName = VehicleOwner.VehicleName;
+	VehicleOwner.InitInventory(self);
 }
 
 function BecomePickup();

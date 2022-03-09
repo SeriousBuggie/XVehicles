@@ -26,10 +26,21 @@ function PreBeginPlay()
 {
 	Super.PreBeginPlay();
 	VehicleOwner = Vehicle(Owner);
-	MaxDesireability = VehicleOwner.AIRating*100;
-	AIRating = VehicleOwner.AIRating;
-	setCollisionSize(VehicleOwner.CollisionRadius + 10, CollisionHeight);
-	PrePivot.Z = CollisionHeight - VehicleOwner.CollisionHeight;
+	VehicleOwner.InitInventory(self);
+}
+
+function ChangeOwner(Actor NewOwner)
+{
+	local Pawn OldOwner;
+	OldOwner = Pawn(Owner);
+	SetOwner(NewOwner);
+	if (OldOwner != None)
+	{
+		OldOwner.DeleteInventory(self);
+		if (MyNotifier!=None)
+			OldOwner.DeleteInventory(MyNotifier);
+	}
+	Inventory = MyNotifier;
 }
 
 event float BotDesireability( pawn Bot )
@@ -55,6 +66,7 @@ function PostBeginPlay()
 {
 	bOwnsCrosshair = !class'DriverWeapon'.default.UseStandardCrosshair;
 	MyNotifier = Spawn(Class'DriverWNotifier');
+	//VehicleOwner.InitInventory(MyNotifier);
 	MyNotifier.WeaponOwner = Self;
 	Inventory = MyNotifier;
 	
@@ -185,16 +197,23 @@ defaultproperties
       UseStandardCrosshair=False
       bWarnTarget=True
       AIRating=1.000000
+      bRotatingPickup=False
       PickupMessage="You got a vehicle"
       ItemName="Vehicle"
       PlayerViewMesh=LodMesh'Botpack.AutoML'
+      PlayerViewScale=0.000100
       PickupViewMesh=LodMesh'Botpack.MagPick'
+      PickupViewScale=0.000100
       ThirdPersonMesh=LodMesh'Botpack.AutoHand'
+      ThirdPersonScale=0.000100
       Charge=1
       MaxDesireability=10.000000
       bHidden=True
       Physics=PHYS_Trailer
+      DrawType=DT_Sprite
       Mesh=LodMesh'Botpack.MagPick'
+      DrawScale=0.000100
       bGameRelevant=True
       bCarriedItem=True
+      CollisionHeight=24.000000
 }

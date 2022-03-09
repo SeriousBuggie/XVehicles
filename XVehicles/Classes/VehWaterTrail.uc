@@ -29,7 +29,7 @@ simulated function Tick(float DeltaTime)
 	DrawScale = InitDrawScale + (Default.LifeSpan - LifeSpan) * FinalScale * InitDrawScale / Default.LifeSpan;
 }
 
-function ZoneChange( ZoneInfo newZone)
+simulated function ZoneChange( ZoneInfo newZone)
 {
 	if (!inWater && newZone.bWaterZone)
 	{
@@ -55,6 +55,7 @@ defaultproperties
       FinalScale=3.000000
       inWater=False
       Physics=PHYS_Falling
+      RemoteRole=ROLE_None
       LifeSpan=1.000000
       AnimSequence="Expand"
       DrawType=DT_Mesh

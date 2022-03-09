@@ -32,9 +32,9 @@ State EmptyVehicle
 	function EndState()
 	{
 		if (DriverGun != None)
-			DriverGun.LoopAnim('Rotating');
+			DriverGun.LoopAnim('Rotating', 2.0);
 		if (AttachmentList != None)
-			AttachmentList.LoopAnim('Rotating');
+			AttachmentList.LoopAnim('Rotating', 4.0);
 		Super.EndState();
 	}
 }
@@ -87,7 +87,7 @@ defaultproperties
       MaxAirSpeed=2000.000000
       YawTurnSpeed=36000.000000
       AIRating=5.000000
-      WAccelRate=2000.000000
+      WAccelRate=1000.000000
       Health=360
       VehicleName="Cybot Helico"
       TranslatorDescription="This is a Cybot Helico, you can fire different firemodes using [Fire] and [AltFire] buttons. To move higher or lover use [Jump] and [Crouch] buttons and to move around use movement keys. To leave this vehicle press [ThrowWeapon] key."

@@ -24,7 +24,7 @@ defaultproperties
 {
       InitDrawScale=0.000000
       Physics=PHYS_Rotating
-      RemoteRole=ROLE_SimulatedProxy
+      RemoteRole=ROLE_None
       LifeSpan=1.250000
       DrawType=DT_Mesh
       Style=STY_Translucent

@@ -131,9 +131,14 @@ var vector MoveDest;
 var float MoveTimer;
 
 // Replication variables
-var vector VehPos,VehVeloc,SimVehVeloc,SimPosUpd;
-var bool bUpdatingPos;
-var byte UpdTimeLeft;
+struct VehState
+{
+	var vector Pos;
+	var vector Velocity;
+};
+var VehState ServerState;
+var float ServerStateTime;
+var vector LastServerPos;
 var DriverCameraActor MyCameraAct;
 var OverlayMatDispRep ReplicOverlayMat;
 
@@ -323,8 +328,8 @@ replication
 {
 	// Variables the server should send to the client.
 	reliable if( Role==ROLE_Authority )
-		VehPos,VehVeloc,Driver,bDriving,Health,bVehicleBlewUp,ReplicOverlayMat,bTeamLocked,CurrentTeam,Passengers,
-		bReadyToRun, Specials, DriverGun, VehicleState, // new ones
+		Driver,bDriving,Health,bVehicleBlewUp,ReplicOverlayMat,bTeamLocked,CurrentTeam,Passengers,
+		bReadyToRun, Specials, DriverGun, VehicleState, ServerState, // new ones
 		// Functions server can call.
 		ClientSetTranslatorMsg;
 	reliable if( Role==ROLE_Authority && bNetOwner )
@@ -630,6 +635,17 @@ simulated function PostBeginPlay()
 	SetTimer(0.5, true);
 }
 
+function InitInventory(Inventory Inv)
+{
+	Inv.MaxDesireability = AIRating*100;
+	Inv.setCollisionSize(CollisionRadius + 10, Inv.CollisionHeight);
+	Inv.PrePivot.Z = Inv.CollisionHeight - CollisionHeight;
+	Inv.ItemName = VehicleName;
+	// weapon specific
+	if (Weapon(Inv) != None)
+		Weapon(Inv).AIRating = AIRating;
+}
+
 function ChangeBackView()
 {
 	if (MyCameraAct != None)
@@ -740,7 +756,7 @@ function DriverWeapon SpawnWeapon(class<DriverWeapon> DriverWeaponClass, optiona
 		Owned = self;
 	wep = Spawn(DriverWeaponClass,self);
 	if (Owned != self)
-		wep.setOwner(Owned);
+		wep.ChangeOwner(Owned);
 	if (Seat == 0) // driver
 	{
 		wep.ItemName = VehicleName;
@@ -857,7 +873,7 @@ function DriverEnter( Pawn Other )
 	if( DWeapon==None )
 		DWeapon = SpawnWeapon(DriverWeaponClass);
 	DWeapon.NotifyNewDriver(Other);
-	DWeapon.SetOwner(Other);
+	DWeapon.ChangeOwner(Other);
 	if( Other.Weapon!=None )
 	{
 		Other.PendingWeapon = Other.Weapon;
@@ -950,6 +966,9 @@ function RestartPawn(Pawn Other)
     local ENetRole OldRole;
     local PlayerPawn PP;
     
+    if (Other.IsInState('Dying'))
+    	return;
+    
     // fix UT bug
     if (Bot(Other) != None) 
     {
@@ -992,7 +1011,7 @@ local vector ExitVect;
 			Driver.DrawScale = Driver.Default.DrawScale;
 			if( PlayerPawn(Driver)!=None )
 			{
-				if (Driver.Health>0)
+				if (Driver.Health>0 && Driver.IsInState('PlayerFlying'))
 					Driver.GoToState('PlayerWalking');
 			}
 			RestartPawn(Driver);
@@ -1038,7 +1057,7 @@ local vector ExitVect;
 	if( DWeapon!=None )
 	{
 		DWeapon.NotifyDriverLeft(Driver);
-		DWeapon.SetOwner(Self);
+		DWeapon.ChangeOwner(Self);
 	}
 	//log("DriverLeft" @ Driver);
 	if (PlayerPawn(Driver) != None)
@@ -1115,43 +1134,26 @@ simulated function Destroyed()
 // Client update vehicle pos/rot/vel
 simulated function ClientUpdateState( float Delta )
 {
+	local vector ServerPredictPos, Diff;
 	local float Dist;
+	
+	if (ServerState.Pos != vect(0,0,0))
+	{
+		LastServerPos = ServerState.Pos;
+		ServerStateTime = Level.TimeSeconds;
+		ServerState.Pos = vect(0,0,0);
+		ServerState.Velocity /= 15.f;
+		Velocity = ServerState.Velocity;		
+	}
+	ServerPredictPos = LastServerPos + (Level.TimeSeconds - ServerStateTime)*ServerState.Velocity;
+	Diff = ServerPredictPos-Location;
+	Dist = VSize(Diff);
 
-	if( bUpdatingPos )
-	{
-		Move(SimPosUpd);
-		UpdTimeLeft--;
-		if( UpdTimeLeft==0 )
-		{
-			bOnGround = CheckOnGround();
-			bUpdatingPos = False;
-		}
-	}
-	if( VehPos!=vect(0,0,0) ) // Give an interpolation for location updates
-	{
-		Dist = VSize(VehPos-Location);
-		if( Dist>350 || Dist<=5 )
-		{
-			bOnGround = CheckOnGround();
-			bUpdatingPos = False;
-			SetLocation(VehPos);
-		}
-		else
-		{
-			UpdTimeLeft = (Dist/5);
-			bUpdatingPos = True;
-			if( UpdTimeLeft==0 )
-				UpdTimeLeft = 1;
-			else if( UpdTimeLeft>50 )
-				UpdTimeLeft = 50;
-			SimPosUpd = (VehPos-Location)/UpdTimeLeft;
-		}
-	}	
-	if( VehVeloc!=SimVehVeloc )
-	{
-		SimVehVeloc = VehVeloc;
-		Velocity = VehVeloc/15.f;
-	}
+	if (Dist > 350)
+		SetLocation(ServerPredictPos);
+	else if (Dist > 1)
+		Move(Diff*0.1);
+	
 	if( bShouldRepVehYaw && ReplVehicleYaw!=0 )
 	{
 		if( bFPRepYawUpdatesView && !bCameraOnBehindView && Driver!=None && IsNetOwner(Driver) )
@@ -1163,8 +1165,8 @@ simulated function ClientUpdateState( float Delta )
 // Server send to client vehicle pos/rot/vel
 function ServerPackState( float Delta)
 {
-	VehPos = Location;
-	VehVeloc = Velocity*15.f;
+	ServerState.Pos = Location;
+	ServerState.Velocity = Velocity*15.f;
 	if( bShouldRepVehYaw )
 		ReplVehicleYaw = VehicleYaw;
 }
@@ -1541,6 +1543,18 @@ local VehicleAttachment vat;
 
 		VehFoot.Move(CollisionHeight*vect(0,0,-1));
 	}
+/*	
+	if (Owner != None)
+	{
+		DbgRole = Role;
+		Role = Role_Authority;
+		DbgTmr2 = Float(ConsoleCommand("DbgTmr"));
+		Role = DbgRole;
+		DbgTmr = DbgTmr2 - DbgTmr;
+		Log(self @ (1/DbgTmr) @ (Vsize(Location - OldLocation)/DbgTmr) @ DbgMsg);
+		DbgTmr = DbgTmr2;
+	}
+*/
 }
 
 simulated function CheckBase(Actor PossibleBase, Actor Ac[4])
@@ -3775,7 +3789,7 @@ function PassengerEnter( Pawn Other, byte Seat )
 		PassengerSeats[Seat].PHGun.bPassengerGun = True;
 		PassengerSeats[Seat].PHGun.SeatNumber = Seat;
 	}
-	else PassengerSeats[Seat].PHGun.SetOwner(Other);
+	else PassengerSeats[Seat].PHGun.ChangeOwner(Other);
 	PassengerSeats[Seat].PHGun.NotifyNewDriver(Other);
 	if( Other.Weapon!=None )
 	{
@@ -3826,7 +3840,7 @@ local vector ExitVect;
 		else
 		{
 			Passengers[Seat].DrawScale = Passengers[Seat].Default.DrawScale;
-			if( PlayerPawn(Passengers[Seat])!=None && Passengers[Seat].Health>0 )
+			if( PlayerPawn(Passengers[Seat])!=None && Passengers[Seat].Health>0 && Driver.IsInState('PlayerFlying') )
 				Passengers[Seat].GoToState('PlayerWalking');
 			RestartPawn(Passengers[Seat]);
 			ChangeCollision(Passengers[Seat], false);
@@ -3869,7 +3883,7 @@ local vector ExitVect;
 	if( PassengerSeats[Seat].PHGun!=None )
 	{
 		PassengerSeats[Seat].PHGun.NotifyDriverLeft(Driver);
-		PassengerSeats[Seat].PHGun.SetOwner(None);
+		PassengerSeats[Seat].PHGun.ChangeOwner(None);
 	}
 	if( PassengerSeats[Seat].PassengerCam!=None && PassengerSeats[Seat].PassengerCam.Owner!=None )
 		PassengerSeats[Seat].PassengerCam.SetCamOwner(None);
@@ -4050,12 +4064,9 @@ defaultproperties
       bHasMoveTarget=False
       MoveDest=(X=0.000000,Y=0.000000,Z=0.000000)
       MoveTimer=0.000000
-      VehPos=(X=0.000000,Y=0.000000,Z=0.000000)
-      VehVeloc=(X=0.000000,Y=0.000000,Z=0.000000)
-      SimVehVeloc=(X=0.000000,Y=0.000000,Z=0.000000)
-      SimPosUpd=(X=0.000000,Y=0.000000,Z=0.000000)
-      bUpdatingPos=False
-      UpdTimeLeft=0
+      ServerState=(pos=(X=0.000000,Y=0.000000,Z=0.000000),Velocity=(X=0.000000,Y=0.000000,Z=0.000000))
+      ServerStateTime=0.000000
+      LastServerPos=(X=0.000000,Y=0.000000,Z=0.000000)
       MyCameraAct=None
       ReplicOverlayMat=(MatTexture=None,MatDispTime=0)
       MyFactory=None

@@ -69,7 +69,7 @@ defaultproperties
       SplashSnd(2)=Sound'xZones.WaterSplash.WaterSplashSnd03'
       SplashSnd(3)=Sound'xZones.WaterSplash.WaterSplashSnd04'
       Physics=PHYS_Falling
-      RemoteRole=ROLE_SimulatedProxy
+      RemoteRole=ROLE_None
       LifeSpan=0.750000
       DrawType=DT_Mesh
       Style=STY_Translucent

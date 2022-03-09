@@ -21,21 +21,24 @@ var(FX) int SplashDamage;
 
 var bool hasGivenZoneObj;
 
-function PostBeginPlay()
+simulated function PostBeginPlay()
 {
-local xZoneInfo xZObj;
-	
+	local xZoneInfo xZObj;
+
+	/* // XZonesMut disabled. for more info look at XZonesMut class
+	// hackish way instantiate mutator only once.
 	ForEach AllActors(Class'xZoneInfo', xZObj)
 	{
 		if (xZObj == Self)
 			Level.Game.BaseMutator.AddMutator(Spawn(Class'XZonesMut'));
 		break;
 	}
+	*/
 
 	SetTimer(0.5, False);
 }
 
-function Timer()
+simulated function Timer()
 {
 local xZoneInfo xZ;
 local Pawn P;
@@ -60,7 +63,7 @@ local Pawn P;
 		SetTimer(0.5,False);
 }
 
-singular function ActorEntered( actor Other )
+singular simulated function ActorEntered( actor Other )
 {
 local xOldLocDummy OldLD;
 local Projectile xPD;
@@ -196,7 +199,7 @@ local vector AddVelocity;
     }
 }
 
-singular function ActorLeaving( actor Other )
+singular simulated function ActorLeaving( actor Other )
 {
 local xOldLocDummy OldLD;
 local Projectile xPD;
@@ -282,7 +285,7 @@ local byte willFloat;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function SpawnBullet(byte BType, pawn OtherInst, actor xTarget)
+simulated function SpawnBullet(byte BType, pawn OtherInst, actor xTarget)
 {
 local Projectile xPD;
 local vector StartLoc;
@@ -296,7 +299,7 @@ local vector StartLoc;
 	xPD.Velocity = Normal(xTarget.Location - StartLoc)*xPD.Speed;
 }
 
-function SpawnWaterFX(Actor Other, byte SplashLevel, optional bool NoSplash, optional bool bOutFX)
+simulated function SpawnWaterFX(Actor Other, byte SplashLevel, optional bool NoSplash, optional bool bOutFX)
 {
 local WaterSplashRing wsr;
 local WaterVertSplashA02 wvs;
@@ -378,7 +381,7 @@ local vector RealLoc;
 	}
 }
 
-function byte GetCollisionCategory(Actor Other)
+simulated function byte GetCollisionCategory(Actor Other)
 {
 local float colmult;
 
@@ -407,7 +410,7 @@ local float colmult;
 		return 0;
 }
 
-function byte GetMassCategory(Actor Other)
+simulated function byte GetMassCategory(Actor Other)
 {
 	if (Other.Mass > 5000)
 		return 7;
@@ -429,7 +432,7 @@ function byte GetMassCategory(Actor Other)
 		return 255;
 }
 
-function float CheckProperUTMass(Actor Other)
+simulated function float CheckProperUTMass(Actor Other)
 {
 	if (Other.IsA('Projectile'))
 	{

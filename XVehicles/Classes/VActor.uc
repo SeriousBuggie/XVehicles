@@ -24,6 +24,14 @@ struct IntRange
 	var() int Max,Min;
 };
 
+// for debug
+/*
+var vector TmpLocA, TmpLocB;
+var float DbgTmr, DbgTmr2;
+var ENetRole DbgRole;
+var string DbgMsg;
+*/
+
 // simulated event BaseChange() { Log(self @ "BaseChange" @ Base); }
 // simulated event Attach( Actor Other ) { Log(self @ "Attach" @ Other); }
 // simulated event Detach( Actor Other ) { Log(self @ "Detach" @ Other); }

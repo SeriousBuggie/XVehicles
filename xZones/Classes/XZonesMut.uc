@@ -1,3 +1,5 @@
+// crappy mutator which replace any (!) subclasses of minigun, enforcer and sniperrifle to modified version
+// for make water splash on hitscan shoots. Better avoid to use.
 class XZonesMut expands Mutator;
 
 var() string ZonesPackName;

@@ -47,7 +47,7 @@ defaultproperties
       bNetTemporary=False
       bTrailerSameRotation=True
       Physics=PHYS_Trailer
-      RemoteRole=ROLE_SimulatedProxy
+      RemoteRole=ROLE_None
       DrawType=DT_Mesh
       Texture=Texture'XWheelVeh.Skins.DarkMetalShine'
       Mesh=LodMesh'XWheelVeh.JSDXIceWheelSup'
