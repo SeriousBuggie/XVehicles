@@ -11,9 +11,11 @@ function PreBeginPlay()
 	MaxDesireability = VehicleOwner.AIRating*100;
 	setCollisionSize(VehicleOwner.CollisionRadius + 10, CollisionHeight);
 	PrePivot.Z = CollisionHeight - VehicleOwner.CollisionHeight;
+	ItemName = VehicleOwner.VehicleName;
 }
 
 function BecomePickup();
+
 auto state Pickup
 {
 Ignores Touch,ZoneChange;
@@ -50,7 +52,12 @@ defaultproperties
       bTrailerPrePivot=True
       Physics=PHYS_Trailer
       RemoteRole=ROLE_None
-      DrawType=DT_None
+      DrawType=DT_Sprite
+      Texture=None
       bGameRelevant=True
-      CollisionHeight=35.000000
+      CollisionRadius=17.000000
+      CollisionHeight=24.000000
+      bFixedRotationDir=False
+      RotationRate=(Yaw=0)
+      DesiredRotation=(Yaw=0)
 }
