@@ -55,9 +55,14 @@ function Timer()
 		MyVehicle.MyFactory = Self;
 		MyVehicle.CurrentTeam = TeamNum;
 		MyVehicle.bTeamLocked = bStartTeamLocked;
+		if (MyVehicle.CurrentTeam > 3)
+		{
+			MyVehicle.CurrentTeam = 0;
+			MyVehicle.bTeamLocked = false;
+		}
 
 		if (!class'VehiclesConfig'.default.bDisableTeamSpawn)
-			MyVehicle.SetOverlayMat(MyVehicle.TeamOverlays[TeamNum],0.5);
+			MyVehicle.SetOverlayMat(MyVehicle.TeamOverlays[MyVehicle.CurrentTeam],0.5);
 
 		//MyVehicle.bDisableTeamSpawn = (MyVehicle.bDisableTeamSpawn || bDisableTeamSpawn);
 		MyVehicle.ShowState();
