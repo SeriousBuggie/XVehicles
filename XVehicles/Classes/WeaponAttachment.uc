@@ -931,7 +931,23 @@ simulated function rotator GetDriverInput( float Delta )
 		}
 	}
 	RepAimPos = OwnerVehicle.CalcPlayerAimPos(PassengerNum);
-	Return rotator(RepAimPos-(Location + (eVect(0,0,ZAimOffset)>>OwnerVehicle.Rotation)));
+	Return GetAimForPos(RepAimPos);
+}
+function rotator GetAimForPos(vector Pos)
+{
+	local vector offset, Aim;
+	local rotator ret;
+	Aim.z = ZAimOffset;
+	Offset = Aim >> OwnerVehicle.Rotation;
+	ret = rotator(Pos - (Location + offset));
+	if (PitchPart != None)
+	{
+		Aim = PitchActorOffset;
+		Aim.Z = ZAimOffset;
+		Offset = Aim >> OwnerVehicle.Rotation;
+		ret.pitch = rotator(Pos - (Location + Offset)).pitch;
+	}
+	Return ret;
 }
 function rotator GetBotInput( float Delta )
 {
@@ -954,7 +970,7 @@ function rotator GetBotInput( float Delta )
 		else		
 			RepAimPos = WeaponController.Focus;
 	}
-	Return rotator(RepAimPos-(Location + (eVect(0,0,ZAimOffset)>>OwnerVehicle.Rotation)));
+	Return GetAimForPos(RepAimPos);
 }
 function bool FindEnemy()
 {
@@ -1056,12 +1072,17 @@ simulated function WRenderOverlay( Canvas C )
 	local float X, Y;
 	local Texture Crossh;
 	
+	X = ZAimOffset;
 	if (PitchPart != None)
+	{
 		ViewActor = PitchPart;
+		X -= PitchActorOffset.Z;
+	}	
 	else
 		ViewActor = self;
 	CamLoc = vector(ViewActor.Rotation);
-	HN = ViewActor.Location;
+	HN.Z = X;
+	HN = ViewActor.Location + (HN >> ViewActor.Rotation);
 	HL = HN + CamLoc*40000;
 	if (OwnerVehicle != None)
 	{

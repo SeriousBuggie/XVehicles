@@ -219,4 +219,6 @@ defaultproperties
       OldDesiredViewMult=1.000000
       KeepWait=0.000000
       RemoteRole=ROLE_SimulatedProxy
+      CollisionRadius=0.000000
+      CollisionHeight=0.000000
 }

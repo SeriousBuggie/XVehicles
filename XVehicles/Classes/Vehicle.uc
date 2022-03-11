@@ -2994,7 +2994,7 @@ simulated function Bump( Actor Other )
 					; // not make any damage for same team, also for driver which exit recently too
 				else if( Sp > 200 )
 					Other.TakeDamage((Sp-100)/7*Mass/500.f,Instigator,Other.Location+Normal(Location-Other.Location)*Other.CollisionRadius,
-						100*Normal(Velocity)*Mass,'Crushed');
+						FMin(Mass*100, VSize(Velocity)*Other.Mass)*Normal(Velocity),'Crushed');
 				// bad idea can cause recursive calls if pawn in middle between two vehicles.				
 				/* else if (bHitAPawn)
 					Other.MoveSmooth(Dir*3); */
