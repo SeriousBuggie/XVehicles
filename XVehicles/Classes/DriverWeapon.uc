@@ -170,6 +170,8 @@ function Destroyed()
 {
 	if( MyNotifier!=None )
 	{
+		if (Pawn(Owner) != None)
+			Pawn(Owner).DeleteInventory(MyNotifier);
 		MyNotifier.Destroy();
 		MyNotifier = None;
 	}

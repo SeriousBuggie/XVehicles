@@ -10,6 +10,14 @@ function Vehicle GetVehicle()
 	return None;
 }
 
+function PreBeginPlay()
+{
+	Super.PreBeginPlay();
+	Disable('Touch');
+}
+
+function Touch(Actor Other);
+
 // UT_Shield destroy all armor on pickup, and bots able pickup stuff inside vehicle
 // so we make another copy
 function Destroyed()
@@ -17,11 +25,11 @@ function Destroyed()
 	local Pawn OldOwner;
 	if (GetVehicle() != None)
 		OldOwner = Pawn(Owner);
-	
+
 	Super.Destroyed();
 	
 	if (OldOwner != None)
-		OldOwner.AddInventory( OldOwner.Spawn(Class)); 
+		OldOwner.AddInventory( OldOwner.Spawn(Class, OldOwner)); 
 }
 
 function int ReduceDamage( int Damage, name DamageType, vector HitLocation )
@@ -99,5 +107,12 @@ defaultproperties
       bKeysSet=False
       bIsAnArmor=True
       bHidden=True
+      Physics=PHYS_Trailer
+      InitialState="Idle2"
       bGameRelevant=True
+      CollisionRadius=0.000000
+      CollisionHeight=0.000000
+      bCollideActors=False
+      bFixedRotationDir=False
+      RotationRate=(Yaw=0)
 }

@@ -852,7 +852,7 @@ function TryDropFlag(Pawn Other)
 function AddShield(Pawn Other)
 {
 	if (Other.FindInventoryType(Class'DriverShield') == None)
-		Other.AddInventory( Other.Spawn(Class'DriverShield')); 
+		Other.AddInventory( Other.Spawn(Class'DriverShield', Other));
 }
 
 function DriverEnter( Pawn Other )
@@ -957,6 +957,7 @@ function ChangeCollision(Pawn Other, bool bInside)
 			Bot.LandGrunt = Bot.default.LandGrunt;
 			Bot.Land = Bot.default.Land;
 			Bot.WaterStep = Bot.default.WaterStep;
+			Bot.PreSetMovement();
 		}
 	}
 }
