@@ -97,10 +97,14 @@ function vector GetNextMoveTarget()
 			T.Z -= NP.CollisionHeight - VehicleOwner.CollisionHeight - VehicleOwner.MaxObstclHeight/2;
 			if (//!VehicleOwner.Driver.LineOfSightTo(NP) || 
 				VehicleOwner.Trace(HitLocation, HitNormal, T, S, true, V) != None)
-			{
+			{				
 //				if (i == 0) Log(i @ NP @ HitLocation @ HitNormal);
-//				dbg = dbg @ "-";				
-				continue;
+//				dbg = dbg @ "-";
+				if (T.Z < S.Z && T.Z + VehicleOwner.CollisionHeight > S.Z && 
+					VehicleOwner.Trace(HitLocation, HitNormal, T + vect(0,0,1)*(S.Z - T.Z), S, true, V) == None)
+					; // skip it
+				else				
+					continue;
 			}
 			Visible[i] = NP;
 			Dist = VSize(T - VehicleOwner.Location);
