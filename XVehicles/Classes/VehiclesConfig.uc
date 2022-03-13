@@ -1,11 +1,11 @@
 //=============================================================================
 // VehiclesConfig.
 //=============================================================================
-class VehiclesConfig expands Info;
+class VehiclesConfig expands Info Config(XVehicles);
 
-var bool bHideState;
-var bool bPulseAltHeal;
-var bool bDisableTeamSpawn;
+var() config bool bHideState;
+var() config bool bPulseAltHeal;
+var() config bool bDisableTeamSpawn;
 
 defaultproperties
 {
