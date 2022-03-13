@@ -3,11 +3,39 @@
 //=============================================================================
 class XVehiclesCTF expands Mutator;
 
+enum EPulseForHeal
+{
+	PFH_Auto,				// Detect by presence FixGun on map, or by use FixGunMutator
+	PFH_Yes,				// Pulse Heal vehicles
+	PFH_No,					// Pulse not heal vehicles
+};
+var() EPulseForHeal PulseForHeal;
+
 event PreBeginPlay()
-{	
+{
+	local bool bPulseAltHeal;
+	Local PulseGun Pulse;
+	local Mutator M;
 	Super.PreBeginPlay();
 	
-//	SetShield();
+	if (PulseForHeal == PFH_Yes)
+		bPulseAltHeal = true;
+	else if (PulseForHeal == PFH_Auto)
+	{
+		foreach AllActors(class'PulseGun', Pulse)
+			if (Pulse.isA('FixGun'))
+				break;
+		if (Pulse == None) // on map no any Fixgun?
+		{
+			foreach AllActors(class'Mutator', M)
+				if (M.isA('FixGunMutator'))
+					break;
+			if (M == None) // FixGunMutator not loaded? (able give FixGun on enter to vehicle)
+				bPulseAltHeal = true;
+		}
+	}
+	
+	class'VehiclesConfig'.default.bPulseAltHeal = bPulseAltHeal;
 }
 
 /*
@@ -52,4 +80,5 @@ function Tick(float delta)
 
 defaultproperties
 {
+      PulseForHeal=PFH_Auto
 }
