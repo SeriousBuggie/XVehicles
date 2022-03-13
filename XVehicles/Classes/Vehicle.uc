@@ -3841,7 +3841,8 @@ local vector ExitVect;
 		else
 		{
 			Passengers[Seat].DrawScale = Passengers[Seat].Default.DrawScale;
-			if( PlayerPawn(Passengers[Seat])!=None && Passengers[Seat].Health>0 && Driver.IsInState('PlayerFlying') )
+			if( PlayerPawn(Passengers[Seat])!=None && Passengers[Seat].Health>0 && 
+				Driver != None && Driver.IsInState('PlayerFlying') )
 				Passengers[Seat].GoToState('PlayerWalking');
 			RestartPawn(Passengers[Seat]);
 			ChangeCollision(Passengers[Seat], false);
