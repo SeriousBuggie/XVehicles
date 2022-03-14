@@ -190,6 +190,8 @@ function SetupWeapon(WeaponAttachment WA)
 	bAltWarnTarget = WA.bAltFireZooms;
 }
 
+simulated function TweenToStill();
+
 defaultproperties
 {
       VehicleOwner=None
