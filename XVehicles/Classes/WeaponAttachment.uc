@@ -933,7 +933,7 @@ simulated function rotator GetDriverInput( float Delta )
 	RepAimPos = OwnerVehicle.CalcPlayerAimPos(PassengerNum);
 	Return GetAimForPos(RepAimPos);
 }
-function rotator GetAimForPos(vector Pos)
+simulated function rotator GetAimForPos(vector Pos)
 {
 	local vector offset, Aim;
 	local rotator ret;
