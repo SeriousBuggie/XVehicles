@@ -615,7 +615,7 @@ local byte j;
 
 event int SpecialCost(Pawn Seeker)
 {
-	if ( Seeker != None && Seeker.Weapon != None && Seeker.Weapon.isA('DriverWeapon'))
+	if (!bHidden && !bDisabled && Seeker != None && Seeker.Weapon != None && Seeker.Weapon.isA('DriverWeapon'))
 		return 100000;
 		
 	return ExtraCost;
