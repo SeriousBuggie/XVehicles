@@ -230,7 +230,7 @@ simulated function PostBeginPlay()
 			
 			if (V.Z < 0)
 				V.Z = -V.Z;
-			Log(self @ CollisionHeight @ ( S.Z + V.Z));
+
 			if (CollisionHeight < S.Z + V.Z)
 				 SetCollisionSize(CollisionRadius, S.Z + V.Z);
 		}
