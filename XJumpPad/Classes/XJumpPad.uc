@@ -1,4 +1,3 @@
-// on place you need set Pitch in movement to 16384 for it be properly rotated.
 // ============================================================================
 //  swJumpPad.
 //
@@ -82,7 +81,7 @@ class XJumpPad expands Teleporter;
 
 //Model import
 #exec mesh import mesh=XJumpPad anivfile=Models\WildCardBaseM_a.3d datafile=Models\WildCardBaseM_d.3d x=0 y=0 z=0 MLOD=1 LODSTYLE=0
-#exec mesh origin mesh=XJumpPad x=0 y=0 z=0 PITCH=-64
+#exec mesh origin mesh=XJumpPad x=0 y=0 z=0 PITCH=0
 #exec mesh sequence mesh=XJumpPad seq=All startframe=0 numframes=1
 
 #exec meshmap new meshmap=XJumpPad mesh=XJumpPad
@@ -120,6 +119,8 @@ var enum EParticleColor
 } PT;
 
 var() EParticleColor ParticlesColor;
+
+var() bool bAutoSize;
 
 var vector Velocity;
 
@@ -189,6 +190,7 @@ replication
 simulated function PostBeginPlay()
 {
 	local Actor A;
+	local vector V, S;
     Super(NavigationPoint).PostBeginPlay();
     if( URL == "" )
     {
@@ -203,6 +205,35 @@ simulated function PostBeginPlay()
                 JumpTarget = A;
 
 		Velocity = CalcVelocity(self);
+	}
+	
+	if (!bHidden && bAutoSize)
+	{
+		if (DrawScale != default.DrawScale && Mesh == default.Mesh &&
+			CollisionRadius == default.CollisionRadius && CollisionHeight == default.CollisionHeight)
+		{
+			SetCollisionSize(CollisionRadius*DrawScale/default.DrawScale, CollisionHeight*DrawScale/default.DrawScale);
+		}
+		if (Rotation != rot(0,0,0))
+		{
+			V.X = default.CollisionRadius*DrawScale/default.DrawScale;
+			V.Y = V.X;
+			S = V >> Rotation;
+			
+			if (S.Z < 0)
+				S.Z = -S.Z;
+			
+			V.X = 0;
+			V.Y = 0;
+			V.Z = default.CollisionHeight*DrawScale/default.DrawScale;
+			V = V >> Rotation;
+			
+			if (V.Z < 0)
+				V.Z = -V.Z;
+			Log(self @ CollisionHeight @ ( S.Z + V.Z));
+			if (CollisionHeight < S.Z + V.Z)
+				 SetCollisionSize(CollisionRadius, S.Z + V.Z);
+		}
 	}
 }
 
@@ -547,11 +578,14 @@ local int rX, rY;
 local JPadEmitPrtc JStreak;
 local JPadEmitGrid JGrid;
 local byte j;
+local rotator R;
 
 	Super.Tick(DeltaTime);
 
 	if (bDisabled || Level.NetMode == NM_DedicatedServer || bHidden)
 		return;
+		
+	R = Rotation + rot(16384,0,0);
 
 	TCountA += DeltaTime;
 	TCountB += DeltaTime;
@@ -560,7 +594,7 @@ local byte j;
 	{
 		TCountA = 0;
 
-		GetAxes(Rotation, X, Y, Z);
+		GetAxes(R, X, Y, Z);
 		
 		For (j=0; j<4; j++)
 		{
@@ -591,7 +625,7 @@ local byte j;
 	{
 		TCountB = 0;
 
-		GetAxes(Rotation, X, Y, Z);
+		GetAxes(R, X, Y, Z);
 		JGrid = Spawn(Class'JPadEmitGrid',,, Location + 4*X);
 		
 		JGrid.Velocity = Normal(Velocity) * 50 * DrawScale;
@@ -627,6 +661,7 @@ defaultproperties
       TCountB=0.000000
       PT=PCLR_Red
       ParticlesColor=PCLR_Yellow
+      bAutoSize=True
       Velocity=(X=0.000000,Y=0.000000,Z=0.000000)
       JumpAngle=45.000000
       TeamNumber=0
@@ -655,7 +690,6 @@ defaultproperties
       bSpecialCost=True
       bStatic=False
       bHidden=False
-      Rotation=(Pitch=16384)
       bDirectional=False
       DrawType=DT_Mesh
       Mesh=LodMesh'XJumpPad.XJumpPad'

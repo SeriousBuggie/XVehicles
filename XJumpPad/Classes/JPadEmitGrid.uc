@@ -1,7 +1,7 @@
 class JPadEmitGrid expands Effects;
 
 #exec MESH IMPORT MESH=JPadEmitGrid ANIVFILE=MODELS\JPadEmitGrid_a.3d DATAFILE=MODELS\JPadEmitGrid_d.3d X=0 Y=0 Z=0
-#exec MESH ORIGIN MESH=JPadEmitGrid X=0 Y=0 Z=0 PITCH=-64
+#exec MESH ORIGIN MESH=JPadEmitGrid X=0 Y=0 Z=0 PITCH=0
 
 #exec MESH SEQUENCE MESH=JPadEmitGrid SEQ=All STARTFRAME=0 NUMFRAMES=1
 
