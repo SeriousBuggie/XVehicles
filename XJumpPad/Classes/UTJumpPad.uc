@@ -77,7 +77,7 @@
 //  D   = Destination JumpPad name
 //
 // ============================================================================
-class XJumpPad expands Teleporter;
+class UTJumpPad expands Teleporter;
 
 //Model import
 #exec mesh import mesh=XJumpPad anivfile=Models\WildCardBaseM_a.3d datafile=Models\WildCardBaseM_d.3d x=0 y=0 z=0 MLOD=1 LODSTYLE=0
@@ -119,6 +119,10 @@ var enum EParticleColor
 } PT;
 
 var() EParticleColor ParticlesColor;
+var() EParticleColor GridsColor;
+
+var() float ParticlesSpeed;
+var() float GridsSpeed;
 
 var() bool bAutoSize;
 
@@ -602,7 +606,7 @@ local rotator R;
 			rY = (Rand(57) - 28) * DrawScale;
 	
 			JStreak = Spawn(Class'JPadEmitPrtc',,, Location + rX*Z + rY*Y + 4*X, rotator(Velocity));
-			JStreak.Velocity = Normal(Velocity) * FRand() * 160 * DrawScale;
+			JStreak.Velocity = Normal(Velocity) * FRand() * ParticlesSpeed * DrawScale;
 	
 			JStreak.DrawScale = DrawScale;
 	
@@ -628,21 +632,21 @@ local rotator R;
 		GetAxes(R, X, Y, Z);
 		JGrid = Spawn(Class'JPadEmitGrid',,, Location + 4*X);
 		
-		JGrid.Velocity = Normal(Velocity) * 50 * DrawScale;
+		JGrid.Velocity = Normal(Velocity) * GridsSpeed * DrawScale;
 
 		JGrid.DrawScale = DrawScale;
 
-		if (ParticlesColor == PCLR_Red)
+		if (GridsColor == PCLR_Red)
 			JGrid.MultiSkins[1] = Texture'RedGrid';
-		else if (ParticlesColor == PCLR_Blue)
+		else if (GridsColor == PCLR_Blue)
 			JGrid.MultiSkins[1] = Texture'BlueGrid';
-		else if (ParticlesColor == PCLR_Green)
+		else if (GridsColor == PCLR_Green)
 			JGrid.MultiSkins[1] = Texture'GreenGrid';
-		else if (ParticlesColor == PCLR_Purple)
+		else if (GridsColor == PCLR_Purple)
 			JGrid.MultiSkins[1] = Texture'PurpleGrid';
-		else if (ParticlesColor == PCLR_Orange)
+		else if (GridsColor == PCLR_Orange)
 			JGrid.MultiSkins[1] = Texture'OrangeGrid';
-		else if (ParticlesColor == PCLR_White)
+		else if (GridsColor == PCLR_White)
 			JGrid.MultiSkins[1] = Texture'WhiteGrid';
 	}
 }
@@ -661,6 +665,9 @@ defaultproperties
       TCountB=0.000000
       PT=PCLR_Red
       ParticlesColor=PCLR_Yellow
+      GridsColor=PCLR_Yellow
+      ParticlesSpeed=160.000000
+      GridsSpeed=50.000000
       bAutoSize=True
       Velocity=(X=0.000000,Y=0.000000,Z=0.000000)
       JumpAngle=45.000000
