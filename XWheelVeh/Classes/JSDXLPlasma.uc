@@ -15,12 +15,12 @@ simulated function ProcessTouch (Actor Other, Vector HitLocation)
 	}
 }
 
-    function BlowUp(vector HitLocation)
-    {
-        //HurtRadius(Damage , 50, MyDamageType, MomentumTransfer, HitLocation);
+function BlowUp(vector HitLocation)
+{
+    //HurtRadius(Damage, 50, MyDamageType, MomentumTransfer, HitLocation);
 	Spawn(Class'JSDXPlasmaExpl');
-        MakeNoise(0.5);
-    }
+    MakeNoise(0.5);
+}
 
 simulated function Explode(vector HitLocation, vector HitNormal)
 {
@@ -30,6 +30,7 @@ simulated function Explode(vector HitLocation, vector HitNormal)
 
 defaultproperties
 {
+      DamageRadius=50.000000
       speed=2000.000000
       MaxSpeed=4000.000000
       Damage=35.000000

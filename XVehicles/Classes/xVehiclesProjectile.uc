@@ -1,5 +1,7 @@
 class xVehiclesProjectile expands Projectile;
 
+var(Projectile) float    DamageRadius; 
+
 function HurtRadiusOwned( float DamageAmount, float DamageRadius, name DamageName, float Momentum, vector HitLocation )
 {
     local actor Victims;
@@ -62,4 +64,5 @@ local PlayerPawn p;
 
 defaultproperties
 {
+      DamageRadius=0.000000
 }

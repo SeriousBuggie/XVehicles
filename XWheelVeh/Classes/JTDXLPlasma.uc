@@ -9,15 +9,16 @@ simulated function ProcessTouch (Actor Other, Vector HitLocation)
 	}
 }
 
-    function BlowUp(vector HitLocation)
-    {
-        //HurtRadius(Damage , 62.5, MyDamageType, MomentumTransfer, HitLocation);
+function BlowUp(vector HitLocation)
+{
+    //HurtRadius(Damage, DamageRadius, MyDamageType, MomentumTransfer, HitLocation);
 	Spawn(Class'JTDXPlasmaExpl');
-        MakeNoise(1.0);
-    }
+    MakeNoise(1.0);
+}
 
 defaultproperties
 {
+      DamageRadius=62.500000
       Damage=70.000000
       MomentumTransfer=9000
       ExplosionDecal=Class'Botpack.BoltScorch'
