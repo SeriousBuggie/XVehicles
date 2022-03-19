@@ -44,12 +44,16 @@ event PreBeginPlay()
 	
 	if (bShowFlagBase)
 		foreach AllActors(class'FlagBase', FB)
-			if (FB.Trace(HL, HN, FB.Location - vect(0,0,134.5)*FB.DrawScale/FB.default.DrawScale) != None)
+		{
+			HL = FB.Location;
+			HL -= vect(0,0,134.5)*FB.DrawScale/FB.default.DrawScale >> FB.Rotation;
+			if (FB.Trace(HL, HN, HL) != None)
 			{
-				xFB = FB.Spawn(class'XFlagBase', FB, , HL + vect(0,0,18));
+				xFB = FB.Spawn(class'XFlagBase', FB, , HL + (vect(0,0,18) >> FB.Rotation), FB.Rotation);
 				if (xFB != None && FB.Team != 0)
 					xFB.MultiSkins[0] = Texture'FlagBaseSkinB';				
 			}
+		}
 }
 
 /*
