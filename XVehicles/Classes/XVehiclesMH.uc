@@ -55,6 +55,13 @@ Function SetShield()
 	SetPropertyText("DynClass", "Class'JTDXLPlasma'");	
 	if (Class<Projectile>(DynClass) != None)
 		Class<Projectile>(DynClass).Default.Damage = 140;
+		
+	SetPropertyText("DynClass", "Class'TankCBullet'");	
+	if (Class<xVehiclesProjectile>(DynClass) != None)
+	{
+		Class<xVehiclesProjectile>(DynClass).Default.Damage = 600;
+		Class<xVehiclesProjectile>(DynClass).Default.DamageRadius = 710;
+	}
 }
 
 function SetupVehicleClass(Class<vehicle> cl)

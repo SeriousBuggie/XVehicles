@@ -78,10 +78,10 @@ defaultproperties
 {
       DistCount=0.000000
       bFirstSmk=False
-      DamageRadius=710.000000
+      DamageRadius=660.000000
       speed=4500.000000
       MaxSpeed=9000.000000
-      Damage=600.000000
+      Damage=300.000000
       MomentumTransfer=100000
       MyDamageType="TankBlast"
       ExplosionDecal=Class'XTreadVeh.TankCBlastMark'
