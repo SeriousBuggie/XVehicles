@@ -89,14 +89,14 @@ function BlowTheHellUp(vector HitLocation, vector HitNormal)
 {
 	local byte i;
 
-	HurtRadiusOwned(Damage, 1400.0, MyDamageType, MomentumTransfer, HitLocation);
+	HurtRadiusOwned(Damage, DamageRadius, MyDamageType, MomentumTransfer, HitLocation);
    
 	Spawn(Class'TankMLProjExplController',,, HitLocation, rotator(HitNormal));
 	Spawn(Class'TankMLSmkRing',,, HitLocation, rotator(HitNormal));
 	Spawn(Class'TankMLSmkRing',,, HitLocation, rotator(HitNormal) + rot(0,0,2731));
 	Spawn(Class'TankMLShockRing',,, HitLocation + HitNormal, rotator(HitNormal));
 
-	ClientShakes(1500);
+	ClientShakes(DamageRadius*1.07);
 
     MakeNoise(3.75);
 }
@@ -121,6 +121,7 @@ defaultproperties
       ProjLength=320.000000
       TMLTrail=None
       TMLTrailOffset=(X=96.000000,Y=0.000000,Z=0.000000)
+      DamageRadius=1400.000000
       speed=6000.000000
       MaxSpeed=12000.000000
       Damage=1500.000000

@@ -51,11 +51,11 @@ simulated function ProcessTouch (Actor Other, Vector HitLocation)
 		Explode(HitLocation, vect(0,0,1));
 }
 
-    function BlowTheHellUp(vector HitLocation, vector HitNormal)
-    {
+function BlowTheHellUp(vector HitLocation, vector HitNormal)
+{
 	local byte i;
 
-        HurtRadiusOwned(Damage , 710.0, MyDamageType, MomentumTransfer, HitLocation);
+    HurtRadiusOwned(Damage, DamageRadius, MyDamageType, MomentumTransfer, HitLocation);
 
 	Spawn(Class'TCBulExpl');
 	Spawn(Class'DustAirBurst');
@@ -63,10 +63,10 @@ simulated function ProcessTouch (Actor Other, Vector HitLocation)
 	For(i=0; i<7; i++)
 		Spawn(Class'DustParticles',,, HitLocation, rotator(HitNormal));
 
-	ClientShakes(750);
+	ClientShakes(DamageRadius*1.07);
 	
-        MakeNoise(3.75);
-    }
+    MakeNoise(3.75);
+}
 
 simulated function Explode(vector HitLocation, vector HitNormal)
 {
@@ -78,6 +78,7 @@ defaultproperties
 {
       DistCount=0.000000
       bFirstSmk=False
+      DamageRadius=710.000000
       speed=4500.000000
       MaxSpeed=9000.000000
       Damage=600.000000

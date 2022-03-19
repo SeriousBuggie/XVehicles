@@ -30,20 +30,20 @@ simulated function ProcessTouch (Actor Other, Vector HitLocation)
 		Explode(HitLocation, vect(0,0,1));
 }
 
-    function BlowTheHellUp(vector HitLocation, vector HitNormal)
-    {
+function BlowTheHellUp(vector HitLocation, vector HitNormal)
+{
 	local byte i;
 
-        HurtRadiusOwned(Damage , 550.0, MyDamageType, MomentumTransfer, HitLocation);
+    HurtRadiusOwned(Damage, DamageRadius, MyDamageType, MomentumTransfer, HitLocation);
 
 	Spawn(Class'KrahtProjExpl');
 	Spawn(Class'KrahtCorona',,, HitLocation);
 	Spawn(Class'KrahtShock',,, HitLocation + HitNormal/2, rotator(HitNormal));
 
-	ClientShakes(625);
+	ClientShakes(DamageRadius*1.14);
 	
-        MakeNoise(2.5);
-    }
+    MakeNoise(2.5);
+}
 
 simulated function Explode(vector HitLocation, vector HitNormal)
 {
@@ -53,6 +53,7 @@ simulated function Explode(vector HitLocation, vector HitNormal)
 
 defaultproperties
 {
+      DamageRadius=550.000000
       speed=4500.000000
       MaxSpeed=9000.000000
       Damage=750.000000

@@ -84,7 +84,7 @@ function BlowTheHellUp(vector HitLocation, vector HitNormal)
 {
 	local byte i;
 
-    HurtRadiusOwned(Damage , 1350.0, MyDamageType, MomentumTransfer, HitLocation);
+    HurtRadiusOwned(Damage, DamageRadius, MyDamageType, MomentumTransfer, HitLocation);
 	
 	Spawn(Class'BigRockSpawner',,, HitLocation, rotator(HitNormal));
 
@@ -98,7 +98,7 @@ function BlowTheHellUp(vector HitLocation, vector HitNormal)
 	Spawn(Class'ShraliCorona',,,HitLocation);
 
 	PlaySound(Sound'ShraliExpl',,125.0,,11500);
-	ClientShakes(3125);
+	ClientShakes(DamageRadius*2.3);
 	ClientFlashes();
 	
     MakeNoise(7.5);
@@ -115,6 +115,7 @@ defaultproperties
       DistCount=0.000000
       bFirstSmk=False
       spsh=None
+      DamageRadius=1350.000000
       speed=4500.000000
       MaxSpeed=9000.000000
       Damage=3800.000000
