@@ -10,12 +10,17 @@ enum EPulseForHeal
 	PFH_No,					// Pulse not heal vehicles
 };
 var() EPulseForHeal PulseForHeal;
+var() bool bShowFlagBase;
 
 event PreBeginPlay()
 {
 	local bool bPulseAltHeal;
 	Local PulseGun Pulse;
 	local Mutator M;
+	local FlagBase FB;
+	Local XFlagBase xFB;
+	Local vector HL, HN;
+	
 	Super.PreBeginPlay();
 	
 	if (PulseForHeal == PFH_Yes)
@@ -36,6 +41,15 @@ event PreBeginPlay()
 	}
 	
 	class'VehiclesConfig'.default.bPulseAltHeal = bPulseAltHeal;
+	
+	if (bShowFlagBase)
+		foreach AllActors(class'FlagBase', FB)
+			if (FB.Trace(HL, HN, FB.Location - vect(0,0,134.5)*FB.DrawScale/FB.default.DrawScale) != None)
+			{
+				xFB = FB.Spawn(class'XFlagBase', FB, , HL + vect(0,0,18));
+				if (xFB != None && FB.Team != 0)
+					xFB.MultiSkins[0] = Texture'FlagBaseSkinB';				
+			}
 }
 
 /*
@@ -81,4 +95,5 @@ function Tick(float delta)
 defaultproperties
 {
       PulseForHeal=PFH_Auto
+      bShowFlagBase=True
 }
