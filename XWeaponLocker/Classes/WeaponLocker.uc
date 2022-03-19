@@ -218,6 +218,19 @@ simulated function SetPickups()
 		TeamLight.Texture = Texture'BotPack.Translocator.TranGlowG';
 }
 
+auto state Pickup
+{
+	// Validate touch, and if valid trigger event.
+	function bool ValidTouch( actor Other )
+	{
+		// make sure not touching through wall
+		if ( !FastTrace(Other.Location, Location) )
+			return false;
+		
+		return Super.ValidTouch(Other);
+	}
+}
+
 //---------------------------------------------------------------
 //Cancel several inventory functions
 //---------------------------------------------------------------
