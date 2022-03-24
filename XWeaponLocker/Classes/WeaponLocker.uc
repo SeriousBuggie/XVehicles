@@ -343,6 +343,7 @@ defaultproperties
       bAmbientGlow=False
       bRotatingPickup=False
       PickupMessage="You loaded up at a weapon locker"
+      ItemName="Weapon Locker"
       PickupSound=Sound'XWeaponLocker.WeaponLocker.WeaponLocker'
       bNoDelete=True
       RemoteRole=ROLE_DumbProxy
