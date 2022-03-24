@@ -975,7 +975,11 @@ function RestartPawn(Pawn Other)
     // fix UT bug
     if (Bot(Other) != None) 
     {
-    	Other.SetPhysics(PHYS_Falling);
+    	Bot(Other).PreSetMovement(); // for set bCanSwim
+    	if (Other.Region.Zone != None && Other.Region.Zone.bWaterZone && Other.bCanSwim)
+    		Other.setPhysics(PHYS_Swimming);
+    	else
+	    	Other.SetPhysics(PHYS_Falling);
 	    if (Bot(Other).PlayerReStartState == 'PlayerWalking')
 		    Bot(Other).PlayerReStartState = 'Attacking';
 	}
