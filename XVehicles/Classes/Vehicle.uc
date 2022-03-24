@@ -254,6 +254,8 @@ var float LastTeleportTime; // for fix flicker teleport between two locations
 var int LastTeleportYaw; // for support teleports with change yaw
 var bool bLastTeleport;
 
+var bool bInBump;
+
 var Pawn LastDriver;
 var float LastDriverTime;
 
@@ -2850,8 +2852,17 @@ function vector VectorProjection(vector VProjector, vector VProjectedOn)
 	return VProjectedOn + Normal(-VProjectedOn)*(((-VProjectedOn) dot ( VProjector - VProjectedOn )) / VSize( VProjectedOn));
 }
 
-// not singular because v436 share singularity flag with state version of function
 simulated function Bump( Actor Other )
+{
+	if (bInBump)
+		return;
+	bInBump = true;
+	SingularBump(Other);
+	bInBump = false;
+}
+
+// not singular because v436 share singularity flag with state version of function
+simulated function SingularBump( Actor Other )
 {
 	local vector OtVel,MyVel;
 	local float Sp;
@@ -4234,6 +4245,7 @@ defaultproperties
       LastTeleportTime=0.000000
       LastTeleportYaw=-1
       bLastTeleport=False
+      bInBump=False
       LastDriver=None
       LastDriverTime=0.000000
       DropFlag=DF_None
