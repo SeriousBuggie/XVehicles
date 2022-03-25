@@ -3,6 +3,8 @@ Class VAIBehaviour extends Info;
 
 var Vehicle VehicleOwner;
 
+const AimError = 0.001;
+
 function bool HasFlag(Actor Other)
 {
 	return Pawn(Other) != None && Pawn(Other).PlayerReplicationInfo != None && Pawn(Other).PlayerReplicationInfo.HasFlag != None;
@@ -132,8 +134,8 @@ function vector GetNextMoveTarget()
 			Return AdjustLocation(VehicleOwner.Driver.MoveTarget);
 		}
 			
-//		v = Normal(VehicleOwner.Velocity);
-		v = vector(VehicleOwner.Rotation);
+//		V = Normal(VehicleOwner.Velocity);
+		V = vector(VehicleOwner.Rotation);
 			
 		BestDist = V dot Normal(Pos[best] - Location);
 		
@@ -147,9 +149,10 @@ function vector GetNextMoveTarget()
 			}
 			Dist = V dot Normal(Pos[i] - Location);
 //			dbg = dbg @ "+";
-			if (dist > BestDist)
+			if (dist >= BestDist - AimError)
 			{
-				BestDist = dist;
+				if (dist > BestDist)
+					BestDist = dist;
 				best = i;
 //				dbg = dbg @ "!";
 			}				

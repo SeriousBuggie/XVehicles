@@ -946,8 +946,11 @@ function ChangeCollision(Pawn Other, bool bInside)
 			Bot.LandGrunt = None;
 			Bot.Land = None;
 			Bot.WaterStep = None;
-			Other.bCollideWorld = True; // for paths work
-			Other.SetCollisionSize(Other.default.CollisionRadius, Other.default.CollisionHeight);
+			Bot.bCollideWorld = True; // for paths work
+			Bot.SetCollisionSize(Other.default.CollisionRadius, Other.default.CollisionHeight);
+			Bot.MaxStepHeight = MaxObstclHeight;
+			Bot.JumpZ = 1;
+			Bot.bCanJump = true;
 		}
 		else
 		{
@@ -959,6 +962,9 @@ function ChangeCollision(Pawn Other, bool bInside)
 			Bot.LandGrunt = Bot.default.LandGrunt;
 			Bot.Land = Bot.default.Land;
 			Bot.WaterStep = Bot.default.WaterStep;
+			Bot.MaxStepHeight = Bot.default.MaxStepHeight;
+			Bot.JumpZ = Bot.default.JumpZ;
+			Bot.bCanJump = Bot.default.bCanJump;
 			Bot.PreSetMovement();
 		}
 	}
