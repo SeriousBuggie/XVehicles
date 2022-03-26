@@ -196,12 +196,16 @@ simulated function PostBeginPlay()
 	local Actor A;
 	local vector V, S;
     Super(NavigationPoint).PostBeginPlay();
+    
+    if( Role!=ROLE_Authority )
+    	return;
+    	
     if( URL == "" )
     {
         ExtraCost = 0;
         bHidden = true;
 	}
-	else if( Role==ROLE_Authority )
+	else
 	{
 		// Find JumpTarget
         foreach AllActors( class 'Actor', A )
@@ -697,6 +701,7 @@ defaultproperties
       bSpecialCost=True
       bStatic=False
       bHidden=False
+      bNoDelete=True
       bDirectional=False
       DrawType=DT_Mesh
       Mesh=LodMesh'XJumpPad.XJumpPad'
