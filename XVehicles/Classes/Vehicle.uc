@@ -630,6 +630,9 @@ simulated function PostBeginPlay()
 				}
 			}
 		}
+		
+		if (DriverGun == None && DriverWeapon.WeaponClass == None)
+			MyCameraAct.GunAttachM = PassengerSeats[0].PGun;
 	//}
 	
 	ShowState();
@@ -2637,10 +2640,7 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 		Gun = Cam.GunAttachM;
 		i = Seat - 1;
 		if (Seat == 0)
-		{
 			i = 0;
-			Gun = PassengerSeats[0].PGun;
-		}
 		CrosshairTex = PassCrosshairTex[i];
 		CrossColor = PassCrossColor[i];
 		CrossScale = PassCrossScale[i];
