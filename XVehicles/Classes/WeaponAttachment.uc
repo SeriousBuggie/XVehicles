@@ -660,7 +660,7 @@ function Timer()
 	if( WeaponController==None )
 		Return;
 	if (Bot(WeaponController) != None && WeaponController.bFire + WeaponController.bAltFire > 0 && 
-		WeaponController.Enemy == None && !Bot(WeaponController).bComboPaused && !Bot(WeaponController).bComboPaused)
+		WeaponController.Enemy == None && (!WeaponController.IsInState('RangedAttack') || !Bot(WeaponController).bComboPaused))
 		Bot(WeaponController).StopFiring();
 	if( WeaponController.bFire!=0 )
 		FireTurret(0);
