@@ -701,7 +701,6 @@ defaultproperties
       bSpecialCost=True
       bStatic=False
       bHidden=False
-      bNoDelete=True
       bDirectional=False
       DrawType=DT_Mesh
       Mesh=LodMesh'XJumpPad.XJumpPad'
