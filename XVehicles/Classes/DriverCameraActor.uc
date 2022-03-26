@@ -113,7 +113,7 @@ simulated function Tick( float Delta )
 		else if( bPasengerCam && PP.bBehindView && PP.ViewTarget==Self )
 			PP.bBehindView = False;
 	}
-	VehicleOwner.CalcCameraPos(V,R,CurrentViewMult,SeatNum);
+	VehicleOwner.CalcCameraPos(V,R,CurrentViewMult,SeatNum,self);
 	Move(V-Location);
 
 	//Vertical shake support

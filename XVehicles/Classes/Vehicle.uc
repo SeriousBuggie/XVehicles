@@ -2367,9 +2367,10 @@ simulated function vector FixCameraPos(vector V, vector S)
 		V -= P*Z;
 	return V;
 }
-simulated function CalcCameraPos( out vector Pos, out rotator Rot, float Mult, optional byte SeatNumber )
+simulated function CalcCameraPos( out vector Pos, out rotator Rot, float Mult, optional byte SeatNumber, optional DriverCameraActor Cam )
 {
 	local vector V,S;
+	local WeaponAttachment Gun;
 
 	if( SeatNumber>0 )
 	{
@@ -2394,13 +2395,16 @@ simulated function CalcCameraPos( out vector Pos, out rotator Rot, float Mult, o
 		Pos = FixCameraPos(V, S);
 		Return;
 	}
+	Gun = DriverGun;
+	if (Gun == None && Passengers[0] == None && Cam != None)
+		Gun = Cam.GunAttachM;
 	if( Pawn(Owner)==None )
 		Rot = Rotation;
 	else if (PlayerPawn(Owner) != None && PlayerPawn(Owner).Player != None)
 		Rot = Pawn(Owner).ViewRotation;
-	else if (DriverGun != None)
+	else if (Gun != None)
 	{
-		Rot = DriverGun.TurretYaw*rot(0,1,0) + DriverGun.TurretPitch*rot(1,0,0);
+		Rot = Gun.TurretYaw*rot(0,1,0) + Gun.TurretPitch*rot(1,0,0);
 		if (bSlopedPhys && GVT!=None)
 			Rot = TransformForGroundRot(Rot.Yaw,GVTNormal,Rot.Pitch);
 		else
@@ -2430,17 +2434,17 @@ simulated function CalcCameraPos( out vector Pos, out rotator Rot, float Mult, o
 	bOwnerNoSee = False;
 	if (bSlopedPhys && GVT!=None)
 	{
-		if (!bDriverWOffset || DriverGun == None)
+		if (!bDriverWOffset || Gun == None)
 			V = GVT.PrePivot + Location+((BehinViewViewOffset*Mult) >> Rot);
 		else
-			V = GVT.PrePivot + DriverGun.Location+((BehinViewViewOffset*Mult) >> Rot);
+			V = GVT.PrePivot + Gun.Location+((BehinViewViewOffset*Mult) >> Rot);
 	}
 	else
 	{
-		if (!bDriverWOffset || DriverGun == None)
+		if (!bDriverWOffset || Gun == None)
 			V = Location+((BehinViewViewOffset*Mult) >> Rot);
 		else
-			V = DriverGun.Location+((BehinViewViewOffset*Mult) >> Rot);
+			V = Gun.Location+((BehinViewViewOffset*Mult) >> Rot);
 	}
 	Pos = FixCameraPos(V, Location);
 }
