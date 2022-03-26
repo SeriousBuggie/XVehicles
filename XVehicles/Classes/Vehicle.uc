@@ -688,11 +688,20 @@ local byte i;
 function FireWeapon( bool bAltFire )
 {
 	local byte i;
+	
+	if( bAltFire )
+		i = 1;
+	
+	if (DriverGun == None && Passengers[0] == None && PassengerSeats[0].PGun != None)
+	{
+		PassengerSeats[0].PGun.FireTurret(i);
+		return;
+	}
 
 	if (bDriverHorn && ((bHornPrimaryOnly && !bAltFire) || !bHornPrimaryOnly))
 	{
 		if( PlayerPawn(Driver)==None || NextHornTime>Level.TimeSeconds )
-			Return;
+			return;
 		NextHornTime = Level.TimeSeconds+HornTimeInterval;
 		if( Instigator!=None )
 			MakeNoise(5);
@@ -700,11 +709,9 @@ function FireWeapon( bool bAltFire )
 		if( HornSnd!=None )
 			PlaySound(HornSnd,SLOT_Misc,2,,1600);
 	
-		Return;
+		return;
 	}
 
-	if( bAltFire )
-		i = 1;
 	if( DriverGun!=None )
 		DriverGun.FireTurret(i);
 }
@@ -872,6 +879,11 @@ function DriverEnter( Pawn Other )
 	ChangeCollision(Other, true);
 	if( DriverGun!=None )
 		DriverGun.WeaponController = Other;
+	else if (Passengers[0] == None && PassengerSeats[0].PGun != None)
+	{
+		PassengerSeats[0].PGun.WeaponController = Other;
+		PassengerSeats[0].PGun.SetOwner(Other);
+	}
 	if( DWeapon==None )
 		DWeapon = SpawnWeapon(DriverWeaponClass);
 	DWeapon.NotifyNewDriver(Other);
@@ -1067,6 +1079,11 @@ local vector ExitVect;
 	}
 	if( DriverGun!=None )
 		DriverGun.WeaponController = None;
+	else if (Passengers[0] == None && PassengerSeats[0].PGun != None)
+	{
+		PassengerSeats[0].PGun.WeaponController = None;
+		PassengerSeats[0].PGun.SetOwner(None);
+	}
 	if( DWeapon!=None )
 	{
 		DWeapon.NotifyDriverLeft(Driver);
@@ -2491,18 +2508,18 @@ simulated function vector CalcPlayerAimPos( optional byte SeatN )
 	local vector End,Start,HL,HN;
 	local rotator Aim;
 	local DriverCameraActor Cam;
-
-	if (SeatN > 0 && PassengerSeats[SeatN-1].PassengerCam != None)
-	{
-		Cam = PassengerSeats[SeatN-1].PassengerCam;
-		CalcCameraPos(Start,Aim,Cam.CurrentViewMult,SeatN);
-	}
-	else if (SeatN == 0 && MyCameraAct != None)
+	
+	if ((SeatN == 0 || (SeatN == 1 && Passengers[0] == None)) && MyCameraAct != None)
 	{
 		Cam = MyCameraAct;
 		CalcCameraPos(Start,Aim,Cam.CurrentViewMult);
 	}
-	else
+	else if (SeatN > 0 && PassengerSeats[SeatN-1].PassengerCam != None)
+	{
+		Cam = PassengerSeats[SeatN-1].PassengerCam;
+		CalcCameraPos(Start,Aim,Cam.CurrentViewMult,SeatN);
+	}
+	else 
 		CalcCameraPos(Start,Aim,1.0,SeatN);
 	Start = AdjustCamTraceStart(Start, Aim, Cam);
 		
@@ -2518,6 +2535,11 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 	Local Pawn CamOwner;
 	local ChallengeHud HUD;
 	local string str;
+	local WeaponAttachment Gun;
+	local texture CrosshairTex;
+	local color CrossColor;
+	local float CrossScale;
+	local ERenderStyle CrossStyle;
 
 	// Draw health bar:	
 	C.Style = ERenderStyle.STY_Normal;
@@ -2603,53 +2625,46 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 	// Draw aim OK crosshair
 	if( DriverCrosshairTex!=None && Seat==0 && DriverGun!=None)
 	{
-		/*C.SetPos(C.ClipX/2-AimLockedOnCrosshairTex.USize/2,C.ClipY/2-AimLockedOnCrosshairTex.VSize/2);
-		C.DrawColor.R = 110;
-		C.DrawColor.G = 255;
-		C.DrawColor.B = 110;*/
-
-		if (PlayerPawn(Driver) != None && class'DriverWeapon'.default.UseStandardCrosshair && 
-			ClassIsChildOf(class<GameInfo>(DynamicLoadObject(C.ViewPort.Actor.GameReplicationInfo.GameClass, class'Class')), class'DeathMatchPlus'))
-		{
-			if (PlayerPawn(Driver).Handedness == -1)
-				C.SetPos(C.ClipX*0.503-(DriverCrosshairTex.USize*DriverCrossScale/2),C.ClipY*0.504-(DriverCrosshairTex.VSize*DriverCrossScale/2));
-			else if (PlayerPawn(Driver).Handedness == 1)
-				C.SetPos(C.ClipX*0.497-(DriverCrosshairTex.USize*DriverCrossScale/2),C.ClipY*0.496-(DriverCrosshairTex.VSize*DriverCrossScale/2));
-			else
-				C.SetPos(C.ClipX*0.5-(DriverCrosshairTex.USize*DriverCrossScale/2),C.ClipY*0.5-(DriverCrosshairTex.VSize*DriverCrossScale/2));
-		}
-		else
-			C.SetPos(C.ClipX*0.5-(DriverCrosshairTex.USize*DriverCrossScale/2),C.ClipY*0.5-(DriverCrosshairTex.VSize*DriverCrossScale/2));
-
-		C.Style = DriverCrossStyle;
-		C.DrawColor = DriverCrossColor;
-		C.DrawIcon(DriverCrosshairTex,DriverCrossScale);		
-		DriverGun.WRenderOverlay(C);
+		Gun = DriverGun;
+		CrosshairTex = DriverCrosshairTex;
+		CrossColor = DriverCrossColor;
+		CrossScale = DriverCrossScale;
+		CrossStyle = DriverCrossStyle;
 	}
-	else if( Seat > 0 && PassCrosshairTex[Seat-1]!=None && Cam!=None && Cam.GunAttachM!=None)
+	else if((Seat > 0 && PassCrosshairTex[Seat-1]!=None && Cam!=None && Cam.GunAttachM!=None) || 
+		(Seat == 0 && PassCrosshairTex[0]!=None && DriverGun == None && Passengers[0] == None))
 	{
-		/*C.SetPos(C.ClipX/2-AimLockedOnCrosshairTex.USize/2,C.ClipY/2-AimLockedOnCrosshairTex.VSize/2);
-		C.DrawColor.R = 110;
-		C.DrawColor.G = 255;
-		C.DrawColor.B = 110;*/
-
-		if (PlayerPawn(Cam.GunAttachM.WeaponController) != None && 
+		Gun = Cam.GunAttachM;
+		i = Seat - 1;
+		if (Seat == 0)
+		{
+			i = 0;
+			Gun = PassengerSeats[0].PGun;
+		}
+		CrosshairTex = PassCrosshairTex[i];
+		CrossColor = PassCrossColor[i];
+		CrossScale = PassCrossScale[i];
+		CrossStyle = PassCrossStyle[i];
+	}
+	if (Gun != None)
+	{
+		if (PlayerPawn(Gun.WeaponController) != None && class'DriverWeapon'.default.UseStandardCrosshair && 
 			ClassIsChildOf(class<GameInfo>(DynamicLoadObject(C.ViewPort.Actor.GameReplicationInfo.GameClass, class'Class')), class'DeathMatchPlus'))
 		{
-			if (PlayerPawn(Cam.GunAttachM.WeaponController).Handedness == -1)
-				C.SetPos(C.ClipX*0.503-(PassCrosshairTex[Seat-1].USize*PassCrossScale[Seat-1]/2),C.ClipY*0.504-(PassCrosshairTex[Seat-1].VSize*PassCrossScale[Seat-1]/2));
-			else if (PlayerPawn(Cam.GunAttachM.WeaponController).Handedness == 1)
-				C.SetPos(C.ClipX*0.497-(PassCrosshairTex[Seat-1].USize*PassCrossScale[Seat-1]/2),C.ClipY*0.496-(PassCrosshairTex[Seat-1].VSize*PassCrossScale[Seat-1]/2));
+			if (PlayerPawn(Gun.WeaponController).Handedness == -1)
+				C.SetPos(C.ClipX*0.503-(CrosshairTex.USize*CrossScale/2),C.ClipY*0.504-(CrosshairTex.VSize*CrossScale/2));
+			else if (PlayerPawn(Gun.WeaponController).Handedness == 1)
+				C.SetPos(C.ClipX*0.497-(CrosshairTex.USize*CrossScale/2),C.ClipY*0.496-(CrosshairTex.VSize*CrossScale/2));
 			else
-				C.SetPos(C.ClipX*0.5-(PassCrosshairTex[Seat-1].USize*PassCrossScale[Seat-1]/2),C.ClipY*0.5-(PassCrosshairTex[Seat-1].VSize*PassCrossScale[Seat-1]/2));
+				C.SetPos(C.ClipX*0.5-(CrosshairTex.USize*CrossScale/2),C.ClipY*0.5-(CrosshairTex.VSize*CrossScale/2));
 		}
 		else
-			C.SetPos(C.ClipX*0.5-(PassCrosshairTex[Seat-1].USize*PassCrossScale[Seat-1]/2),C.ClipY*0.5-(PassCrosshairTex[Seat-1].VSize*PassCrossScale[Seat-1]/2));
+			C.SetPos(C.ClipX*0.5-(CrosshairTex.USize*CrossScale/2),C.ClipY*0.5-(CrosshairTex.VSize*CrossScale/2));
 
-		C.Style = PassCrossStyle[Seat-1];
-		C.DrawColor = PassCrossColor[Seat-1];
-		C.DrawIcon(PassCrosshairTex[Seat-1],PassCrossScale[Seat-1]);		
-		Cam.GunAttachM.WRenderOverlay(C);
+		C.Style = CrossStyle;
+		C.DrawColor = CrossColor;
+		C.DrawIcon(CrosshairTex, CrossScale);
+		Gun.WRenderOverlay(C);
 	}
 	C.Style = ERenderStyle.STY_Normal;
 
@@ -3853,7 +3868,8 @@ function PassengerEnter( Pawn Other, byte Seat )
 }
 function PassengerLeave( byte Seat, optional bool bForcedLeave )
 {
-local vector ExitVect;
+	local vector ExitVect;
+	local Pawn Other;
 
 	if( Passengers[Seat]!=None )
 	{
@@ -3900,8 +3916,10 @@ local vector ExitVect;
 	}
 	if( PassengerSeats[Seat].PGun!=None )
 	{
-		PassengerSeats[Seat].PGun.WeaponController = None;
-		PassengerSeats[Seat].PGun.SetOwner(None);
+		if (Seat == 0 && DriverGun == None)
+			Other = Driver;
+		PassengerSeats[Seat].PGun.WeaponController = Other;
+		PassengerSeats[Seat].PGun.SetOwner(Other);
 	}
 	if( PassengerSeats[Seat].PHGun!=None )
 	{
