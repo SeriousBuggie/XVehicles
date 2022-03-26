@@ -1859,6 +1859,8 @@ simulated function UpdateDriverPos()
 	R = Rotation;
 	if( DriverGun!=None )
 		R.Yaw = DriverGun.TurretYaw;
+	else if (MyCameraAct != None && MyCameraAct.GunAttachM != None && Passengers[0] == None )
+		R.Yaw = MyCameraAct.GunAttachM.TurretYaw;
 	ResetPawn(Driver, R, DWeapon);
 }
 simulated function UpdatePassengerPos()
@@ -2453,14 +2455,16 @@ function rotator GetFiringRot( float ProjSpeed, bool bInstantHit, vector PStartP
 	local vector End,Start,HL,HN;
 	local rotator Aim;
 	local DriverCameraActor Cam;
+	local Pawn WeaponController;
 
 	if( bInstantHit )
 		ProjSpeed = 99999;
 	if( SeatN>0 )
 	{
 		SeatN--;
-		if( PlayerPawn(Passengers[SeatN])==None )
-			Return Passengers[SeatN].AdjustAim(ProjSpeed,PStartPos,200,True,True);
+		WeaponController = PassengerSeats[SeatN].PGun.WeaponController;
+		if( PlayerPawn(WeaponController)==None && WeaponController != None )
+			Return WeaponController.AdjustAim(ProjSpeed,PStartPos,200,True,True);
 		
 		Cam = PassengerSeats[SeatN].PassengerCam;
 		if (Cam != None)
