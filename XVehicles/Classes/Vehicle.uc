@@ -1072,8 +1072,8 @@ local vector ExitVect;
 				Driver.SetRotation(rotator(Driver.Location - Location));
 			MyCameraAct.SetCamOwner(None);
 			Driver.Weapon = Driver.PendingWeapon;
-			if (Driver.Inventory != None)
-				Driver.Inventory.ChangedWeapon();
+			if (Driver != None)
+				Driver.ChangedWeapon();
 			if( Driver.Weapon != None && Driver.Weapon.Owner != None )
 				Driver.Weapon.BringUp();
 			LastDriver = Driver;
@@ -3916,8 +3916,8 @@ function PassengerLeave( byte Seat, optional bool bForcedLeave )
 			}
 			PassengerSeats[Seat].PassengerCam.setCamOwner(None);
 			Passengers[Seat].Weapon = Passengers[Seat].PendingWeapon;
-			if (Passengers[Seat].Inventory != None)
-				Passengers[Seat].Inventory.ChangedWeapon();
+			if (Passengers[Seat] != None)
+				Passengers[Seat].ChangedWeapon();
 			if( Passengers[Seat].Weapon!=None )
 				Passengers[Seat].Weapon.BringUp();
 		}
