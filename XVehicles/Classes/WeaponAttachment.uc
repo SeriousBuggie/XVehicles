@@ -591,7 +591,7 @@ function FireTurret( byte Mode, optional bool bForceFire )
 	else
 	{
 		S = P;
-		P = Normal(vector(R)+VRand()*WeapSettings[Mode].HitError);
+		P = Normal(vector(R)+VRand()*FRand()*WeapSettings[Mode].HitError);
 		E = S+P*80000;
 		SpawnTraceEffects(P);
 		A = OwnerVehicle.Trace(HL,HN,E,S,True);
@@ -605,7 +605,7 @@ function FireTurret( byte Mode, optional bool bForceFire )
 	else if (WeapSettings[Mode].DualMode == 2)
 	{
 		S = Pdual;
-		Pdual = Normal(vector(Rdual)+VRand()*WeapSettings[Mode].HitError);
+		Pdual = Normal(vector(Rdual)+VRand()*FRand()*WeapSettings[Mode].HitError);
 		E = S+Pdual*80000;
 		SpawnTraceEffects(PDual);
 		A = OwnerVehicle.Trace(HL,HN,E,S,True);
