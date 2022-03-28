@@ -62,6 +62,13 @@ Function SetShield()
 		Class<xVehiclesProjectile>(DynClass).Default.Damage = 600;
 		Class<xVehiclesProjectile>(DynClass).Default.DamageRadius = 710;
 	}
+	
+	SetPropertyText("DynClass", "Class'TankMGRot'");	
+	if (Class<WeaponAttachment>(DynClass) != None)
+	{
+		Class<WeaponAttachment>(DynClass).Default.WeapSettings[0].HitError = 0.001;
+		Class<WeaponAttachment>(DynClass).Default.WeapSettings[0].HitDamage = 20;
+	}
 }
 
 function SetupVehicleClass(Class<vehicle> cl)
