@@ -6,8 +6,15 @@ class XVehiclesMH expands Mutator;
 var class<Actor> DynClass;
 
 event PreBeginPlay()
-{	
+{
+	local Actor A;
+	
 	Super.PreBeginPlay();
+	
+	foreach AllActors(Class, A)
+		break;
+	if (A != self)
+		return;
 	
 	SetShield();
 }

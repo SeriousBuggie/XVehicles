@@ -14,6 +14,7 @@ var() bool bShowFlagBase;
 
 event PreBeginPlay()
 {
+	local Actor A;
 	local bool bPulseAltHeal;
 	Local PulseGun Pulse;
 	local Mutator M;
@@ -22,6 +23,11 @@ event PreBeginPlay()
 	Local vector HL, HN;
 	
 	Super.PreBeginPlay();
+	
+	foreach AllActors(Class, A)
+		break;
+	if (A != self)
+		return;
 	
 	if (PulseForHeal == PFH_Yes)
 		bPulseAltHeal = true;

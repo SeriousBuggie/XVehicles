@@ -5,18 +5,16 @@ class FixGunMutator expands Mutator;
 
 function PostBeginPlay()
 {
-	local Mutator Other;
+	local Actor A;
 	
 	Super.PostBeginPlay();
 	
-	foreach AllActors(class'Mutator', Other)
-		if (Other.isA('FixGunMutator') && Other != self && string(Other.Name) < string(Name))
-			break;
+	foreach AllActors(Class, A)
+		break;
+	if (A != self)
+		return;
 	
-	if (Other == None)
-		SetTimer(1.0, true);
-	else
-		Warn(self @ "disabled in favor of" @ Other);
+	SetTimer(1.0, true);
 }
 
 function Timer()
