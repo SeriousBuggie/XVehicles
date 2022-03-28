@@ -19,6 +19,9 @@ function bool InVehicle(Actor Other)
 function float GetVehAIRating( Pawn Seeker )
 {
 	local float ret;
+	if (VehicleOwner.Driver == None && Level.TimeSeconds - VehicleOwner.LastFix <= 5 && 
+		Seeker.PlayerReplicationInfo != None && Seeker.PlayerReplicationInfo.Team == VehicleOwner.CurrentTeam)
+		return -1; // prevent take it if someone heal it
 	if (VehicleOwner.LastDriver == Seeker && Level.TimeSeconds - VehicleOwner.LastDriverTime < 1)
 		return -1; // for avoid bot loops exit/enter
 	if (VehicleOwner.HealthTooLowFor(Seeker) || VehicleOwner.NeedStop(Seeker) || !VehicleOwner.CrewFit(Seeker))

@@ -224,6 +224,7 @@ function FixDamage(Actor Target, int Damage, Pawn EventInstigator, vector HitLoc
 			Pawn(Target.Owner).ClientMessage("Your vehicle is being fixed!", 'CriticalEvent');
 	
 		LastFix = Level.TimeSeconds;
+		Target.SetPropertyText("LastFix", string(LastFix));
 	}
 	
 	str = Level @ int(Level.TimeSeconds / 100);
