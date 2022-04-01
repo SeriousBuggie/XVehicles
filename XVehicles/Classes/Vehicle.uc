@@ -3220,9 +3220,10 @@ simulated singular function HitWall( vector HitNormal, Actor Wall )
 	{
 		HitNormal.Z = 0;
 
-		if( bOnGround && CanGetOver(MaxObstclHeight,0.85) )
+		// if OtherHitN.Z < 0 - get over can not be applied
+		if( bOnGround && OtherHitN.Z >= 0 && CanGetOver(MaxObstclHeight,0.85) )
 			Return;
-		else if (VSize(HitNormal) > 0)
+		else if (VSize(HitNormal) > 0) // bounce from walls on collide. 
 			MoveSmooth(HitNormal*16);
 			
 		HitNormal = OtherHitN;
@@ -3232,7 +3233,7 @@ simulated singular function HitWall( vector HitNormal, Actor Wall )
 	}
 
 	V = SetUpNewMVelocity(Velocity,HitNormal,1);
-
+	
 	if( !bOnGround && HitNormal.Z>0.8 )
 	{
 		if( VSize(Normal(V)-Normal(Velocity))>0.85 && VSize(Velocity)>450 )
