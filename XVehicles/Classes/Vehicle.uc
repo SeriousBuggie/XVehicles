@@ -3186,6 +3186,7 @@ simulated singular function HitWall( vector HitNormal, Actor Wall )
 		return;
 	}
 
+/*
 	if ((Normal(Region.Zone.ZoneGravity) dot HitNormal) > 0.65)
 	{
 		V = Velocity;
@@ -3209,6 +3210,7 @@ simulated singular function HitWall( vector HitNormal, Actor Wall )
 		MoveSmooth(-Normal(Velocity)*16);
 		return;
 	}
+*/
 
 	if (!bOnGround && HitNormal.Z > 0.65)
 		FellToGround();
@@ -3233,7 +3235,7 @@ simulated singular function HitWall( vector HitNormal, Actor Wall )
 	}
 
 	V = SetUpNewMVelocity(Velocity,HitNormal,1);
-	
+
 	if( !bOnGround && HitNormal.Z>0.8 )
 	{
 		if( VSize(Normal(V)-Normal(Velocity))>0.85 && VSize(Velocity)>450 )
@@ -3249,15 +3251,18 @@ simulated singular function HitWall( vector HitNormal, Actor Wall )
 	}
 	if( VSize(Normal(V)-Normal(Velocity))>0.85 || (bOnGround && !CanYawUpTo(Rotation,TransformForGroundRot(VehicleYaw,HitNormal),1500)))
 	{
-		if (HitNormal.Z < 0.8 && bSlopedPhys)	//Avoid jumping in simple slopes
+		if (HitNormal.Z >= 0)
 		{
-			if( bOnGround && CanGetOver(MaxObstclHeight,0.85) )
-				Return;
-		}
-		else if (!bSlopedPhys)
-		{
-			if( bOnGround && CanGetOver(35,0.85) )
-				Return;
+			if (HitNormal.Z < 0.8 && bSlopedPhys)	//Avoid jumping in simple slopes
+			{
+				if( bOnGround && CanGetOver(MaxObstclHeight,0.85) )
+					Return;
+			}
+			else if (!bSlopedPhys)
+			{
+				if( bOnGround && CanGetOver(35,0.85) )
+					Return;
+			}
 		}
 
 		/*if (bSlopedPhys && (HitNormal Dot ActualFloorNormal) > 0.5 )
