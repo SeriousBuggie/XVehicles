@@ -2373,14 +2373,19 @@ simulated function CalcCameraPos( out vector Pos, out rotator Rot, float Mult, o
 {
 	local vector V,S;
 	local WeaponAttachment Gun;
+	local Pawn WeaponController;
 
 	if( SeatNumber>0 )
 	{
 		SeatNumber--;
-		if( Passengers[SeatNumber]==None )
+		if (PassengerSeats[SeatNumber].PGun != None)
+			WeaponController = PassengerSeats[SeatNumber].PGun.WeaponController;
+		else
+			WeaponController = Passengers[SeatNumber];
+		if( WeaponController == None )
 			Rot = Rotation;
-		else if (PlayerPawn(Passengers[SeatNumber]) != None && PlayerPawn(Passengers[SeatNumber]).Player != None)
-			Rot = Passengers[SeatNumber].ViewRotation;
+		else if (PlayerPawn(WeaponController) != None && PlayerPawn(WeaponController).Player != None)
+			Rot = WeaponController.ViewRotation;
 		else 
 		{
 			if (bSlopedPhys && GVT!=None)
