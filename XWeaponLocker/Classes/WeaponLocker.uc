@@ -48,7 +48,7 @@ var() config MeshRotFix RotFix[64];
 // overide some parent functions
 function inventory SpawnCopy( pawn P ) {
 	local int i;
-	local Weapon InvK;
+	local Weapon InvK, wep;
 	
 	If (LockerTeam != 255 && Level.Game.IsA('TeamGamePlus') && 
 		(P.PlayerReplicationInfo == None || P.PlayerReplicationInfo.Team != LockerTeam))
@@ -58,17 +58,21 @@ function inventory SpawnCopy( pawn P ) {
 	{
 		if (Weapons[i].WeaponClass != None)
 		{
-			InvK = Weapon(P.FindInventoryType(Weapons[i].WeaponClass));
-			If (InvK != None)
+			If (!RefillAmmo(P, Weapons[i].WeaponClass, Weapons[i].ExtraAmmo))
 			{
-				If( InvK.AmmoType != None && InvK.AmmoType.AmmoAmount < InvK.PickupAmmoCount + Weapons[i].ExtraAmmo)
+				InvK = P.Spawn(Weapons[i].WeaponClass,,Name);
+				if (InvK == None) // smth replace it
 				{
-					InvK.AmmoType.AmmoAmount = InvK.PickupAmmoCount + Weapons[i].ExtraAmmo;
+					foreach P.RadiusActors(class'Weapon', wep, 10)
+						if (wep.Class.name != Weapons[i].WeaponClass.Name && 
+							wep.Tag == Weapons[i].WeaponClass.Name)
+							InvK = wep;
+					if (InvK != None && RefillAmmo(P, InvK.Class, Weapons[i].ExtraAmmo))
+					{
+						InvK.Destroy();
+						continue;
+					}
 				}
-			}
-			else
-			{
-				InvK = P.Spawn(Weapons[i].WeaponClass);
 				if (InvK != None)
 				{
 					InvK.RespawnTime = 0.0;
@@ -87,6 +91,19 @@ function inventory SpawnCopy( pawn P ) {
 			}		
 		}
 	}
+}
+
+function bool RefillAmmo(Pawn P, class<Weapon> WeaponClass, int ExtraAmmo)
+{
+	local Weapon InvK;
+	InvK = Weapon(P.FindInventoryType(WeaponClass));
+	If (InvK != None)
+	{
+		If( InvK.AmmoType != None && InvK.AmmoType.AmmoAmount < InvK.PickupAmmoCount + ExtraAmmo)
+			InvK.AmmoType.AmmoAmount = InvK.PickupAmmoCount + ExtraAmmo;
+		return true;
+	}
+	return false;
 }
 
 simulated function PostBeginPlay()
