@@ -68,20 +68,22 @@ function inventory SpawnCopy( pawn P ) {
 			}
 			else
 			{
-				InvK = Spawn(Weapons[i].WeaponClass);
-
-				InvK.RespawnTime = 0.0;
-				InvK.bHeldItem = true;
-				InvK.bTossedOut = false;
-				InvK.GiveTo( P );
-				InvK.Instigator = P;
-				InvK.GiveAmmo(P);
-				InvK.SetSwitchPriority(P);
-				if (InvK.AmmoType != None)
-					InvK.AmmoType.AmmoAmount += Weapons[i].ExtraAmmo;
-				if ( !P.bNeverSwitchOnPickup )
-					InvK.WeaponSet(P);
-				InvK.AmbientGlow = 0;
+				InvK = P.Spawn(Weapons[i].WeaponClass);
+				if (InvK != None)
+				{
+					InvK.RespawnTime = 0.0;
+					InvK.bHeldItem = true;
+					InvK.bTossedOut = false;
+					InvK.GiveTo( P );
+					InvK.Instigator = P;
+					InvK.GiveAmmo(P);
+					InvK.SetSwitchPriority(P);
+					if (InvK.AmmoType != None)
+						InvK.AmmoType.AmmoAmount += Weapons[i].ExtraAmmo;
+					if ( !P.bNeverSwitchOnPickup )
+						InvK.WeaponSet(P);
+					InvK.AmbientGlow = 0;
+				}
 			}		
 		}
 	}
