@@ -2,6 +2,7 @@
 Class VAIBehaviour extends Info;
 
 var Vehicle VehicleOwner;
+var Pawn TracePawn;
 
 const AimError = 0.001;
 
@@ -19,13 +20,17 @@ function bool InVehicle(Actor Other)
 function float GetVehAIRating( Pawn Seeker )
 {
 	local float ret;
+//	log(VehicleOwner @ "GetVehAIRating1" @ Seeker);
 	if (VehicleOwner.Driver == None && Level.TimeSeconds - VehicleOwner.LastFix <= 5 && 
 		Seeker.PlayerReplicationInfo != None && Seeker.PlayerReplicationInfo.Team == VehicleOwner.CurrentTeam)
 		return -1; // prevent take it if someone heal it
+//	log(VehicleOwner @ "GetVehAIRating2" @ Seeker);
 	if (VehicleOwner.LastDriver == Seeker && Level.TimeSeconds - VehicleOwner.LastDriverTime < 1)
 		return -1; // for avoid bot loops exit/enter
+//	log(VehicleOwner @ "GetVehAIRating3" @ Seeker);
 	if (VehicleOwner.HealthTooLowFor(Seeker) || VehicleOwner.NeedStop(Seeker) || !VehicleOwner.CrewFit(Seeker))
 		return -1;
+//	log(VehicleOwner @ "GetVehAIRating4" @ Seeker);
 	ret = VehicleOwner.AIRating*VehicleOwner.Health/VehicleOwner.Default.Health;
 //	log("GetVehAIRating 1" @ ret @ VehicleOwner.AIRating);
 	if (Seeker != None)	
@@ -64,6 +69,26 @@ function vector AdjustLocation(Actor NP)
 		else ret = pos;
 	}
 	return ret;
+}
+
+function bool CanReach(vector Point)
+{
+	local bool ret;
+	if (VSize(Point - VehicleOwner.Driver.Location) < 800)
+		return VehicleOwner.Driver.PointReachable(Point);
+		
+	if (TracePawn == None)
+	{
+		TracePawn = Spawn(class'HorseFly');
+		if (TracePawn == None)
+			return false;
+		TracePawn.RemoteRole = ROLE_None;
+		TracePawn.AmbientSound = None;
+		TracePawn.DrawScale = 0.0001;
+		TracePawn.SetCollisionSize(1, 1);
+	}
+	TracePawn.SetLocation(Point);
+	return VehicleOwner.Driver.ActorReachable(TracePawn);
 }
 
 function vector GetNextMoveTarget()
@@ -111,6 +136,8 @@ function vector GetNextMoveTarget()
 				else				
 					continue;
 			}
+			if (!CanReach(T))
+				continue;
 			Visible[i] = NP;
 			Dist = VSize(T - VehicleOwner.Location);
 			if (BestDist < 0 || dist < BestDist)
@@ -192,5 +219,6 @@ function bool PawnCanPassenge( Pawn Other, byte SeatNumber )
 defaultproperties
 {
       VehicleOwner=None
+      TracePawn=None
       RemoteRole=ROLE_None
 }

@@ -2013,8 +2013,11 @@ function ReadBotInput( float Delta )
 	if (NeedStop(Driver))
 	{
 		Bot = Bot(Driver);
-		S = VSize(Driver.MoveTarget.Location - Location);
-		if (S < CollisionRadius*2)
+		V = Driver.Destination;
+		if (Driver.MoveTarget != None)
+			V = Driver.MoveTarget.Location;
+		S = VSize(V - Location);
+		if (Driver.IsInState('ImpactJumping') || Driver.MoveTarget == None || S < CollisionRadius*2)
 			DriverLeft(False, "NeedStop near");
 		else if (VSize(Velocity) < 50 && S < 1500 && Driver.LineOfSightTo(Driver.MoveTarget))
 			DriverLeft(False, "NeedStop stuck");
@@ -2066,7 +2069,7 @@ function ReadBotInput( float Delta )
 			bHasMoveTarget = False;
 			Return;
 		}
-		MoveTimer = Level.TimeSeconds+ FMin(1, Vsize(Location-MoveDest) / Fmax(1, Vsize(Velocity)) / 2);
+		MoveTimer = Level.TimeSeconds+ FMin(0.25, Vsize(Location-MoveDest) / Fmax(1, Vsize(Velocity)) / 4);
 	}
 	V = Location-MoveDest;
 	V.Z = 0;
@@ -2086,7 +2089,10 @@ function bool NeedStop(Pawn pDriver)
 {
 	if (pDriver == None || PlayerPawn(pDriver) != None)
 		return false;
-	if (VehicleExit(pDriver.MoveTarget) != None)
+	if (VehicleExit(pDriver.MoveTarget) != None || 
+		JumpSpot(pDriver.MoveTarget) != None ||		
+		pDriver.IsInState('ImpactJumping') ||
+		(pDriver.MoveTarget == None && JumpSpot(pDriver.RouteCache[0]) != None))
 		return true;
 	if (pDriver.PlayerReplicationInfo != None)
 	{
@@ -4299,7 +4305,7 @@ defaultproperties
       VehicleFlag=None
       VehicleState=None
       WaitForDriver=0.000000
-      LastFix=0.000000
+      LastFix=-100.000000
       FixSounds(0)=Sound'UnrealShare.Dispersion.number1'
       FixSounds(1)=Sound'UnrealShare.Dispersion.number2'
       FixSounds(2)=Sound'UnrealShare.Dispersion.number3'
