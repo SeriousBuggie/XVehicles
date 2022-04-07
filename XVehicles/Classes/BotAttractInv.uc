@@ -23,10 +23,10 @@ Begin:
 event float BotDesireability( pawn Bot )
 {
 	local vector L;
-//	Log(self @ "BotDesireability 1" @ Bot.GetHumanName() @ VehicleOwner);
+//	Log(VehicleOwner @ "BotDesireability 1" @ Bot.GetHumanName());
 	if( VehicleOwner==None || VehicleOwner.bDeleteMe )
 		Return -1;
-//	Log(self @ "BotDesireability 2" @ Bot.GetHumanName() @ VehicleOwner.CurrentTeam @ VehicleOwner.CanEnter(Bot) @ 
+//	Log(VehicleOwner @ "BotDesireability 2" @ Bot.GetHumanName() @ VehicleOwner.CurrentTeam @ VehicleOwner.CanEnter(Bot) @ 
 //		VehicleOwner.IsTeamLockedFor(Bot) @ VehicleOwner.VehicleAI.PawnCanDrive(Bot) @ Bot.bIsPlayer);
 	if( !VehicleOwner.CanEnter(Bot) || VehicleOwner.IsTeamLockedFor(Bot) || !VehicleOwner.VehicleAI.PawnCanDrive(Bot) )
 		Return -1;
@@ -38,7 +38,7 @@ event float BotDesireability( pawn Bot )
 		Move(L);
 		Log("Moved!" @ L);
 	}*/
-//	Log(self @ "BotDesireability 3" @ Bot.GetHumanName() @ VehicleOwner.VehicleAI.GetVehAIRating(Bot) @ Bot.actorReachable(self));
+//	Log(VehicleOwner @ "BotDesireability 3" @ Bot.GetHumanName() @ VehicleOwner.VehicleAI.GetVehAIRating(Bot) @ Bot.actorReachable(self));
 	Return VehicleOwner.VehicleAI.GetVehAIRating(Bot);
 }
 
