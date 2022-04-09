@@ -198,7 +198,11 @@ simulated function PostBeginPlay()
     Super(NavigationPoint).PostBeginPlay();
     
     if( Role!=ROLE_Authority )
+    {
+    	if ((bNoDelete || bStatic) && URL == "")
+    		bHidden = true;
     	return;
+    }
     	
     if( URL == "" )
     {
