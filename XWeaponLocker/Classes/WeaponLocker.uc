@@ -67,10 +67,15 @@ function inventory SpawnCopy( pawn P ) {
 						if (wep.Class.name != Weapons[i].WeaponClass.Name && 
 							wep.Tag == Weapons[i].WeaponClass.Name)
 							InvK = wep;
-					if (InvK != None && RefillAmmo(P, InvK.Class, Weapons[i].ExtraAmmo))
-					{
-						InvK.Destroy();
-						continue;
+					if (InvK != None)
+					{				
+						if (Weapons[i].WeaponClass != InvK.Class) // for next time
+							Weapons[i].WeaponClass = InvK.Class; // this prevent attract bots
+						if (RefillAmmo(P, InvK.Class, Weapons[i].ExtraAmmo)) 
+						{		
+							InvK.Destroy();
+							continue;
+						}
 					}
 				}
 				if (InvK != None)
