@@ -2478,6 +2478,11 @@ function rotator GetFiringRot( float ProjSpeed, bool bInstantHit, vector PStartP
 			Return WeaponController.AdjustAim(ProjSpeed,PStartPos,200,True,True);
 		
 		Cam = PassengerSeats[SeatN].PassengerCam;
+		if (Passengers[SeatN] == None)
+		{
+			Cam = MyCameraAct;
+			SeatN = -1;
+		}
 		if (Cam != None)
 		{
 			CalcCameraPos(Start,Aim,Cam.CurrentViewMult,SeatN+1);
