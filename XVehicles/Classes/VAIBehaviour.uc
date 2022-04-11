@@ -227,6 +227,8 @@ function vector GetNextMoveTarget()
 	}
 //	Log("Use driver Destination" @ VehicleOwner.Driver.Destination @ VSize(VehicleOwner.Driver.Destination - VehicleOwner.Location) @ VSize(VehicleOwner.Driver.Destination - VehicleOwner.Driver.Location));
 //	if (CanReach(VehicleOwner.Driver.Destination)
+	if (VehicleOwner.Driver.IsInState('Wandering') && FixBot(Bot(VehicleOwner.Driver)))
+		return AdjustLocation(VehicleOwner.Driver.MoveTarget);
 	return VehicleOwner.Driver.Destination;	
 }
 function bool PawnCanDrive( Pawn Other )
@@ -242,6 +244,51 @@ function bool PawnCanPassenge( Pawn Other, byte SeatNumber )
 	if (Other.IsInState('Dying'))
 		return false;
 	Return Other.bIsPlayer;
+}
+
+function bool FixBot(Bot Bot) {
+	local int s, i;
+	local NavigationPoint NP, Best;
+	local float Dist, BestDist;
+
+	if (Bot != None && Bot.IsInState('wandering')) {
+		for (i = 0; i < ArrayCount(Bot.RouteCache) && Bot.RouteCache[i] != None; i++)
+			if (VSize(Bot.RouteCache[i].Location - Bot.Location) < 800 && 
+				Bot.actorReachable(Bot.RouteCache[i]))
+				return false;
+		foreach Bot.RadiusActors(class'NavigationPoint', NP, 800)
+			if (Bot.actorReachable(NP))
+				return false;
+		foreach AllActors(class'NavigationPoint', NP) {
+			Dist = Vsize(NP.Location - Bot.Location);
+			if (Best != None && Dist > BestDist)
+				continue;
+			if (Dist < 800) {
+				continue; // already check before
+			} else {
+/*				if (Scout == None)
+					Scout = NP.Spawn(class'Scout');
+				else
+					scout.SetLocation(NP.Location);
+				bCheck = Bot.actorReachable(scout);
+*/
+			}
+			if (Best == None || Dist < BestDist) {
+				BestDist = Dist;
+				Best = NP;
+			}
+		}
+		if (Best != None) {
+//			log(Bot @ Bot.GetHumanName() @ "Sended to" @ Best @ BestDist);
+			Bot.SpecialPause = 0;
+			Bot.MoveTarget = Best;
+			Bot.GotoState('Roaming', 'SpecialNavig');
+			return true;
+		} else {
+//			log(Bot @ Bot.GetHumanName() @ "Failed send");
+		}
+	}
+	return false;
 }
 
 defaultproperties
