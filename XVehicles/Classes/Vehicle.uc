@@ -2471,7 +2471,7 @@ function rotator GetFiringRot( float ProjSpeed, bool bInstantHit, vector PStartP
 	local Pawn WeaponController;
 
 	if( bInstantHit )
-		ProjSpeed = 99999;
+		ProjSpeed = 999999;
 	if( SeatN>0 )
 	{
 		SeatN--;

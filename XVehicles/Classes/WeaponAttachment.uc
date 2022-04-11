@@ -448,6 +448,11 @@ function Projectile FixProj(Projectile Proj)
 	return Proj;
 }
 
+function float GetProjSpeed(byte Mode, vector P, rotator R)
+{
+	return WeapSettings[Mode].ProjectileClass.Default.Speed;
+}
+
 function FireTurret( byte Mode, optional bool bForceFire )
 {
 	local vector P, Pdual;
@@ -559,9 +564,9 @@ function FireTurret( byte Mode, optional bool bForceFire )
 	{
 		if (!WeapSettings[Mode].bInstantHit)
 		{
-			R = OwnerVehicle.GetFiringRot(WeapSettings[Mode].ProjectileClass.Default.Speed,False,P,PassengerNum);
+			R = OwnerVehicle.GetFiringRot(GetProjSpeed(Mode, P, R),False,P,PassengerNum);
 			if (WeapSettings[Mode].DualMode == 2)
-				Rdual = OwnerVehicle.GetFiringRot(WeapSettings[Mode].ProjectileClass.Default.Speed,False,Pdual,PassengerNum);
+				Rdual = OwnerVehicle.GetFiringRot(GetProjSpeed(Mode, Pdual, Rdual),False,Pdual,PassengerNum);
 		}
 		else
 		{
