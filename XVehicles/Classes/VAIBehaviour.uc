@@ -106,7 +106,7 @@ function vector GetNextMoveTarget()
 	local bool bHasNext;
 	
 	if( VehicleOwner.Driver.Target!=None && VehicleOwner.Driver.LineOfSightTo(VehicleOwner.Driver.Target) &&
-		!VehicleOwner.Driver.IsInState('Fallback') && CanReach(VehicleOwner.Driver.Target.Location))
+		!VehicleOwner.Driver.IsInState('Fallback') && (VehicleOwner.bCanFly || CanReach(VehicleOwner.Driver.Target.Location)))
 	{
 //		Log("Use driver Target" @ VehicleOwner.Driver.Target @ VehicleOwner.Driver.Target.getHumanName());
 		return AdjustLocation(VehicleOwner.Driver.Target);

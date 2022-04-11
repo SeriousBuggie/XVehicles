@@ -60,6 +60,12 @@ function float SuggestDefenseStyle()
 	return -10.0; // run away, vehicle override usage of this
 }
 
+function float RateSelf( out int bUseAltMode )
+{
+	bUseAltMode = int(FRand() < 0.4);
+	return (AIRating + FRand() * 0.05);
+}
+
 simulated event RenderOverlays( canvas Canvas );
 
 function PostBeginPlay()
