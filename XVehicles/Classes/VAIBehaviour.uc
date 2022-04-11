@@ -130,7 +130,10 @@ function vector GetNextMoveTarget()
 				continue;
 			T = AdjustLocation(NP, i == ArrayCount(VehicleOwner.Driver.RouteCache) - 1 || 
 				VehicleOwner.Driver.RouteCache[i + 1] != None);
-			if (T != NP.Location && bHasNext && !VehicleOwner.FastTrace(NextT, T))
+			if (T != NP.Location && (
+				(bHasNext && !VehicleOwner.FastTrace(NextT, T)) ||
+				(!bHasNext && i == 0)
+				))
 				//VehicleOwner.Trace(HitLocation, HitNormal, NextT, T - vect(0,0,1)*(NP.CollisionHeight - HeightDiff), true) != None)
 				T = NP.Location;
 			Pos[i] = T;
@@ -222,7 +225,7 @@ function vector GetNextMoveTarget()
 			V -= (Normal(VehicleOwner.ExitOffset)*(VehicleOwner.CollisionRadius + 10 - Visible[best].CollisionRadius/2)) >> VehicleOwner.Rotation;
 		return V;
 	}
-//	Log("Use driver Destination" @ VehicleOwner.Driver.Destination);
+//	Log("Use driver Destination" @ VehicleOwner.Driver.Destination @ VSize(VehicleOwner.Driver.Destination - VehicleOwner.Location) @ VSize(VehicleOwner.Driver.Destination - VehicleOwner.Driver.Location));
 //	if (CanReach(VehicleOwner.Driver.Destination)
 	return VehicleOwner.Driver.Destination;	
 }
