@@ -20,6 +20,7 @@ var bool bHasPitchPart, bTurretYawInit;
 var vector PassWPosOffset[8]; 
 var bool bUpdatedPassOffsets;
 var rotator OldAimRotation;
+var float NextTimeRangedAttack;
 
 struct VehWWeapon
 {
@@ -995,7 +996,7 @@ function bool FindEnemy()
 	local vector HL, HN;
 	local name BotState;
 	Bot = Bot(WeaponController);
-	if (Bot == None || Bot.Enemy != None)
+	if (Bot == None || Bot.Enemy != None || NextTimeRangedAttack > Level.TimeSeconds)
 		return false;
 	BotState = Bot.GetStateName();
 	if (BotState == 'RangedAttack' || BotState == 'FallingState' || BotState == 'TakeHit' || BotState == 'ImpactJumping')
@@ -1032,6 +1033,8 @@ function bool FindEnemy()
 	Bot.SpecialPause = 1.0; // calculate exact time for shoot
 //	Log(Bot @ "FindEnemy" @ Best @ BestDist @ Hit @ Bot.GetStateName() @ Bot.NextState @ Bot.NextLabel);
 //	log(Bot @ self @ BotState @ Bot.NextState @ Bot.NextLabel);
+	Bot.MoveTimer = -1f; // time refresh path
+	NextTimeRangedAttack = Level.TimeSeconds + Bot.SpecialPause + 0.1; // pause for allow do some pathing
 	Bot.NextState = BotState;
 	Bot.NextLabel = 'Begin';
 	Bot.GotoState('RangedAttack');
@@ -1155,6 +1158,7 @@ defaultproperties
       PassWPosOffset(7)=(X=0.000000,Y=0.000000,Z=0.000000)
       bUpdatedPassOffsets=False
       OldAimRotation=(Pitch=0,Yaw=0,Roll=0)
+      NextTimeRangedAttack=0.000000
       WeapSettings(0)=(ProjectileClass=None,FireStartOffset=(X=0.000000,Y=0.000000,Z=0.000000),RefireRate=0.500000,FireAnim1="None",FireAnim2="None",FireSound=None,FireSndRange=32,FireSndVolume=20,DualMode=0,bInstantHit=False,hitdamage=0,HitType="None",HitError=0.015000,HitMomentum=0.000000,HitHeavyness=1,FireDelay=0.000000,FireDelaySnd=None,FireDelaySndRange=0,FireDelaySndVolume=0,FireDelayAnim="None",FireDelayAnimRate=0.000000)
       WeapSettings(1)=(ProjectileClass=None,FireStartOffset=(X=0.000000,Y=0.000000,Z=0.000000),RefireRate=0.500000,FireAnim1="None",FireAnim2="None",FireSound=None,FireSndRange=32,FireSndVolume=20,DualMode=0,bInstantHit=False,hitdamage=0,HitType="None",HitError=0.015000,HitMomentum=0.000000,HitHeavyness=1,FireDelay=0.000000,FireDelaySnd=None,FireDelaySndRange=0,FireDelaySndVolume=0,FireDelayAnim="None",FireDelayAnimRate=0.000000)
       bFireRateByAnim=False
