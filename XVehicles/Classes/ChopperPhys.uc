@@ -61,11 +61,30 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 {
 	local rotator R;
 	local vector X,Y,Z;
+	local float S, T;
 	
 //	log("Turn" @ InTurn @ "Accel" @ InAccel @ "Rise" @ InRise @ "VehicleYaw" @ VehicleYaw);
 
-	if( PlayerPawn(Driver)==None )
-		Return Normal(MoveDest-Location);
+	if (Driver != None && PlayerPawn(Driver) == None)
+	{
+		// bot drive code
+		X = MoveDest - Driver.Location;		
+		/*
+		S = VSize(Velocity);		
+		if (S > 0)
+		{
+			T = VSize(X)/S;
+			X -= Normal(Velocity)*(S*T - WAccelRate*T*T/2);
+		}
+		*/
+		// dont slow down if run over
+		if (Driver.Enemy == None || VSize(Driver.Enemy.Location - MoveDest) > 40)
+			X -= Velocity;
+		S = VSize(X);
+		if (S > 5)
+			return Normal(X);
+		return vect(0,0,0);		
+	}
 	if( InTurn==0 && InRise==0 && InAccel==0 )
 		return vect(0,0,0);
 	R.Yaw = VehicleYaw;

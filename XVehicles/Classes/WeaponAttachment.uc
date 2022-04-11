@@ -951,6 +951,7 @@ simulated function rotator GetAimForPos(vector Pos)
 }
 function rotator GetBotInput( float Delta )
 {
+	local vector HL, HN;
 	if( !WeaponController.IsInState('GameEnded') &&
 		!SeeEnemy(WeaponController.Target) &&
 		!SeeEnemy(WeaponController.Enemy) &&
@@ -969,6 +970,14 @@ function rotator GetBotInput( float Delta )
 			RepAimPos = OwnerVehicle.MoveDest;
 		else		
 			RepAimPos = WeaponController.Focus;
+	}
+	if (OwnerVehicle.bCanFly && RepAimPos == OwnerVehicle.MoveDest)
+	{
+		HL = RepAimPos;
+		HL.Z -= OwnerVehicle.CollisionHeight*OwnerVehicle.VehicleAI.AirFlyScale;
+		if (OwnerVehicle.Trace(HL, HN, HL, RepAimPos) != None)
+			HL.Z += OwnerVehicle.Driver.CollisionHeight;
+		RepAimPos.Z = HL.Z;
 	}
 	Return GetAimForPos(RepAimPos);
 }

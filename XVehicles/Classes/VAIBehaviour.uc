@@ -4,6 +4,8 @@ Class VAIBehaviour extends Info;
 var Vehicle VehicleOwner;
 var Pawn TracePawn;
 
+var float AirFlyScale;
+
 const AimError = 0.001;
 
 function bool HasFlag(Actor Other)
@@ -51,14 +53,16 @@ function float GetVehAIRating( Pawn Seeker )
 	return ret;
 }
 
-function vector AdjustLocation(Actor NP)
+function vector AdjustLocation(Actor NP, optional bool bInMid)
 {
 	local vector ret, HL, HN, pos;
 	local float offset;
 	ret = NP.Location;	
-	if (VehicleOwner.bCanFly && PathNode(NP) != None)
+	if (VehicleOwner.bCanFly && NavigationPoint(NP) != None && 
+		!NP.FastTrace(NP.Location - vect(0,0,1)*2*VehicleOwner.Collisionheight) &&
+		(bInMid || PathNode(NP) != None || NP.isA('AirPath')))
 	{
-		offset = VehicleOwner.CollisionHeight*6;
+		offset = VehicleOwner.CollisionHeight*AirFlyScale;
 		pos = ret + offset*vect(0,0,1);
 		if (NP.Trace(HL, HN, pos) != None)
 		{
@@ -94,8 +98,8 @@ function bool CanReach(vector Point)
 function vector GetNextMoveTarget()
 {
 	local int i, best;
-	local float Dist, BestDist;
-	Local vector V, S, T, HitLocation, HitNormal;
+	local float Dist, BestDist, HeightDiff;
+	Local vector V, S, T, NextT, HitLocation, HitNormal;
 	local string dbg;
 	local NavigationPoint Visible[ArrayCount(VehicleOwner.Driver.RouteCache)], NP;
 	local vector Pos[ArrayCount(VehicleOwner.Driver.RouteCache)];
@@ -117,29 +121,44 @@ function vector GetNextMoveTarget()
 		S = VehicleOwner.Location;
 		S.Z += VehicleOwner.MaxObstclHeight/2;		
 //		dbg = "";
-		for (i = 0; i < ArrayCount(VehicleOwner.Driver.RouteCache); i++)
+		HeightDiff = VehicleOwner.CollisionHeight + VehicleOwner.MaxObstclHeight/2;
+		for (i = ArrayCount(VehicleOwner.Driver.RouteCache) - 1; i >= 0; i--)
 		{
 			NP = VehicleOwner.Driver.RouteCache[i];
 			if (NP == None)
 				break;
-			T = AdjustLocation(NP);
+			T = AdjustLocation(NP, i == ArrayCount(VehicleOwner.Driver.RouteCache) - 1 || 
+				VehicleOwner.Driver.RouteCache[i + 1] != None);
+			if (i != ArrayCount(VehicleOwner.Driver.RouteCache) - 1 && 
+				!VehicleOwner.FastTrace(NextT, T))
+				//VehicleOwner.Trace(HitLocation, HitNormal, NextT, T - vect(0,0,1)*(NP.CollisionHeight - HeightDiff), true) != None)
+				T = NP.Location;
 			Pos[i] = T;
-			T.Z -= NP.CollisionHeight - VehicleOwner.CollisionHeight - VehicleOwner.MaxObstclHeight/2;
+			T.Z -= NP.CollisionHeight - HeightDiff;
+			NextT = T;
 			if (//!VehicleOwner.Driver.LineOfSightTo(NP) || 
 				VehicleOwner.Trace(HitLocation, HitNormal, T, S, true, V) != None)
-			{				
+			{
+//				Log(i @ "!Trace" @ T @ NP);
 //				if (i == 0) Log(i @ NP @ HitLocation @ HitNormal);
 //				dbg = dbg @ "-";
 				if (T.Z < S.Z && T.Z + VehicleOwner.CollisionHeight > S.Z && 
 					VehicleOwner.Trace(HitLocation, HitNormal, T + vect(0,0,1)*(S.Z - T.Z), S, true, V) == None)
 					; // skip it
-				else				
+				else
+				{
+//					Log(i @ "!Trace2" @ T @ NP);
 					continue;
+				}
 			}
 			if (!CanReach(T))
+			{
+//				Log(i @ "!CanReach" @ T @ NP);
 				continue;
+			}
+//			Log(i @ "Visible" @ T @ NP);
 			Visible[i] = NP;
-			Dist = VSize(T - VehicleOwner.Location);
+			Dist = VSize(T - VehicleOwner.Driver.Location);
 			if (BestDist < 0 || dist < BestDist)
 			{
 				BestDist = dist;
@@ -178,6 +197,8 @@ function vector GetNextMoveTarget()
 				continue;
 			}
 			Dist = V dot Normal(Pos[i] - Location);
+			if (VehicleOwner.bCanFly)
+				Dist = i + 10;
 //			dbg = dbg @ "+";
 			if (dist >= BestDist - AimError)
 			{
@@ -191,6 +212,8 @@ function vector GetNextMoveTarget()
 		
 		if (i >= 14) // too old?
 			VehicleOwner.Driver.MoveTimer = -1f; // time to refresh path
+		else if (VehicleOwner.bCanFly)
+			VehicleOwner.Driver.MoveTimer = 1f; // prevent refresh path in air
 		
 //		Log("Use driver RouteCache" @ best @ Visible[best] @ Visible[best].getHumanName());
 		V = Pos[best];
@@ -220,5 +243,6 @@ defaultproperties
 {
       VehicleOwner=None
       TracePawn=None
+      AirFlyScale=4.500000
       RemoteRole=ROLE_None
 }

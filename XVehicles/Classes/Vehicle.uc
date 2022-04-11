@@ -954,6 +954,7 @@ function ChangeCollision(Pawn Other, bool bInside)
 		if (bInside)
 		{
 			Bot.bCanSwim = bIsWaterResistant; // not help :(
+			Bot.bCanFly = bCanFly;
 			Bot.FootStep1 = None;
 			Bot.FootStep2 = None;
 			Bot.FootStep3 = None;
@@ -970,6 +971,7 @@ function ChangeCollision(Pawn Other, bool bInside)
 		else
 		{
 			Bot.bCanSwim = Bot.default.bCanSwim;
+			Bot.bCanFly = Bot.default.bCanFly;
 			Bot.FootStep1 = Bot.default.FootStep1;
 			Bot.FootStep2 = Bot.default.FootStep2;
 			Bot.FootStep3 = Bot.default.FootStep3;
