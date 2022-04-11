@@ -25,9 +25,13 @@ function SpawnFireEffects(byte Mode)
 
 function FireTurret( byte Mode, optional bool bForceFire )
 {
-	if (Bot(WeaponController) != None && Mode == 0 && 
-		class'XV_SeekingRocket'.static.IsGoodTarget(WeaponController, WeaponController.Target))
-		Mode = 1; // use alt fire for rocket
+	if (Bot(WeaponController) != None)
+	{
+		if (Mode == 0 && class'XV_SeekingRocket'.static.IsGoodTarget(WeaponController, WeaponController.Target))
+			Mode = 1; // use alt fire for rocket
+		else
+			Mode = 0;
+	}
 
 	Super.FireTurret(Mode, bForceFire);	
 }
