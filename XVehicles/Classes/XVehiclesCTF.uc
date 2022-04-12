@@ -24,11 +24,7 @@ event PreBeginPlay()
 	
 	Super.PreBeginPlay();
 	
-	class'WarShell'.default.Speed = 3000; // instead of 600
-	class'WarShell'.default.MaxSpeed = 10000; // instead of 2000
-	// repeat for GuidedWarShell
-	class'GuidedWarShell'.default.Speed = class'WarShell'.default.Speed;
-	class'GuidedWarShell'.default.MaxSpeed = class'WarShell'.default.MaxSpeed;
+	Spawn(class'FastWSNotify'); // Fast WarShell
 	
 	foreach AllActors(Class, A)
 		break;
