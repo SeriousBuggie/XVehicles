@@ -20,7 +20,7 @@ event PreBeginPlay()
 	local Mutator M;
 	local FlagBase FB;
 	Local XFlagBase xFB;
-	Local vector HL, HN;
+	Local vector HL, HN, dir;
 	
 	Super.PreBeginPlay();
 	
@@ -54,8 +54,9 @@ event PreBeginPlay()
 		foreach AllActors(class'FlagBase', FB)
 		{
 			HL = FB.Location;
-			HL -= vect(0,0,134.5)*FB.DrawScale/FB.default.DrawScale >> FB.Rotation;
-			if (FB.Trace(HL, HN, HL) != None)
+			dir = vect(0,0,134.5)*FB.DrawScale/FB.default.DrawScale >> FB.Rotation;
+			HL -= dir;
+			if (FB.Trace(HL, HN, HL) != None && (Normal(dir) dot HN) > 0.998)
 			{
 				xFB = FB.Spawn(class'XFlagBase', FB, , HL + (vect(0,0,18) >> FB.Rotation), FB.Rotation);
 				if (xFB != None && FB.Team != 0)
