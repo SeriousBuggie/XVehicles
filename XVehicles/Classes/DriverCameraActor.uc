@@ -174,19 +174,19 @@ function ChangeCam(Actor IfView, Actor ThenView)
 	for (P=Level.PawnList; P!=None; P=P.nextPawn)
 	{
 		Player = PlayerPawn(P);
-		if (Player != None && Player.ViewTarget == IfView)
+		if (Player != None && Player != ThenView && Player.ViewTarget == IfView)
+		{
+			Player.ViewTarget = ThenView;
+			if (ThenView == self)
 			{
-				Player.ViewTarget = ThenView;
-				if (ThenView == self)
-				{
-					Player.bHiddenEd = Player.bBehindView;
-					Player.bBehindView = false;					
-				}
-				else if (ThenView == None)
-					Player.bBehindView = false;
-				else
-					Player.bBehindView = Player.bHiddenEd;
+				Player.bHiddenEd = Player.bBehindView;
+				Player.bBehindView = false;					
 			}
+			else if (ThenView == None)
+				Player.bBehindView = false;
+			else
+				Player.bBehindView = Player.bHiddenEd;
+		}
 	}
 }
 

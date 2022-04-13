@@ -32,7 +32,7 @@ function Timer()
 			continue;
 		Camera = Weapon.VehicleOwner.GetCam(Weapon);
 
-		if (Camera == None)
+		if (Camera == None || Camera == Player)
 			continue;
 			
 		Check = Player @ Player.ViewTarget;
@@ -46,7 +46,7 @@ function Timer()
 		}
 		
 		Pending = Left(Pending, i - 1) $ Mid(Pending, i + Len(Check));
-		
+
 		Player.ViewTarget = Camera;
 		Player.bHiddenEd = Player.bBehindView;
 		Player.bBehindView = false;
