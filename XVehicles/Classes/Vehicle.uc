@@ -1128,7 +1128,8 @@ simulated function Destroyed()
 {
 	local VehicleAttachment W,NW;
 	local byte i;
-
+	if (Role != ROLE_Authority && PlayerPawn(Owner) != None && Owner.CollisionRadius != Owner.default.CollisionRadius)
+		Owner.SetCollisionSize(Owner.default.CollisionRadius, Owner.CollisionHeight);
 	if( Driver!=None )
 		DriverLeft(True, "Destroyed");
 	For( i=0; i<ArrayCount(Passengers); i++ )
