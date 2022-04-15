@@ -221,6 +221,8 @@ function vector GetNextMoveTarget()
 			VehicleOwner.Driver.MoveTimer = 1f; // prevent refresh path in air
 //		Log("Use driver RouteCache" @ best @ Visible[best] @ Visible[best].getHumanName());
 		V = Pos[best];
+		if (VSize(V - Location) < 100 && Vsize(V - Visible[best].Location) > 100)
+			V = Visible[best].Location;
 		if (FlagBase(Visible[best]) != None)
 			V -= (Normal(VehicleOwner.ExitOffset)*(VehicleOwner.CollisionRadius + 10 - Visible[best].CollisionRadius/2)) >> VehicleOwner.Rotation;
 		return V;
@@ -295,6 +297,6 @@ defaultproperties
 {
       VehicleOwner=None
       TracePawn=None
-      AirFlyScale=4.500000
+      AirFlyScale=6.000000
       RemoteRole=ROLE_None
 }

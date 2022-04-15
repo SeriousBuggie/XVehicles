@@ -68,7 +68,7 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 	if (Driver != None && PlayerPawn(Driver) == None)
 	{
 		// bot drive code
-		X = MoveDest - Driver.Location;		
+		X = MoveDest - Location;		
 		/*
 		S = VSize(Velocity);		
 		if (S > 0)
