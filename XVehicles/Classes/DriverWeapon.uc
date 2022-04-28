@@ -96,6 +96,8 @@ Ignores BringUp,Finish;
 			VehicleOwner.ChangeBackView();
 		return true;
 	}
+	
+	simulated function AnimEnd() {}
 }
 
 function float SwitchPriority()
