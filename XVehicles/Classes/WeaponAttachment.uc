@@ -900,9 +900,9 @@ simulated function SetTurretYaw()
 {
 	if (!bRotWithOtherWeap || WAtt == None || WeaponController != None)
 	{
-		if (!bYawFromContr)
+		if (bYawFromContr)
 		{
-			bYawFromContr = true;
+			bYawFromContr = false;
 			OlVehYaw = OwnerVehicle.VehicleYaw;
 		}
 		else if( OlVehYaw != OwnerVehicle.VehicleYaw)
@@ -913,9 +913,9 @@ simulated function SetTurretYaw()
 	}
 	else
 	{
-		if (bYawFromContr)
+		if (!bYawFromContr)
 		{
-			bYawFromContr = false;
+			bYawFromContr = true;
 			OlVehYaw = WAtt.TurretYaw;
 		}
 		else if (OlVehYaw != WAtt.TurretYaw)
