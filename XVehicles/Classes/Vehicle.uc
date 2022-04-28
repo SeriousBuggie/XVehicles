@@ -902,7 +902,7 @@ function DriverEnter( Pawn Other )
 	{
 		ClientSetTranslatorMsg();
 		R.Yaw = VehicleYaw;
-		R.Pitch = -4000;
+		R.Pitch = 0;
 		PlayerPawn(Other).ClientSetRotation(R);
 		PlayerPawn(Other).bBehindView = False;
 		Other.GoToState('PlayerFlying');
@@ -3878,7 +3878,7 @@ function PassengerEnter( Pawn Other, byte Seat )
 		if( PassengerSeats[Seat].PGun!=None )
 			R.Yaw = PassengerSeats[Seat].PGun.TurretYaw;
 		else R.Yaw = VehicleYaw;
-		R.Pitch = -4000;
+		R.Pitch = 0;
 		PlayerPawn(Other).ClientSetRotation(R);
 		PlayerPawn(Other).bBehindView = False;
 		Other.GoToState('PlayerFlying');
