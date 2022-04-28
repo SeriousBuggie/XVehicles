@@ -3,7 +3,7 @@ class DriverWeapon expands TournamentWeapon;
 var Vehicle VehicleOwner;
 var DriverWNotifier MyNotifier;
 var bool bPassengerGun;
-var byte SeatNumber;
+var byte SeatNumber, bFireUsed, bAltFireUsed;
 
 var() config bool UseStandardCrosshair;
 
@@ -41,6 +41,8 @@ function ChangeOwner(Actor NewOwner)
 			OldOwner.DeleteInventory(MyNotifier);
 	}
 	Inventory = MyNotifier;
+	bFireUsed = 0;
+	bAltFireUsed = 0;
 }
 
 event float BotDesireability( pawn Bot )
@@ -149,8 +151,29 @@ simulated function PlaySelect()
 	bCanClientFire = false;
 }
 
+function Tick(float delta)
+{
+	Super.Tick(delta);
+	if (Pawn(Owner) != None)
+	{
+		if (bFireUsed != Pawn(Owner).bFire)
+		{
+			bFireUsed = Pawn(Owner).bFire;
+			if (bFireUsed != 0)
+				Fire(0);
+		}
+		if (bAltFireUsed != Pawn(Owner).bAltFire)
+		{
+			bAltFireUsed = Pawn(Owner).bAltFire;
+			if (bAltFireUsed != 0)
+				AltFire(0);
+		}
+	}
+}
+
 function Fire(float F)
 {
+	bFireUsed = 1;
 	if( bPassengerGun )
 		VehicleOwner.PassengerFireWeapon(False,SeatNumber);
 	else
@@ -158,6 +181,7 @@ function Fire(float F)
 }
 function AltFire(float F) 
 {
+	bAltFireUsed = 1;
 	if( bPassengerGun )
 		VehicleOwner.PassengerFireWeapon(True,SeatNumber);
 	else
@@ -204,6 +228,8 @@ defaultproperties
       MyNotifier=None
       bPassengerGun=False
       SeatNumber=0
+      bFireUsed=0
+      bAltFireUsed=0
       UseStandardCrosshair=False
       bWarnTarget=True
       AIRating=1.000000
