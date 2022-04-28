@@ -1801,9 +1801,13 @@ simulated function SwitchWeapon(Pawn Other, Weapon Weap)
 		return;
 	if ( Other.Weapon != None )
 	{
+		Other.ClientPutDown(Other.Weapon, Weap);		
 		Other.PendingWeapon = Other.Weapon;
 		Other.Weapon.GoToState('');
 		Other.Weapon.TweenDown(); // for remove ambient sound
+		// weird hack for prevent call AnimEnd which set Weapon to ClientPending if ClientPending not None
+		Other.Weapon.AnimRate = 0;
+		Other.Weapon.TweenRate = 0;
 	}
 	Other.Weapon = Weap;
 }

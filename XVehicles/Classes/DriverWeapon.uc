@@ -220,7 +220,14 @@ function SetupWeapon(WeaponAttachment WA)
 	bAltWarnTarget = WA.bAltFireZooms;
 }
 
-simulated function TweenToStill();
+simulated function TweenToStill() {}
+
+simulated function AnimEnd() {}
+
+State ClientDown
+{		
+	simulated function AnimEnd() {}
+}
 
 defaultproperties
 {
