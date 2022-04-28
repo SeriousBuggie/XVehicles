@@ -661,7 +661,6 @@ function TraceProcess( actor A, vector HitLocation, vector HitNormal, byte Mode)
 
 function Timer()
 {
-
 	bFireRestrict = False;
 	if( WeaponController==None )
 		Return;
@@ -731,6 +730,8 @@ simulated function Tick( float Delta )
 		}
 			
 	}
+	else if (!bFireRestrict && WeaponController != None && WeaponController.bFire + WeaponController.bAltFire > 0)
+		Timer();
 
 	if (bRotWithOtherWeap)
 	{
