@@ -45,6 +45,7 @@ event float BotDesireability( pawn Bot )
 defaultproperties
 {
       VehicleOwner=None
+      bRotatingPickup=False
       MaxDesireability=10.000000
       bTrailerPrePivot=True
       Physics=PHYS_Trailer

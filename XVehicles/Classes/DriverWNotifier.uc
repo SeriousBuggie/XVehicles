@@ -41,6 +41,7 @@ function Weapon WeaponChange( byte F )
 defaultproperties
 {
       WeaponOwner=None
+      bRotatingPickup=False
       bHidden=True
       RemoteRole=ROLE_None
       bGameRelevant=True

@@ -105,6 +105,7 @@ simulated exec function XVJumpReleased()
 defaultproperties
 {
       bKeysSet=False
+      bRotatingPickup=False
       bIsAnArmor=True
       bHidden=True
       Physics=PHYS_Trailer
