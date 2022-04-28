@@ -691,7 +691,7 @@ local byte i;
 function FireWeapon( bool bAltFire )
 {
 	local byte i;
-	
+
 	if( bAltFire )
 		i = 1;
 	
@@ -870,7 +870,6 @@ function AddShield(Pawn Other)
 function DriverEnter( Pawn Other )
 {
 	local rotator R;
-	
 	bHadADriver = True;
 	bTeamLocked = False;
 	Driver = Other;
@@ -891,13 +890,7 @@ function DriverEnter( Pawn Other )
 		DWeapon = SpawnWeapon(DriverWeaponClass);
 	DWeapon.NotifyNewDriver(Other);
 	DWeapon.ChangeOwner(Other);
-	if( Other.Weapon!=None )
-	{
-		Other.PendingWeapon = Other.Weapon;
-		Other.Weapon.GoToState('');
-		Other.Weapon.TweenDown(); // for remove ambient sound
-	}
-	Other.Weapon = DWeapon;
+	SwitchWeapon(Other, DWeapon);
 	AddShield(Other);
 	if (Other.Inventory != None)
 		Other.Inventory.ChangedWeapon();
@@ -1802,6 +1795,19 @@ simulated function ResetPhysics(Pawn Other)
 		Other.SetPhysics(Desired);
 }
 
+simulated function SwitchWeapon(Pawn Other, Weapon Weap)
+{
+	if (Other.Weapon == Weap)
+		return;
+	if ( Other.Weapon != None )
+	{
+		Other.PendingWeapon = Other.Weapon;
+		Other.Weapon.GoToState('');
+		Other.Weapon.TweenDown(); // for remove ambient sound
+	}
+	Other.Weapon = Weap;
+}
+
 simulated function ResetPawn(Pawn Other, rotator R, Weapon Weap)
 {
 	local vector L;
@@ -1822,15 +1828,7 @@ simulated function ResetPawn(Pawn Other, rotator R, Weapon Weap)
 		Other.SetLocation(L);
 		
 	if (Weap != None && Other.Weapon != Weap)
-	{
-		if ( Other.Weapon != None )
-		{
-			Other.PendingWeapon = Other.Weapon;
-			Other.Weapon.GoToState('');
-			Other.Weapon.TweenDown(); // for remove ambient sound
-		}
-		Other.Weapon = Weap;
-	}
+		SwitchWeapon(Other, Weap);
 
 	Other.Velocity = Velocity;
 	if( Level.NetMode<NM_Client )
@@ -3066,7 +3064,6 @@ simulated function SingularBump( Actor Other )
 		}
 		else if (VSize(VeryOldVel[1]) > 300)
 		{
-			//if (!IsUTracing()) SetUTracing(true);
 			if (Role == ROLE_Authority)
 				TakeImpactDamage(VSize(VeryOldVel[1])/(Mass/500),None, "Bump");
 		}
@@ -3861,13 +3858,7 @@ function PassengerEnter( Pawn Other, byte Seat )
 	}
 	else PassengerSeats[Seat].PHGun.ChangeOwner(Other);
 	PassengerSeats[Seat].PHGun.NotifyNewDriver(Other);
-	if( Other.Weapon!=None )
-	{
-		Other.PendingWeapon = Other.Weapon;
-		Other.Weapon.GoToState('');
-		Other.Weapon.TweenDown(); // for remove ambient sound
-	}
-	Other.Weapon = PassengerSeats[Seat].PHGun;
+	SwitchWeapon(Other, PassengerSeats[Seat].PHGun);
 	AddShield(Other);
 	if (Other.Inventory != None)
 		Other.Inventory.ChangedWeapon();	
