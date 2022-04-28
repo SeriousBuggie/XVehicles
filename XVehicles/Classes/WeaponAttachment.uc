@@ -12,6 +12,7 @@ var(Sounds) Sound BarrelTurnSound;
 var() IntRange PitchRange;
 var() bool bAltFireZooms;
 var float OlVehYaw;
+var bool bYawFromContr;
 var byte PassengerNum;
 var VehicleAttachment PitchPart;
 var() class<VehicleAttachment> TurretPitchActor;
@@ -897,8 +898,9 @@ simulated function GetTurretCoords( optional out vector Pos, optional out rotato
 
 simulated function SetTurretYaw()
 {
-	if (!bRotWithOtherWeap || WAtt == None || WeaponController!=None)
+	if (!bRotWithOtherWeap || WAtt == None || WeaponController != None)
 	{
+		bYawFromContr = true;
 		if( OlVehYaw != OwnerVehicle.VehicleYaw)
 		{
 			TurretYaw += OwnerVehicle.VehicleYaw - OlVehYaw;
@@ -907,9 +909,14 @@ simulated function SetTurretYaw()
 	}
 	else
 	{
-		if( OlVehYaw != WAtt.TurretYaw)
+		if (bYawFromContr)
 		{
-			TurretYaw += WAtt.TurretYaw - OlVehYaw;
+			bYawFromContr = false;
+			OlVehYaw = WAtt.TurretYaw;
+		}
+		else if (OlVehYaw != WAtt.TurretYaw)
+		{
+			TurretYaw += WAtt.TurretYaw - OlVehYaw;			
 			OlVehYaw = WAtt.TurretYaw;
 		}
 	}
@@ -1143,6 +1150,7 @@ defaultproperties
       PitchRange=(Max=10000,Min=-5000)
       bAltFireZooms=False
       OlVehYaw=0.000000
+      bYawFromContr=False
       PassengerNum=0
       PitchPart=None
       TurretPitchActor=None
