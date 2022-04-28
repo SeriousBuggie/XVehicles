@@ -2188,8 +2188,10 @@ function int ShouldRiseFor( vector AcTarget )
 // Pawn can enter this vehicle?
 function bool CanEnter( Pawn Other, optional bool bIgnoreDuck )
 {
+	local vector HL, HN;
 	if( Other.Health<=0 || (!bIgnoreDuck && PlayerPawn(Other)!=None && Other.bDuck==0) || DriverWeapon(Other.Weapon)!=None ||
-		Other.IsInState('PlayerWaiting') || !Other.bCollideActors )
+		Other.IsInState('PlayerWaiting') || !Other.bCollideActors || 
+		!Other.FastTrace(Location) || Other.Trace(HL, HN, Location, , true) != self)
 		Return False;
 	Return True;
 }
@@ -2224,8 +2226,8 @@ Ignores FireWeapon,ReadDriverInput,ReadBotInput,DriverLeft;
 
 		For( P=Level.PawnList; P!=None; P=P.NextPawn )
 		{
-			if( P.bIsPlayer && PlayerPawn(P)!=None && VSize(P.Location-Location)<(CollisionRadius+100+P.CollisionRadius) && CanEnter(P,True)
-			 && !IsTeamLockedFor(P) )
+			if( P.bIsPlayer && PlayerPawn(P)!=None && VSize(P.Location-Location)<(CollisionRadius+100+P.CollisionRadius) && 
+				CanEnter(P, True) && !IsTeamLockedFor(P))
 //				P.ClientMessage("Hold 'Crouch' key to enter this"@VehicleName,'Pickup');
 				P.ReceiveLocalizedMessage( class'EnterMessagePlus', 0, None, None, self );
 		}
