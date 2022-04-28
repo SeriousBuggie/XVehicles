@@ -854,7 +854,7 @@ simulated function Tick( float Delta )
 		else if( Ro.Pitch>CarTopAllowedPitch.Max )
 			Ro.Pitch = CarTopAllowedPitch.Max;
 	}
-	
+
 	OldY = TurretYaw;
 	OldP = TurretPitch;
 	TurretYaw = CalcTurnSpeed(RotatingSpeed*Delta,TurretYaw,Ro.Yaw);
@@ -900,8 +900,12 @@ simulated function SetTurretYaw()
 {
 	if (!bRotWithOtherWeap || WAtt == None || WeaponController != None)
 	{
-		bYawFromContr = true;
-		if( OlVehYaw != OwnerVehicle.VehicleYaw)
+		if (!bYawFromContr)
+		{
+			bYawFromContr = true;
+			OlVehYaw = OwnerVehicle.VehicleYaw;
+		}
+		else if( OlVehYaw != OwnerVehicle.VehicleYaw)
 		{
 			TurretYaw += OwnerVehicle.VehicleYaw - OlVehYaw;
 			OlVehYaw = OwnerVehicle.VehicleYaw;
