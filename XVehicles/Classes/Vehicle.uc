@@ -867,7 +867,7 @@ function AddShield(Pawn Other)
 		Other.AddInventory( Other.Spawn(Class'DriverShield', Other));
 }
 
-function DriverEnter( Pawn Other )
+function DriverEnter( Pawn Other, optional int MyPitch, optional int MyYaw )
 {
 	local rotator R;
 	bHadADriver = True;
@@ -901,8 +901,11 @@ function DriverEnter( Pawn Other )
 	if( PlayerPawn(Other)!=None )
 	{
 		ClientSetTranslatorMsg();
-		R.Yaw = VehicleYaw;
-		R.Pitch = 0;
+		if (MyYaw != 0)
+			R.Yaw = MyYaw;
+		else
+			R.Yaw = VehicleYaw;
+		R.Pitch = MyPitch;
 		PlayerPawn(Other).ClientSetRotation(R);
 		PlayerPawn(Other).bBehindView = False;
 		Other.GoToState('PlayerFlying');
@@ -3441,7 +3444,7 @@ State BlownUp
 {
 Ignores DriverEnter,Tick,ServerPackState,Bump;
 
-	function PassengerEnter( Pawn Other, byte Seat );
+	function PassengerEnter( Pawn Other, byte Seat, optional int MyPitch, optional int MyYaw );
 
 Begin:
 	bVehicleBlewUp = True;
@@ -3751,13 +3754,17 @@ function ChangeSeat( byte SeatNum, bool bWasPassenger, byte PassengerNum )
 			OthPawn = Driver;
 			DriverLeft(True, "ChangeSeat 1");
 			PassengerLeave(PassengerNum,True);
-			DriverEnter(InvPawn);
+			DriverEnter(InvPawn,
+				PassengerSeats[PassengerNum].PassengerCam.Rotation.Pitch, 
+				PassengerSeats[PassengerNum].PassengerCam.Rotation.Yaw);
 			PassengerEnter(OthPawn,PassengerNum);
 		}
 		else
 		{
 			PassengerLeave(PassengerNum,True);
-			DriverEnter(InvPawn);
+			DriverEnter(InvPawn, 
+				PassengerSeats[PassengerNum].PassengerCam.Rotation.Pitch, 
+				PassengerSeats[PassengerNum].PassengerCam.Rotation.Yaw);
 		}
 	}
 	else
@@ -3773,7 +3780,9 @@ function ChangeSeat( byte SeatNum, bool bWasPassenger, byte PassengerNum )
 			else DriverLeft(True, "ChangeSeat 2");
 			OthPawn = Passengers[SeatNum-1];
 			PassengerLeave(SeatNum-1,True);
-			PassengerEnter(InvPawn,SeatNum-1);
+			PassengerEnter(InvPawn,SeatNum-1, 
+				MyCameraAct.Rotation.Pitch, 
+				MyCameraAct.Rotation.Yaw);
 			if( bWasPassenger )
 				PassengerEnter(OthPawn,PassengerNum);
 			else DriverEnter(OthPawn);
@@ -3783,7 +3792,9 @@ function ChangeSeat( byte SeatNum, bool bWasPassenger, byte PassengerNum )
 			if( bWasPassenger )
 				PassengerLeave(PassengerNum,True);
 			else DriverLeft(True, "ChangeSeat 3");
-			PassengerEnter(InvPawn,SeatNum-1);
+			PassengerEnter(InvPawn,SeatNum-1, 
+				MyCameraAct.Rotation.Pitch, 
+				MyCameraAct.Rotation.Yaw);
 		}
 	}
 }
@@ -3843,7 +3854,7 @@ function bool PassengerSeatAvailable( byte SNum )
 		Return False;
 	Return (PassengerSeats[SNum].bIsAvailable && Passengers[SNum]==None);
 }
-function PassengerEnter( Pawn Other, byte Seat )
+function PassengerEnter( Pawn Other, byte Seat, optional int MyPitch, optional int MyYaw )
 {
 	local rotator R, RotRollZero;
 
@@ -3875,10 +3886,12 @@ function PassengerEnter( Pawn Other, byte Seat )
 	if( PlayerPawn(Other)!=None )
 	{
 		Other.ClientMessage(PassengerSeats[Seat].SeatName,'Pickup');
-		if( PassengerSeats[Seat].PGun!=None )
+		if (MyYaw != 0)
+			R.Yaw = MyYaw;
+		else if( PassengerSeats[Seat].PGun!=None )
 			R.Yaw = PassengerSeats[Seat].PGun.TurretYaw;
 		else R.Yaw = VehicleYaw;
-		R.Pitch = 0;
+		R.Pitch = MyPitch;
 		PlayerPawn(Other).ClientSetRotation(R);
 		PlayerPawn(Other).bBehindView = False;
 		Other.GoToState('PlayerFlying');
