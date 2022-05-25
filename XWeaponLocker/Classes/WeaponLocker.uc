@@ -48,6 +48,8 @@ var() config MeshRotFix RotFix[64];
 // internal stuff
 var WDumbMeshes WMesh[8];
 var WRI WRI;
+var bool bNW3hack;
+var Inventory TempInv;
 
 // overide some parent functions
 function Inventory SpawnCopy( pawn P )
@@ -55,6 +57,9 @@ function Inventory SpawnCopy( pawn P )
 	local int i;
 	local Weapon InvK, wep;
 	local bool bChanged;
+	local Actor NWRepObj;
+	local string InvStr;
+	local Class<Weapon> WeaponClass;
 	
 	If (LockerTeam != 255 && Level.Game.IsA('TeamGamePlus') && 
 		(P.PlayerReplicationInfo == None || P.PlayerReplicationInfo.Team != LockerTeam))
@@ -67,6 +72,33 @@ function Inventory SpawnCopy( pawn P )
 			If (!RefillAmmo(P, Weapons[i].WeaponClass, Weapons[i].ExtraAmmo))
 			{
 				InvK = P.Spawn(Weapons[i].WeaponClass,,Name);
+				
+				if (bNW3hack && InvK != None)
+				{ // hack for support NW3
+					TempInv = InvK;
+					InvStr = GetPropertyText("TempInv");
+					foreach InvK.RadiusActors(class'Actor', NWRepObj, 1)
+						if (NWRepObj.isA('NWRepObj') && NWRepObj.GetPropertyText("Inv") == InvStr)
+							break;
+					if (NWRepObj != None)
+					{
+						InvStr = NWRepObj.GetPropertyText("NewInvClass");
+						if (InvStr != "")
+						{
+							WeaponClass = class<Weapon>(DynamicLoadObject(InvStr, class'Class'));
+							if (WeaponClass != None)
+							{ // emulate instant replace
+								wep = InvK.Spawn(WeaponClass,,Weapons[i].WeaponClass.Name);
+								if (wep != None)
+								{
+									InvK.Destroy();
+									InvK = None;
+								}
+							}
+						}
+					}
+				}
+				
 				if (InvK == None) // smth replace it
 				{
 					foreach P.RadiusActors(class'Weapon', wep, 10)
@@ -129,6 +161,12 @@ function bool RefillAmmo(Pawn P, class<Weapon> WeaponClass, int ExtraAmmo)
 simulated function PostBeginPlay()
 {
 	local int i;
+	local Mutator Mutator;
+	
+	foreach AllActors(class'Mutator', Mutator)
+		if (Mutator.isA('NWReplacer'))
+			break;
+	bNW3hack = Mutator != None;
 
 	for (i=0; i<ArrayCount(Weapons); i++)
 		if (Weapons[i].WeaponClass != None && AIRating < Weapons[i].WeaponClass.default.AIRating)
@@ -398,6 +436,8 @@ defaultproperties
       WMesh(6)=None
       WMesh(7)=None
       WRI=None
+      bNW3hack=False
+      TempInv=None
       bWeaponStay=True
       bAmbientGlow=False
       bRotatingPickup=False
