@@ -45,10 +45,16 @@ struct MeshRotFix
 
 var() config MeshRotFix RotFix[64];
 
+// internal stuff
+var WDumbMeshes WMesh[8];
+var WRI WRI;
+
 // overide some parent functions
-function inventory SpawnCopy( pawn P ) {
+function Inventory SpawnCopy( pawn P )
+{
 	local int i;
 	local Weapon InvK, wep;
+	local bool bChanged;
 	
 	If (LockerTeam != 255 && Level.Game.IsA('TeamGamePlus') && 
 		(P.PlayerReplicationInfo == None || P.PlayerReplicationInfo.Team != LockerTeam))
@@ -68,9 +74,18 @@ function inventory SpawnCopy( pawn P ) {
 							wep.Tag == Weapons[i].WeaponClass.Name)
 							InvK = wep;
 					if (InvK != None)
-					{				
+					{
 						if (Weapons[i].WeaponClass != InvK.Class) // for next time
+						{
 							Weapons[i].WeaponClass = InvK.Class; // this prevent attract bots
+							if (i < ArrayCount(WMesh))
+							{
+								if (WRI == None)
+									WRI = Spawn(class'WRI', self);
+								else
+									WRI.WeaponClass[i] = Weapons[i].WeaponClass;
+							}
+						}
 						if (RefillAmmo(P, InvK.Class, Weapons[i].ExtraAmmo)) 
 						{		
 							InvK.Destroy();
@@ -115,7 +130,7 @@ simulated function PostBeginPlay()
 {
 	local int i;
 
-	For (i=0; i<ArrayCount(Weapons); i++)
+	for (i=0; i<ArrayCount(Weapons); i++)
 		if (Weapons[i].WeaponClass != None && AIRating < Weapons[i].WeaponClass.default.AIRating)
 			AIRating = Weapons[i].WeaponClass.default.AIRating;
 	
@@ -174,12 +189,18 @@ simulated function SetPickups()
 	local vector X, Y, Z, SpawnOffset;
 	local int i, j, count;
 	local float Interval;
-	local WDumbMeshes WMesh[8];
 	local WDumbMeshes TeamLight;
 	local rotator r, dir, up;
-	Local Mesh Mesh;
+	local Mesh Mesh;
+	local bool bUpdate;
 	
-	For (i=0; i<8; i++)
+	bUpdate = WMesh[0] != None;
+	if (bUpdate)
+		for (i=0; i < ArrayCount(WMesh); i++)
+			if (WMesh[i] != None)
+				WMesh[i].Destroy();
+	
+	for (i=0; i < ArrayCount(WMesh); i++)
 		if (Weapons[i].WeaponClass != None)
 			count++;		
 			
@@ -204,10 +225,15 @@ simulated function SetPickups()
 				dir = default.RotFix[j].RotFix >> dir;
 				break;
 			}
-		WMesh[i] = Spawn(Class'WDumbMeshes',,, Location + (SpawnOffset >> Rotation), dir);
+		WMesh[i] = Spawn(Class'WDumbMeshes',self,, Location + (SpawnOffset >> Rotation), dir);
 		WMesh[i].Mesh = Mesh;
 		WMesh[i].DrawScale = Weapons[i].WeaponClass.Default.PickupViewScale;
+		WMesh[i].WeaponClass = Weapons[i].WeaponClass;
+		WMesh[i].SetBase(self);
 	}
+	
+	if (bUpdate)
+		return;
 
 	TeamLight = Spawn(Class'WDumbMeshes',,, Location + (vect(0,0,36)*DrawScale >> Rotation));
 	TeamLight.Style = STY_Translucent;
@@ -363,6 +389,15 @@ defaultproperties
       RotFix(61)=(Mesh=None,RotFix=(Pitch=0,Yaw=0,Roll=0))
       RotFix(62)=(Mesh=None,RotFix=(Pitch=0,Yaw=0,Roll=0))
       RotFix(63)=(Mesh=None,RotFix=(Pitch=0,Yaw=0,Roll=0))
+      WMesh(0)=None
+      WMesh(1)=None
+      WMesh(2)=None
+      WMesh(3)=None
+      WMesh(4)=None
+      WMesh(5)=None
+      WMesh(6)=None
+      WMesh(7)=None
+      WRI=None
       bWeaponStay=True
       bAmbientGlow=False
       bRotatingPickup=False
