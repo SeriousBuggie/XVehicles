@@ -1054,7 +1054,8 @@ function bool FindEnemy()
 }
 function bool SeeEnemy(Actor Enemy)
 {
-	local vector P;
+	local vector P, Dir;
+	local float VProj, V1, V;
 	local rotator R;
 	if( Enemy==None || (Pawn(Enemy) != None && Pawn(Enemy).Health <= 0) || !WeaponController.LineOfSightTo(Enemy) )
 		return false;
@@ -1074,10 +1075,20 @@ function bool SeeEnemy(Actor Enemy)
 		}
 	
 		P += (WeapSettings[0].FireStartOffset >> R);
-	
-		RepAimPos += Enemy.Velocity * VSize(Enemy.Location - P)/Fmax(1, WeapSettings[0].ProjectileClass.default.Speed);
-		if ( !FastTrace(RepAimPos))
-			RepAimPos = 0.5 * (RepAimPos + Enemy.Location);
+		
+		Dir = Enemy.Location - P;
+		
+		VProj = Fmax(1, WeapSettings[0].ProjectileClass.default.Speed);
+		V1 = Normal(Dir) dot Enemy.Velocity;
+		V = VSize(Enemy.Velocity);
+		V = VProj*VProj + V1*V1 - V*V; 
+		
+		if (V > V1*V1)
+		{
+			RepAimPos += Enemy.Velocity * VSize(Dir)/(Sqrt(V) - V1);
+			if ( !FastTrace(RepAimPos))
+				RepAimPos = 0.5 * (RepAimPos + Enemy.Location);
+		}
 	}
 
 	return true;
