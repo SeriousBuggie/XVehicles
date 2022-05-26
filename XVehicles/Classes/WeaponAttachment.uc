@@ -1059,8 +1059,8 @@ function bool SeeEnemy(Actor Enemy)
 	if( Enemy==None || (Pawn(Enemy) != None && Pawn(Enemy).Health <= 0) || !WeaponController.LineOfSightTo(Enemy) )
 		return false;
 	RepAimPos = Enemy.Location;
-/*
-	if (WeapSettings[0].ProjectileClass != None)
+
+	if (bPhysicalGunAimOnly && WeapSettings[0].ProjectileClass != None)
 	{
 		if (PitchPart != None)
 		{
@@ -1079,7 +1079,7 @@ function bool SeeEnemy(Actor Enemy)
 		if ( !FastTrace(RepAimPos))
 			RepAimPos = 0.5 * (RepAimPos + Enemy.Location);
 	}
-*/
+
 	return true;
 }
 simulated function bool AimingIsOK()
