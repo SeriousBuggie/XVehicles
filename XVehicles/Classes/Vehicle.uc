@@ -2485,7 +2485,7 @@ function rotator GetFiringRot( float ProjSpeed, bool bInstantHit, vector PStartP
 		SeatN--;
 		WeaponController = PassengerSeats[SeatN].PGun.WeaponController;
 		if( PlayerPawn(WeaponController)==None && WeaponController != None )
-			Return WeaponController.AdjustAim(ProjSpeed,PStartPos,200,True,True);
+			return WeaponController.AdjustAim(ProjSpeed,PStartPos,200,True,True);
 		
 		Cam = PassengerSeats[SeatN].PassengerCam;
 		if (Passengers[SeatN] == None)
@@ -2513,7 +2513,7 @@ function rotator GetFiringRot( float ProjSpeed, bool bInstantHit, vector PStartP
 		else
 			return Rotation;
 	if( PlayerPawn(Driver)==None )
-		Return Driver.AdjustAim(ProjSpeed,PStartPos,200,True,True);
+		return Driver.AdjustAim(ProjSpeed,PStartPos,200,True,True);
 		
 	if (MyCameraAct != None)
 	{
