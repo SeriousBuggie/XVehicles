@@ -2927,6 +2927,7 @@ simulated function SingularBump( Actor Other )
 	local float Sp;
 	local vector V, Dir;
 	local vector befOtVel, befMyVel, NVelH;
+	local Pawn RealInstigator, RealOtherInstigator;
 	
 	if (Other == None || Other.bDeleteMe)
 		return;
@@ -2964,55 +2965,51 @@ simulated function SingularBump( Actor Other )
 		}
 
 		Vehicle(Other).PendingBump = Self;
-
-		if (Other.Mass/Mass >= 2.0 && (Normal(Velocity) Dot Dir)>0 )
-		{
-			if (Role == ROLE_Authority)
-			{
-				Other.TakeDamage(VSize(Other.Velocity) * (Mass/Other.Mass) / 20,Instigator,Location,Velocity*Mass,'Crushed');
-				TakeDamage(VSize(Velocity) * (Other.Mass/Mass) / 20,Instigator,Location,Velocity*Mass,'Crushed');
-			}
-			Velocity *= 0.25;
+		
+		NVelH = Velocity - Other.Velocity;
+		Sp = VSize(NVelH);
+		
+		RealInstigator = Instigator;
+		if ((Velocity Dot Dir) <= 0)
+			RealInstigator = Other.Instigator;
+			
+		RealOtherInstigator = Other.Instigator;
+		if ((Other.Velocity Dot Dir) <= 0)
+			RealOtherInstigator = Instigator;
+		
+		if (Role == ROLE_Authority && (Other.Mass/Mass >= 2.0 || Mass/Other.Mass >= 2.0))
+		{	
+			Other.TakeDamage(Sp * (Mass/Other.Mass) / 20,RealInstigator,Location,NVelH*Mass,'Crushed');
+			TakeDamage(Sp * (Other.Mass/Mass) / 20,RealOtherInstigator,Other.Location,NVelH*Other.Mass,'Crushed');
 		}
+		
+		if (Other.Mass/Mass >= 2.0 && (Velocity Dot Dir)>0 )
+			Velocity *= 0.25;
 		else if (Other.Mass/Mass >= 2.0)
 		{
-			if (Role == ROLE_Authority)
-			{
-				Other.TakeDamage(VSize(Other.Velocity) * (Mass/Other.Mass) / 20,Instigator,Location,Velocity*Mass,'Crushed');
-				TakeDamage(VSize(Velocity) * (Other.Mass/Mass) / 20,Instigator,Location,Velocity*Mass,'Crushed');
-			}
 			Velocity = Other.Velocity * 1.15;
 			Move((Other.Location - Other.OldLocation)*1.5);
 		}
-		else if (Mass/Other.Mass >= 2.0 && (Normal(Velocity) Dot Dir)>0 )
+		else if (Mass/Other.Mass >= 2.0 && (Velocity Dot Dir)>0 )
 		{
-			if (Role == ROLE_Authority)
-			{
-				Other.TakeDamage(VSize(Velocity) * (Mass/Other.Mass) / 20,Instigator,Location,Velocity*Mass,'Crushed');
-				TakeDamage(VSize(Velocity) * (Other.Mass/Mass) / 20,Instigator,Location,Velocity*Mass,'Crushed');
-			}
 			Other.Velocity = Velocity * 1.15;
 			Other.Move((Location - OldLocation)*1.5);
 			bHitASmallerVehicle = True;
 		}
 		else if (Mass/Other.Mass >= 2.0)
+			Other.Velocity *= 0.25;
+		else
 		{
 			if (Role == ROLE_Authority)
 			{
-				Other.TakeDamage(VSize(Other.Velocity) * (Mass/Other.Mass) / 20,Instigator,Location,Velocity*Mass,'Crushed');
-				TakeDamage(VSize(Other.Velocity) * (Other.Mass/Mass) / 20,Instigator,Location,Velocity*Mass,'Crushed');
+				Sp = VSize(NVelH) * (Mass/Other.Mass);
+				if( Sp>250 )
+					Other.TakeDamage((Sp-200)/10,RealInstigator,Location,200*Normal(Velocity)*Mass,'Crushed');
+		
+				Sp = VSize(NVelH) * (Other.Mass/Mass);
+				if( Sp>250 )
+					TakeDamage((Sp-200)/10,RealOtherInstigator,Other.Location,200*Normal(OtVel)*Other.Mass,'Crushed');
 			}
-			Other.Velocity *= 0.25;
-		}
-		else
-		{
-			Sp = FMax(VSize(Velocity),VSize(Other.Velocity)) * (Mass/Other.Mass);
-			if( Sp>250 && Role == ROLE_Authority )
-				Other.TakeDamage((Sp-200)/10,Instigator,Location,200*Normal(Velocity)*Mass,'Crushed');
-	
-			Sp = FMax(VSize(Velocity),VSize(Other.Velocity)) * (Other.Mass/Mass);
-			if( Sp>250 && Role == ROLE_Authority )
-				TakeDamage((Sp-200)/10,Other.Instigator,Other.Location,200*Normal(OtVel)*Other.Mass,'Crushed');
 	
 			NVelH = (Mass*befMyVel + Other.Mass*befOtVel) / (Mass+Other.Mass);	//Inelastic collision calculation (not the most realistic for vehicles, but good, reliable and simple enough for the main objectve)
 	
@@ -3028,7 +3025,6 @@ simulated function SingularBump( Actor Other )
 					NVelH = VectorProjection(NVelH, -vector(Rotation)*65535);
 					OldAccelD = -1;
 				}
-	
 	
 				Vehicle(Other).OldAccelD = OldAccelD;
 			}
@@ -3432,7 +3428,9 @@ function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 		Velocity+=momentum/Mass;
 		if( Health<=0 )
 		{
-			KillDriver(instigatedBy);
+			Instigator = instigatedBy;
+			KillDriver(instigatedBy, damageType);
+			Instigator = instigatedBy;
 			GoToState('BlownUp');
 		} 
 		else if (Damage > 0)
@@ -3454,7 +3452,7 @@ Begin:
 	Destroy();
 }
 
-function KillDriver( Pawn Killer )
+function KillDriver( Pawn Killer, name damageType )
 {
 	local Pawn D;
 	local byte i;
@@ -3463,7 +3461,7 @@ function KillDriver( Pawn Killer )
 	{
 		D = Driver;
 		DriverLeft(True, "KillDriver");
-		D.Died(Killer,'Gibbed',Location);
+		D.Died(Killer, damageType, Location);
 	}
 	For( i=0; i<ArrayCount(Passengers); i++ )
 	{
@@ -3471,7 +3469,7 @@ function KillDriver( Pawn Killer )
 		{
 			D = Passengers[i];
 			PassengerLeave(i,True);
-			D.Died(Killer,'Gibbed',Location);
+			D.Died(Killer, damageType, Location);
 		}
 	}
 }
