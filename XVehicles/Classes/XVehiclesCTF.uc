@@ -24,7 +24,8 @@ event PreBeginPlay()
 	
 	Super.PreBeginPlay();
 	
-	Spawn(class'FastWSNotify'); // Fast WarShell
+	if (!class'VehiclesConfig'.default.bDisableFastWarShell)
+		Spawn(class'FastWSNotify'); // Fast WarShell
 	
 	foreach AllActors(Class, A)
 		break;
