@@ -2974,7 +2974,7 @@ simulated function SingularBump( Actor Other )
 			RealInstigator = Other.Instigator;
 			
 		RealOtherInstigator = Other.Instigator;
-		if ((Other.Velocity Dot Dir) <= 0)
+		if ((Other.Velocity Dot -Dir) <= 0)
 			RealOtherInstigator = Instigator;
 		
 		if (Role == ROLE_Authority && (Other.Mass/Mass >= 2.0 || Mass/Other.Mass >= 2.0))
