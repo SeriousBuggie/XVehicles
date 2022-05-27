@@ -111,7 +111,7 @@ simulated function float DrawPlayer(canvas Canvas, font Big, font Small, float Y
 			Y += 1.0*YL;
 		}
 		Y += 2.0*YL;
-		// preven overlap health bar
+		// prevent overlap health bar
 		if (DriverWeapon(MyHUD.PawnOwner.Weapon) != None && Y > Canvas.ClipY/6*5 && Y < Canvas.ClipY/6*5 + 24)
 			Y = Canvas.ClipY/6*5 + 24 + 0.5*YL;
 	}
@@ -131,13 +131,15 @@ simulated function string getVal(Actor actor, string prop) {
 
 simulated function bool TraceIdentify(canvas Canvas)
 {
-	local actor Other;
+	local actor Other, Camera;
 	local vector HitLocation, HitNormal, StartTrace, EndTrace;
+	local rotator CamRot;
+	local float X;
 	local Vehicle MyVehicle;
 	
-	StartTrace = MyHUD.PawnOwner.Location;
-	StartTrace.Z += MyHUD.PawnOwner.BaseEyeHeight;
-	EndTrace = StartTrace + vector(MyHUD.PawnOwner.ViewRotation) * 1000.0;
+	Canvas.ViewPort.Actor.PlayerCalcView(Camera, StartTrace, CamRot);
+	
+	EndTrace = StartTrace + vector(CamRot) * 1000.0;
 	Other = Trace(HitLocation, HitNormal, EndTrace, StartTrace, true);
 	
 	if (Vehicle(Other) != None && DriverWeapon(MyHUD.PawnOwner.Weapon) != None && 
@@ -146,8 +148,8 @@ simulated function bool TraceIdentify(canvas Canvas)
 	
 	if (MyVehicle != None && Other == MyVehicle)
 	{
-		StartTrace += vector(MyHUD.PawnOwner.ViewRotation) * 
-			(Sqrt(MyVehicle.CollisionRadius*MyVehicle.CollisionRadius + MyVehicle.CollisionHeight*MyVehicle.CollisionHeight) + 10);
+		X = (vector(CamRot) dot (MyVehicle.Location - StartTrace));
+		StartTrace += vector(CamRot)*2*Abs(X);
 		Other = Trace(HitLocation, HitNormal, EndTrace, StartTrace, true);
 	}
 
