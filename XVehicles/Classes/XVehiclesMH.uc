@@ -15,6 +15,8 @@ event PreBeginPlay()
 		break;
 	if (A != self)
 		return;
+		
+	class'XVehiclesHUD'.static.SpawnHUD(self);
 	
 	SetShield();
 }

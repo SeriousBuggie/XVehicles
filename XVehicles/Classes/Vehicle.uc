@@ -3818,7 +3818,7 @@ function bool CanAddPassenger( Pawn Other, optional out byte FreeSlot )
 	}
 	Return False;
 }
-function bool HasPassengers()
+simulated function bool HasPassengers()
 {
 	local byte i;
 

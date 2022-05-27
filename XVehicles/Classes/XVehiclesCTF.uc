@@ -31,6 +31,8 @@ event PreBeginPlay()
 		break;
 	if (A != self)
 		return;
+		
+	class'XVehiclesHUD'.static.SpawnHUD(self);
 	
 	if (PulseForHeal == PFH_Yes)
 		bPulseAltHeal = true;
