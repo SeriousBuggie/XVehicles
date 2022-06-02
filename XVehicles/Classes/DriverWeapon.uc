@@ -83,9 +83,9 @@ event TravelPostAccept()
 	Destroy();
 }
 
-Auto State ClientActive
+auto state ClientActive
 {
-Ignores BringUp,Finish;
+ignores BringUp,Finish;
 
 	function bool PutDown()
 	{
@@ -99,6 +99,24 @@ Ignores BringUp,Finish;
 	
 	simulated function AnimEnd() {}
 }
+
+state Idle
+{
+ignores BringUp,Finish;
+
+	function bool PutDown()
+	{
+		bChangeWeapon = true;
+		if( bPassengerGun )
+			VehicleOwner.PassengerChangeBackView(SeatNumber);
+		else
+			VehicleOwner.ChangeBackView();
+		return true;
+	}
+	
+	simulated function AnimEnd() {}
+}
+
 
 function float SwitchPriority()
 {
@@ -118,14 +136,20 @@ simulated function SetName()
 
 simulated function Timer()
 {
+	local name DesiredState;
 /*	if (Role < ROLE_Authority) 
 	{
 		SetName();
 		return;
 	}*/
+	
+	if (Level != None && Level.NetMode == NM_DedicatedServer)
+		DesiredState = 'Idle';
+	else
+		DesiredState = 'ClientActive';
 
-	if (!IsInState('ClientActive'))
-		GotoState('ClientActive');
+	if (!IsInState(DesiredState))
+		GotoState(DesiredState);
 	if (Pawn(Owner) != None && Pawn(Owner).Weapon != self)
 	{
 		Pawn(Owner).PendingWeapon = self;
