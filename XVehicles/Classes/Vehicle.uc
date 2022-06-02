@@ -806,11 +806,15 @@ function ShowFlagOnRoof()
 	local Decoration HasFlag;
 	local int i;
 	
-	if (Driver != None && Driver.PlayerReplicationInfo != None && Driver.PlayerReplicationInfo.HasFlag != None)
+	if (Driver != None && Driver.PlayerReplicationInfo != None && 
+		Driver.PlayerReplicationInfo.HasFlag != None &&
+		!Driver.PlayerReplicationInfo.HasFlag.IsA('PureFlag'))
 		HasFlag = Driver.PlayerReplicationInfo.HasFlag;
 	else
 		for (i=0; i<Arraycount(Passengers); i++)
-			if (Passengers[i] != None && Passengers[i].PlayerReplicationInfo != None && Passengers[i].PlayerReplicationInfo.HasFlag != None)
+			if (Passengers[i] != None && Passengers[i].PlayerReplicationInfo != None && 
+				Passengers[i].PlayerReplicationInfo.HasFlag != None &&
+				!Passengers[i].PlayerReplicationInfo.HasFlag.IsA('PureFlag'))
 				HasFlag = Passengers[i].PlayerReplicationInfo.HasFlag;
 	
 	if (HasFlag == None && VehicleFlag != None)
