@@ -4,6 +4,16 @@
 class VehicleFlag expands Effects;
 
 var Decoration MyFlag;
+var VehicleFlag Next;
+var float LastCheck;
+var int Pos;
+
+replication
+{
+	// Variables the server should send to the client.
+	reliable if (Role == ROLE_Authority)
+		Pos;
+}
 
 simulated function PostBeginPlay()
 {
@@ -45,7 +55,7 @@ simulated function Tick(float Delta)
 	FixOffset();
 
 	if (Owner != None) {
-		SetLocation(Owner.Location);
+		SetLocation(Owner.Location - (vect(10,0,0)*Pos >> Owner.Rotation));
 		r = Owner.Rotation;
 		r.Yaw += 32768;
 		r.Pitch = -r.Pitch;
@@ -54,22 +64,49 @@ simulated function Tick(float Delta)
 	}
 }
 
-function SetFlag(Decoration InFlag)
+function Destroyed()
+{
+	local VehicleFlag Prev;
+	if (Vehicle(Owner) != None && Next != None)
+	{
+		if (Vehicle(Owner).VehicleFlag == None) // must never happen
+			Vehicle(Owner).VehicleFlag = Next;
+		else
+		{
+			for (Prev = Vehicle(Owner).VehicleFlag; Prev != None; Prev = Prev.Next)
+				if (Prev.Next == self)
+					break;
+			if (Prev != None)
+				Prev.Next = Next;
+		}
+	}
+	Super.Destroyed();
+}
+
+function VehicleFlag SetFlag(Decoration InFlag)
 {
 	Local Texture Tex;
 	MyFlag = InFlag;
 	
 	Tex = Texture'JpflagB';
-	if (InFlag != None && InFlag.isA('RedFlag'))
+	if (MyFlag.Mesh == Mesh'pflag' || MyFlag.Mesh == Mesh)
+		Tex = MyFlag.Skin;
+	else if (CTFFlag(MyFlag) != None && CTFFlag(MyFlag).Team == 0)
 		Tex = Texture'JpflagR';
 		
 	if (Skin != Tex)
 		Skin = Tex;
+		
+	LastCheck = Level.TimeSeconds;
+	return self;
 }
 
 defaultproperties
 {
       myFlag=None
+      Next=None
+      LastCheck=0.000000
+      pos=0
       bNetTemporary=False
       bTrailerSameRotation=True
       bTrailerPrePivot=True

@@ -803,31 +803,53 @@ simulated function vector GetStateOffset()
 
 function ShowFlagOnRoof()
 {
-	local Decoration HasFlag;
 	local int i;
+	local VehicleFlag Prev;
+	local CTFReplicationInfo CTFRI;
 	
 	if (Driver != None && Driver.PlayerReplicationInfo != None && 
 		Driver.PlayerReplicationInfo.HasFlag != None &&
 		!Driver.PlayerReplicationInfo.HasFlag.IsA('PureFlag'))
-		HasFlag = Driver.PlayerReplicationInfo.HasFlag;
-	else
-		for (i=0; i<Arraycount(Passengers); i++)
-			if (Passengers[i] != None && Passengers[i].PlayerReplicationInfo != None && 
-				Passengers[i].PlayerReplicationInfo.HasFlag != None &&
-				!Passengers[i].PlayerReplicationInfo.HasFlag.IsA('PureFlag'))
-				HasFlag = Passengers[i].PlayerReplicationInfo.HasFlag;
-	
-	if (HasFlag == None && VehicleFlag != None)
+		AddFlag(Driver.PlayerReplicationInfo.HasFlag);
+
+	for (i = 0; i < ArrayCount(Passengers); i++)
+		if (Passengers[i] != None && Passengers[i].PlayerReplicationInfo != None && 
+			Passengers[i].PlayerReplicationInfo.HasFlag != None &&
+			!Passengers[i].PlayerReplicationInfo.HasFlag.IsA('PureFlag'))
+			AddFlag(Passengers[i].PlayerReplicationInfo.HasFlag);
+			
+	if (Level != None && Level.Game != None && CTFReplicationInfo(Level.Game.GameReplicationInfo) != None)
 	{
-		VehicleFlag.Destroy();
-		VehicleFlag = None;
+		CTFRI = CTFReplicationInfo(Level.Game.GameReplicationInfo);
+		for (i = 0; i < ArrayCount(CTFRI.FlagList); i++)
+			if (CTFRI.FlagList[i] != None && !CTFRI.FlagList[i].IsA('PureFlag') && 
+				CTFRI.FlagList[i].Holder != None &&
+				DriverWeapon(CTFRI.FlagList[i].Holder.Weapon) != None &&
+				DriverWeapon(CTFRI.FlagList[i].Holder.Weapon).VehicleOwner == self)
+				AddFlag(CTFRI.FlagList[i]);
 	}
-	else if (HasFlag != None && (VehicleFlag == None || VehicleFlag.MyFlag != HasFlag))
+	
+	i = 0;
+	for (Prev = VehicleFlag; Prev != None; Prev = Prev.Next)
+		if (Prev.LastCheck != Level.TimeSeconds)
+			Prev.Destroy();
+		else
+			Prev.Pos = i++;
+}
+
+function AddFlag(Decoration HasFlag)
+{
+	local VehicleFlag Prev;
+	if (VehicleFlag == None)
+		VehicleFlag = Spawn(class'VehicleFlag', self).SetFlag(HasFlag);
+	else
 	{
-		if (VehicleFlag == None)
-			VehicleFlag = Spawn(class'VehicleFlag', self);
-		// set prepivot
-		VehicleFlag.SetFlag(HasFlag);
+		for (Prev = VehicleFlag; Prev != None; Prev = Prev.Next)
+			if (Prev.MyFlag == HasFlag)
+				break;
+			else if (Prev.Next == None)
+				Prev.Next = Spawn(class'VehicleFlag', self).SetFlag(HasFlag);
+		Prev.SetFlag(HasFlag);
 	}
 }
 
