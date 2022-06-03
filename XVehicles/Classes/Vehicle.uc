@@ -1100,6 +1100,7 @@ local vector ExitVect;
 				Driver.ChangedWeapon();
 			if( Driver.Weapon != None && Driver.Weapon.Owner != None )
 				Driver.Weapon.BringUp();
+			Driver.bDuck = 0; // prevent enter again
 			LastDriver = Driver;
 			LastDriverTime = Level.TimeSeconds;
 		}
@@ -3979,6 +3980,7 @@ function PassengerLeave( byte Seat, optional bool bForcedLeave )
 				Passengers[Seat].ChangedWeapon();
 			if( Passengers[Seat].Weapon!=None )
 				Passengers[Seat].Weapon.BringUp();
+			Passengers[Seat].bDuck = 0; // prevent enter again
 		}
 	}
 	if( PassengerSeats[Seat].PGun!=None )
