@@ -26,6 +26,8 @@ function PreBeginPlay()
 {
 	Super.PreBeginPlay();
 	VehicleOwner = Vehicle(Owner);
+	if (VehicleOwner == None)
+		Destroy();
 	VehicleOwner.InitInventory(self);
 }
 
