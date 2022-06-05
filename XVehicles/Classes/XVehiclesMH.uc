@@ -57,33 +57,33 @@ Function SetShield()
 	class'VehiclesConfig'.default.bHideState = true;
 	class'VehiclesConfig'.default.bDisableTeamSpawn = true;	
 	
-	SetPropertyText("DynClass", "Class'JSDXLPlasma'");	
+	SetPropertyText("DynClass", "Class'JSDXLPlasma'");
 	if (Class<Projectile>(DynClass) != None)
 		Class<Projectile>(DynClass).Default.Damage = 70;
 
-	SetPropertyText("DynClass", "Class'JTDXLPlasma'");	
+	SetPropertyText("DynClass", "Class'JTDXLPlasma'");
 	if (Class<Projectile>(DynClass) != None)
 		Class<Projectile>(DynClass).Default.Damage = 140;
 		
-	SetPropertyText("DynClass", "Class'TankCBullet'");	
+	SetPropertyText("DynClass", "Class'TankCBullet'");
 	if (Class<xVehiclesProjectile>(DynClass) != None)
 	{
 		Class<xVehiclesProjectile>(DynClass).Default.Damage = 600;
 		Class<xVehiclesProjectile>(DynClass).Default.DamageRadius = 710;
 	}
 	
-	SetPropertyText("DynClass", "Class'TankMGRot'");	
+	SetPropertyText("DynClass", "Class'TankMGRot'");
 	if (Class<WeaponAttachment>(DynClass) != None)
 	{
 		Class<WeaponAttachment>(DynClass).Default.WeapSettings[0].HitError = 0.001;
 		Class<WeaponAttachment>(DynClass).Default.WeapSettings[0].HitDamage = 20;
 	}
 	
-	SetPropertyText("DynClass", "Class'FixBolt'");	
+	SetPropertyText("DynClass", "Class'FixBolt'");
 	if (Class<Projectile>(DynClass) != None)
 		Class<Projectile>(DynClass).Default.Damage = 100;
 		
-	SetPropertyText("DynClass", "Class'StarterFixBolt'");	
+	SetPropertyText("DynClass", "Class'StarterFixBolt'");
 	if (Class<Projectile>(DynClass) != None)
 		Class<Projectile>(DynClass).Default.Damage = 200;
 }
