@@ -117,6 +117,7 @@ ignores BringUp,Finish;
 	}
 	
 	simulated function AnimEnd() {}
+Begin:
 }
 
 
