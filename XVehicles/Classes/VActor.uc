@@ -54,7 +54,7 @@ Static function PlayerPawn FindNetOwner( Actor ChkAct )
 {
 	local PlayerPawn P;
 
-	if( Default.StaticPP!=None )
+	if (Default.StaticPP != None)
 		Return Default.StaticPP.Actor;
 	ForEach ChkAct.AllActors(Class'PlayerPawn',P)
 	{

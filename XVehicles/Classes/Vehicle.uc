@@ -111,7 +111,7 @@ var bool bReadyToRun;
 
 // -1 to 1.
 var int Turning,Rising,Accel;
-var int VehicleYaw,ReplVehicleYaw;
+var int VehicleYaw;
 
 var byte LastPackedMove;
 var float LastPackedMoveTime;
@@ -133,14 +133,21 @@ var float MoveTimer;
 // Replication variables
 struct VehState
 {
-	var vector Pos;
+	var vector Location;
 	var vector Velocity;
+	var float Yaw;
+	var float ClientTime;
 };
 var VehState ServerState;
 var float ServerStateTime;
-var vector LastServerPos;
 var DriverCameraActor MyCameraAct;
 var OverlayMatDispRep ReplicOverlayMat;
+
+var float ClientLastTime;
+var float ServerLastTime;
+
+var SavedMoveXV SavedMoves;
+var SavedMoveXV FreeMoves;
 
 var VehicleFactory MyFactory;
 var() const EPhysics ReqPPPhysics;
@@ -336,8 +343,6 @@ replication
 		ClientSetTranslatorMsg;
 	reliable if( Role==ROLE_Authority && bNetOwner )
 		bCameraOnBehindView,MyCameraAct,WAccelRate;
-	reliable if( Role==ROLE_Authority && bShouldRepVehYaw )
-		ReplVehicleYaw;
 	// Functions client can call.
 	reliable if( Role<ROLE_Authority )
 		ServerPerformPackedMove,ServerSetBehindView;
@@ -637,6 +642,9 @@ simulated function PostBeginPlay()
 	
 	ShowState();
 	
+	ClientLastTime = -1;
+	ServerLastTime = -1;
+	
 	SetTimer(0.5, true);
 }
 
@@ -736,10 +744,10 @@ simulated function ServerPerformMove( int InRise, int InTurn, int InAccel )
 		return;
 	LastPackedMove = Bits;
 	LastPackedMoveTime = Level.TimeSeconds;
-	ServerPerformPackedMove(Bits);
+	ServerPerformPackedMove(Level.TimeSeconds, Bits);
 }
 
-function ServerPerformPackedMove(byte Bits)
+function ServerPerformPackedMove(float InClientTime, byte Bits)
 {
 	Rising = (Bits & 3) - 1;
 	Turning = ((Bits >> 2) & 3) - 1;
@@ -750,6 +758,9 @@ function ServerPerformPackedMove(byte Bits)
 		Rising = 1;
 	if( Accel>1 )
 		Accel = 1;
+
+	ClientLastTime = InClientTime;
+	ServerLastTime = Level.TimeSeconds;
 }
 
 simulated function string GetWeaponName(byte Seat)
@@ -1188,46 +1199,109 @@ simulated function Destroyed()
 		VehicleState.Destroy();
 	if (Shadow != None)
 		Shadow.Destroy();
+	while (FreeMoves != None)
+	{
+		FreeMoves.Destroy();
+		FreeMoves = FreeMoves.NextMove;
+	}
+	while (SavedMoves != None)
+	{
+		SavedMoves.Destroy();
+		SavedMoves = SavedMoves.NextMove;
+	}
 	Super.Destroyed();
 }
 // Client update vehicle pos/rot/vel
-simulated function ClientUpdateState( float Delta )
+simulated function ClientUpdateState(float Delta)
 {
-	local vector ServerPredictPos, Diff;
+	local vector ServerPredictLocation, Diff;
 	local float Dist;
+	local SavedMoveXV CurrentMove;
+	local int i, f;
+	local PlayerPawn LocalPlayer;
+	local VehState ClientState;
 	
-	if (ServerState.Pos != vect(0,0,0))
+	if (Default.StaticPP != None)
+		LocalPlayer = Default.StaticPP.Actor;
+	else
+		LocalPlayer = FindNetOwner(self);
+	
+	if (ServerState.ClientTime != 0)
 	{
-		LastServerPos = ServerState.Pos;
+		ClientState.Location = Location;
+		ClientState.Velocity = Velocity;
+		ClientState.Yaw = VehicleYaw;
+		ClientState.ClientTime = Level.TimeSeconds;
+		
 		ServerStateTime = Level.TimeSeconds;
-		ServerState.Pos = vect(0,0,0);
+		if (LocalPlayer == Driver)
+			ServerStateTime = ServerState.ClientTime;
+		/* // linear prediction is not good enough
+		else if (LocalPlayer != None && LocalPlayer.PlayerReplicationInfo != None)
+			ServerStateTime -= 0.001*LocalPlayer.PlayerReplicationInfo.Ping;
+		*/
+		ServerState.ClientTime = 0;
 		ServerState.Velocity /= 15.f;
-		Velocity = ServerState.Velocity;		
+		
+		if (LocalPlayer != None && LocalPlayer == Driver)
+		{
+			// replay last moves
+			CurrentMove = SavedMoves;
+			while (CurrentMove != None)
+			{
+				if (CurrentMove.TimeStamp <= ServerStateTime )
+				{
+					SavedMoves = CurrentMove.NextMove;
+					CurrentMove.NextMove = FreeMoves;
+					FreeMoves = CurrentMove;
+					FreeMoves.Clear();
+					CurrentMove = SavedMoves;
+				}
+				else
+				{
+					// try real replay can screwed non-linear calls and need hardly rework all physics to stateless
+					// replay via simple assumptions
+					
+					ServerState.Velocity += CurrentMove.SavedVelocity - CurrentMove.Velocity;
+					ServerState.Yaw += CurrentMove.SavedYaw - CurrentMove.Yaw;						
+					ServerState.Location += CurrentMove.SavedLocation - CurrentMove.Acceleration;
+					
+					CurrentMove = CurrentMove.NextMove;
+				}
+			}
+			
+			ServerStateTime = Level.TimeSeconds;
+		}
+		else
+			Velocity = ServerState.Velocity;
+		
+		if (bShouldRepVehYaw)
+		{
+			if (bFPRepYawUpdatesView && !bCameraOnBehindView && Driver != None && IsNetOwner(Driver))
+				Driver.ViewRotation.Yaw += ServerState.Yaw - VehicleYaw;
+			VehicleYaw = ServerState.Yaw;
+		}
 	}
-	ServerPredictPos = LastServerPos + (Level.TimeSeconds - ServerStateTime)*ServerState.Velocity;
-	Diff = ServerPredictPos-Location;
+	ServerPredictLocation = ServerState.Location + (Level.TimeSeconds - ServerStateTime)*ServerState.Velocity;
+		
+	Diff = ServerPredictLocation - Location;
 	Dist = VSize(Diff);
 
 	if (Dist > 350)
-		SetLocation(ServerPredictPos);
+		SetLocation(ServerPredictLocation);
 	else if (Dist > 1)
-		Move(Diff*0.1);
-	
-	if( bShouldRepVehYaw && ReplVehicleYaw!=0 )
-	{
-		if( bFPRepYawUpdatesView && !bCameraOnBehindView && Driver!=None && IsNetOwner(Driver) )
-			Driver.ViewRotation.Yaw+=(ReplVehicleYaw-VehicleYaw);
-		VehicleYaw = ReplVehicleYaw;
-		ReplVehicleYaw = 0;
-	}
+		MoveSmooth(Diff*0.1);
 }
 // Server send to client vehicle pos/rot/vel
 function ServerPackState( float Delta)
 {
-	ServerState.Pos = Location;
+	ServerState.Location = Location;
 	ServerState.Velocity = Velocity*15.f;
-	if( bShouldRepVehYaw )
-		ReplVehicleYaw = VehicleYaw;
+	if (bShouldRepVehYaw)
+		ServerState.Yaw = VehicleYaw;
+	ServerState.ClientTime = ClientLastTime;
+	if (PlayerPawn(Driver) != None && Level.TimeSeconds != ServerLastTime)
+		ServerState.ClientTime += Level.TimeSeconds - ServerLastTime;
 }
 
 simulated function DmgFXGen(byte Mode)
@@ -1288,8 +1362,10 @@ simulated function AfterTeleport(float YawChange)
 // Main tick
 simulated function Tick( float Delta )
 {
-local bool bSlopedG;
-local float f;
+	local bool bSlopedG;
+	local float f;
+	local SavedMoveXV NewMove;
+	
 	if (bLastTeleport)
 	{
 		AfterTeleport(Rotation.Yaw - LastTeleportYaw);		
@@ -1349,8 +1425,8 @@ local float f;
 		bHitAnActor = 0;
 	}
 	
-	if( Level.NetMode==NM_Client )
-	{
+	if (Level.NetMode == NM_Client)
+	{		
 		if( bVehicleBlewUp )
 		{
 			if( !bClientBlewUp )
@@ -1360,7 +1436,34 @@ local float f;
 			}
 			Return;
 		}
+		
+		if (IsNetOwner(Driver) && SavedMoves != None)
+		{
+			NewMove = SavedMoves;
+			while (NewMove.NextMove != None)
+				NewMove = NewMove.NextMove;
+				
+			// store previous data after physics apply	
+			NewMove.SavedLocation = Location;
+		}
+		
 		ClientUpdateState(Delta);
+		
+		if (IsNetOwner(Driver))
+		{
+			// I'm  a client, so I'll save my moves in case I need to replay them
+			// Get a SavedMove actor to store the movement in.
+			if (SavedMoves == None)
+			{
+				SavedMoves = GetFreeMove();
+				NewMove = SavedMoves;
+			}
+			else
+			{	
+				NewMove.NextMove = GetFreeMove();
+				NewMove = NewMove.NextMove;
+			}
+		}
 	}
 	
 	if (VehicleState != None && Level.NetMode != NM_DedicatedServer && Level.NetMode != NM_ListenServer)
@@ -1503,10 +1606,26 @@ local float f;
 		UpdateDriverPos();
 	if( bOnGround && !bSlopedG )
 		bOnGround = False;
-	UpdateDriverInput(Delta);
-	UpdatePassengerPos();
+	if (NewMove != None)
+	{
+		NewMove.TimeStamp = Level.TimeSeconds;
+		NewMove.Delta = Delta;
+		NewMove.Velocity = Velocity;
+		NewMove.Acceleration = Location;
+		NewMove.Yaw = VehicleYaw;
+		NewMove.Rise = Rising;
+		NewMove.Turn = Turning;
+		NewMove.Accel = Accel;
+	}
 	if( Level.NetMode>NM_StandAlone && Level.NetMode<NM_Client )
 		ServerPackState(Delta);
+	UpdateDriverInput(Delta);
+	if (NewMove != None)
+	{
+		NewMove.SavedVelocity = Velocity;
+		NewMove.SavedYaw = VehicleYaw;
+	}
+	UpdatePassengerPos();
 	if( !bIsWaterResistant && Region.Zone.bWaterZone && NextWaterDamageTime<Level.TimeSeconds && Region.Zone.DamagePerSec <= 0)
 	{
 		NextWaterDamageTime = Level.TimeSeconds+0.25;
@@ -1525,6 +1644,21 @@ local float f;
 
 	if (AttachmentList == None)
 		AttachmentsTick(Delta);
+}
+
+simulated function SavedMoveXV GetFreeMove()
+{
+	local SavedMoveXV s;
+
+	if (FreeMoves == None)
+		return Spawn(class'SavedMoveXV', self);
+	else
+	{
+		s = FreeMoves;
+		FreeMoves = FreeMoves.NextMove;
+		s.NextMove = None;
+		return s;
+	}
 }
 
 simulated function float ArcAmount(vector VelArc)
@@ -2244,11 +2378,14 @@ Auto State EmptyVehicle
 {
 Ignores FireWeapon,ReadDriverInput,ReadBotInput,DriverLeft;
 
-	function ServerPerformPackedMove( byte Bits )
+	function ServerPerformPackedMove(float InClientTime, byte Bits)
 	{
 		Turning = 0;
 		Rising = 0;
 		Accel = 0;
+		
+		ClientLastTime = InClientTime;
+		ServerLastTime = Level.TimeSeconds;
 	}
 	function MessageLocalPLs()
 	{
@@ -4145,7 +4282,6 @@ defaultproperties
       Rising=0
       Accel=0
       VehicleYaw=0
-      ReplVehicleYaw=0
       LastPackedMove=0
       LastPackedMoveTime=0.000000
       Driver=None
@@ -4174,11 +4310,14 @@ defaultproperties
       bHasMoveTarget=False
       MoveDest=(X=0.000000,Y=0.000000,Z=0.000000)
       MoveTimer=0.000000
-      ServerState=(pos=(X=0.000000,Y=0.000000,Z=0.000000),Velocity=(X=0.000000,Y=0.000000,Z=0.000000))
+      ServerState=(Location=(X=0.000000,Y=0.000000,Z=0.000000),Velocity=(X=0.000000,Y=0.000000,Z=0.000000),Yaw=0.000000,ClientTime=0.000000)
       ServerStateTime=0.000000
-      LastServerPos=(X=0.000000,Y=0.000000,Z=0.000000)
       MyCameraAct=None
       ReplicOverlayMat=(MatTexture=None,MatDispTime=0)
+      ClientLastTime=0.000000
+      ServerLastTime=0.000000
+      SavedMoves=None
+      FreeMoves=None
       MyFactory=None
       ReqPPPhysics=PHYS_None
       VehicleKeyInfoStr=""
