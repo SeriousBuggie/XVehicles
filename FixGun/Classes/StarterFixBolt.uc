@@ -159,7 +159,7 @@ defaultproperties
       FixSounds(1)=None
       FixSounds(2)=None
       FixSounds(3)=None
-      Damage=200.000000
+      Damage=82.500000
       RemoteRole=ROLE_SimulatedProxy
       LightType=LT_Steady
       LightEffect=LE_NonIncidence

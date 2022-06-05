@@ -78,6 +78,14 @@ Function SetShield()
 		Class<WeaponAttachment>(DynClass).Default.WeapSettings[0].HitError = 0.001;
 		Class<WeaponAttachment>(DynClass).Default.WeapSettings[0].HitDamage = 20;
 	}
+	
+	SetPropertyText("DynClass", "Class'FixBolt'");	
+	if (Class<Projectile>(DynClass) != None)
+		Class<Projectile>(DynClass).Default.Damage = 100;
+		
+	SetPropertyText("DynClass", "Class'StarterFixBolt'");	
+	if (Class<Projectile>(DynClass) != None)
+		Class<Projectile>(DynClass).Default.Damage = 200;
 }
 
 function SetupVehicleClass(Class<vehicle> cl)

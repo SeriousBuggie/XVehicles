@@ -249,7 +249,6 @@ defaultproperties
       SpriteAnim(3)=FireTexture'UnrealShare.EffectASMD.fireeffectASMD'
       SpriteAnim(4)=FireTexture'UnrealShare.EffectASMD.fireeffectASMD'
       BeamSize=80.000000
-      Damage=100.000000
       ExplosionDecal=Class'FixGun.FixScorch'
       LifeSpan=0.000000
       Texture=FireTexture'UnrealShare.EffectASMD.fireeffectASMD'
