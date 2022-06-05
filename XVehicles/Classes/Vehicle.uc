@@ -1507,13 +1507,13 @@ simulated function Tick( float Delta )
 			}
 		}
 	}
-	if (!bDriving)
+	if (!bDriving || (Driver != None && Driver.IsInState('GameEnded')))
 	{
 		Turning = 0;
 		Rising = 0;
 		Accel = 0;
 	}
-	else if(Level.NetMode<NM_Client || IsNetOwner(Driver))
+	else if (Level.NetMode<NM_Client || IsNetOwner(Driver))
 	{
 		if( Driver==None || ((Driver.bDeleteMe || Driver.Health<=0) && Level.NetMode<NM_Client) )
 		{
