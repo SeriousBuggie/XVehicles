@@ -2354,7 +2354,7 @@ function bool CanEnter( Pawn Other, optional bool bIgnoreDuck )
 {
 	local vector HL, HN;
 	if( Other.Health<=0 || (!bIgnoreDuck && PlayerPawn(Other)!=None && Other.bDuck==0) || DriverWeapon(Other.Weapon)!=None ||
-		Other.IsInState('PlayerWaiting') || !Other.bCollideActors || 
+		Other.IsInState('PlayerWaiting') || Other.IsInState('GameEnded') || !Other.bCollideActors || 
 		!Other.FastTrace(Location) || Other.Trace(HL, HN, Location, , true) != self)
 		Return False;
 	Return True;
