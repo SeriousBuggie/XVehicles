@@ -466,6 +466,9 @@ function FireTurret( byte Mode, optional bool bForceFire )
 	local xVehProjDummy xWFX;
 	
 	//Log(self @ OwnerVehicle @ WeaponController.getHumanName() @ WeaponController.bFire @ WeaponController.bAltFire);
+	
+	if (WeaponController != None && WeaponController.IsInState('GameEnded'))
+		return;
 
 	if( bAltFireZooms && Mode==1 )
 	{
