@@ -67,6 +67,8 @@ defaultproperties
       ExplosionGFX(2)=(bHaveThisExplFX=True,ExplSize=1.875000,AttachName="JSDXTurret")
       UseExplosionSnd2=False
       WreckPartColHeight=48.000000
+      bEnableShield=True
+      ShieldLevel=0.600000
       Mesh=LodMesh'XWheelVeh.JeepSDX'
       MultiSkins(1)=Texture'XWheelVeh.Skins.JeepTDXHBodySk01'
       MultiSkins(2)=Texture'XWheelVeh.Skins.JeepTDXHBodySk02'
