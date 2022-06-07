@@ -4403,10 +4403,10 @@ defaultproperties
       bHitAnActor=0.000000
       NextZoneDmgTime=0.000000
       bHitASmallerVehicle=False
-      ArmorType(0)=(ArmorLevel=0.000000,ProtectionType="None")
-      ArmorType(1)=(ArmorLevel=0.000000,ProtectionType="None")
-      ArmorType(2)=(ArmorLevel=0.000000,ProtectionType="None")
-      ArmorType(3)=(ArmorLevel=0.000000,ProtectionType="None")
+      ArmorType(0)=(ArmorLevel=0.600000,ProtectionType="Corroded")
+      ArmorType(1)=(ArmorLevel=0.500000,ProtectionType="shredded")
+      ArmorType(2)=(ArmorLevel=0.300000,ProtectionType="jolted")
+      ArmorType(3)=(ArmorLevel=0.100000,ProtectionType="RocketDeath")
       ArmorType(4)=(ArmorLevel=0.000000,ProtectionType="None")
       ArmorType(5)=(ArmorLevel=0.000000,ProtectionType="None")
       ArmorType(6)=(ArmorLevel=0.000000,ProtectionType="None")

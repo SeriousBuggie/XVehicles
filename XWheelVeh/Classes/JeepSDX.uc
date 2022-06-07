@@ -165,6 +165,8 @@ defaultproperties
       ExplosionGFX(2)=(bHaveThisExplFX=True,ExplSize=1.875000,AttachName="JSDXTurret")
       UseExplosionSnd2=False
       WreckPartColHeight=48.000000
+      bEnableShield=True
+      ShieldLevel=0.600000
       Mesh=LodMesh'XWheelVeh.JeepSDX'
       SoundRadius=70
       SoundVolume=100
