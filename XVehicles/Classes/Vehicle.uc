@@ -1119,7 +1119,7 @@ local vector ExitVect;
 			{
 				PlayerPawn(Driver).ViewTarget = None;
 				PlayerPawn(Driver).EndZoom();
-				Driver.ClientSetRotation(Rotation);
+				Driver.ClientSetLocation(Driver.Location, Rotation);
 			}
 			else
 				Driver.SetRotation(rotator(Driver.Location - Location));
@@ -4155,7 +4155,7 @@ function PassengerLeave( byte Seat, optional bool bForcedLeave )
 			{
 				PlayerPawn(Passengers[Seat]).ViewTarget = None;
 				PlayerPawn(Passengers[Seat]).EndZoom();
-				Passengers[Seat].ClientSetRotation(Rotation);
+				Passengers[Seat].ClientSetLocation(Passengers[Seat].Location, Rotation);
 			}
 			PassengerSeats[Seat].PassengerCam.setCamOwner(None);
 			Passengers[Seat].Weapon = Passengers[Seat].PendingWeapon;
