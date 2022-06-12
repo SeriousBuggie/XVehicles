@@ -70,18 +70,9 @@ simulated function Tick(float Delta)
 function Destroyed()
 {
 	local VehicleFlag Prev;
-	if (Vehicle(Owner) != None && Next != None)
+	if (Vehicle(Owner) != None)
 	{
-		if (Vehicle(Owner).VehicleFlag == None) // must never happen
-			Vehicle(Owner).VehicleFlag = Next;
-		else
-		{
-			for (Prev = Vehicle(Owner).VehicleFlag; Prev != None; Prev = Prev.Next)
-				if (Prev.Next == self)
-					break;
-			if (Prev != None)
-				Prev.Next = Next;
-		}
+		if (Vehicle(Owner).VehicleFlag == self || Vehicle(Owner).VehicleFlag == None)			Vehicle(Owner).VehicleFlag = Next;		else		{			for (Prev = Vehicle(Owner).VehicleFlag; Prev != None; Prev = Prev.Next)				if (Prev.Next == self)					break;			if (Prev != None)				Prev.Next = Next;		}
 	}
 	Super.Destroyed();
 }
