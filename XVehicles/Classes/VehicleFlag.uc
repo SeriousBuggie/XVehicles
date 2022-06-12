@@ -50,6 +50,8 @@ simulated function FixOffset()
 simulated function Tick(float Delta)
 {
 	local rotator r;
+	local bool bNetOwner;
+	local int i;
 	Super.Tick(Delta);
 	
 	FixOffset();
@@ -62,6 +64,7 @@ simulated function Tick(float Delta)
 		r.Roll = -r.Roll;
 		SetRotation(r);
 	}
+	if (Vehicle(Owner) != None && Vehicle(Owner).IsNetOwned())		Style = STY_Translucent;	else		Style = STY_Normal;
 }
 
 function Destroyed()

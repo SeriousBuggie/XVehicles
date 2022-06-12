@@ -812,6 +812,19 @@ simulated function vector GetStateOffset()
 	return Offset;
 }
 
+simulated function bool IsNetOwned()
+{
+	local int i;
+	if (Driver != None && IsNetOwner(Driver))
+		return true;
+
+	for (i = 0; i < ArrayCount(Passengers); i++)
+		if (Passengers[i] != None && IsNetOwner(Passengers[i]))
+			return true;
+			
+	return false;
+}
+
 function ShowFlagOnRoof()
 {
 	local int i;
