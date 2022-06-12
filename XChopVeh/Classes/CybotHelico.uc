@@ -44,6 +44,14 @@ simulated function Tick(float delta)
 	Super.Tick(delta);
 	if (CurrentTeamColor != CurrentTeam)
 		ChangeColor();
+	if (AttachmentList != None && DriverGun != None && 
+		DriverGun.AnimSequence != AttachmentList.AnimSequence)
+	{
+		if (DriverGun.AnimSequence == 'Rotating')
+			AttachmentList.LoopAnim(DriverGun.AnimSequence, 4.0);
+		else
+			AttachmentList.PlayAnim(DriverGun.AnimSequence);
+	}
 }
 
 function ChangeColor()
