@@ -1622,8 +1622,7 @@ simulated function Tick( float Delta )
 	bOwnerNoSee = False;
 	if( Driver!=None )
 		UpdateDriverPos();
-	if( bOnGround && !bSlopedG )
-		bOnGround = False;
+	bOnGround = bSlopedG;
 	if (NewMove != None)
 	{
 		NewMove.TimeStamp = Level.TimeSeconds;
