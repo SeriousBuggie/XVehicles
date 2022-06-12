@@ -108,6 +108,7 @@ var WeaponAttachment DriverGun;
 
 var Vehicle PendingBump;
 var bool bReadyToRun;
+var bool bFirstCheckOnGround;
 
 // -1 to 1.
 var int Turning,Rising,Accel;
@@ -537,7 +538,7 @@ simulated function PostBeginPlay()
 	//*****************************************
 	
 	if( Level.NetMode==NM_Client )
-		return;	
+		return;
 
 	if (InitialDamage > 0)
 		TakeImpactDamage(InitialDamage,None, "InitialDamage");
@@ -1793,6 +1794,8 @@ simulated function CheckBase(Actor PossibleBase, Actor Ac[4])
 	}
 	if (Base != PossibleBase)
 		SetBase(PossibleBase);
+		
+	bFirstCheckOnGround = true;
 }
 
 // Vehicle is currently on ground?
@@ -1882,7 +1885,7 @@ simulated function bool CheckOnGround()
 
 	if (bSlopedPhys && GVT!=None)
 	{
-		if (Location != OldLocation)
+		if (Location != OldLocation || !bFirstCheckOnGround)
 		{
 			ePointsOffSet[0] = FrontWide;
 			ePointsOffSet[1] = ePointsOffSet[0];
@@ -1948,16 +1951,15 @@ simulated function bool CheckOnGround()
 			GVTLoc = MLoc + ActualGVTNormal*CollisionHeight;
 			GVT.PrePivot = GVTLoc - Location;
 		}
-		else if (Location != OldLocation)
+		else if (Location != OldLocation || !bFirstCheckOnGround)
 			ActualGVTNormal = HN;
 	}
 
-	if ((Location != OldLocation || !bSlopedPhys) /*&& (HN dot ActualFloorNormal) <= 0.5*/)
+	if ((Location != OldLocation || !bSlopedPhys || !bFirstCheckOnGround) /*&& (HN dot ActualFloorNormal) <= 0.5*/)
 		ActualFloorNormal = HN;
 		
 	CheckBase(PossibleBase, Ac);
 	return ActualFloorNormal.Z >= 0.7;
-	Return True;
 }
 
 simulated function ResetPhysics(Pawn Other)
@@ -4322,6 +4324,7 @@ defaultproperties
       DriverGun=None
       PendingBump=None
       bReadyToRun=False
+      bFirstCheckOnGround=False
       Turning=0
       Rising=0
       Accel=0

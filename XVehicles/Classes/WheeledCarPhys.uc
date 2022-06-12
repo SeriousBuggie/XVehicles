@@ -157,14 +157,12 @@ simulated function UpdateDriverInput( float Delta )
 	{
 		VelFriction = Velocity;
 		VirtOldAccel = OldAccelD;
-	}
-		
+	}	
 
 	if (bSlopedPhys && GVT!=None)
 		R = TransformForGroundRot(VehicleYaw,GVTNormal);
 	else
 		R = TransformForGroundRot(VehicleYaw,FloorNormal);
-
 	OldWheeledRot = Rotation;
 
 	if( Rotation!=R )
@@ -188,6 +186,10 @@ simulated function UpdateDriverInput( float Delta )
 				WheelYaw = DesTurn;
 		}
 	}
+	
+	if( Level.NetMode==NM_Client && !IsNetOwner(Owner) )
+		Return;
+	
 	if( !bOnGround )
 	{
 		if (!Region.Zone.bWaterZone)
@@ -197,11 +199,8 @@ simulated function UpdateDriverInput( float Delta )
 		FallingLenghtZ += Abs(OldLocation.Z - Location.Z);
 		Return;
 	}
-	if( Level.NetMode==NM_Client && !IsNetOwner(Owner) )
-		Return;
-
-	if( bOnGround)
-		Velocity+=CalcGravityStrength(Region.Zone.ZoneGravity*(VehicleGravityScale/GroundPower),FloorNormal)*Delta/(FMax(Region.Zone.ZoneGroundFriction,WheelsTraction)/8.f+1.f);
+	
+	Velocity+=CalcGravityStrength(Region.Zone.ZoneGravity*(VehicleGravityScale/GroundPower),FloorNormal)*Delta/(FMax(Region.Zone.ZoneGroundFriction,WheelsTraction)/8.f+1.f);
 
 	if (FMax(Region.Zone.ZoneGroundFriction,WheelsTraction) > 4.0)
 		DesTurn = VSize(Velocity)*WheelYaw*Delta/400*GetMovementDir();

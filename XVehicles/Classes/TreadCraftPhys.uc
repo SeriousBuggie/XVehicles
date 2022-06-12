@@ -303,6 +303,12 @@ simulated function UpdateDriverInput( float Delta )
 		VelFriction = Velocity;
 		VirtOldAccel = OldAccelD;
 	}
+	
+	if( Level.NetMode==NM_Client && !IsNetOwner(Driver) )
+	{
+		UpdateTreads(Delta);
+		Return;
+	}
 
 	if( !bOnGround )
 	{
@@ -361,14 +367,7 @@ simulated function UpdateDriverInput( float Delta )
 	if( !bCameraOnBehindView && Driver!=None )
 		Driver.ViewRotation.Yaw+=CurTurnSpeed*Delta;
 
-	if( Level.NetMode==NM_Client && !IsNetOwner(Driver) )
-	{
-		UpdateTreads(Delta);
-		Return;
-	}
-
-	if( bOnGround )
-		Velocity+=CalcGravityStrength(Region.Zone.ZoneGravity*(VehicleGravityScale/GroundPower),FloorNormal)*Delta/(Region.Zone.ZoneGroundFriction/8.f+1.f);
+	Velocity+=CalcGravityStrength(Region.Zone.ZoneGravity*(VehicleGravityScale/GroundPower),FloorNormal)*Delta/(Region.Zone.ZoneGroundFriction/8.f+1.f);
 
 	//Treads control
 	UpdateTreads(Delta);
