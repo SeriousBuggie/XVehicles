@@ -1842,7 +1842,8 @@ simulated function bool CheckOnGround()
 			MoveSmooth(vect(0,0,-1));
 			Enable('Bump');
 			Enable('HitWall');
-			MLoc = (sHL[0] + sHL[1] + sHL[2] + sHL[3]) / 4;
+			MLoc = (sHL[0] + sHL[1] + sHL[2] + sHL[3]) / 4 - 
+				(vect(0.5,0,0)*(FrontWide.X + BackWide.X) >> Rotation);
 			CrossedVect[0] = Normal(sHL[0] - sHL[3]);
 			CrossedVect[1] = Normal(sHL[1] - sHL[2]);
 			ActualGVTNormal = Normal(CrossedVect[0] cross CrossedVect[1]);
@@ -1941,7 +1942,8 @@ simulated function bool CheckOnGround()
 
 		if (AcCount == 4)
 		{
-			MLoc = (sHL[0] + sHL[1] + sHL[2] + sHL[3]) / 4;
+			MLoc = (sHL[0] + sHL[1] + sHL[2] + sHL[3]) / 4 - 
+				(vect(0.5,0,0)*(FrontWide.X + BackWide.X) >> Rotation);
 			CrossedVect[0] = Normal(sHL[0] - sHL[3]);
 			CrossedVect[1] = Normal(sHL[1] - sHL[2]);
 			ActualGVTNormal = Normal(CrossedVect[0] cross CrossedVect[1]);
