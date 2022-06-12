@@ -282,6 +282,8 @@ var float WaitForDriver;
 var float LastFix;
 var() Sound FixSounds[4];
 
+var class<LocalMessagePlus> ClassPureHitSound;
+
 var Decal Shadow;
 
 //Damage FX
@@ -646,6 +648,8 @@ simulated function PostBeginPlay()
 	ServerLastTime = -1;
 	
 	SetTimer(0.5, true);
+	
+	SetPropertyText("ClassPureHitSound", "Class'PureHitSound'");
 }
 
 function InitInventory(Inventory Inv)
@@ -3490,7 +3494,6 @@ simulated singular function HitWall( vector HitNormal, Actor Wall )
 	}
 }
 
-
 function TakeImpactDamage( int Damage, Pawn InstigatedBy, optional coerce string Reason )
 {
 // if (Damage > 0) Log(self @ Level.TimeSeconds @ "TakeImpactDamage" @ Damage @ InstigatedBy @ Reason);
@@ -3527,7 +3530,6 @@ function FixDamage(int Damage, Pawn EventInstigator, vector HitLocation, vector 
 		LastFix = Level.TimeSeconds;
 	}
 }
-
 
 function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 						Vector momentum, name damageType)
@@ -3601,6 +3603,9 @@ function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 			PlaySound(BulletHitSounds[Rand(ArrayCount(BulletHitSounds))],SLOT_Pain,FClamp(float(Damage)/20,0.75,2));
 		else if (damageType=='BumpWall')
 			PlaySound(ImpactSounds[Rand(ArrayCount(ImpactSounds))],SLOT_Pain,FClamp(float(Damage)/50,0.75,2));
+		
+		MakeHitSound(PlayerPawn(instigatedBy), Damage);
+		
 		Health-=Damage;
 		Velocity+=momentum/Mass;
 		if( Health<=0 )
@@ -3649,6 +3654,32 @@ function KillDriver( Pawn Killer, name damageType )
 			D.Died(Killer, damageType, Location);
 		}
 	}
+}
+
+// make hit sound for UTPure
+function MakeHitSound(PlayerPawn Instigator, int Damage)
+{
+	local Pawn Damaged, P;
+	local int i;
+	if (Instigator == None || ClassPureHitSound == None)
+		return;
+	if (Driver != None)
+		Damaged = Driver;
+	else
+		For (i = 0; i < ArrayCount(Passengers); i++)
+			if (Passengers[i] != None)
+			{
+				Damaged = Passengers[i];
+				break;
+			}
+	if (Damaged == None)
+		return;
+	Instigator.ReceiveLocalizedMessage(ClassPureHitSound, Damage, Damaged.PlayerReplicationInfo, 
+		Instigator.PlayerReplicationInfo);
+	for (P = Level.PawnList; P != None; P = P.NextPawn)		if (Spectator(P) != None && Spectator(P).ViewTarget != None && 
+			(Spectator(P).ViewTarget == Instigator || 
+			Spectator(P).ViewTarget == DriverCameraActor(Instigator.ViewTarget)))			P.ReceiveLocalizedMessage(ClassPureHitSound, Damage, Damaged.PlayerReplicationInfo, 
+				Instigator.PlayerReplicationInfo);
 }
 
 simulated function CastVectorialExpl(byte j, vector EXHOffSet)
@@ -4506,6 +4537,7 @@ defaultproperties
       FixSounds(1)=Sound'UnrealShare.Dispersion.number2'
       FixSounds(2)=Sound'UnrealShare.Dispersion.number3'
       FixSounds(3)=Sound'UnrealShare.Dispersion.number4'
+      ClassPureHitSound=None
       Shadow=None
       bDamageFXInWater=False
       DamageGFX(0)=(bHaveThisGFX=False,bHaveFlames=False,DmgFXOffset=(X=0.000000,Y=0.000000,Z=0.000000),FXRange=0,DmgFlamesClass=Class'XVehicles.VehDmgFire',DmgBlackSmkClass=Class'XVehicles.VehEngBlackSmoke',DmgLightSmkClass=Class'XVehicles.VehEngLightSmoke')
