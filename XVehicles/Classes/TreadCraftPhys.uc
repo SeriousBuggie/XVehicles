@@ -303,20 +303,13 @@ simulated function UpdateDriverInput( float Delta )
 		VelFriction = Velocity;
 		VirtOldAccel = OldAccelD;
 	}
-	
-	if( Level.NetMode==NM_Client && !IsNetOwner(Driver) )
-	{
-		UpdateTreads(Delta);
-		Return;
-	}
 
 	if( !bOnGround )
 	{
-		if (!Region.Zone.bWaterZone)
-			Velocity+=Region.Zone.ZoneGravity*Delta*VehicleGravityScale;
-		else
-			Velocity+=Region.Zone.ZoneGravity*Delta*VehicleGravityScale*0.35;
-		FallingLenghtZ += Abs(OldLocation.Z - Location.Z);
+		if (!(Level.NetMode==NM_Client && !IsNetOwner(Driver)))
+		{
+			if (!Region.Zone.bWaterZone)				Velocity+=Region.Zone.ZoneGravity*Delta*VehicleGravityScale;			else				Velocity+=Region.Zone.ZoneGravity*Delta*VehicleGravityScale*0.35;			FallingLenghtZ += Abs(OldLocation.Z - Location.Z);
+		}
 		UpdateTreads(Delta);
 		Return;
 	}
@@ -364,6 +357,13 @@ simulated function UpdateDriverInput( float Delta )
 			CurTurnSpeed = 0;
 	}
 	VehicleYaw+=CurTurnSpeed*Delta;
+	
+	if( Level.NetMode==NM_Client && !IsNetOwner(Driver) )
+	{
+		UpdateTreads(Delta);
+		Return;
+	}
+	
 	if( !bCameraOnBehindView && Driver!=None )
 		Driver.ViewRotation.Yaw+=CurTurnSpeed*Delta;
 
