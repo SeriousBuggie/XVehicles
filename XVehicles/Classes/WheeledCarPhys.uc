@@ -361,7 +361,7 @@ simulated function UpdateDriverInput( float Delta )
 				Velocity-=Normal(Velocity)*DeAccRat;
 			if (Velocity dot Ac > 0)
 				Velocity = VSize(Velocity)*Normal(Ac);
-			else
+			else if (VSize(Velocity) > 0)
 				OldAccelD = -OldAccelD;
 		}
 		Return;
