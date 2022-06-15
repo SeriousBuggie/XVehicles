@@ -24,12 +24,14 @@ function Timer()
 
 simulated function Tick(float Delta)
 {
-	if (Vehicle(Owner)!=None)
+	local Vehicle Veh;
+	Veh = Vehicle(Owner);
+	if (Veh!=None)
 	{
-		if (Vehicle(Owner).bSlopedPhys && Vehicle(Owner).GVT!=None)
-			PrePivot = Vehicle(Owner).GVT.PrePivot + (POffSet >> Vehicle(Owner).Rotation);
+		if (Veh.bSlopedPhys && Veh.GVT!=None)
+			PrePivot = Veh.GVT.PrePivot + (POffSet >> Veh.Rotation);
 		else
-			PrePivot = (POffSet >> Vehicle(Owner).Rotation);
+			PrePivot = (POffSet >> Veh.Rotation);
 	}
 }
 
