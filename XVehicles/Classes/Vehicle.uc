@@ -1404,7 +1404,7 @@ simulated function AfterTeleport(float YawChange)
 // Main tick
 simulated function Tick( float Delta )
 {
-	local bool bSlopedG;
+	local bool bSlopedG, bIsNetOwner;
 	local float f;
 	local SavedMoveXV NewMove;
 	
@@ -1428,29 +1428,9 @@ simulated function Tick( float Delta )
 	VeryOldVel[1] = VeryOldVel[0];
 	VeryOldVel[0] = Velocity;
 
-	if (Health < (FirstHealth/5))
+	if (Health*2 < FirstHealth)
 	{
-		DmgFXCount += Delta;
-		if (DmgFXCount > (0.065 + FRand()*0.15))
-			DmgFXGen(3);
-	}
-	else if (Health < (FirstHealth/4))
-	{
-		DmgFXCount += Delta;
-		if (DmgFXCount > (0.1 + FRand()*0.15))
-			DmgFXGen(2);
-	}
-	else if (Health < (FirstHealth/3))
-	{
-		DmgFXCount += Delta;
-		if (DmgFXCount > (0.1 + FRand()*0.15))
-			DmgFXGen(1);
-	}
-	else if (Health < (FirstHealth/2))
-	{
-		DmgFXCount += Delta;
-		if (DmgFXCount > (0.5 + FRand()))
-			DmgFXGen(0);
+		if (Health*5 < FirstHealth)		{			DmgFXCount += Delta;			if (DmgFXCount > (0.065 + FRand()*0.15))				DmgFXGen(3);		}		else if (Health*4 < FirstHealth)		{			DmgFXCount += Delta;			if (DmgFXCount > (0.1 + FRand()*0.15))				DmgFXGen(2);		}		else if (Health*3 < FirstHealth)		{			DmgFXCount += Delta;			if (DmgFXCount > (0.1 + FRand()*0.15))				DmgFXGen(1);		}		else		{			DmgFXCount += Delta;			if (DmgFXCount > (0.5 + FRand()))				DmgFXGen(0);		}
 	}
 
 	if (bHitAPawn || bHitASmallerVehicle)
@@ -1479,7 +1459,8 @@ simulated function Tick( float Delta )
 			Return;
 		}
 		
-		if (IsNetOwner(Driver) && SavedMoves != None)
+		bIsNetOwner = IsNetOwner(Driver);
+		if (bIsNetOwner && SavedMoves != None)
 		{
 			NewMove = SavedMoves;
 			while (NewMove.NextMove != None)
@@ -1491,7 +1472,7 @@ simulated function Tick( float Delta )
 		
 		ClientUpdateState(Delta);
 		
-		if (IsNetOwner(Driver))
+		if (bIsNetOwner)
 		{
 			// I'm  a client, so I'll save my moves in case I need to replay them
 			// Get a SavedMove actor to store the movement in.
@@ -1508,7 +1489,7 @@ simulated function Tick( float Delta )
 		}
 	}
 	
-	if (VehicleState != None && Level.NetMode != NM_DedicatedServer && Level.NetMode != NM_ListenServer)
+	if (Level.NetMode != NM_DedicatedServer && Level.NetMode != NM_ListenServer && VehicleState != None)
 		VehicleState.bHidden = VehicleState.Mass >= Level.TimeSeconds;
 
 	if (!class'VehiclesConfig'.default.bDisableTeamSpawn)
@@ -1577,10 +1558,10 @@ simulated function Tick( float Delta )
 	if (ArcGroundTime > 0)
 		ArcGroundTime -= Delta;
 
-	if (!Region.Zone.bWaterZone)
-		f = 1.0;
-	else
+	if (Region.Zone.bWaterZone)
 		f = 0.35;
+	else
+		f = 1.0;
 
 	if( ActualFloorNormal!=FloorNormal && (!bArcMovement || (bSlopedG && bArcMovement)))
 	{
@@ -1629,7 +1610,6 @@ simulated function Tick( float Delta )
 					GVTNormal = ActualGVTNormal;
 			}
 		}
-		
 	}
 
 	if (bSlopedPhys && bSlopedG && GVTNormal!=ActualGVTNormal)
@@ -1667,7 +1647,8 @@ simulated function Tick( float Delta )
 		NewMove.SavedYaw = VehicleYaw;
 	}
 	UpdatePassengerPos();
-	if( !bIsWaterResistant && Region.Zone.bWaterZone && NextWaterDamageTime<Level.TimeSeconds && Region.Zone.DamagePerSec <= 0)
+	if (Region.Zone.bWaterZone && !bIsWaterResistant && NextWaterDamageTime<Level.TimeSeconds && 
+		Region.Zone.DamagePerSec <= 0)
 	{
 		NextWaterDamageTime = Level.TimeSeconds+0.25;
 		TakeDamage(25,None,Location,vect(0,0,0),'drowned');
