@@ -197,8 +197,8 @@ simulated function UpdateDriverInput( float Delta )
 		Return;
 	}
 	
-	Velocity += CalcGravityStrength(Region.Zone.ZoneGravity*(VehicleGravityScale/GroundPower),
-		FloorNormal)*Delta/(FMax(Region.Zone.ZoneGroundFriction, WheelsTraction)/8.f + 1.f);
+	Velocity += CalcGravityStrength(Region.Zone.ZoneGravity*(VehicleGravityScale/GroundPower), FloorNormal)*
+		8.f*Delta/(FMax(Region.Zone.ZoneGroundFriction, WheelsTraction) + 8.f);
 
 	DesTurn = VSize(Velocity);
 	if (DesTurn > 0)
@@ -281,8 +281,8 @@ simulated function UpdateDriverInput( float Delta )
 	if (Accel == 0)
 	{
 		DeAcc = VSize(Velocity);
-		DeAccRat = Delta*WDeAccelRate*FMax(Region.Zone.ZoneGroundFriction,WheelsTraction);
-		if( DeAccRat>DeAcc )
+		DeAccRat = WDeAccelRate*FMax(Region.Zone.ZoneGroundFriction, WheelsTraction)*Delta;
+		if (DeAccRat > DeAcc)
 			DeAccRat = DeAcc;
 		if (FMax(Region.Zone.ZoneGroundFriction, WheelsTraction) <= 4.0)
 		{
@@ -324,25 +324,26 @@ simulated function UpdateDriverInput( float Delta )
 	}
 	DeAcc = VSize(Velocity);
 	
-	if( DeAcc<MaxGroundSpeed )
+	if (DeAcc < MaxGroundSpeed)
 	{
 		DeAcc+=WAccelRate*Delta;
-		if( DeAcc>MaxGroundSpeed )
+		if (DeAcc > MaxGroundSpeed)
 			DeAcc = MaxGroundSpeed;
 	}
-	else DeAcc+=WAccelRate*Delta/100;
+	else 
+		DeAcc += WAccelRate*Delta/100;
 
-	Ac = GetAccelDir(Turning,Rising,Accel);
+	Ac = GetAccelDir(Turning, Rising, Accel);
 	NVeloc = Normal(Velocity);
 
-	if( DeAcc>50 && (Ac dot NVeloc)<0.4 )
+	if (DeAcc > 50 && (Ac dot NVeloc) < 0.4)
 	{
-		Velocity+=Ac*FMax(Region.Zone.ZoneGroundFriction,WheelsTraction)*WAccelRate*Delta*2.f;
+		Velocity += Ac*FMax(Region.Zone.ZoneGroundFriction, WheelsTraction)*WAccelRate*2.f*Delta;
 		Return;
 	}
 
-	Ac = Ac*MaxGroundSpeed*FMax(Region.Zone.ZoneGroundFriction,WheelsTraction)/10;
-	Velocity = Normal(Velocity+Ac)*DeAcc;
+	Ac = Ac*MaxGroundSpeed*FMax(Region.Zone.ZoneGroundFriction, WheelsTraction)/10;
+	Velocity = Normal(Velocity + Ac)*DeAcc;
 }
 
 simulated function int GetIcedMovementDir()
