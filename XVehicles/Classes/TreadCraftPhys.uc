@@ -91,19 +91,21 @@ simulated function PostBeginPlay()
 
 simulated function SpawnFurtherParts()
 {
-local byte i;
-local TornOffCarPartActor WT;
+	local byte i;	local TornOffCarPartActor WT;
 
-	For (i=0; i<ArrayCount(Treads); i++)
+	if (Level.NetMode == NM_DedicatedServer)
+		return;
+
+	for (i = 0; i < ArrayCount(Treads); i++)
 	{
 		if (Treads[i].TTread != None)
 		{
-			WT = Spawn(Class'TornOffCarPartActor',Self,,Location + Treads[i].TTread.PrePivot,Rotation);
+			WT = Spawn(Class'TornOffCarPartActor', Self, , Location + Treads[i].TTread.PrePivot, Rotation);
 			if (WT != None)
 			{
-				WT.CopyDisplayFrom(Treads[i].TTread,Self);
+				WT.CopyDisplayFrom(Treads[i].TTread, Self);
 				WT.SetInitialSpeed(2);
-				WT.SetCollisionSize(WreckTrackColRadius,WreckTrackColHeight);
+				WT.SetCollisionSize(WreckTrackColRadius, WreckTrackColHeight);
 			}
 			Treads[i].TTread.Destroy();
 		}
@@ -194,7 +196,7 @@ simulated function UpdateTreads(float Delta)
 	if (FMax(Region.Zone.ZoneGroundFriction,TreadsTraction) > 4.0)
 		YDelta = Abs(Abs(OldVehicleYaw) - Abs(VehicleYaw));
 	else
-		YDelta = Abs(Abs(OldVehicleYaw) - Abs(VehicleYaw))*(FMax(Region.Zone.ZoneGroundFriction,TreadsTraction)/0.1)*4.25;
+		YDelta = Abs(Abs(OldVehicleYaw) - Abs(VehicleYaw))*(FMax(Region.Zone.ZoneGroundFriction, TreadsTraction)/0.1)*4.25;
 
 	if (FMax(Region.Zone.ZoneGroundFriction,TreadsTraction) > 4.0 && bOnGround)
 	{
@@ -307,7 +309,8 @@ simulated function UpdateDriverInput( float Delta )
 		{
 			if (!Region.Zone.bWaterZone)				Velocity+=Region.Zone.ZoneGravity*Delta*VehicleGravityScale;			else				Velocity+=Region.Zone.ZoneGravity*Delta*VehicleGravityScale*0.35;			FallingLenghtZ += Abs(OldLocation.Z - Location.Z);
 		}
-		UpdateTreads(Delta);
+		if (Level.NetMode != NM_DedicatedServer)
+			UpdateTreads(Delta);
 		Return;
 	}
 
@@ -355,7 +358,7 @@ simulated function UpdateDriverInput( float Delta )
 	}
 	VehicleYaw+=CurTurnSpeed*Delta;
 	
-	if( Level.NetMode==NM_Client && !IsNetOwner(Driver) )
+	if (Level.NetMode == NM_Client && !IsNetOwner(Driver))
 	{
 		UpdateTreads(Delta);
 		Return;
@@ -367,7 +370,8 @@ simulated function UpdateDriverInput( float Delta )
 	Velocity+=CalcGravityStrength(Region.Zone.ZoneGravity*(VehicleGravityScale/GroundPower),FloorNormal)*Delta/(Region.Zone.ZoneGroundFriction/8.f+1.f);
 
 	//Treads control
-	UpdateTreads(Delta);
+	if (Level.NetMode != NM_DedicatedServer)
+		UpdateTreads(Delta);
 	
 	// Update vehicle speed
 	if (Accel != 0)
