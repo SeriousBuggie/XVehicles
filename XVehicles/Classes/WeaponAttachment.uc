@@ -794,7 +794,7 @@ simulated function Tick( float Delta )
 		SetTurretYaw();
 	}
 	GetTurretCoords(Po, Ro, PRo);
-	if (PitchPart != None)
+	if (PitchPart != None && PitchPart.Rotation != PRo)
 	{
 		//PitchPart.SetLocation(Po+(PitchActorOffset >> Ro));
 		PitchPart.SetRotation(PRo);
