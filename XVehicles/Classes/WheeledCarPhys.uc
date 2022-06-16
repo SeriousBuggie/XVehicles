@@ -137,7 +137,7 @@ simulated function UpdateDriverInput( float Delta )
 	if (Region.Zone.ZoneGroundFriction + WheelsTraction > 14.0)	//Traction on but outside ice/snow areas
 	{
 		IronC += Delta;
-		if (IronC >= 0.5 && VSize(Velocity)>0)
+		if (IronC >= 0.5 && VSize(Velocity) > 0)
 		{
 			IronC = 0;
 			TakeImpactDamage(IronWheelsTerrainDmg*VSize(Velocity)/MaxGroundSpeed, None);
@@ -150,13 +150,13 @@ simulated function UpdateDriverInput( float Delta )
 		VirtOldAccel = OldAccelD;
 	}	
 
-	if (bSlopedPhys && GVT!=None)
-		R = TransformForGroundRot(VehicleYaw,GVTNormal);
+	if (bSlopedPhys && GVT != None)
+		R = TransformForGroundRot(VehicleYaw, GVTNormal);
 	else
-		R = TransformForGroundRot(VehicleYaw,FloorNormal);
+		R = TransformForGroundRot(VehicleYaw, FloorNormal);
 	OldWheeledRot = Rotation;
 
-	if( Rotation!=R )
+	if (Rotation != R)
 		SetRotation(R);
 		
 	if (OldWheeledRot.Yaw != Rotation.Yaw)
@@ -168,31 +168,31 @@ simulated function UpdateDriverInput( float Delta )
 	}
 
 	DesTurn = WheelMaxYaw*Turning*-1;
-	if( WheelYaw!=DesTurn )
+	if (WheelYaw != DesTurn)
 	{
-		if( WheelYaw<DesTurn )
+		if (WheelYaw < DesTurn)
 		{
-			WheelYaw+=WheelTurnSpeed*Delta;
-			if( WheelYaw>DesTurn )
+			WheelYaw += WheelTurnSpeed*Delta;
+			if (WheelYaw > DesTurn)
 				WheelYaw = DesTurn;
 		}
 		else
 		{
-			WheelYaw-=WheelTurnSpeed*Delta;
-			if( WheelYaw<DesTurn )
+			WheelYaw -= WheelTurnSpeed*Delta;
+			if (WheelYaw < DesTurn)
 				WheelYaw = DesTurn;
 		}
 	}
 	
-	if( Level.NetMode==NM_Client && !IsNetOwner(Owner) )
+	if (Level.NetMode == NM_Client && !IsNetOwner(Owner))
 		Return;
 	
-	if( !bOnGround )
+	if (!bOnGround)
 	{
-		if (!Region.Zone.bWaterZone)
-			Velocity+=Region.Zone.ZoneGravity*Delta*VehicleGravityScale;
+		if (Region.Zone.bWaterZone)
+			Velocity += Region.Zone.ZoneGravity*Delta*VehicleGravityScale*0.35;
 		else
-			Velocity+=Region.Zone.ZoneGravity*Delta*VehicleGravityScale*0.35;
+			Velocity += Region.Zone.ZoneGravity*Delta*VehicleGravityScale;
 		FallingLenghtZ += Abs(OldLocation.Z - Location.Z);
 		Return;
 	}
@@ -203,12 +203,17 @@ simulated function UpdateDriverInput( float Delta )
 	DesTurn = VSize(Velocity);
 	if (DesTurn > 0)
 	{
-		if (FMax(Region.Zone.ZoneGroundFriction,WheelsTraction) > 4.0)			DesTurn *= WheelYaw*Delta/400*GetMovementDir();		else			DesTurn *= WheelYaw*Delta/400*GetMovementDir()*
-				FMin(FMax(Region.Zone.ZoneGroundFriction,WheelsTraction),1.0);
+		if (FMax(Region.Zone.ZoneGroundFriction, WheelsTraction) > 4.0)
+			DesTurn *= WheelYaw*Delta/400*GetMovementDir();
+		else
+			DesTurn *= WheelYaw*Delta/400*GetMovementDir()*
+				FMin(FMax(Region.Zone.ZoneGroundFriction, WheelsTraction), 1.0);
 	}
 	if (DesTurn > 0)
 	{
-		VehicleYaw += DesTurn;		if (!bCameraOnBehindView && Driver!=None)			Driver.ViewRotation.Yaw += DesTurn;
+		VehicleYaw += DesTurn;
+		if (!bCameraOnBehindView && Driver!=None)
+			Driver.ViewRotation.Yaw += DesTurn;
 	}
 
 	// Update vehicle speed
@@ -249,7 +254,10 @@ simulated function UpdateDriverInput( float Delta )
 				{
 					Ac = GetAccelDir(Turning,Rising,OldAccelD);
 					Velocity-=Normal(Velocity)*DeAccRat;
-					if (Velocity dot Ac > 0)						Velocity = VSize(Velocity)*Normal(Ac);					else						OldAccelD = -OldAccelD;
+					if (Velocity dot Ac > 0)
+						Velocity = VSize(Velocity)*Normal(Ac);
+					else
+						OldAccelD = -OldAccelD;
 				}
 
 				SetSignalLights(SL_Stop);
@@ -270,13 +278,13 @@ simulated function UpdateDriverInput( float Delta )
 	}
 
 	//If no braking, and no accel, deaccel smoothly
-	if( Accel==0 )
+	if (Accel == 0)
 	{
 		DeAcc = VSize(Velocity);
 		DeAccRat = Delta*WDeAccelRate*FMax(Region.Zone.ZoneGroundFriction,WheelsTraction);
 		if( DeAccRat>DeAcc )
 			DeAccRat = DeAcc;
-		if (FMax(Region.Zone.ZoneGroundFriction,WheelsTraction) <= 4.0)
+		if (FMax(Region.Zone.ZoneGroundFriction, WheelsTraction) <= 4.0)
 		{
 			if( DeAcc>0 )
 			{
@@ -303,8 +311,11 @@ simulated function UpdateDriverInput( float Delta )
 			else
 			{
 				Ac = GetAccelDir(Turning,Rising,OldAccelD);
-				Velocity-=Normal(Velocity)*DeAccRat;
-				if (Velocity dot Ac > 0)					Velocity = VSize(Velocity)*Normal(Ac);				else if (VSize(Velocity) > 0)					OldAccelD = -OldAccelD;
+				Velocity -= Normal(Velocity)*DeAccRat;
+				if (Velocity dot Ac > 0)
+					Velocity = VSize(Velocity)*Normal(Ac);
+				else if (VSize(Velocity) > 0)
+					OldAccelD = -OldAccelD;
 			}
 			
 			SetSignalLights(SL_None);
@@ -324,7 +335,7 @@ simulated function UpdateDriverInput( float Delta )
 	Ac = GetAccelDir(Turning,Rising,Accel);
 	NVeloc = Normal(Velocity);
 
-	if( DeAcc>50 && (Ac Dot NVeloc)<0.4 )
+	if( DeAcc>50 && (Ac dot NVeloc)<0.4 )
 	{
 		Velocity+=Ac*FMax(Region.Zone.ZoneGroundFriction,WheelsTraction)*WAccelRate*Delta*2.f;
 		Return;
