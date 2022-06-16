@@ -881,12 +881,12 @@ simulated function GetTurretCoords( optional out vector Pos, optional out rotato
 		if (OwnerVehicle.bSlopedPhys && OwnerVehicle.GVT!=None)
 		{
 			TurRot = TransformForGroundRot(TurretYaw,OwnerVehicle.GVTNormal);
-			PitchPartRot = TransformForGroundRot(TurretYaw,OwnerVehicle.GVTNormal,TurretPitch);
+			PitchPartRot = PitchPart.TransformForGroundRot(TurretYaw,OwnerVehicle.GVTNormal,TurretPitch);
 		}
 		else
 		{
 			TurRot = TransformForGroundRot(TurretYaw,OwnerVehicle.FloorNormal);
-			PitchPartRot = TransformForGroundRot(TurretYaw,OwnerVehicle.FloorNormal,TurretPitch);
+			PitchPartRot = PitchPart.TransformForGroundRot(TurretYaw,OwnerVehicle.FloorNormal,TurretPitch);
 		}
 	}
 	else if (OwnerVehicle.bSlopedPhys && OwnerVehicle.GVT!=None)

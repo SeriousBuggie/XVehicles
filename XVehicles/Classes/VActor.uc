@@ -17,6 +17,17 @@ const UU_360_NEGDEGREES = -65536.0f;
 var MatOverlayFX OverlayMActor;
 var Player StaticPP;
 
+// arrays access too slow, so there dupliacte of fields
+var int PrevCurrentYawA;
+var vector PrevGroundNormalA;
+var int PrevCurrentPitchA;
+var rotator PrevTransformForGroundRotA;
+
+var int PrevCurrentYawB;
+var vector PrevGroundNormalB;
+var int PrevCurrentPitchB;
+var rotator PrevTransformForGroundRotB;
+
 var() globalconfig float DistDetail;
 
 struct IntRange
@@ -283,11 +294,19 @@ simulated function rotator TransformForGroundRot( int CurrentYaw, vector GroundN
 {
 	local vector CrossDir,FwdDir,OldFwdDir,X,Y,Z,A,B;
 	local rotator R;
-	
+
 	R.Yaw = CurrentYaw;
 	R.Pitch = CurrentPitch;
 	if( Abs(GroundNormal.Z - 1) < 0.0000001 )
 		Return R;
+		
+	if (bReverse)
+	{	
+		if (CurrentYaw == PrevCurrentYawA &&
+			GroundNormal == PrevGroundNormalA &&			CurrentPitch == PrevCurrentPitchA)			return PrevTransformForGroundRotA;
+	}
+	else	
+		if (CurrentYaw == PrevCurrentYawB &&			GroundNormal == PrevGroundNormalB &&			CurrentPitch == PrevCurrentPitchB)			return PrevTransformForGroundRotB;
 
 	GetAxes(R,X,Y,Z);
 
@@ -313,7 +332,20 @@ simulated function rotator TransformForGroundRot( int CurrentYaw, vector GroundN
 	Z = A;
 	Z = Normal(Z);
 	Y = Normal(A Cross X);
-	return OrthoRotation(X,Y,Z);
+	R = OrthoRotation(X,Y,Z);
+	
+	if (bReverse)
+	{	
+		PrevCurrentYawA = CurrentYaw;
+		PrevGroundNormalA = GroundNormal;		PrevCurrentPitchA = CurrentPitch;		PrevTransformForGroundRotA = R;
+	}
+	else	
+	{
+		PrevCurrentYawB = CurrentYaw;
+		PrevGroundNormalB = GroundNormal;		PrevCurrentPitchB = CurrentPitch;		PrevTransformForGroundRotB = R;
+	}
+
+	return R;
 }
 // Vel = vector value to bouch off a "surface"
 // GNormal = The surface normal
@@ -468,6 +500,14 @@ defaultproperties
 {
       OverlayMActor=None
       StaticPP=None
+      PrevCurrentYawA=0
+      PrevGroundNormalA=(X=0.000000,Y=0.000000,Z=0.000000)
+      PrevCurrentPitchA=0
+      PrevTransformForGroundRotA=(Pitch=0,Yaw=0,Roll=0)
+      PrevCurrentYawB=0
+      PrevGroundNormalB=(X=0.000000,Y=0.000000,Z=0.000000)
+      PrevCurrentPitchB=0
+      PrevTransformForGroundRotB=(Pitch=0,Yaw=0,Roll=0)
       DistDetail=2.000000
       LODBias=4.000000
       DrawType=DT_Mesh

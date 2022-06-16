@@ -244,7 +244,7 @@ simulated function AttachmentsTick( float Delta )
 		While( RotorYaw>65536 )
 			RotorYaw-=65536;
 		MyRotor.Move(Location+(RotorOffset >> Rotation)-MyRotor.Location);
-		MyRotor.SetRotation(TransformForGroundRot(RotorYaw,FloorNormal));
+		MyRotor.SetRotation(MyRotor.TransformForGroundRot(RotorYaw,FloorNormal));
 	}
 }
 
