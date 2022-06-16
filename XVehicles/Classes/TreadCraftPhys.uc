@@ -677,7 +677,9 @@ simulated function AttachmentsTick( float Delta )
 			EngP = MinEngPitch + Min(PitchDif,(VSize(VelFriction)*PitchDif/MaxGroundSpeed));
 		SoundPitch = Byte(EngP);
 	}
-
+	
+	if (Level.NetMode == NM_DedicatedServer)
+		return;
 	
 	//********************************************************************************
 	//Water Trail FX points update
@@ -722,7 +724,7 @@ simulated function AttachmentsTick( float Delta )
 						VWaterT[i].Move(vect(0,0,8));
 						rec++;
 					}
-//log (self @ Level.TimeSeconds @ VWaterT[i].WaveLenght @ (Velocity dot vector(Rotation)) @ VSize(Location - OldLocation));
+
 					if ((Velocity dot vector(Rotation)) > 0)
 						VWaterT[i].WaveLenght += VSize(Location - OldLocation);
 					else
@@ -737,7 +739,6 @@ simulated function AttachmentsTick( float Delta )
 	
 					FootVehZone[i] = None;
 				}
-	
 			}
 			else if (FootVehZone[i] != None && Location == OldLocation && VWaterT[i] != None && VWaterT[i].AmbientSound != None)
 				VWaterT[i].AmbientSound = None;
@@ -754,12 +755,12 @@ simulated function AttachmentsTick( float Delta )
 		if (SecCount >= 0.35)
 		{
 			i = 0;
-			while (i < 8)
+			while (i < ArrayCount(FootVehZone))
 			{
 				if (FootVehZone[i] != None)
 				{
 					AnalyzeZone(FootVehZone[i]);
-					i = 10;
+					i = ArrayCount(FootVehZone);
 				}
 				
 				i++;
