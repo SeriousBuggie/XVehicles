@@ -123,6 +123,8 @@ var float LastPackedMoveTime;
 // Driving pawn
 var Pawn Driver,Passengers[8];
 
+var bool bHasPassengers;
+
 var vector FloorNormal,ActualFloorNormal, GVTNormal, ActualGVTNormal;
 var VehicleAttachment AttachmentList; // Vehicle attachment list.
 var bool bDriving,bOnGround,bOldOnGround,bCameraOnBehindView,bVehicleBlewUp,bClientBlewUp,bHadADriver;
@@ -351,7 +353,7 @@ replication
 	// Variables the server should send to the client.
 	reliable if( Role==ROLE_Authority )
 		Driver,bDriving,Health,bVehicleBlewUp,ReplicOverlayMat,bTeamLocked,CurrentTeam,Passengers,
-		bReadyToRun, Specials, DriverGun, VehicleState, ServerState, // new ones
+		bReadyToRun, Specials, DriverGun, VehicleState, ServerState, bHasPassengers, // new ones
 		// Functions server can call.
 		ClientSetTranslatorMsg;
 	reliable if( Role==ROLE_Authority && bNetOwner )
@@ -1646,7 +1648,8 @@ simulated function Tick( float Delta )
 		NewMove.SavedVelocity = Velocity;
 		NewMove.SavedYaw = VehicleYaw;
 	}
-	UpdatePassengerPos();
+	if (bHasPassengers)
+		UpdatePassengerPos();
 	if (Region.Zone.bWaterZone && !bIsWaterResistant && NextWaterDamageTime<Level.TimeSeconds && 
 		Region.Zone.DamagePerSec <= 0)
 	{
@@ -3982,9 +3985,11 @@ simulated function bool HasPassengers()
 		if( PassengerSeats[i].bIsAvailable && Passengers[i]!=None )
 		{
 			CurrentTeam = Passengers[i].PlayerReplicationInfo.Team;
+			bHasPassengers = true;
 			Return True;
 		}
 	}
+	bHasPassengers = false;
 	Return False;
 }
 function bool HasFreePassengerSeat( optional out byte SeatNum )
@@ -4059,6 +4064,7 @@ function PassengerEnter( Pawn Other, byte Seat, optional int MyPitch, optional i
 	else PassengerSeats[Seat].PassengerCam.SetOwner(Other);
 	PassengerSeats[Seat].PassengerCam.setCamOwner(Other);
 	
+	bHasPassengers = true;
 	CheckForEmpty();
 	ShowState();
 }
@@ -4127,6 +4133,7 @@ function PassengerLeave( byte Seat, optional bool bForcedLeave )
 		PassengerSeats[Seat].PassengerCam.SetCamOwner(None);
 	Passengers[Seat] = None;
 
+	HasPassengers();
 	CheckForEmpty();
 	ShowState();
 }
@@ -4288,6 +4295,7 @@ defaultproperties
       Passengers(5)=None
       Passengers(6)=None
       Passengers(7)=None
+      bHasPassengers=False
       FloorNormal=(X=0.000000,Y=0.000000,Z=1.000000)
       ActualFloorNormal=(X=0.000000,Y=0.000000,Z=1.000000)
       GVTNormal=(X=0.000000,Y=0.000000,Z=1.000000)
