@@ -197,15 +197,19 @@ simulated function UpdateDriverInput( float Delta )
 		Return;
 	}
 	
-	Velocity+=CalcGravityStrength(Region.Zone.ZoneGravity*(VehicleGravityScale/GroundPower),FloorNormal)*Delta/(FMax(Region.Zone.ZoneGroundFriction,WheelsTraction)/8.f+1.f);
+	Velocity += CalcGravityStrength(Region.Zone.ZoneGravity*(VehicleGravityScale/GroundPower),
+		FloorNormal)*Delta/(FMax(Region.Zone.ZoneGroundFriction, WheelsTraction)/8.f + 1.f);
 
-	if (FMax(Region.Zone.ZoneGroundFriction,WheelsTraction) > 4.0)
-		DesTurn = VSize(Velocity)*WheelYaw*Delta/400*GetMovementDir();
-	else
-		DesTurn = VSize(Velocity)*WheelYaw*Delta/400*GetMovementDir()*FMin(FMax(Region.Zone.ZoneGroundFriction,WheelsTraction),1.0);
-	VehicleYaw+=DesTurn;
-	if( !bCameraOnBehindView && Driver!=None )
-		Driver.ViewRotation.Yaw+=DesTurn;
+	DesTurn = VSize(Velocity);
+	if (DesTurn > 0)
+	{
+		if (FMax(Region.Zone.ZoneGroundFriction,WheelsTraction) > 4.0)			DesTurn *= WheelYaw*Delta/400*GetMovementDir();		else			DesTurn *= WheelYaw*Delta/400*GetMovementDir()*
+				FMin(FMax(Region.Zone.ZoneGroundFriction,WheelsTraction),1.0);
+	}
+	if (DesTurn > 0)
+	{
+		VehicleYaw += DesTurn;		if (!bCameraOnBehindView && Driver!=None)			Driver.ViewRotation.Yaw += DesTurn;
+	}
 
 	// Update vehicle speed
 	if (Accel != 0)
