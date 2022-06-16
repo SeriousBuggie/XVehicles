@@ -198,7 +198,7 @@ simulated function UpdateDriverInput( float Delta )
 	}
 	
 	Velocity += CalcGravityStrength(Region.Zone.ZoneGravity*(VehicleGravityScale/GroundPower), FloorNormal)*
-		8.f*Delta/(FMax(Region.Zone.ZoneGroundFriction, WheelsTraction) + 8.f);
+		Delta/(FMax(Region.Zone.ZoneGroundFriction, WheelsTraction)/8.f + 1.f);
 
 	DesTurn = VSize(Velocity);
 	if (DesTurn > 0)

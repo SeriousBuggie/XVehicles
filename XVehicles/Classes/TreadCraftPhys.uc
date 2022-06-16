@@ -367,7 +367,8 @@ simulated function UpdateDriverInput( float Delta )
 	if( !bCameraOnBehindView && Driver!=None )
 		Driver.ViewRotation.Yaw+=CurTurnSpeed*Delta;
 
-	Velocity+=CalcGravityStrength(Region.Zone.ZoneGravity*(VehicleGravityScale/GroundPower),FloorNormal)*Delta/(Region.Zone.ZoneGroundFriction/8.f+1.f);
+	Velocity += CalcGravityStrength(Region.Zone.ZoneGravity*(VehicleGravityScale/GroundPower), FloorNormal)*
+		Delta/(Region.Zone.ZoneGroundFriction/8.f + 1.f);
 
 	//Treads control
 	if (Level.NetMode != NM_DedicatedServer)
