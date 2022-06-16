@@ -241,14 +241,6 @@ final static function float ATan2(float Y,float X)
   
 	return tempang;
 }
-simulated static final function vector eVect( float x , float y , float z )
-{
-	local vector v;
-	v.x = x;
-	v.y = y;
-	v.z = z;
-	return v;
-}
 simulated static final function quat QuatFromAxisAndAngle( vector Axis , float Theta )
 {
 	// Theta must be given in radians
