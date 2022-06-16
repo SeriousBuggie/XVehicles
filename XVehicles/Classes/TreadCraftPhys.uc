@@ -392,7 +392,6 @@ simulated function UpdateDriverInput( float Delta )
 			DeAccRat = Delta*WDeAccelRate*3*FMax(Region.Zone.ZoneGroundFriction,TreadsTraction);
 			if( DeAccRat>DeAcc )
 				DeAccRat = DeAcc;
-			Ac = GetAccelDir(Turning,Rising,OldAccelD);
 			if (FMax(Region.Zone.ZoneGroundFriction,TreadsTraction) <= 4.0)
 			{	
 				if( DeAcc>0 )
@@ -402,7 +401,8 @@ simulated function UpdateDriverInput( float Delta )
 						DeAcc = 0;
 				}
 				else DeAcc-=WDeAccelRate*3*Delta/100;
-	
+
+				Ac = GetAccelDir(Turning,Rising,OldAccelD);
 				NVeloc = Normal(Velocity);
 				if( DeAcc>50 && (Ac Dot NVeloc)<0.4 )
 				{
@@ -418,6 +418,7 @@ simulated function UpdateDriverInput( float Delta )
 					Velocity = vect(0,0,0);
 				else
 				{
+					Ac = GetAccelDir(Turning,Rising,OldAccelD);
 					Velocity-=Normal(Velocity)*DeAccRat;
 					if (Velocity dot Ac > 0)						Velocity = VSize(Velocity)*Normal(Ac);					else						OldAccelD = -OldAccelD;
 				}
@@ -448,7 +449,6 @@ simulated function UpdateDriverInput( float Delta )
 		DeAccRat = Delta*WDeAccelRate*FMax(Region.Zone.ZoneGroundFriction,TreadsTraction);
 		if( DeAccRat>DeAcc )
 			DeAccRat = DeAcc;
-		Ac = GetAccelDir(Turning,Rising,OldAccelD);
 		if (FMax(Region.Zone.ZoneGroundFriction,TreadsTraction) <= 4.0)
 		{
 			if( DeAcc>0 )
@@ -459,6 +459,7 @@ simulated function UpdateDriverInput( float Delta )
 			}
 			else DeAcc-=WDeAccelRate*Delta/100;
 
+			Ac = GetAccelDir(Turning,Rising,OldAccelD);
 			NVeloc = Normal(Velocity);
 			if( DeAcc>50 && (Ac Dot NVeloc)<0.4 )
 			{
@@ -474,6 +475,7 @@ simulated function UpdateDriverInput( float Delta )
 				Velocity = vect(0,0,0);
 			else
 			{
+				Ac = GetAccelDir(Turning,Rising,OldAccelD);
 				Velocity-=Normal(Velocity)*DeAccRat;
 				if (Velocity dot Ac > 0)
 					Velocity = VSize(Velocity)*Normal(Ac);
