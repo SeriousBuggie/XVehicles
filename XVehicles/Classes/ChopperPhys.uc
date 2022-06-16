@@ -138,14 +138,10 @@ simulated function UpdateDriverInput( float Delta )
 		R.Roll/=2;
 		R.Pitch/=2;
 	}
-	if( !bDriving && !bOnGround )
+	if (!bDriving && !bOnGround)
 	{
-		bOnGround = CheckOnGround();
-		if( !bOnGround )
-		{
-			Velocity+=Region.Zone.ZoneGravity*Delta*VehicleGravityScale;
-			Return;
-		}
+		Velocity += Region.Zone.ZoneGravity*Delta*VehicleGravityScale;
+		return;
 	}
 	if( Level.NetMode!=NM_DedicatedServer && !bOnGround && bDriving )
 	{

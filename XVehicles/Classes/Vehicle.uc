@@ -109,6 +109,9 @@ var WeaponAttachment DriverGun;
 var Vehicle PendingBump;
 var bool bReadyToRun;
 var bool bFirstCheckOnGround;
+var vector LastCheckOnGroundLocation;
+var float LastCheckOnGroundTime;
+var bool bLastCheckOnGroundResult;
 
 // -1 to 1.
 var int Turning,Rising,Accel;
@@ -1808,6 +1811,10 @@ simulated function bool CheckOnGround()
 	local actor WAs, WBs, PossibleBase;
 	local vector WHL, WHN, WSt, WEnd, WExt;
 	local bool isNotAble, ret;
+	
+	if (Location == LastCheckOnGroundLocation && 
+		Level.TimeSeconds < LastCheckOnGroundTime + 0.2 && Mover(Base) == None)
+		return bLastCheckOnGroundResult;
 
 	Start = Location;
 	Start.Z-=(CollisionHeight-1);
@@ -1878,89 +1885,18 @@ simulated function bool CheckOnGround()
 				ret = ActualFloorNormal.Z >= 0.7;
 			}
 		}
-
-		CheckBase(PossibleBase, Ac);
-		return ret;
 	}
-
-	if (bSlopedPhys && GVT!=None)
+	else
 	{
-		if (Location != OldLocation || !bFirstCheckOnGround)
-		{
-			ePointsOffSet[0] = FrontWide;
-			ePointsOffSet[1] = ePointsOffSet[0];
-			ePointsOffSet[1].Y = -FrontWide.Y;
-			ePointsOffSet[2] = BackWide;
-			ePointsOffSet[3] = ePointsOffSet[2];
-			ePointsOffSet[3].Y = -BackWide.Y;
 
-			//************************************************************************
-			//Walls climbing bug fix
-			//************************************************************************
-			WSt = Location + GVT.PrePivot;
-			WExt.X = FMax(FrontWide.Y,BackWide.Y);
-			WExt.Y = WExt.X;
-			WExt.Z = CollisionHeight - MaxObstclHeight;
-			WEnd = WSt + vector(Rotation)*OldAccelD*(WExt.X + 2);
-			WAs = Trace(WHL,WHN,WEnd,WSt,False,WExt);
-
-			if (WAs == None)
-			{
-				if (WallHitDir == -Accel && WallHitDir!=0)
-				{
-					WEnd = WSt + vector(Rotation)*WallHitDir*(WExt.X + 2);
-					WBs = Trace(WHL,WHN,WEnd,WSt,False,WExt);
-					
-					if (WBs == None)
-					{
-						WallHitDir = 0;
-						WHN = HN;
-					}
-				}
-				else
-					WHN = HN;
-			}
-			else
-				WallHitDir = OldAccelD;
-			//************************************************************************
-
-			For (b=0; b<4; b++)
-			{
-				S = Location + (ePointsOffSet[b] >> Rotation);
-				E = S + (eVect(0,0,-Abs(ZRange)) >> Rotation);
-				Ac[b] = Trace(sHL[b],sHN[b],E,S,False);
-				if (Ac[b] != None && (sHN[b] dot WHN > 0.5) /*&& (ActualFloorNormal dot sHN[b] >= 0.3)*/)
-					AcCount++;
-			}
-		}
-
-		if (bArcMovement && AcCount > 2)
-		{
-			ArcInitDir[0] = FloorNormal;
-			ArcInitDir[1] = GVTNormal;
-		}
-
-		if (AcCount == 4)
-		{
-			MLoc = (sHL[0] + sHL[1] + sHL[2] + sHL[3]) / 4 - 
-				(vect(0.5,0,0)*(FrontWide.X + BackWide.X) >> Rotation);
-			CrossedVect[0] = Normal(sHL[0] - sHL[3]);
-			CrossedVect[1] = Normal(sHL[1] - sHL[2]);
-			ActualGVTNormal = Normal(CrossedVect[0] cross CrossedVect[1]);
-			if (ActualGVTNormal.Z < 0)
-				ActualGVTNormal = -ActualGVTNormal;
-			GVTLoc = MLoc + ActualGVTNormal*CollisionHeight;
-			GVT.PrePivot = GVTLoc - Location;
-		}
-		else if (Location != OldLocation || !bFirstCheckOnGround)
-			ActualGVTNormal = HN;
+		if (bSlopedPhys && GVT!=None)		{			if (Location != OldLocation || !bFirstCheckOnGround)			{				ePointsOffSet[0] = FrontWide;				ePointsOffSet[1] = ePointsOffSet[0];				ePointsOffSet[1].Y = -FrontWide.Y;				ePointsOffSet[2] = BackWide;				ePointsOffSet[3] = ePointsOffSet[2];				ePointsOffSet[3].Y = -BackWide.Y;					//************************************************************************				//Walls climbing bug fix				//************************************************************************				WSt = Location + GVT.PrePivot;				WExt.X = FMax(FrontWide.Y,BackWide.Y);				WExt.Y = WExt.X;				WExt.Z = CollisionHeight - MaxObstclHeight;				WEnd = WSt + vector(Rotation)*OldAccelD*(WExt.X + 2);				WAs = Trace(WHL,WHN,WEnd,WSt,False,WExt);					if (WAs == None)				{					if (WallHitDir == -Accel && WallHitDir!=0)					{						WEnd = WSt + vector(Rotation)*WallHitDir*(WExt.X + 2);						WBs = Trace(WHL,WHN,WEnd,WSt,False,WExt);												if (WBs == None)						{							WallHitDir = 0;							WHN = HN;						}					}					else						WHN = HN;				}				else					WallHitDir = OldAccelD;				//************************************************************************					For (b=0; b<4; b++)				{					S = Location + (ePointsOffSet[b] >> Rotation);					E = S + (eVect(0,0,-Abs(ZRange)) >> Rotation);					Ac[b] = Trace(sHL[b],sHN[b],E,S,False);					if (Ac[b] != None && (sHN[b] dot WHN > 0.5) /*&& (ActualFloorNormal dot sHN[b] >= 0.3)*/)						AcCount++;				}			}				if (bArcMovement && AcCount > 2)			{				ArcInitDir[0] = FloorNormal;				ArcInitDir[1] = GVTNormal;			}				if (AcCount == 4)			{				MLoc = (sHL[0] + sHL[1] + sHL[2] + sHL[3]) / 4 - 					(vect(0.5,0,0)*(FrontWide.X + BackWide.X) >> Rotation);				CrossedVect[0] = Normal(sHL[0] - sHL[3]);				CrossedVect[1] = Normal(sHL[1] - sHL[2]);				ActualGVTNormal = Normal(CrossedVect[0] cross CrossedVect[1]);				if (ActualGVTNormal.Z < 0)					ActualGVTNormal = -ActualGVTNormal;				GVTLoc = MLoc + ActualGVTNormal*CollisionHeight;				GVT.PrePivot = GVTLoc - Location;			}			else if (Location != OldLocation || !bFirstCheckOnGround)				ActualGVTNormal = HN;		}			if ((Location != OldLocation || !bSlopedPhys || !bFirstCheckOnGround) /*&& (HN dot ActualFloorNormal) <= 0.5*/)			ActualFloorNormal = HN;
+		ret = ActualFloorNormal.Z >= 0.7;
 	}
-
-	if ((Location != OldLocation || !bSlopedPhys || !bFirstCheckOnGround) /*&& (HN dot ActualFloorNormal) <= 0.5*/)
-		ActualFloorNormal = HN;
-		
 	CheckBase(PossibleBase, Ac);
-	return ActualFloorNormal.Z >= 0.7;
+	LastCheckOnGroundLocation = Location;
+	LastCheckOnGroundTime = Level.TimeSeconds;
+	bLastCheckOnGroundResult = ret;
+	return ret;
 }
 
 simulated function ResetPhysics(Pawn Other)
@@ -4326,6 +4262,9 @@ defaultproperties
       PendingBump=None
       bReadyToRun=False
       bFirstCheckOnGround=False
+      LastCheckOnGroundLocation=(X=0.000000,Y=0.000000,Z=0.000000)
+      LastCheckOnGroundTime=0.000000
+      bLastCheckOnGroundResult=False
       Turning=0
       Rising=0
       Accel=0
