@@ -102,6 +102,7 @@ struct xShakeWeap
 };
 
 var(Shake) xShakeWeap FiringShaking[4];
+var bool bSkipFiringShaking;
 
 replication
 {
@@ -436,6 +437,7 @@ local byte i;
 				ClientShakes(i);
 		}
 	}
+	bSkipFiringShaking = false;
 }
 
 simulated function DelayFX(byte Mode);	//Called at the same time as ActivateDelay (to easilly spawn further effects in the delay time)
@@ -514,6 +516,7 @@ function FireTurret( byte Mode, optional bool bForceFire )
 				ClientShakes(i);
 		}
 	}
+	bSkipFiringShaking = false;
 
 	GetTurretCoords(P,R,PR);
 
@@ -696,26 +699,19 @@ simulated function Tick( float Delta )
 	local vector Po;
 	local rotator Ro,RAdj,PRo;
 	local int Diff,OldY,OldP;
-	local byte j;
+	local byte i, j;
 	local VehicleAttachment vat;
-	local byte i;
+	local bool bNeedFiringShaking;
 
 	if( OwnerVehicle==None )
 		Return;
 
-	For (i = 0; i < 4; i++)
+	if (!bSkipFiringShaking)
 	{
-		if (FiringShaking[i].bShakeEnabled && FiringShaking[i].bShakeByStep && FiringShaking[i].StepAmount > 0)
-		{
-			FiringShaking[i].StepShkCount += Delta;
-		
-			if (FiringShaking[i].StepShkCount >= FiringShaking[i].StepInterval)
-			{
-				FiringShaking[i].StepAmount--;
-				FiringShaking[i].StepShkCount = 0;
-				ClientShakes(i);
-			}
-		}
+		For (i = 0; i < 4; i++)		{			if (FiringShaking[i].bShakeEnabled && FiringShaking[i].bShakeByStep && FiringShaking[i].StepAmount > 0)			{				FiringShaking[i].StepShkCount += Delta;							if (FiringShaking[i].StepShkCount >= FiringShaking[i].StepInterval)				{					FiringShaking[i].StepAmount--;					FiringShaking[i].StepShkCount = 0;					ClientShakes(i);				}
+				if (!bNeedFiringShaking && FiringShaking[i].StepAmount > 0)
+					bNeedFiringShaking = true;			}		}
+		bSkipFiringShaking = !bNeedFiringShaking;
 	}
 
 	if (bInFiringProcess > 0)
@@ -723,23 +719,23 @@ simulated function Tick( float Delta )
 		firec -= Delta;
 
 		if (bUseEnergyFX)
-			EnergyGather(Delta,bInFiringProcess-1);
+			EnergyGather(Delta, bInFiringProcess - 1);
 
 		if (firec <= 0)
 		{
-			j = bInFiringProcess-1;
+			j = bInFiringProcess - 1;
 			bInFiringProcess = 0;
 			FireTurret(j,True);
 			ResetEnergy();
 		}
 			
 	}
-	else if (!bFireRestrict && WeaponController != None && WeaponController.bFire + WeaponController.bAltFire > 0)
+	else if (WeaponController != None && !bFireRestrict && WeaponController.bFire + WeaponController.bAltFire > 0)
 		Timer();
 
-	if (bRotWithOtherWeap)
+	if (bRotWithOtherWeap && UpdateAttachInfoC < 1.0)
 	{
-		if (UpdateAttachInfoC >= 0.2 && UpdateAttachInfoC < 1.0)
+		if (UpdateAttachInfoC >= 0.2)
 		{
 			if (Role == ROLE_Authority && (WAtt == None || WAtt.PassengerNum != RotWithOtherWeapPassN))
 				for ( vat=OwnerVehicle.AttachmentList; vat!=None; vat=vat.NextAttachment )
@@ -757,35 +753,36 @@ simulated function Tick( float Delta )
 	if (!bUpdatedPassOffsets)
 	{
 		bUpdatedPassOffsets = True;
-		For (j=0; j<8; j++)
+		For (j = 0; j < ArrayCount(PassWPosOffset); j++)
 			PassWPosOffset[j] = OwnerVehicle.GetPassengerWOffset(j);
 	}
 
-	if( !bFireInit )
+	if (!bFireInit)
 	{
 		bFireInit = True;
 		FireFXCounter = 0;
 	}
-	//if( OwnerVehicle.AttachmentList==Self )
-	if(bMasterPart && OwnerVehicle != None)
-		OwnerVehicle.AttachmentsTick(Delta);	
-	if( Level.NetMode==NM_Client /* || Level.NetMode==NM_DedicatedServer */ )
+	//if (OwnerVehicle.AttachmentList==Self)
+	if (bMasterPart && OwnerVehicle != None)
+		OwnerVehicle.AttachmentsTick(Delta);
+	if (Level.NetMode==NM_Client /* || Level.NetMode==NM_DedicatedServer */)
 		OwnerVehicle.UpdateAttachment(self, Delta);
-	if( bDriverWeapon && WeaponController!=OwnerVehicle.Driver )
+	if (bDriverWeapon && WeaponController != OwnerVehicle.Driver)
 		WeaponController = OwnerVehicle.Driver;
-	if( Level.NetMode!=NM_DedicatedServer && !bInvisGun )
+	if (Level.NetMode!=NM_DedicatedServer && !bInvisGun)
 	{
-		if( OwnerVehicle.OverlayMat!=None )
+		if (OwnerVehicle.OverlayMat != None)
 		{
-			if( OverlayMActor==None )
-				OverlayMActor = Spawn(Class'MatOverlayFX',Self);
+			if (OverlayMActor == None)
+				OverlayMActor = Spawn(Class'MatOverlayFX', Self);
 			OverlayMActor.Texture = OwnerVehicle.OverlayMat;
-			if( OwnerVehicle.OverlayTime>=1 )
+			if (OwnerVehicle.OverlayTime >= 1)
 				OverlayMActor.ScaleGlow = 1;
-			else OverlayMActor.ScaleGlow = (OwnerVehicle.OverlayTime/1);
+			else
+				OverlayMActor.ScaleGlow = OwnerVehicle.OverlayTime/1;
 			OverlayMActor.AmbientGlow = OverlayMActor.ScaleGlow * 255;
 		}
-		else if( OverlayMActor!=None )
+		else if (OverlayMActor != None)
 		{
 			OverlayMActor.Destroy();
 			OverlayMActor = None;
@@ -796,17 +793,18 @@ simulated function Tick( float Delta )
 		bTurretYawInit = true;
 		SetTurretYaw();
 	}
-	GetTurretCoords(Po,Ro,PRo);
-	if( PitchPart!=None )
+	GetTurretCoords(Po, Ro, PRo);
+	if (PitchPart != None)
 	{
 		//PitchPart.SetLocation(Po+(PitchActorOffset >> Ro));
 		PitchPart.SetRotation(PRo);
 	}
 	//Move(Po-Location);
-	SetRotation(Ro);
-	/*if( Level.NetMode==NM_Client )
+	if (Rotation != Ro)
+		SetRotation(Ro);
+	/*if (Level.NetMode == NM_Client)
 	{
-		if( FireFXCounter>0 )
+		if (FireFXCounter > 0)
 		{
 			FireFXCounter = 0;
 			MakeFireFX();
@@ -815,21 +813,23 @@ simulated function Tick( float Delta )
 	
 	SetTurretYaw();
 
-	if( WeaponController==None )
+	if (WeaponController == None)
 	{
 		bRotatingBarrel = False;
 		AmbientSound = Default.AmbientSound;
 		Return;
 	}
-	if( Level.NetMode!=NM_Client || (WeaponController!=None && IsNetOwner(WeaponController)) )
+	if (Level.NetMode != NM_Client || (WeaponController != None && IsNetOwner(WeaponController)))
 	{
-		if( PlayerPawn(WeaponController)==None )
+		if (PlayerPawn(WeaponController) == None)
 			Ro = GetBotInput(Delta);
-		else Ro = GetDriverInput(Delta);
+		else
+			Ro = GetDriverInput(Delta);
 	}
-	else if( RepAimPos==vect(0,0,0) )
+	else if (RepAimPos == vect(0,0,0))
 		Ro = OwnerVehicle.Rotation;
-	else Ro = rotator(RepAimPos-Po);
+	else
+		Ro = rotator(RepAimPos - Po);
 	
 	Ro = Normalize(Ro);
 	//Ro.Roll = 0;
@@ -843,32 +843,34 @@ simulated function Tick( float Delta )
 	if( RAdj!=Ro )
 		Ro = RAdj;
 
-	if (!bLimitPitchByCarTop || (bLimitPitchByCarTop && (vector(Rotation) dot vector(OwnerVehicle.Rotation))<CarTopRange))
+	if (!bLimitPitchByCarTop || (bLimitPitchByCarTop && 
+		(vector(Rotation) dot vector(OwnerVehicle.Rotation)) < CarTopRange))
 	{
-		if( Ro.Pitch<PitchRange.Min )
+		if (Ro.Pitch < PitchRange.Min)
 			Ro.Pitch = PitchRange.Min;
-		else if( Ro.Pitch>PitchRange.Max )
+		else if (Ro.Pitch > PitchRange.Max)
 			Ro.Pitch = PitchRange.Max;
 	}
 	else
 	{
-		if( Ro.Pitch<CarTopAllowedPitch.Min )
+		if (Ro.Pitch < CarTopAllowedPitch.Min)
 			Ro.Pitch = CarTopAllowedPitch.Min;
-		else if( Ro.Pitch>CarTopAllowedPitch.Max )
+		else if (Ro.Pitch > CarTopAllowedPitch.Max)
 			Ro.Pitch = CarTopAllowedPitch.Max;
 	}
 
 	OldY = TurretYaw;
 	OldP = TurretPitch;
-	TurretYaw = CalcTurnSpeed(RotatingSpeed*Delta,TurretYaw,Ro.Yaw);
-	TurretPitch = CalcTurnSpeed(RotatingSpeed*Delta,TurretPitch,Ro.Pitch);
+	TurretYaw = CalcTurnSpeed(RotatingSpeed*Delta, TurretYaw, Ro.Yaw);
+	TurretPitch = CalcTurnSpeed(RotatingSpeed*Delta, TurretPitch, Ro.Pitch);
 	
-	bRotatingBarrel = (OldY!=TurretYaw || OldP!=TurretPitch);
-	if( BarrelTurnSound==None /*|| Level.NetMode==NM_ListenServer || Level.NetMode==NM_DedicatedServer */)
+	bRotatingBarrel = (OldY != TurretYaw || OldP != TurretPitch);
+	if (BarrelTurnSound == None /*|| Level.NetMode==NM_ListenServer || Level.NetMode==NM_DedicatedServer */)
 		Return;
-	if( !bRotatingBarrel )
+	if (!bRotatingBarrel)
 		AmbientSound = Default.AmbientSound;
-	else AmbientSound = BarrelTurnSound;
+	else
+		AmbientSound = BarrelTurnSound;
 }
 simulated function GetTurretCoords( optional out vector Pos, optional out rotator TurRot, optional out rotator PitchPartRot )
 {
@@ -1240,6 +1242,7 @@ defaultproperties
       FiringShaking(1)=(bShakeEnabled=False,bShakeByStep=False,ShakeStart=SHK_OnAltFire,ShakeRadius=0.000000,shaketime=0.000000,ShakeVertMag=0.000000,ShakeRollMag=0.000000,StepInterval=0.000000,StepAmount=0,StepShkCount=0.000000)
       FiringShaking(2)=(bShakeEnabled=False,bShakeByStep=False,ShakeStart=SHK_DuringFire,ShakeRadius=0.000000,shaketime=0.000000,ShakeVertMag=0.000000,ShakeRollMag=0.000000,StepInterval=0.000000,StepAmount=0,StepShkCount=0.000000)
       FiringShaking(3)=(bShakeEnabled=False,bShakeByStep=False,ShakeStart=SHK_DuringAltFire,ShakeRadius=0.000000,shaketime=0.000000,ShakeVertMag=0.000000,ShakeRollMag=0.000000,StepInterval=0.000000,StepAmount=0,StepShkCount=0.000000)
+      bSkipFiringShaking=False
       RemoteRole=ROLE_SimulatedProxy
       bCarriedItem=True
       NetPriority=3.000000
