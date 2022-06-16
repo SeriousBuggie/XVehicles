@@ -1701,10 +1701,10 @@ local Actor AttachBase;
 local WeaponAttachment WA;
 
 	AttachBase = vat.Base;
-	if (AttachBase == None)
-		AttachBase = self;
 	if (vat.bRotWithOtherWeap && WeaponAttachment(vat.Base) == None && vat.WAtt != None)
 		AttachBase = vat.WAtt;
+	if (AttachBase == None)
+		AttachBase = self;
 //	if (Vat.base != AttachBase)
 //		Log(self @ vat @ Vat.base @ AttachBase @ vat.bRotWithOtherWeap);
 
@@ -1713,31 +1713,31 @@ local WeaponAttachment WA;
 	else
 		WPosA = Location + (vat.TurretOffset >> Rotation);
 	//log(self @ vat @ WPosA @ vat.Location @ "|" @ GVT.PrePivot @ Location @ vat.TurretOffset @ Rotation @ "|" @ (vat.TurretOffset >> Rotation));
-	if (!vat.Move(WPosA - vat.Location))
+	if (WPosA != vat.Location && !vat.Move(WPosA - vat.Location))
 		vat.SetLocation(WPosA);
 	if (Vat.base != AttachBase)
 		vat.setBase(AttachBase);
 
 	if (vat.PitchPart != None)
 	{
-		if( vat.bHasPitchPart )
+		if (vat.bHasPitchPart)
 		{
-			if (bSlopedPhys && GVT!=None)
-				WRotA = vat.TransformForGroundRot(vat.TurretYaw,GVTNormal);
+			if (bSlopedPhys && GVT != None)
+				WRotA = vat.TransformForGroundRot(vat.TurretYaw, GVTNormal);
 			else
-				WRotA = vat.TransformForGroundRot(vat.TurretYaw,FloorNormal);
+				WRotA = vat.TransformForGroundRot(vat.TurretYaw, FloorNormal);
 		}
 		else
 		{
-			if (bSlopedPhys && GVT!=None)
-				WRotA = vat.TransformForGroundRot(vat.TurretYaw,GVTNormal,vat.TurretPitch);
+			if (bSlopedPhys && GVT != None)
+				WRotA = vat.TransformForGroundRot(vat.TurretYaw, GVTNormal, vat.TurretPitch);
 			else
-				WRotA = vat.TransformForGroundRot(vat.TurretYaw,FloorNormal,vat.TurretPitch);
+				WRotA = vat.TransformForGroundRot(vat.TurretYaw, FloorNormal, vat.TurretPitch);
 		}
 		WPosA += (vat.PitchActorOffset >> WRotA);
-		if (!vat.PitchPart.Move(WPosA - vat.PitchPart.Location))
+		if (WPosA != vat.PitchPart.Location && !vat.PitchPart.Move(WPosA - vat.PitchPart.Location))
 			vat.PitchPart.SetLocation(WPosA);
-		if (Vat.PitchPart.base != AttachBase)
+		if (vat.PitchPart.base != AttachBase)
 			vat.PitchPart.setBase(AttachBase);
 	}
 }
