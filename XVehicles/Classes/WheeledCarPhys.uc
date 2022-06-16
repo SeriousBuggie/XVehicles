@@ -209,7 +209,7 @@ simulated function UpdateDriverInput( float Delta )
 			DesTurn *= WheelYaw*Delta/400*GetMovementDir()*
 				FMin(FMax(Region.Zone.ZoneGroundFriction, WheelsTraction), 1.0);
 	}
-	if (DesTurn > 0)
+	if (DesTurn != 0)
 	{
 		VehicleYaw += DesTurn;
 		if (!bCameraOnBehindView && Driver!=None)
