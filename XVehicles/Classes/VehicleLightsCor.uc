@@ -39,6 +39,7 @@ defaultproperties
 {
       bReady=False
       POffSet=(X=0.000000,Y=0.000000,Z=0.000000)
+      bHidden=True
       bNetTemporary=False
       bTrailerSameRotation=True
       bTrailerPrePivot=True

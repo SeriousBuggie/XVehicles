@@ -114,15 +114,6 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 	Return SetUpNewMVelocity(vector(R)*InAccel,ActualFloorNormal,0);
 }
 
-simulated function vector RotateByTraction( float TWP, rotator OldWheelRot, rotator NewWheelRot)
-{
-local vector OldPosOffset, NewPosOffset;
-
-	OldPosOffset = eVect(TWP,0,0) >> OldWheelRot;
-	NewPosOffset = eVect(TWP,0,0) >> NewWheelRot;
-	return (NewPosOffset - OldPosOffset);
-}
-
 simulated function FellToGround()
 {
 	if (FallingLenghtZ > 0)
@@ -139,7 +130,7 @@ simulated function UpdateDriverInput( float Delta )
 {
 	local vector Ac,NVeloc;
 	local float DesTurn,DeAcc,DeAccRat;
-	local rotator R;
+	local rotator R, RA, RB;
 	local byte i;
 	local rotator OldWheeledRot;
 
@@ -167,8 +158,14 @@ simulated function UpdateDriverInput( float Delta )
 
 	if( Rotation!=R )
 		SetRotation(R);
-
-	MoveSmooth(RotateByTraction( TractionWheelsPosition, OldWheeledRot.Yaw*rot(0,1,0), Rotation.Yaw*rot(0,1,0)));
+		
+	if (OldWheeledRot.Yaw != Rotation.Yaw)
+	{
+		Ac.X = TractionWheelsPosition;
+		RA.Yaw = Rotation.Yaw;
+		RB.Yaw = OldWheeledRot.Yaw;
+		MoveSmooth((Ac >> RA) - (Ac >> RB));
+	}
 
 	DesTurn = WheelMaxYaw*Turning*-1;
 	if( WheelYaw!=DesTurn )
@@ -245,29 +242,12 @@ simulated function UpdateDriverInput( float Delta )
 				if (DeAccRat >= VSize(Velocity))
 					Velocity = vect(0,0,0);
 				else
-					Velocity-=Normal(Velocity)*DeAccRat;
-				if (Velocity dot Ac > 0)
-					Velocity = VSize(Velocity)*Normal(Ac);
-				else
-					OldAccelD = -OldAccelD;
-			}
-
-			if (FMax(Region.Zone.ZoneGroundFriction,WheelsTraction) > 4.0)
-			{
-				if (bUseSignalLights)
 				{
-					For (i=0; i<ArrayCount(StopLights); i++)
-					{
-						if (StopLights[i].VLC != None)
-							StopLights[i].VLC.bHidden = False;
-					}
-	
-					For (i=0; i<ArrayCount(BackwardsLights); i++)
-					{
-						if (BackwardsLights[i].VLC != None)
-							BackwardsLights[i].VLC.bHidden = True;
-					}
+					Velocity-=Normal(Velocity)*DeAccRat;
+					if (Velocity dot Ac > 0)						Velocity = VSize(Velocity)*Normal(Ac);					else						OldAccelD = -OldAccelD;
 				}
+
+				SetSignalLights(SL_Stop);
 			}
 			Return;
 		}
@@ -275,34 +255,10 @@ simulated function UpdateDriverInput( float Delta )
 		{
 			if (FMax(Region.Zone.ZoneGroundFriction,WheelsTraction) > 4.0)
 			{
-				if (bUseSignalLights && Accel==-1)
-				{
-					For (i=0; i<ArrayCount(StopLights); i++)
-					{
-						if (StopLights[i].VLC != None)
-							StopLights[i].VLC.bHidden = True;
-					}
-	
-					For (i=0; i<ArrayCount(BackwardsLights); i++)
-					{
-						if (BackwardsLights[i].VLC != None)
-							BackwardsLights[i].VLC.bHidden = False;
-					}
-				}
-				else if (bUseSignalLights)
-				{
-					For (i=0; i<ArrayCount(StopLights); i++)
-					{
-						if (StopLights[i].VLC != None)
-							StopLights[i].VLC.bHidden = True;
-					}
-	
-					For (i=0; i<ArrayCount(BackwardsLights); i++)
-					{
-						if (BackwardsLights[i].VLC != None)
-							BackwardsLights[i].VLC.bHidden = True;
-					}
-				}
+				if (Accel == -1)
+					SetSignalLights(SL_Backwards);
+				else
+					SetSignalLights(SL_None);
 			}
 			OldAccelD = Accel;
 		}
@@ -311,24 +267,6 @@ simulated function UpdateDriverInput( float Delta )
 	//If no braking, and no accel, deaccel smoothly
 	if( Accel==0 )
 	{
-		if (FMax(Region.Zone.ZoneGroundFriction,WheelsTraction) > 4.0)
-		{
-			if (bUseSignalLights)
-			{
-				For (i=0; i<ArrayCount(StopLights); i++)
-				{
-					if (StopLights[i].VLC != None)
-						StopLights[i].VLC.bHidden = True;
-				}
-	
-				For (i=0; i<ArrayCount(BackwardsLights); i++)
-				{
-					if (BackwardsLights[i].VLC != None)
-						BackwardsLights[i].VLC.bHidden = True;
-				}
-			}
-		}
-
 		DeAcc = VSize(Velocity);
 		DeAccRat = Delta*WDeAccelRate*FMax(Region.Zone.ZoneGroundFriction,WheelsTraction);
 		if( DeAccRat>DeAcc )
@@ -358,11 +296,12 @@ simulated function UpdateDriverInput( float Delta )
 			if (DeAccRat >= VSize(Velocity))
 				Velocity = vect(0,0,0);
 			else
+			{
 				Velocity-=Normal(Velocity)*DeAccRat;
-			if (Velocity dot Ac > 0)
-				Velocity = VSize(Velocity)*Normal(Ac);
-			else if (VSize(Velocity) > 0)
-				OldAccelD = -OldAccelD;
+				if (Velocity dot Ac > 0)					Velocity = VSize(Velocity)*Normal(Ac);				else if (VSize(Velocity) > 0)					OldAccelD = -OldAccelD;
+			}
+			
+			SetSignalLights(SL_None);
 		}
 		Return;
 	}
@@ -492,54 +431,16 @@ local byte i;
 				DeAccRat = DeAcc;
 			VelFriction-=Normal(VelFriction)*DeAccRat;
 
-			if (bUseSignalLights)
-			{
-				For (i=0; i<ArrayCount(StopLights); i++)
-				{
-					if (StopLights[i].VLC != None)
-						StopLights[i].VLC.bHidden = False;
-				}
-
-				For (i=0; i<ArrayCount(BackwardsLights); i++)
-				{
-					if (BackwardsLights[i].VLC != None)
-						BackwardsLights[i].VLC.bHidden = True;
-				}
-			}
+			SetSignalLights(SL_Stop);
 
 			Return VelFriction;
 		}
 		else
 		{
-			if (bUseSignalLights && Accel==-1)
-			{
-				For (i=0; i<ArrayCount(StopLights); i++)
-				{
-					if (StopLights[i].VLC != None)
-						StopLights[i].VLC.bHidden = True;
-				}
-
-				For (i=0; i<ArrayCount(BackwardsLights); i++)
-				{
-					if (BackwardsLights[i].VLC != None)
-						BackwardsLights[i].VLC.bHidden = False;
-				}
-			}
-			else if (bUseSignalLights)
-			{
-				For (i=0; i<ArrayCount(StopLights); i++)
-				{
-					if (StopLights[i].VLC != None)
-						StopLights[i].VLC.bHidden = True;
-				}
-
-				For (i=0; i<ArrayCount(BackwardsLights); i++)
-				{
-					if (BackwardsLights[i].VLC != None)
-						BackwardsLights[i].VLC.bHidden = True;
-				}
-			}
-
+			if (Accel == -1)
+				SetSignalLights(SL_Backwards);
+			else
+				SetSignalLights(SL_None);
 			VirtOldAccel = Accel;
 		}
 	}
@@ -551,20 +452,7 @@ local byte i;
 			DeAccRat = DeAcc;
 		VelFriction-=Normal(VelFriction)*DeAccRat;
 
-		if (bUseSignalLights)
-		{
-			For (i=0; i<ArrayCount(StopLights); i++)
-			{
-				if (StopLights[i].VLC != None)
-					StopLights[i].VLC.bHidden = True;
-			}
-
-			For (i=0; i<ArrayCount(BackwardsLights); i++)
-			{
-				if (BackwardsLights[i].VLC != None)
-					BackwardsLights[i].VLC.bHidden = True;
-			}
-		}
+		SetSignalLights(SL_None);
 
 		Return VelFriction;
 	}

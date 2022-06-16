@@ -214,6 +214,13 @@ struct VLights
 };
 var(VehicleLights) VLights StopLights[8];
 var(VehicleLights) VLights BackwardsLights[8];
+enum ESignalLights
+{
+	SL_None,
+	SL_Stop,
+	SL_Backwards,
+};
+var ESignalLights SignalLights;
 var VehicleLightsOv VLov;
 var bool bHeadLightInUse;
 struct VHeadL
@@ -370,6 +377,19 @@ local float rrad;
 
 function ActivateSpecial( byte SpecialN);	//SpecialN: 7 = Key 9
 
+function SetSignalLights(ESignalLights InSignalLights)
+{
+	local int i;
+	if (bUseSignalLights && SignalLights != InSignalLights)
+	{
+		if (SignalLights == SL_Stop || InSignalLights == SL_Stop)
+			for (i = 0; i < ArrayCount(StopLights); i++)				if (StopLights[i].VLC != None)					StopLights[i].VLC.bHidden = SignalLights == SL_Stop;
+		if (SignalLights == SL_Backwards || InSignalLights == SL_Backwards)			for (i = 0; i < ArrayCount(BackwardsLights); i++)				if (BackwardsLights[i].VLC != None)					BackwardsLights[i].VLC.bHidden = SignalLights == SL_Backwards;
+				
+		SignalLights = InSignalLights;
+	}
+}
+
 function SwitchVehicleLights()
 {
 local byte i;
@@ -407,6 +427,7 @@ local byte i;
 			HeadLights[i].VLC.Texture = HeadLights[i].VLightTex;
 			HeadLights[i].VLC.SpriteProjForward = HeadLights[i].VSpriteProj;
 			HeadLights[i].VLC.DrawScale = HeadLights[i].VLightScale;
+			HeadLights[i].VLC.bHidden = false;
 
 			if (HeadLights[i].VHeadLight.bHaveSpotLight)
 			{
@@ -4425,6 +4446,7 @@ defaultproperties
       BackwardsLights(5)=(VLightOffset=(X=0.000000,Y=0.000000,Z=0.000000),VLightTex=None,VSpriteProj=0.000000,VLightScale=0.000000,VLC=None)
       BackwardsLights(6)=(VLightOffset=(X=0.000000,Y=0.000000,Z=0.000000),VLightTex=None,VSpriteProj=0.000000,VLightScale=0.000000,VLC=None)
       BackwardsLights(7)=(VLightOffset=(X=0.000000,Y=0.000000,Z=0.000000),VLightTex=None,VSpriteProj=0.000000,VLightScale=0.000000,VLC=None)
+      SignalLights=SL_None
       VLov=None
       bHeadLightInUse=False
       HeadLights(0)=(VLightOffset=(X=0.000000,Y=0.000000,Z=0.000000),VLightTex=None,VSpriteProj=0.000000,VLightScale=0.000000,VLC=None,VHeadLight=(bHaveSpotLight=False,HeadLightIntensity=0,HLightHue=0,HLightSat=0,HeadCone=0,HeadDistance=0,HSpot=None))

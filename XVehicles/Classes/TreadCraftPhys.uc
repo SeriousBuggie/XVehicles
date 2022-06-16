@@ -417,29 +417,12 @@ simulated function UpdateDriverInput( float Delta )
 				if (DeAccRat >= VSize(Velocity))
 					Velocity = vect(0,0,0);
 				else
-					Velocity-=Normal(Velocity)*DeAccRat;
-				if (Velocity dot Ac > 0)
-					Velocity = VSize(Velocity)*Normal(Ac);
-				else
-					OldAccelD = -OldAccelD;
-			}
-
-			if (FMax(Region.Zone.ZoneGroundFriction,TreadsTraction) > 4.0)
-			{
-				if (bUseSignalLights)
 				{
-					For (i=0; i<ArrayCount(StopLights); i++)
-					{
-						if (StopLights[i].VLC != None)
-							StopLights[i].VLC.bHidden = False;
-					}
-	
-					For (i=0; i<ArrayCount(BackwardsLights); i++)
-					{
-						if (BackwardsLights[i].VLC != None)
-							BackwardsLights[i].VLC.bHidden = True;
-					}
+					Velocity-=Normal(Velocity)*DeAccRat;
+					if (Velocity dot Ac > 0)						Velocity = VSize(Velocity)*Normal(Ac);					else						OldAccelD = -OldAccelD;
 				}
+
+				SetSignalLights(SL_Stop);
 			}
 
 			Return;
@@ -448,34 +431,10 @@ simulated function UpdateDriverInput( float Delta )
 		{
 			if (FMax(Region.Zone.ZoneGroundFriction,TreadsTraction) > 4.0)
 			{
-				if (bUseSignalLights && Accel==-1)
-				{
-					For (i=0; i<ArrayCount(StopLights); i++)
-					{
-						if (StopLights[i].VLC != None)
-							StopLights[i].VLC.bHidden = True;
-					}
-	
-					For (i=0; i<ArrayCount(BackwardsLights); i++)
-					{
-						if (BackwardsLights[i].VLC != None)
-							BackwardsLights[i].VLC.bHidden = False;
-					}
-				}
-				else if (bUseSignalLights)
-				{
-					For (i=0; i<ArrayCount(StopLights); i++)
-					{
-						if (StopLights[i].VLC != None)
-							StopLights[i].VLC.bHidden = True;
-					}
-	
-					For (i=0; i<ArrayCount(BackwardsLights); i++)
-					{
-						if (BackwardsLights[i].VLC != None)
-							BackwardsLights[i].VLC.bHidden = True;
-					}
-				}
+				if (Accel == -1)
+					SetSignalLights(SL_Backwards);
+				else
+					SetSignalLights(SL_None);
 			}
 
 			OldAccelD = Accel;
@@ -514,29 +473,15 @@ simulated function UpdateDriverInput( float Delta )
 			if (DeAccRat >= VSize(Velocity))
 				Velocity = vect(0,0,0);
 			else
-				Velocity-=Normal(Velocity)*DeAccRat;
-			if (Velocity dot Ac > 0)
-				Velocity = VSize(Velocity)*Normal(Ac);
-			else if (VSize(Velocity) > 0)
-				OldAccelD = -OldAccelD;
-		}
-
-		if (FMax(Region.Zone.ZoneGroundFriction,TreadsTraction) > 4.0)
-		{
-			if (bUseSignalLights)
 			{
-				For (i=0; i<ArrayCount(StopLights); i++)
-				{
-					if (StopLights[i].VLC != None)
-						StopLights[i].VLC.bHidden = True;
-				}
-	
-				For (i=0; i<ArrayCount(BackwardsLights); i++)
-				{
-					if (BackwardsLights[i].VLC != None)
-						BackwardsLights[i].VLC.bHidden = True;
-				}
+				Velocity-=Normal(Velocity)*DeAccRat;
+				if (Velocity dot Ac > 0)
+					Velocity = VSize(Velocity)*Normal(Ac);
+				else if (VSize(Velocity) > 0)
+					OldAccelD = -OldAccelD;
 			}
+			
+			SetSignalLights(SL_None);
 		}
 		Return;
 	}
@@ -670,53 +615,16 @@ function vector GetVirtualSpeedOnIce( float Delta )
 
 			VelFriction-=Normal(VelFriction)*DeAccRat;
 
-			if (bUseSignalLights)
-			{
-				For (i=0; i<ArrayCount(StopLights); i++)
-				{
-					if (StopLights[i].VLC != None)
-						StopLights[i].VLC.bHidden = False;
-				}
-
-				For (i=0; i<ArrayCount(BackwardsLights); i++)
-				{
-					if (BackwardsLights[i].VLC != None)
-						BackwardsLights[i].VLC.bHidden = True;
-				}
-			}
+			SetSignalLights(SL_Stop);
 	
 			return VelFriction;
 		}
 		else
 		{
-			if (bUseSignalLights && Accel==-1)
-			{
-				For (i=0; i<ArrayCount(StopLights); i++)
-				{
-					if (StopLights[i].VLC != None)
-						StopLights[i].VLC.bHidden = True;
-				}
-
-				For (i=0; i<ArrayCount(BackwardsLights); i++)
-				{
-					if (BackwardsLights[i].VLC != None)
-						BackwardsLights[i].VLC.bHidden = False;
-				}
-			}
-			else if (bUseSignalLights)
-			{
-				For (i=0; i<ArrayCount(StopLights); i++)
-				{
-					if (StopLights[i].VLC != None)
-						StopLights[i].VLC.bHidden = True;
-				}
-
-				For (i=0; i<ArrayCount(BackwardsLights); i++)
-				{
-					if (BackwardsLights[i].VLC != None)
-						BackwardsLights[i].VLC.bHidden = True;
-				}
-			}
+			if (Accel == -1)
+				SetSignalLights(SL_Backwards);
+			else
+				SetSignalLights(SL_None);
 
 			VirtOldAccel = Accel;
 		}
@@ -729,21 +637,7 @@ function vector GetVirtualSpeedOnIce( float Delta )
 			DeAccRat = DeAcc;
 		VelFriction-=Normal(VelFriction)*DeAccRat;
 
-		
-		if (bUseSignalLights)
-		{
-			For (i=0; i<ArrayCount(StopLights); i++)
-			{
-				if (StopLights[i].VLC != None)
-					StopLights[i].VLC.bHidden = True;
-			}
-
-			For (i=0; i<ArrayCount(BackwardsLights); i++)
-			{
-				if (BackwardsLights[i].VLC != None)
-					BackwardsLights[i].VLC.bHidden = True;
-			}
-		}
+		SetSignalLights(SL_None);
 
 		Return VelFriction;
 	}
