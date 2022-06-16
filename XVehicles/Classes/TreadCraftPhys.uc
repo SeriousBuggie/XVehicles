@@ -188,9 +188,7 @@ simulated function FellToGround()
 
 simulated function UpdateTreads(float Delta)
 {
-local byte i;
-local float YDelta, TLinSpeed, TWheelAng, MaxFrT, CycleStep;
-local int PanSkip, dir;
+	local byte i;	local float YDelta, TLinSpeed, TWheelAng, MaxFrT, CycleStep, VSizeVel;	local int PanSkip, dir;
 
 	//Treads control
 	if (FMax(Region.Zone.ZoneGroundFriction,TreadsTraction) > 4.0)
@@ -198,24 +196,24 @@ local int PanSkip, dir;
 	else
 		YDelta = Abs(Abs(OldVehicleYaw) - Abs(VehicleYaw))*(FMax(Region.Zone.ZoneGroundFriction,TreadsTraction)/0.1)*4.25;
 
-	For (i=0; i<ArrayCount(Treads); i++)
+	if (FMax(Region.Zone.ZoneGroundFriction,TreadsTraction) > 4.0 && bOnGround)
+	{
+		VSizeVel = VSize(Velocity);
+		dir = OldAccelD;
+		if (Level.NetMode == NM_Client && !IsNetOwner(Driver))
+			dir = GetMovementDir();
+	}
+	else
+	{
+		VSizeVel = VSize(GetVirtualSpeedOnIce(Delta));
+		dir = VirtOldAccel;
+		if (Level.NetMode == NM_Client && !IsNetOwner(Driver))			dir = GetIcedMovementDir();
+	}
+	for (i = 0; i < ArrayCount(Treads); i++)
 	{
 		if (Treads[i].TTread != None)
 		{
-			if (FMax(Region.Zone.ZoneGroundFriction,TreadsTraction) > 4.0 && bOnGround)
-			{
-				dir = OldAccelD;
-				if( Level.NetMode==NM_Client && !IsNetOwner(Driver) )
-					dir = GetMovementDir();
-				TLinSpeed = GetTreadLinSpeed(VSize(Velocity),i,YDelta,Delta,OldTTurnDir,dir);
-			}
-			else
-			{
-				dir = VirtOldAccel;
-				if( Level.NetMode==NM_Client && !IsNetOwner(Driver) )
-					dir = GetIcedMovementDir();
-				TLinSpeed = GetTreadLinSpeed(VSize(GetVirtualSpeedOnIce(Delta)),i,YDelta,Delta,OldTTurnDir,dir);
-			}
+			TLinSpeed = GetTreadLinSpeed(VSizeVel, i, YDelta, Delta, OldTTurnDir, dir);
 
 			if (TLinSpeed > 10 || TLinSpeed < -10)	//Bug fix on stopped tracks moving on big slopes
 				Treads[i].TPanCount += (TLinSpeed*Delta);
@@ -230,7 +228,6 @@ local int PanSkip, dir;
 				Treads[i].CurrentTPan += PanSkip;
 				if (Treads[i].CurrentTPan > 15)
 					Treads[i].CurrentTPan -= 15;
-				
 	
 				if (!Treads[i].bUseAltTread)
 					Treads[i].TTread.MultiSkins[Treads[i].TreadSkinN] = TreadPan[Treads[i].CurrentTPan];
