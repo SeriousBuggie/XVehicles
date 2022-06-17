@@ -47,6 +47,8 @@ function ChangeOwner(Actor NewOwner)
 
 event float BotDesireability( pawn Bot )
 {
+	if (VehicleOwner == None || VehicleOwner.BotAttract == None)
+		return -1;
 	return VehicleOwner.BotAttract.BotDesireability(Bot);
 }
 

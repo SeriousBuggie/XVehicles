@@ -874,30 +874,31 @@ simulated function Tick( float Delta )
 }
 simulated function GetTurretCoords( optional out vector Pos, optional out rotator TurRot, optional out rotator PitchPartRot )
 {
-	if( PassengerNum==0 )
-		Pos = OwnerVehicle.Location+(TurretOffset >> OwnerVehicle.Rotation);
+	if (PassengerNum == 0)
+		Pos = OwnerVehicle.Location + (TurretOffset >> OwnerVehicle.Rotation);
 	//else Pos = OwnerVehicle.GetPassengerWOffset(PassengerNum-1);
-	else Pos = OwnerVehicle.Location+(PassWPosOffset[PassengerNum-1] >> OwnerVehicle.Rotation);
-	if( bHasPitchPart )
+	else
+		Pos = OwnerVehicle.Location + (PassWPosOffset[PassengerNum-1] >> OwnerVehicle.Rotation);
+	if (PitchPart != None)
 	{
-		if (OwnerVehicle.bSlopedPhys && OwnerVehicle.GVT!=None)
+		if (OwnerVehicle.bSlopedPhys && OwnerVehicle.GVT != None)
 		{
-			TurRot = TransformForGroundRot(TurretYaw,OwnerVehicle.GVTNormal);
-			PitchPartRot = PitchPart.TransformForGroundRot(TurretYaw,OwnerVehicle.GVTNormal,TurretPitch);
+			TurRot = TransformForGroundRot(TurretYaw, OwnerVehicle.GVTNormal);
+			PitchPartRot = PitchPart.TransformForGroundRot(TurretYaw, OwnerVehicle.GVTNormal, TurretPitch);
 		}
 		else
 		{
 			TurRot = TransformForGroundRot(TurretYaw,OwnerVehicle.FloorNormal);
-			PitchPartRot = PitchPart.TransformForGroundRot(TurretYaw,OwnerVehicle.FloorNormal,TurretPitch);
+			PitchPartRot = PitchPart.TransformForGroundRot(TurretYaw, OwnerVehicle.FloorNormal, TurretPitch);
 		}
 	}
-	else if (OwnerVehicle.bSlopedPhys && OwnerVehicle.GVT!=None)
+	else if (OwnerVehicle.bSlopedPhys && OwnerVehicle.GVT != None)
 	{
-		TurRot = TransformForGroundRot(TurretYaw,OwnerVehicle.GVTNormal,TurretPitch);
+		TurRot = TransformForGroundRot(TurretYaw, OwnerVehicle.GVTNormal, TurretPitch);
 	}
 	else
 	{
-		TurRot = TransformForGroundRot(TurretYaw,OwnerVehicle.FloorNormal,TurretPitch);
+		TurRot = TransformForGroundRot(TurretYaw, OwnerVehicle.FloorNormal, TurretPitch);
 	}
 }
 

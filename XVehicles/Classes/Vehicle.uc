@@ -1139,23 +1139,25 @@ local vector ExitVect;
 					Return;
 				}
 			}
-			Driver.SetCollision(True,True,True);
-			Driver.Velocity += Velocity; // inertial exit
+			if (Driver != None)
+				Driver.SetCollision(True,True,True);
 			if( PlayerPawn(Driver)!=None )
 			{
 				PlayerPawn(Driver).ViewTarget = None;
 				PlayerPawn(Driver).EndZoom();
 				Driver.ClientSetLocation(Driver.Location, Rotation);
 			}
-			else
+			else if (Driver != None)
 				Driver.SetRotation(rotator(Driver.Location - Location));
 			MyCameraAct.SetCamOwner(None);
-			Driver.Weapon = Driver.PendingWeapon;
 			if (Driver != None)
+			{
+				Driver.Velocity += Velocity; // inertial exit
+				Driver.Weapon = Driver.PendingWeapon;
 				Driver.ChangedWeapon();
-			if( Driver.Weapon != None && Driver.Weapon.Owner != None )
-				Driver.Weapon.BringUp();
-			Driver.bDuck = 0; // prevent enter again
+				if( Driver.Weapon != None && Driver.Weapon.Owner != None )					Driver.Weapon.BringUp();
+				Driver.bDuck = 0; // prevent enter again
+			}
 			LastDriver = Driver;
 			LastDriverTime = Level.TimeSeconds;
 		}
@@ -4073,15 +4075,15 @@ function PassengerLeave( byte Seat, optional bool bForcedLeave )
 	local vector ExitVect;
 	local Pawn Other;
 
-	if( Passengers[Seat]!=None )
+	if (Passengers[Seat] != None)
 	{
-		if( Passengers[Seat].bDeleteMe )
+		if (Passengers[Seat].bDeleteMe)
 			Passengers[Seat] = None;
 		else
 		{
 			Passengers[Seat].DrawScale = Passengers[Seat].Default.DrawScale;
-			if( PlayerPawn(Passengers[Seat])!=None && Passengers[Seat].Health>0 && 
-				Driver != None && Driver.IsInState('PlayerFlying') )
+			if (PlayerPawn(Passengers[Seat]) != None && Passengers[Seat].Health > 0 && 
+				Driver != None && Driver.IsInState('PlayerFlying'))
 				Passengers[Seat].GoToState('PlayerWalking');
 			RestartPawn(Passengers[Seat]);
 			ChangeCollision(Passengers[Seat], false);
@@ -4089,49 +4091,38 @@ function PassengerLeave( byte Seat, optional bool bForcedLeave )
 			ExitVect = ExitOffset;
 			if ((Normal(Velocity) Dot Normal(ExitVect >> Rotation)) > 0.35)
 				ExitVect.Y = -ExitVect.Y;
-			if( !bForcedLeave && !Passengers[Seat].SetLocation(Location+(ExitVect >> Rotation)) )
+			if (!bForcedLeave && !Passengers[Seat].SetLocation(Location+(ExitVect >> Rotation)))
 			{
 				ExitVect.Y = -ExitVect.Y;
-				if( !bForcedLeave && !Passengers[Seat].SetLocation(Location+(ExitVect >> Rotation)) )
+				if (!bForcedLeave && !Passengers[Seat].SetLocation(Location+(ExitVect >> Rotation)))
 				{
 					ChangeCollision(Passengers[Seat], true);
-					if( PlayerPawn(Passengers[Seat])!=None )
+					if (PlayerPawn(Passengers[Seat]) != None)
 						Passengers[Seat].GoToState('PlayerFlying');
 					Return;
 				}
 			}
-			Passengers[Seat].SetCollision(True,True,True);
-			Passengers[Seat].Velocity += Velocity; // inertial exit
-			if( PlayerPawn(Passengers[Seat])!=None )
+			if (Passengers[Seat] != None)
+				Passengers[Seat].SetCollision(True, True, True);
+			if (PlayerPawn(Passengers[Seat]) != None)
 			{
 				PlayerPawn(Passengers[Seat]).ViewTarget = None;
 				PlayerPawn(Passengers[Seat]).EndZoom();
 				Passengers[Seat].ClientSetLocation(Passengers[Seat].Location, Rotation);
 			}
 			PassengerSeats[Seat].PassengerCam.setCamOwner(None);
-			Passengers[Seat].Weapon = Passengers[Seat].PendingWeapon;
 			if (Passengers[Seat] != None)
+			{
+				Passengers[Seat].Velocity += Velocity; // inertial exit
+				Passengers[Seat].Weapon = Passengers[Seat].PendingWeapon;
 				Passengers[Seat].ChangedWeapon();
-			if( Passengers[Seat].Weapon!=None )
-				Passengers[Seat].Weapon.BringUp();
-			Passengers[Seat].bDuck = 0; // prevent enter again
+				if (Passengers[Seat].Weapon != None)
+					Passengers[Seat].Weapon.BringUp();
+				Passengers[Seat].bDuck = 0; // prevent enter again
+			}
 		}
 	}
-	if( PassengerSeats[Seat].PGun!=None )
-	{
-		if (Seat == 0 && DriverGun == None)
-			Other = Driver;
-		PassengerSeats[Seat].PGun.WeaponController = Other;
-		PassengerSeats[Seat].PGun.SetOwner(Other);
-	}
-	if( PassengerSeats[Seat].PHGun!=None )
-	{
-		PassengerSeats[Seat].PHGun.NotifyDriverLeft(Driver);
-		PassengerSeats[Seat].PHGun.ChangeOwner(None);
-	}
-	if( PassengerSeats[Seat].PassengerCam!=None && PassengerSeats[Seat].PassengerCam.Owner!=None )
-		PassengerSeats[Seat].PassengerCam.SetCamOwner(None);
-	Passengers[Seat] = None;
+	if (PassengerSeats[Seat].PGun != None)	{		if (Seat == 0 && DriverGun == None)			Other = Driver;		PassengerSeats[Seat].PGun.WeaponController = Other;		PassengerSeats[Seat].PGun.SetOwner(Other);	}	if (PassengerSeats[Seat].PHGun != None)	{		PassengerSeats[Seat].PHGun.NotifyDriverLeft(Driver);		PassengerSeats[Seat].PHGun.ChangeOwner(None);	}	if (PassengerSeats[Seat].PassengerCam != None && PassengerSeats[Seat].PassengerCam.Owner != None )		PassengerSeats[Seat].PassengerCam.SetCamOwner(None);	Passengers[Seat] = None;
 
 	HasPassengers();
 	CheckForEmpty();
