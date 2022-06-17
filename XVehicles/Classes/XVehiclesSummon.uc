@@ -3,6 +3,20 @@
 //=============================================================================
 class XVehiclesSummon expands Mutator;
 
+event PreBeginPlay()
+{
+	local Actor A;
+	
+	Super.PreBeginPlay();
+	
+	foreach AllActors(Class, A)
+		break;
+	if (A != self)
+		return;
+		
+	Level.Game.BaseMutator.AddMutator(self);
+}
+
 function Mutate(string MutateString, PlayerPawn Sender)
 {
 	local string V;
