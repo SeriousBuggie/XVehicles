@@ -609,7 +609,8 @@ function FireTurret( byte Mode, optional bool bForceFire )
 		SpawnTraceEffects(P);
 		A = OwnerVehicle.Trace(HL,HN,E,S,True);
 		xWFX = Spawn(Class'xVehProjDummy', OwnerVehicle,, S, rotator(P));
-		xWFX.Mass = FClamp(WeapSettings[Mode].HitHeavyness, 0, 10);
+		if (xWFX != None)
+			xWFX.Mass = FClamp(WeapSettings[Mode].HitHeavyness, 0, 10);
 		TraceProcess(A, HL, HN, Mode);
 	}
 
@@ -623,7 +624,8 @@ function FireTurret( byte Mode, optional bool bForceFire )
 		SpawnTraceEffects(PDual);
 		A = OwnerVehicle.Trace(HL,HN,E,S,True);
 		xWFX = Spawn(Class'xVehProjDummy', OwnerVehicle,, S, rotator(Pdual));
-		xWFX.Mass = FClamp(WeapSettings[Mode].HitHeavyness, 0, 10);
+		if (xWFX != None)
+			xWFX.Mass = FClamp(WeapSettings[Mode].HitHeavyness, 0, 10);
 		TraceProcess(A, HL, HN, Mode);
 	}
 
