@@ -3495,7 +3495,7 @@ function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 	{
 		if( bDeleteMe || Level.NetMode==NM_Client )
 			Return;
-		if (damageType == 'zapped' && class'VehiclesConfig'.default.bPulseAltHeal &&
+		if (instigatedBy != None && damageType == 'zapped' && class'VehiclesConfig'.default.bPulseAltHeal &&
 			instigatedBy.PlayerReplicationInfo != None && instigatedBy.PlayerReplicationInfo.Team == CurrentTeam)
 		{
 			FixDamage(Damage, instigatedBy, hitlocation, momentum, damageType);
@@ -3518,12 +3518,15 @@ function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 		else if( Driver.ReducedDamageType=='All' ) // God mode on!
 			Damage = 0;
 		else Damage = Level.Game.ReduceDamage(Damage,DamageType,Driver, instigatedBy);
-		if( Driver!=None )
-			Driver.damageAttitudeTo(instigatedBy);
-		For( i=0; i<Arraycount(Passengers); i++ )
+		if (instigatedBy != None)
 		{
-			if( Passengers[i]!=None )
-				Passengers[i].damageAttitudeTo(instigatedBy);
+			if( Driver!=None )
+				Driver.damageAttitudeTo(instigatedBy);
+			For( i=0; i<Arraycount(Passengers); i++ )
+			{
+				if( Passengers[i]!=None )
+					Passengers[i].damageAttitudeTo(instigatedBy);
+			}
 		}
 	
 		For (i=0; i<ArrayCount(ArmorType); i++)
@@ -3556,7 +3559,8 @@ function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 		else if (damageType=='BumpWall')
 			PlaySound(ImpactSounds[Rand(ArrayCount(ImpactSounds))],SLOT_Pain,FClamp(float(Damage)/50,0.75,2));
 		
-		MakeHitSound(PlayerPawn(instigatedBy), Damage);
+		if (instigatedBy != None)
+			MakeHitSound(PlayerPawn(instigatedBy), Damage);
 		
 		Health-=Damage;
 		Velocity+=momentum/Mass;
