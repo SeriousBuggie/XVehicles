@@ -113,14 +113,6 @@ simulated function bool CheckOnGround()
 function ReadBotInput( float Delta );
 simulated function Bump( Actor Other );
 
-simulated function rotator TransformForGroundRot( int CurrentYaw, vector GroundNormal, optional int CurrentPitch, optional bool bReverse )
-{
-	local rotator R;
-
-	R.Yaw = CurrentYaw;
-	R.Pitch = CurrentPitch;
-	Return R;
-}
 simulated function AttachmentsTick( float Delta )
 {
 	if( PitchMeshActor!=None )

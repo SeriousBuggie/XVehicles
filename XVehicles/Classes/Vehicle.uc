@@ -1331,9 +1331,9 @@ simulated function ClientUpdateState(float Delta)
 	ServerPredictLocation = ServerState.Location + (Level.TimeSeconds - ServerStateTime)*ServerState.Velocity;
 		
 	Diff = ServerPredictLocation - Location;
-	Dist = VSize(Diff);
+	Dist = Diff dot Diff; // squared VSize
 
-	if (Dist > 350)
+	if (Dist > 122500) // 350*350
 		SetLocation(ServerPredictLocation);
 	else if (Dist > 1)
 		MoveSmooth(Diff*0.1);
@@ -1412,13 +1412,16 @@ simulated function Tick( float Delta )
 	local float f;
 	local SavedMoveXV NewMove;
 	
+	if (IsInState('EmptyVehicle') && ResetTimer != Default.ResetTimer && Level.TimeSeconds > ResetTimer)
+		Destroy();
+	
 	if (bLastTeleport)
 	{
 		AfterTeleport(Rotation.Yaw - LastTeleportYaw);		
 		bLastTeleport = false;
 	}
 
-	if (!bReadyToRun && (Self.IsA('WheeledCarPhys') || Self.IsA('TreadCraftPhys')))
+	if (!bReadyToRun && (IsA('WheeledCarPhys') || IsA('TreadCraftPhys')))
 	{
 		if (AttachmentList == None)
 			AttachmentsTick(Delta);
@@ -1587,21 +1590,23 @@ simulated function Tick( float Delta )
 		if (ActualFloorNormal == vect(0,0,0))
 			ActualFloorNormal = FloorNormal;
 
-		if (bOldOnGround && VSize(Velocity) > MinArcSpeed * 2.5)
+		// X dot X == VSize(X)*VSize(X)
+		if (bOldOnGround && (Velocity dot Velocity) > MinArcSpeed*MinArcSpeed*6.25) //2.5*2.5
 		{
 			FloorNormal = ArcInitDir[0];
 			GVTNormal = ArcInitDir[1];
 		}
 			
-
-		if (ActualFloorNormal!=FloorNormal && VSize(Velocity) > 0)
+		// X dot X == VSize(X)*VSize(X)
+		if (ActualFloorNormal!=FloorNormal && (Velocity dot Velocity) > 0)
 		{
 			FloorNormal = NormalWeightSum(ArcAmount(Velocity)*f*Delta, ActualFloorNormal, FloorNormal);
 			if ( (ActualFloorNormal Dot FloorNormal) > 0.999 )
 				FloorNormal = ActualFloorNormal;
 		}
 
-		if (bSlopedPhys && VSize(Velocity) > 0)
+		// X dot X == VSize(X)*VSize(X)
+		if (bSlopedPhys && (Velocity dot Velocity) > 0)
 		{
 			ActualGVTNormal = Normal(vector(Rotation) * (Velocity*20 dot vector(Rotation)));
 			if (ActualGVTNormal == vect(0,0,0))
@@ -2154,10 +2159,13 @@ function ReadBotInput( float Delta )
 		V = Driver.Destination;
 		if (Driver.MoveTarget != None)
 			V = Driver.MoveTarget.Location;
-		S = VSize(V - Location);
-		if (Driver.IsInState('ImpactJumping') || Driver.MoveTarget == None || S < CollisionRadius*2)
+		V -= Location;
+		// X dot X == VSize(X)*VSize(X)
+		S = V dot V;
+		if (Driver.IsInState('ImpactJumping') || Driver.MoveTarget == None || S < CollisionRadius*CollisionRadius*4)
 			DriverLeft(False, "NeedStop near");
-		else if (VSize(Velocity) < 50 && S < 1500 && Driver.LineOfSightTo(Driver.MoveTarget))
+		else if ((Velocity dot Velocity) < 2500 /* 50*50 */ && S < 2250000 /* 1500*1500 */ && 
+			Driver.LineOfSightTo(Driver.MoveTarget))
 			DriverLeft(False, "NeedStop stuck");
 		if (Driver == None && Bot != None)
 		{
@@ -2197,9 +2205,10 @@ function ReadBotInput( float Delta )
 			if (Driver == None)
 				return;
 		}
-		V = Location-MoveDest;
+		V = Location - MoveDest;
 		V.Z = 0;
-		if( VSize(V)<S )
+		// X dot X == VSize(X)*VSize(X)
+		if ((V dot V) < S*S)
 		{
 			Driver.MoveTimer = -1.f;
 			Driver.MoveTarget = None;
@@ -2209,9 +2218,10 @@ function ReadBotInput( float Delta )
 		}
 		MoveTimer = Level.TimeSeconds+ FMin(0.25, Vsize(Location-MoveDest) / Fmax(1, Vsize(Velocity)) / 4);
 	}
-	V = Location-MoveDest;
+	V = Location - MoveDest;
 	V.Z = 0;
-	if( MoveTimer<=Level.TimeSeconds || VSize(V)<S )
+	// X dot X == VSize(X)*VSize(X)
+	if (MoveTimer <= Level.TimeSeconds || (V dot V) < S*S)
 	{
 		bHasMoveTarget = False;
 		Return;
@@ -2250,8 +2260,9 @@ function bool AboutToCrash(out int Accel)
 	local int ret;
 	local Actor A;
 
-	Dir = VSize(Velocity);
-	if (Dir > 290)
+	// X dot X == VSize(X)*VSize(X)
+	Dir = Velocity dot Velocity;
+	if (Dir > 84100 /* 290*290 */)
 	{
 		ret = GetMovementDir();
 		// about to crash with damage?
@@ -2259,14 +2270,16 @@ function bool AboutToCrash(out int Accel)
 			vect(1,1,0)*CollisionRadius + vect(0,0,1)*(CollisionHeight - MaxObstclHeight));
 		if (A == None) 
 			return false;
-		if (A == Level && (HitNormal.Z > 0.5 || Dir <= 490)) // slope?
+		if (A == Level && (HitNormal.Z > 0.5 || Dir <= 240100 /* 490*490 */)) // slope?
 			return false;
 		if (Pawn(A) != None)
-			return false; // teammates protected and can be taken as passenngers, all other must die
-		if (Vehicle(A) != None && Vehicle(A).CurrentTeam != CurrentTeam && (Vehicle(A).Driver != None || Vehicle(A).HasPassengers()))
+			return false; // teammates protected and can be taken as passengers, all other must die
+		if (Vehicle(A) != None && Vehicle(A).CurrentTeam != CurrentTeam && 
+			(Vehicle(A).Driver != None || Vehicle(A).HasPassengers()))
 			return false; // crash into enemy non-empty vehicle for make damage
 		if (Vehicle(A) != None && Vehicle(A).CurrentTeam == CurrentTeam && Vehicle(A).Driver != None && 
-			(Normal(Vehicle(A).Velocity) dot Normal(Velocity)) > 0.5 && VSize(Vehicle(A).Velocity) > Dir - 290)
+			(Normal(Vehicle(A).Velocity) dot Normal(Velocity)) > 0.5 &&
+			VSize(Vehicle(A).Velocity) > VSize(Velocity) - 290)
 			return false; // not slow down when follow teammate vehicle
 //		Log("Detect crash into" @ A @ HitLocation @ HitNormal);
 		Accel = ret*-1; // brake via reverse
@@ -2422,12 +2435,6 @@ Ignores FireWeapon,ReadDriverInput,ReadBotInput,DriverLeft;
 			BotAttract.Destroy();
 			BotAttract = None;
 		}
-	}
-	function Tick( float Delta )
-	{
-		if( ResetTimer!=Default.ResetTimer && Level.TimeSeconds>ResetTimer )
-			Destroy();
-		else Global.Tick(Delta);
 	}
 Begin:
 	Sleep(Level.TimeDilation);

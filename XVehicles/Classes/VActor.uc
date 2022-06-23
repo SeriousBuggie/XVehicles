@@ -282,7 +282,7 @@ simulated static final operator(16) quat Qmulti ( quat Q1 , quat Q2 )
 }
 //==============================================================================
 // Vector math functions:
-simulated function rotator TransformForGroundRot( int CurrentYaw, vector GroundNormal, optional int CurrentPitch, optional bool bReverse )
+final simulated function rotator TransformForGroundRot( int CurrentYaw, vector GroundNormal, optional int CurrentPitch, optional bool bReverse )
 {
 	local vector CrossDir,FwdDir,OldFwdDir,X,Y,Z,A,B;
 	local rotator R;
@@ -318,12 +318,10 @@ simulated function rotator TransformForGroundRot( int CurrentYaw, vector GroundN
 	FwdDir = CrossDir Cross A;
 	OldFwdDir = CrossDir Cross B;
 	X = A * (B Dot X)
-			+ CrossDir * (CrossDir Dot X)
-			+ FwdDir * (OldFwdDir Dot X);
+		+ CrossDir * (CrossDir Dot X)		+ FwdDir * (OldFwdDir Dot X);
 	X = Normal(X);
-	Z = A;
-	Z = Normal(Z);
-	Y = Normal(A Cross X);
+	Z = Normal(A);
+	Y = Z Cross X;
 	R = OrthoRotation(X,Y,Z);
 	
 	if (bReverse)
@@ -455,7 +453,7 @@ simulated function bool CanYawUpTo( rotator OldRot, rotator NewRot, int MaxRotCh
 	nv = MaxRotChange*-1;
 	Return (OldRot.Roll<MaxRotChange && OldRot.Roll>nv && OldRot.Pitch<MaxRotChange && OldRot.Pitch>nv);
 }
-simulated function vector CalcGravityStrength( vector Gravity, vector FloorN )
+final simulated function vector CalcGravityStrength( vector Gravity, vector FloorN )
 {
 	Gravity-=(Gravity dot FloorN) * FloorN;
 	Return Gravity;

@@ -106,8 +106,9 @@ simulated function PostBeginPlay()
 simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 {
 	local rotator R;
-
-	if (FMax(Region.Zone.ZoneGroundFriction,WheelsTraction) > 4.0 || VSize(Velocity) < 100)
+	
+	// X dot X == VSize(X)*VSize(X)
+	if (FMax(Region.Zone.ZoneGroundFriction,WheelsTraction) > 4.0 || (Velocity dot Velocity) < 10000 /* 100*100 */)
 		R.Yaw = VehicleYaw+(WheelYaw/2);
 	else
 		R.Yaw = VehicleYaw-(WheelYaw/2);
@@ -137,7 +138,8 @@ simulated function UpdateDriverInput( float Delta )
 	if (Region.Zone.ZoneGroundFriction + WheelsTraction > 14.0)	//Traction on but outside ice/snow areas
 	{
 		IronC += Delta;
-		if (IronC >= 0.5 && VSize(Velocity) > 0)
+		// X dot X == VSize(X)*VSize(X)
+		if (IronC >= 0.5 && (Velocity dot Velocity) > 0)
 		{
 			IronC = 0;
 			TakeImpactDamage(IronWheelsTerrainDmg*VSize(Velocity)/MaxGroundSpeed, None);
@@ -200,27 +202,24 @@ simulated function UpdateDriverInput( float Delta )
 	Velocity += CalcGravityStrength(Region.Zone.ZoneGravity*(VehicleGravityScale/GroundPower), FloorNormal)*
 		Delta/(FMax(Region.Zone.ZoneGroundFriction, WheelsTraction)/8.f + 1.f);
 
-	DesTurn = VSize(Velocity);
+	// X dot X == VSize(X)*VSize(X)
+	DesTurn = (Velocity dot Velocity);
 	if (DesTurn > 0)
 	{
 		if (FMax(Region.Zone.ZoneGroundFriction, WheelsTraction) > 4.0)
-			DesTurn *= WheelYaw*Delta/400*GetMovementDir();
+			DesTurn = VSize(Velocity)*WheelYaw*Delta/400*GetMovementDir();
 		else
-			DesTurn *= WheelYaw*Delta/400*GetMovementDir()*
+			DesTurn = VSize(Velocity)*WheelYaw*Delta/400*GetMovementDir()*
 				FMin(FMax(Region.Zone.ZoneGroundFriction, WheelsTraction), 1.0);
-	}
-	if (DesTurn != 0)
-	{
-		VehicleYaw += DesTurn;
-		if (!bCameraOnBehindView && Driver!=None)
-			Driver.ViewRotation.Yaw += DesTurn;
+		if (DesTurn != 0)		{			VehicleYaw += DesTurn;			if (!bCameraOnBehindView && Driver!=None)				Driver.ViewRotation.Yaw += DesTurn;		}
 	}
 
 	// Update vehicle speed
 	if (Accel != 0)
 	{
 		//Braking, so reduce speed 3x superior to normal deacceleration
-		if (OldAccelD == -Accel && VSize(Velocity) > 16)
+		// X dot X == VSize(X)*VSize(X)
+		if (OldAccelD == -Accel && (Velocity dot Velocity) > 256 /* 16 * 16 */)
 		{
 			DeAcc = VSize(Velocity);
 			DeAccRat = Delta*WDeAccelRate*3*FMax(Region.Zone.ZoneGroundFriction,WheelsTraction);
@@ -248,7 +247,7 @@ simulated function UpdateDriverInput( float Delta )
 			}
 			else
 			{
-				if (DeAccRat >= VSize(Velocity))
+				if (DeAccRat >= DeAcc)
 					Velocity = vect(0,0,0);
 				else
 				{
@@ -306,7 +305,7 @@ simulated function UpdateDriverInput( float Delta )
 		}
 		else
 		{
-			if (DeAccRat >= VSize(Velocity))
+			if (DeAccRat >= DeAcc)
 				Velocity = vect(0,0,0);
 			else
 			{
@@ -314,7 +313,8 @@ simulated function UpdateDriverInput( float Delta )
 				Velocity -= Normal(Velocity)*DeAccRat;
 				if (Velocity dot Ac > 0)
 					Velocity = VSize(Velocity)*Normal(Ac);
-				else if (VSize(Velocity) > 0)
+				// X dot X == VSize(X)*VSize(X)
+				else if ((Velocity dot Velocity) > 0)
 					OldAccelD = -OldAccelD;
 			}
 			
@@ -373,7 +373,8 @@ function int ShouldAccelFor( vector AcTarget )
 		}
 		Return -1;
 	}
-	bStuck = VSize(Velocity)<MaxGroundSpeed/5;
+	// X dot X == VSize(X)*VSize(X)
+	bStuck = (Velocity dot Velocity) < MaxGroundSpeed*MaxGroundSpeed/25 /* 5*5 */;
 	if (!bStuck)
 	{
 		GetAxes(Rotation,X,Y,Z);
@@ -441,7 +442,8 @@ local byte i;
 
 	if (Accel != 0)
 	{
-		if (VirtOldAccel == -Accel && VSize(VelFriction) > 16)
+		// X dot X == VSize(X)*VSize(X)
+		if (VirtOldAccel == -Accel && (VelFriction dot VelFriction) > 256 /* 16*16 */)
 		{
 			DeAcc = VSize(VelFriction);
 			DeAccRat = Delta*WDeAccelRate*24.0;
@@ -567,7 +569,8 @@ simulated function AttachmentsTick( float Delta )
 			//********************************************************************************
 			//Water Trail FX points update
 			//********************************************************************************
-			if (bHaveGroundWaterFX && bSlopedPhys && VWaterT[i] != None && (Location != OldLocation || (FootVehZone[i] != None && VSize(FootVehZone[i].ZoneVelocity)>150 )))
+			if (bHaveGroundWaterFX && bSlopedPhys && VWaterT[i] != None && (Location != OldLocation ||
+				(FootVehZone[i] != None && VSize(FootVehZone[i].ZoneVelocity) > 150 )))
 			{
 				VWaterT[i].SetLocation(MyWheels[i].Location);
 				VWaterT[i].Move(MyWheels[i].CollisionHeight*vect(0,0,-1));

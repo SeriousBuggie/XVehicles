@@ -80,8 +80,8 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 		// dont slow down if run over
 		if (Driver.Enemy == None || VSize(Driver.Enemy.Location - MoveDest) > 40)
 			X -= Velocity;
-		S = VSize(X);
-		if (S > 5)
+		// X dot X == VSize(X)*VSize(X)
+		if ((X dot X) > 25 /* 5*5 */)
 			return Normal(X);
 		return vect(0,0,0);		
 	}
@@ -197,7 +197,8 @@ simulated function UpdateDriverInput( float Delta )
 	else Velocity+=Ac;
 */
 	Velocity += Ac;
-	if (VSize(Velocity) > MaxAirSpeed)
+	// X dot X == VSize(X)*VSize(X)
+	if ((Velocity dot Velocity) > MaxAirSpeed*MaxAirSpeed)
 		Velocity = MaxAirSpeed*Normal(Velocity);
 	
 	if (PlayerPawn(Driver) != None)

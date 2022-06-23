@@ -67,15 +67,9 @@ simulated function Tick( float Delta )
 	
 	if (KeepWait <= 0)
 	{
-		if (CurrentViewMult < DesiredViewMult)
-			CurrentViewMult += (FMax(0.1,Abs(CurrentViewMult - DesiredViewMult)) * Delta);
-		else if (CurrentViewMult > DesiredViewMult)
-			CurrentViewMult -= (FMax(0.1,Abs(CurrentViewMult - DesiredViewMult)) * Delta);
-	
-		if (CurrentViewMult != DesiredViewMult && Abs(CurrentViewMult - DesiredViewMult) < 0.025)
+		if (CurrentViewMult != DesiredViewMult)
 		{
-			CurrentViewMult = DesiredViewMult;
-			OldDesiredViewMult = DesiredViewMult;
+			if (CurrentViewMult < DesiredViewMult)				CurrentViewMult += (FMax(0.1,Abs(CurrentViewMult - DesiredViewMult)) * Delta);			else if (CurrentViewMult > DesiredViewMult)				CurrentViewMult -= (FMax(0.1,Abs(CurrentViewMult - DesiredViewMult)) * Delta);					if (CurrentViewMult != DesiredViewMult && Abs(CurrentViewMult - DesiredViewMult) < 0.025)			{				CurrentViewMult = DesiredViewMult;				OldDesiredViewMult = DesiredViewMult;			}
 		}
 	}
 	else
@@ -88,8 +82,13 @@ simulated function Tick( float Delta )
 	if (bPasengerCam)
 	{
 		P = Pawn(Owner);
+		if (P == None)
+			return;
 		if (GunAttachM != None)
-			R = GunAttachM.TurretYaw*rot(0,1,0) + GunAttachM.TurretPitch*rot(1,0,0);
+		{
+			R.Pitch = GunAttachM.TurretPitch;
+			R.Yaw = GunAttachM.TurretYaw;
+		}
 		else if (VehicleOwner != None)
 			R = VehicleOwner.Rotation;
 	}

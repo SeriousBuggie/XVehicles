@@ -378,17 +378,22 @@ simulated function UpdateDriverInput( float Delta )
 	if (Accel != 0)
 	{
 		//Quick ice speed Fix
-		if (VSize(Velocity) <= 16 && FMax(Region.Zone.ZoneGroundFriction,TreadsTraction) <= 4.0 && !IceFix)
+		if (!IceFix && FMax(Region.Zone.ZoneGroundFriction, TreadsTraction) <= 4.0 &&  
+			// X dot X == VSize(X)*VSize(X)
+			(Velocity dot Velocity) <= 256 /* 16*16 */)
 		{
 			OldAccelD = Accel;
 			Velocity = VSize(Velocity)*vector(Rotation)*Accel;
 			IceFix = True;
 		}
-		else if (VSize(Velocity) > 16 && FMax(Region.Zone.ZoneGroundFriction,TreadsTraction) <= 4.0 && IceFix)
+		else if (IceFix && FMax(Region.Zone.ZoneGroundFriction, TreadsTraction) <= 4.0 && 
+			// X dot X == VSize(X)*VSize(X)
+			(Velocity dot Velocity) > 256 /* 16*16 */)
 			IceFix = False;
 
 		//Braking, so reduce speed 3x superior to normal deacceleration
-		if (OldAccelD == -Accel && VSize(Velocity) > 16)
+		// X dot X == VSize(X)*VSize(X)
+		if (OldAccelD == -Accel && (Velocity dot Velocity) > 256 /* 16*16 */)
 		{
 			DeAcc = VSize(Velocity);
 			DeAccRat = Delta*WDeAccelRate*3*FMax(Region.Zone.ZoneGroundFriction,TreadsTraction);
@@ -416,7 +421,7 @@ simulated function UpdateDriverInput( float Delta )
 			}
 			else
 			{
-				if (DeAccRat >= VSize(Velocity))
+				if (DeAccRat >= DeAcc)
 					Velocity = vect(0,0,0);
 				else
 				{
@@ -473,7 +478,7 @@ simulated function UpdateDriverInput( float Delta )
 		}
 		else
 		{
-			if (DeAccRat >= VSize(Velocity))
+			if (DeAccRat >= DeAcc)
 				Velocity = vect(0,0,0);
 			else
 			{
@@ -481,7 +486,8 @@ simulated function UpdateDriverInput( float Delta )
 				Velocity-=Normal(Velocity)*DeAccRat;
 				if (Velocity dot Ac > 0)
 					Velocity = VSize(Velocity)*Normal(Ac);
-				else if (VSize(Velocity) > 0)
+				// X dot X == VSize(X)*VSize(X)
+				else if ((Velocity dot Velocity) > 0)
 					OldAccelD = -OldAccelD;
 			}
 			
@@ -553,7 +559,8 @@ function int ShouldAccelFor2( vector AcTarget )
 		}
 		Return -ret;
 	}
-	bStuck = ret != 0 && VSize(Velocity)<MaxGroundSpeed/5;
+	// X dot X == VSize(X)*VSize(X)
+	bStuck = ret != 0 && (Velocity dot Velocity) < MaxGroundSpeed*MaxGroundSpeed/25 /* 5*5 */;
 	if( bWasStuckOnW!=bStuck )
 	{
 		bWasStuckOnW = bStuck;
@@ -610,7 +617,8 @@ function vector GetVirtualSpeedOnIce( float Delta )
 	if (Accel != 0)
 	{
 		//Braking, so reduce speed 3x superior to normal deacceleration
-		if (VirtOldAccel == -Accel && VSize(VelFriction) > 16)
+		// X dot X == VSize(X)*VSize(X)
+		if (VirtOldAccel == -Accel && (VelFriction dot VelFriction) > 256 /* 16*16 */)
 		{
 			DeAcc = VSize(VelFriction);
 			DeAccRat = Delta*WDeAccelRate*24.0;

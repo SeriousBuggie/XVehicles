@@ -1039,8 +1039,10 @@ function bool FindEnemy()
 		Hit = ViewActor.Trace(HL, HN, HL, HN, true);
 		if (Hit != P && (DriverWeapon(P.Weapon) == None || DriverWeapon(P.Weapon).VehicleOwner != Hit))
 			continue;
-		Dist = Vsize(P.Location - OwnerVehicle.Location);
-		if (Best == None || BestDist > Dist)
+		HL = P.Location - OwnerVehicle.Location;
+		// X dot X == VSize(X)*VSize(X)
+		Dist = HL dot HL;
+		if (Best == None || Dist < BestDist)
 		{
 			Best = P;
 			BestDist = Dist;
