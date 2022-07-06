@@ -24,13 +24,16 @@ event PreBeginPlay()
 	
 	Super.PreBeginPlay();
 	
-	if (!class'VehiclesConfig'.default.bDisableFastWarShell)
-		Spawn(class'FastWSNotify'); // Fast WarShell
-	
 	foreach AllActors(Class, A)
 		break;
 	if (A != self)
 		return;
+
+	if (!class'VehiclesConfig'.default.bDisableFastWarShell)
+		Spawn(class'FastWSNotify'); // Fast WarShell
+		
+	if (!class'VehiclesConfig'.default.bAllowTranslocator && DeathMatchPlus(Level.Game) != None)
+		DeathMatchPlus(Level.Game).bUseTranslocator = false;
 		
 	class'XVehiclesHUD'.static.SpawnHUD(self);
 	

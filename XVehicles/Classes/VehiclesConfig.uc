@@ -7,6 +7,7 @@ var() config bool bHideState;
 var() config bool bPulseAltHeal;
 var() config bool bDisableTeamSpawn;
 var() config bool bDisableFastWarShell;
+var() config bool bAllowTranslocator;
 
 defaultproperties
 {
@@ -14,4 +15,5 @@ defaultproperties
       bPulseAltHeal=False
       bDisableTeamSpawn=False
       bDisableFastWarShell=False
+      bAllowTranslocator=False
 }
