@@ -35,6 +35,9 @@ event PreBeginPlay()
 	if (!class'VehiclesConfig'.default.bAllowTranslocator && DeathMatchPlus(Level.Game) != None)
 		DeathMatchPlus(Level.Game).bUseTranslocator = false;
 		
+	if (!class'VehiclesConfig'.default.bDisableFlagAnnouncer && CTFGame(Level.Game).MaxTeams == 2)
+		Spawn(class'FlagAnnouncer');
+		
 	class'XVehiclesHUD'.static.SpawnHUD(self);
 	
 	if (PulseForHeal == PFH_Yes)
