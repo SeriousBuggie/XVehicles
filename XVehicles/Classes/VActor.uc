@@ -323,8 +323,9 @@ final simulated function rotator TransformForGroundRot( int CurrentYaw, vector G
 	CrossDir = Normal(A Cross B);
 	FwdDir = CrossDir Cross A;
 	OldFwdDir = CrossDir Cross B;
-	X = A * (B Dot X)
-		+ CrossDir * (CrossDir Dot X)		+ FwdDir * (OldFwdDir Dot X);
+	X = A * (B Dot X) + 
+		CrossDir * (CrossDir Dot X) + 
+		FwdDir * (OldFwdDir Dot X);
 	X = Normal(X);
 	Z = Normal(A);
 	Y = Z Cross X;
