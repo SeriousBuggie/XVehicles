@@ -105,25 +105,20 @@ function Inventory SpawnCopy( pawn P )
 						if (wep.Class.name != Weapons[i].WeaponClass.Name && 
 							wep.Tag == Weapons[i].WeaponClass.Name)
 							InvK = wep;
+					WeaponClass = Weapons[i].WeaponClass;
 					if (InvK != None)
 					{
-						if (Weapons[i].WeaponClass != InvK.Class) // for next time
-						{
-							Weapons[i].WeaponClass = InvK.Class; // this prevent attract bots
-							if (i < ArrayCount(WMesh))
-							{
-								if (WRI == None)
-									WRI = Spawn(class'WRI', self);
-								else
-									WRI.WeaponClass[i] = Weapons[i].WeaponClass;
-							}
-						}
+						ChangeWeaponClass(i, InvK.Class);
 						if (RefillAmmo(P, InvK.Class, Weapons[i].ExtraAmmo)) 
 						{		
 							InvK.Destroy();
 							continue;
 						}
 					}
+					else
+						// look like this weapon class not allowed here, and destroy without replace
+						// deny spawn it again or attract bots for it
+						ChangeWeaponClass(i, None);
 				}
 				if (InvK != None)
 				{
@@ -143,6 +138,12 @@ function Inventory SpawnCopy( pawn P )
 			}		
 		}
 	}
+}
+
+function ChangeWeaponClass(int i, Class<Weapon> WeaponClass)
+{
+	if (WeaponClass != Weapons[i].WeaponClass) // for next time	{
+		Weapons[i].WeaponClass = WeaponClass;		if (i < ArrayCount(WMesh))		{			if (WRI == None)				WRI = Spawn(class'WRI', self);			else				WRI.WeaponClass[i] = Weapons[i].WeaponClass;		}	}
 }
 
 function bool RefillAmmo(Pawn P, class<Weapon> WeaponClass, int ExtraAmmo)
