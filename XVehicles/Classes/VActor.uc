@@ -296,10 +296,15 @@ final simulated function rotator TransformForGroundRot( int CurrentYaw, vector G
 	if (bReverse)
 	{	
 		if (CurrentYaw == PrevCurrentYawA &&
-			GroundNormal == PrevGroundNormalA &&			CurrentPitch == PrevCurrentPitchA)			return PrevTransformForGroundRotA;
+			GroundNormal == PrevGroundNormalA &&
+			CurrentPitch == PrevCurrentPitchA)
+			return PrevTransformForGroundRotA;
 	}
 	else	
-		if (CurrentYaw == PrevCurrentYawB &&			GroundNormal == PrevGroundNormalB &&			CurrentPitch == PrevCurrentPitchB)			return PrevTransformForGroundRotB;
+		if (CurrentYaw == PrevCurrentYawB &&
+			GroundNormal == PrevGroundNormalB &&
+			CurrentPitch == PrevCurrentPitchB)
+			return PrevTransformForGroundRotB;
 
 	GetAxes(R,X,Y,Z);
 
@@ -328,12 +333,16 @@ final simulated function rotator TransformForGroundRot( int CurrentYaw, vector G
 	if (bReverse)
 	{	
 		PrevCurrentYawA = CurrentYaw;
-		PrevGroundNormalA = GroundNormal;		PrevCurrentPitchA = CurrentPitch;		PrevTransformForGroundRotA = R;
+		PrevGroundNormalA = GroundNormal;
+		PrevCurrentPitchA = CurrentPitch;
+		PrevTransformForGroundRotA = R;
 	}
 	else	
 	{
 		PrevCurrentYawB = CurrentYaw;
-		PrevGroundNormalB = GroundNormal;		PrevCurrentPitchB = CurrentPitch;		PrevTransformForGroundRotB = R;
+		PrevGroundNormalB = GroundNormal;
+		PrevCurrentPitchB = CurrentPitch;
+		PrevTransformForGroundRotB = R;
 	}
 
 	return R;
