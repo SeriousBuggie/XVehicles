@@ -9,6 +9,7 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch,
 	local CTFFlag CTFFlag, OtherFlag;
 	local Sound Sound;
 	local Pawn P;
+	local bool bExcludeTournamentPlayers;
 	
 	if (Message == class'DeathMatchMessage' && Switch == 3 && RelatedPRI_1 != None && 
 		PlayerPawn(RelatedPRI_1.Owner) != None && PlayerPawn(RelatedPRI_1.Owner).bIsPlayer)
@@ -53,7 +54,10 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch,
 								Sound = Sound'Blue_Team_increases_their_lead';
 							if (CTFGame(Level.Game).GoalTeamScore > 0 && 
 								CTFGame(Level.Game).Teams[1].Score >= CTFGame(Level.Game).GoalTeamScore &&
-								CTFGame(Level.Game).Teams[1].Score > CTFGame(Level.Game).Teams[0].Score)								Sound = None; // Sound'blue_team_is_the_winner';
+								CTFGame(Level.Game).Teams[1].Score > CTFGame(Level.Game).Teams[0].Score)
+							{								Sound = Sound'blue_team_is_the_winner';
+								bExcludeTournamentPlayers = true;
+							}
 						}
 					}					if (CTFFlag.Team == 1)
 					{						Sound = Sound'Red_Team_Scores';
@@ -67,13 +71,17 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch,
 								Sound = Sound'Red_Team_increases_their_lead';
 							if (CTFGame(Level.Game).GoalTeamScore > 0 && 
 								CTFGame(Level.Game).Teams[0].Score >= CTFGame(Level.Game).GoalTeamScore &&
-								CTFGame(Level.Game).Teams[0].Score > CTFGame(Level.Game).Teams[1].Score)								Sound = None; // Sound'blue_team_is_the_winner';
+								CTFGame(Level.Game).Teams[0].Score > CTFGame(Level.Game).Teams[1].Score)
+							{								Sound = Sound'blue_team_is_the_winner';
+								bExcludeTournamentPlayers = true;
+							}
 						}
 					}					break;				case 1:					if (CTFFlag.Team == 0)						Sound = Sound'Red_Flag_Returned';					if (CTFFlag.Team == 1)						Sound = Sound'Blue_Flag_Returned';					break;			}
 	}
 	if (Sound != None)
 		for (P = Level.PawnList; P != None; P = P.NextPawn)
-			if (P.bIsPlayer && P.IsA('PlayerPawn'))
+			if (P.bIsPlayer && P.IsA('PlayerPawn') && 
+			(!bExcludeTournamentPlayers || !P.IsA('TournamentPlayer')))
 				PlayerPawn(P).ClientPlaySound(Sound);
 }
 
