@@ -21,7 +21,7 @@ simulated function Tick(float Delta)
 	if (MyShell == None)
 		Destroy();
 	else
-		MyShell.AutonomousPhysics(2*Delta); //x3 speed
+		MyShell.AutonomousPhysics(Delta); //x2 speed
 }
 
 defaultproperties
