@@ -289,6 +289,7 @@ final simulated function rotator TransformForGroundRot( int CurrentYaw, vector G
 
 	R.Yaw = CurrentYaw;
 	R.Pitch = CurrentPitch;
+	//Log(Abs(GroundNormal.Z - 1)*1000000 @ Abs(GroundNormal.Z - 1) < 0.0000001);
 	if( Abs(GroundNormal.Z - 1) < 0.0000001 )
 		Return R;
 		
