@@ -72,7 +72,7 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch,
 							if (CTFGame(Level.Game).GoalTeamScore > 0 && 
 								CTFGame(Level.Game).Teams[0].Score >= CTFGame(Level.Game).GoalTeamScore &&
 								CTFGame(Level.Game).Teams[0].Score > CTFGame(Level.Game).Teams[1].Score)
-							{								Sound = Sound'blue_team_is_the_winner';
+							{								Sound = Sound'red_team_is_the_winner';
 								bExcludeTournamentPlayers = true;
 							}
 						}
