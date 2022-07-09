@@ -156,7 +156,6 @@ defaultproperties
       TurretPitchActor=Class'XStatVeh.MinigunTurretGun'
       WeapSettings(0)=(FireStartOffset=(X=120.000000,Z=45.000000),RefireRate=0.150000,FireSound=Sound'XStatVeh.Attack.CybFire',bInstantHit=True,hitdamage=20,HitType="Ballistic",HitMomentum=10000.000000,HitHeavyness=2)
       bPhysicalGunAimOnly=True
-      HitMark=Class'Botpack.UT_LightWallHitEffect'
       AnimSequence="Still"
       Texture=Texture'XStatVeh.Skins.CybotMetal'
       Mesh=LodMesh'XStatVeh.CybSentinelTurret'
