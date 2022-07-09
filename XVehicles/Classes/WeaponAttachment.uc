@@ -104,6 +104,8 @@ struct xShakeWeap
 var(Shake) xShakeWeap FiringShaking[4];
 var bool bSkipFiringShaking;
 
+var() class<Actor> HitMark;
+
 replication
 {
 	// Variables the server should send to the client.
@@ -655,7 +657,7 @@ function TraceProcess( actor A, vector HitLocation, vector HitNormal, byte Mode)
 	if( A!=None )
 	{
 		if( A==Level )
-			Spawn(Class'UT_LightWallHitEffect',,,HitLocation+HitNormal,Rotator(HitNormal));
+			Spawn(HitMark,,,HitLocation+HitNormal*8,Rotator(HitNormal));
 		else
 		{
 			if ( !A.bIsPawn && !A.IsA('Carcass') )
@@ -1248,6 +1250,7 @@ defaultproperties
       FiringShaking(2)=(bShakeEnabled=False,bShakeByStep=False,ShakeStart=SHK_DuringFire,ShakeRadius=0.000000,shaketime=0.000000,ShakeVertMag=0.000000,ShakeRollMag=0.000000,StepInterval=0.000000,StepAmount=0,StepShkCount=0.000000)
       FiringShaking(3)=(bShakeEnabled=False,bShakeByStep=False,ShakeStart=SHK_DuringAltFire,ShakeRadius=0.000000,shaketime=0.000000,ShakeVertMag=0.000000,ShakeRollMag=0.000000,StepInterval=0.000000,StepAmount=0,StepShkCount=0.000000)
       bSkipFiringShaking=False
+      HitMark=Class'Botpack.UT_LightWallHitEffect'
       RemoteRole=ROLE_SimulatedProxy
       bCarriedItem=True
       NetPriority=3.000000

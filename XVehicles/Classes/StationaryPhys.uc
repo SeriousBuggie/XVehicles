@@ -1,30 +1,8 @@
 // A stationary Turret. (Created by .:..: 11.1.2008)
 Class StationaryPhys extends Vehicle;
 
-var() float TurnSpeed,MaxZoomInRate;
-var() IntRange PitchLimit;
-var() Class<StationaryPitchAttach> PitchViewActor;
-var() vector PitchMeshOffset;
-var vector ViewPos;
-var int VehiclePitch;
-var StationaryPitchAttach PitchMeshActor;
+const MaxZoomInRate = 10.8; // Hardcoded in PlayerPawn as (90.0 - 88.0*0.9)
 
-replication
-{
-	// Variables the server should send to the client.
-	reliable if( Role==ROLE_Authority && !bNetOwner )
-		ViewPos;
-}
-
-simulated function PostBeginPlay()
-{
-	Super.PostBeginPlay();
-	if( Level.NetMode!=NM_DedicatedServer && PitchViewActor!=None )
-	{
-		PitchMeshActor = StationaryPitchAttach(AddAttachment(PitchViewActor));
-		PitchMeshActor.Move(Location+(PitchMeshOffset >> Rotation)-PitchMeshActor.Location);
-	}
-}
 simulated singular function HitWall( vector HitNormal, Actor Wall );
 simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 {
@@ -34,70 +12,24 @@ simulated function ReadDriverInput( PlayerPawn Other, float DeltaTime )
 {
 	if( Other.bWasForward )
 	{
-		if( Other.FovAngle>MaxZoomInRate )
+		if( Other.DesiredFOV > MaxZoomInRate )
 		{
-			Other.FovAngle-=DeltaTime*60;
-			if( Other.FovAngle<MaxZoomInRate )
-				Other.FovAngle = MaxZoomInRate;
+			Other.DesiredFOV -= DeltaTime*60;
+			if( Other.DesiredFOV < MaxZoomInRate )
+				Other.DesiredFOV = MaxZoomInRate;
 		}
 	}
 	else if( Other.bWasBack )
 	{
-		if( Other.FovAngle<Other.DefaultFOV )
+		if( Other.DesiredFOV < Other.DefaultFOV )
 		{
-			Other.FovAngle+=DeltaTime*60;
-			if( Other.FovAngle>Other.DefaultFOV )
-				Other.FovAngle = Other.DefaultFOV;
-		}
-	}
-	Other.DesiredFOV = Other.FovAngle;
-	if( MyCameraAct!=None )
-	{
-		if( Other.bBehindView && Other.ViewTarget==MyCameraAct )
-		{
-			Other.bBehindView = False;
-			bUseBehindView = !bUseBehindView;
-			ServerSetBehindView(bUseBehindView);
-			SaveConfig();
+			Other.DesiredFOV += DeltaTime*60;
+			if( Other.DesiredFOV > Other.DefaultFOV )
+				Other.DesiredFOV = Other.DefaultFOV;
 		}
 	}
 }
-simulated function UpdateDriverInput( float Delta )
-{
-	local rotator R;
-
-	if( Level.NetMode!=NM_DedicatedServer )
-	{
-		R.Yaw = VehicleYaw;
-		if( PitchMeshActor==None )
-			R.Pitch = VehiclePitch;
-		if( Rotation!=R )
-			SetRotation(R);
-		if( PitchMeshActor!=None )
-		{
-			R.Pitch = VehiclePitch;
-			if( PitchMeshActor.Rotation!=R )
-				PitchMeshActor.SetRotation(R);
-		}
-	}
-	if( Driver!=None && (Level.NetMode!=NM_Client || IsNetOwner(Driver)) )
-	{
-		if( PlayerPawn(Driver)==None )
-		{
-			if( Driver.Target!=None )
-				ViewPos = Driver.Target.Location;
-			else if( Driver.FaceTarget!=None )
-				ViewPos = Driver.FaceTarget.Location;
-			else ViewPos = Driver.Focus;
-		}
-		else ViewPos = CalcPlayerAimPos();
-	}
-	if( !bDriving )
-		Return;
-	R = rotator(ViewPos-Location);
-	VehicleYaw = CalcTurnSpeed(TurnSpeed,VehicleYaw,R.Yaw);
-	VehiclePitch = CalcTurnSpeed(TurnSpeed,VehiclePitch,R.Pitch);
-}
+simulated function UpdateDriverInput( float Delta );
 simulated function ServerPerformMove( int InRise, int InTurn, int InAccel );
 
 // Nothing here to constantly replicate.
@@ -113,22 +45,8 @@ simulated function bool CheckOnGround()
 function ReadBotInput( float Delta );
 simulated function Bump( Actor Other );
 
-simulated function AttachmentsTick( float Delta )
-{
-	if( PitchMeshActor!=None )
-		PitchMeshActor.Move(Location+(PitchMeshOffset >> Rotation)-PitchMeshActor.Location);
-}
-
 defaultproperties
 {
-      TurnSpeed=18000.000000
-      MaxZoomInRate=30.000000
-      PitchLimit=(Max=15000,Min=-10000)
-      PitchViewActor=None
-      PitchMeshOffset=(X=0.000000,Y=0.000000,Z=0.000000)
-      ViewPos=(X=0.000000,Y=0.000000,Z=0.000000)
-      VehiclePitch=0
-      PitchMeshActor=None
       Health=300
       bShouldRepVehYaw=False
       bStationaryTurret=True
