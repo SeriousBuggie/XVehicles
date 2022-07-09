@@ -663,7 +663,7 @@ function TraceProcess( actor A, vector HitLocation, vector HitNormal, byte Mode)
 			if ( !A.bIsPawn && !A.IsA('Carcass') )
 				spawn(class'UT_SpriteSmokePuff',,,HitLocation+HitNormal*9);
 			else
-            			A.PlaySound(Sound'ChunkHit',, 4.0,,100);
+				A.PlaySound(Sound'ChunkHit',, 4.0,,100);
 		}
 
 		A.TakeDamage(WeapSettings[Mode].HitDamage,WeaponController,HitLocation,WeapSettings[Mode].HitMomentum*Normal(HitLocation-Location), WeapSettings[Mode].HitType);
