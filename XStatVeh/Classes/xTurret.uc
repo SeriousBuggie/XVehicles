@@ -13,17 +13,6 @@ Begin:
 	GoToState('EmptyVehicle');
 }
 
-function bool HealthTooLowFor(Pawn Other)
-{
-	local Bot Bot;
-	if (Super.HealthTooLowFor(Other))
-		return true;
-	Bot = Bot(Other);
-	if (Bot == None || Bot.Orders == 'Defend')
-		return false;
-	return true;
-}
-
 defaultproperties
 {
       Health=500

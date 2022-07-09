@@ -43,7 +43,22 @@ simulated function bool CheckOnGround()
 
 // No inputs for bots!
 function ReadBotInput( float Delta );
-simulated function Bump( Actor Other );
+
+function bool HealthTooLowFor(Pawn Other)
+{
+	local Bot Bot;
+	if (Super.HealthTooLowFor(Other))
+		return true;
+	Bot = Bot(Other);
+	if (Bot == None)
+		return false;	
+	if (Bot.Orders != 'Defend' && Bot.Orders != 'Hold')
+		return true;
+	if (Bot.OrderObject == None || VSize(Bot.OrderObject.Location - Location) > 2000 || 
+		!FastTrace(Bot.OrderObject.Location))
+		return true;
+	return false;
+}
 
 defaultproperties
 {
