@@ -13,8 +13,6 @@ var byte TracerCount, PuffSide;
 auto state StartingUp
 {
 Begin:
-	if (OwnerVehicle != None)
-		ChangeColor();
 	PlaySound(Sound'CybTransformSnd',,12.0,,1200.0);
 	PlayAnim('Transform', 5.0);
 	Sleep(0.1);
@@ -25,11 +23,12 @@ simulated function Tick(float delta)
 {
 	local bool bInside;
 	Super.Tick(delta);
-	if (OwnerVehicle != None && CurrentTeamColor != OwnerVehicle.CurrentTeam)
+	if (OwnerVehicle != None && (Core == None || CurrentTeamColor != OwnerVehicle.CurrentTeam))
 		ChangeColor();
 	if (Level.NetMode != NM_DedicatedServer)
 	{
-		bInside = WeaponController != None && (bNetOwner || Level.NetMode == NM_Standalone);		if (bInside != (MultiSkins[2] == Texture'FlakAmmoLED'))		{			if (bInside)				MultiSkins[2] = Texture'FlakAmmoLED';			else				MultiSkins[2] = Core;		}
+		bInside = PlayerPawn(WeaponController) != None && 
+			(PlayerPawn(WeaponController).Player != None || Level.NetMode == NM_Standalone);		if (bInside != (MultiSkins[2] == Texture'FlakAmmoLED'))		{			if (bInside)				MultiSkins[2] = Texture'FlakAmmoLED';			else				MultiSkins[2] = Core;		}
 	}
 }
 
