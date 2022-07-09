@@ -40,31 +40,31 @@ simulated function ChangeColor()
 	switch (CurrentTeamColor)
 	{
 		case 1: 
-			Core = Texture'CybotCoreBlue'; 
-			Laser = Texture'SentinelLaserFXBlue';
-			Beam = Texture'CybProjCorBlue';
+			Core = Texture'XVehicles.Skins.CybotCoreBlue'; 
+			Laser = Texture'XVehicles.LaserFX.SentinelLaserFXBlue';
+			Beam = Texture'XVehicles.Coronas.CybProjCorBlue';
 			break;
 		case 2: 
-			Core = Texture'CybotCoreGreen'; 
-			Laser = Texture'SentinelLaserFXGreen'; 
-			Beam = Texture'CybProjCorGreen';
+			Core = Texture'XVehicles.Skins.CybotCoreGreen'; 
+			Laser = Texture'XVehicles.LaserFX.SentinelLaserFXGreen'; 
+			Beam = Texture'XVehicles.Coronas.CybProjCorGreen';
 			break;
 		case 3: 
-			Core = Texture'CybotCoreYellow'; 
-			Laser = Texture'SentinelLaserFXYellow'; 
-			Beam = Texture'CybProjCorYellow';
+			Core = Texture'XVehicles.Skins.CybotCoreYellow'; 
+			Laser = Texture'XVehicles.LaserFX.SentinelLaserFXYellow'; 
+			Beam = Texture'XVehicles.Coronas.CybProjCorYellow';
 			break;
 		case 0: 
 		default: 
-			Core = Texture'CybotCoreRed'; 
-			Laser = Texture'SentinelLaserFXRed'; 
-			Beam = Texture'CybProjCorRed';
+			Core = Texture'XVehicles.Skins.CybotCoreRed'; 
+			Laser = Texture'XVehicles.LaserFX.SentinelLaserFXRed'; 
+			Beam = Texture'XVehicles.Coronas.CybProjCorRed';
 			break;
 	}
 	MultiSkins[2] = Core;
 	if (PitchPart != None)
 	{
-		PitchPart.MultiSkins[LaserTexture] = Laser;
+		PitchPart.MultiSkins[LaserTexture] = Core;
 		PitchPart.MultiSkins[LaserTexture + 1] = Laser;
 	}
 }
@@ -161,8 +161,8 @@ defaultproperties
       Texture=Texture'XStatVeh.Skins.CybotMetal'
       Mesh=LodMesh'XStatVeh.CybSentinelTurret'
       DrawScale=5.000000
-      MultiSkins(1)=Texture'XStatVeh.Skins.CybotSk'
-      MultiSkins(2)=Texture'XStatVeh.Skins.CybotCoreRed'
+      MultiSkins(1)=Texture'XVehicles.Skins.CybotSk'
+      MultiSkins(2)=Texture'XVehicles.Skins.CybotCoreRed'
       CollisionRadius=70.000000
       CollisionHeight=45.000000
 }

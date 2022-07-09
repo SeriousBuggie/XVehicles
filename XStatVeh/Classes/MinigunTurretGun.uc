@@ -18,5 +18,5 @@ defaultproperties
       Texture=Texture'XStatVeh.Skins.CybotMetal'
       Mesh=LodMesh'XStatVeh.CybSentinelGun'
       DrawScale=5.000000
-      MultiSkins(2)=Texture'XStatVeh.Skins.CybotCoreRed'
+      MultiSkins(2)=Texture'XVehicles.Skins.CybotCoreRed'
 }

@@ -33,7 +33,7 @@ defaultproperties
       Mesh=LodMesh'XStatVeh.CybSentinelBase'
       DrawScale=5.000000
       AmbientGlow=17
-      MultiSkins(1)=Texture'XStatVeh.Skins.CybotSk'
+      MultiSkins(1)=Texture'XVehicles.Skins.CybotSk'
       CollisionRadius=70.000000
       CollisionHeight=60.000000
 }

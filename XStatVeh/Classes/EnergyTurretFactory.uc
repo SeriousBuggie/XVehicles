@@ -11,8 +11,8 @@ defaultproperties
       Mesh=LodMesh'XStatVeh.CybDualSentinelGun'
       DrawScale=6.000000
       AmbientGlow=17
-      MultiSkins(3)=Texture'XStatVeh.Skins.CybotCoreRed'
-      MultiSkins(4)=Texture'XStatVeh.Skins.CybotCoreRed'
+      MultiSkins(3)=Texture'XVehicles.Skins.CybotCoreRed'
+      MultiSkins(4)=Texture'XVehicles.LaserFX.SentinelLaserFXRed'
       CollisionRadius=84.000000
       CollisionHeight=72.000000
 }

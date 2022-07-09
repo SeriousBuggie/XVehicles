@@ -62,24 +62,24 @@ function ChangeColor()
 	switch (CurrentTeam)
 	{
 		case 1: 
-			Core = Texture'CybotCoreBlue'; 
-			Laser = Texture'SentinelLaserFXBlue';
+			Core = Texture'XVehicles.Skins.CybotCoreBlue'; 
+			Laser = Texture'XVehicles.LaserFX.SentinelLaserFXBlue';
 			Proj = Class'CybProjB';
 			break;
 		case 2: 
-			Core = Texture'CybotCoreGreen'; 
-			Laser = Texture'SentinelLaserFXGreen'; 
+			Core = Texture'XVehicles.Skins.CybotCoreGreen'; 
+			Laser = Texture'XVehicles.LaserFX.SentinelLaserFXGreen'; 
 			Proj = Class'CybProjG';
 			break;
 		case 3: 
-			Core = Texture'CybotCoreYellow'; 
-			Laser = Texture'SentinelLaserFXYellow'; 
+			Core = Texture'XVehicles.Skins.CybotCoreYellow'; 
+			Laser = Texture'XVehicles.LaserFX.SentinelLaserFXYellow'; 
 			Proj = Class'CybProjY';
 			break;
 		case 0: 
 		default: 
-			Core = Texture'CybotCoreRed'; 
-			Laser = Texture'SentinelLaserFXRed'; 
+			Core = Texture'XVehicles.Skins.CybotCoreRed'; 
+			Laser = Texture'XVehicles.LaserFX.SentinelLaserFXRed'; 
 			Proj = Class'CybProj';
 			break;
 	}
@@ -134,9 +134,9 @@ defaultproperties
       DrawScale=8.000000
       PrePivot=(Z=-26.000000)
       AmbientGlow=17
-      MultiSkins(1)=Texture'XChopVeh.Skins.CybotSk'
-      MultiSkins(4)=Texture'XChopVeh.Skins.CybotCoreRed'
-      MultiSkins(5)=Texture'XChopVeh.LaserFX.SentinelLaserFXRed'
+      MultiSkins(1)=Texture'XVehicles.Skins.CybotSk'
+      MultiSkins(4)=Texture'XVehicles.Skins.CybotCoreRed'
+      MultiSkins(5)=Texture'XVehicles.LaserFX.SentinelLaserFXRed'
       SoundRadius=96
       SoundVolume=192
       SoundPitch=56
