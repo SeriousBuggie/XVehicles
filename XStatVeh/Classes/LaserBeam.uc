@@ -4,6 +4,7 @@
 class LaserBeam expands ShockBeam;
 
 const MoveSize = 135.0;
+const NetMul = 10.0;
 
 simulated function Tick( float DeltaTime )
 {
@@ -17,12 +18,13 @@ simulated function Tick( float DeltaTime )
 		if (Owner != None && Owner.Class != Class)
 		{
 			End = Location + vector(Rotation)*80000;
-			if (Trace(HL, HN, End, Location + MoveAmount, true) == None)
+			if (Trace(HL, HN, End, Location + MoveAmount/NetMul, true) == None)
 				HL = End;
 			NumPuffs = VSize(HL - Location)/MoveSize - 1;
 		}
-		if (NumPuffs > 0)		{			r = Spawn(Class,self,,Location+MoveAmount);			if (r != None)			{				r.RemoteRole = ROLE_None;				r.NumPuffs = NumPuffs - 1;
-				r.Texture = Texture;			}		}
+		if (NumPuffs > 0)		{			r = Spawn(Class,self,,Location + MoveAmount/NetMul);			if (r != None)			{				r.RemoteRole = ROLE_None;				r.NumPuffs = NumPuffs - 1;
+				r.Texture = Texture;
+				r.MoveAmount = MoveAmount;			}		}
 		NumPuffs = 0;
 	}
 }
@@ -30,13 +32,13 @@ simulated function Tick( float DeltaTime )
 simulated function PostBeginPlay()
 {
 	local rotator R;
-	MoveAmount = vector(Rotation)*MoveSize;
+	MoveAmount = vector(Rotation)*MoveSize*NetMul;
 	if ( Level.NetMode != NM_DedicatedServer )
 	{
 		R = Rotation;
 		R.Roll = Rand(65535);
 		SetRotation(R);
-	}
+	}	
 }
 
 defaultproperties

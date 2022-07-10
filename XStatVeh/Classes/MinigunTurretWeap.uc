@@ -28,7 +28,8 @@ simulated function Tick(float delta)
 	if (Level.NetMode != NM_DedicatedServer)
 	{
 		bInside = PlayerPawn(WeaponController) != None && 
-			(PlayerPawn(WeaponController).Player != None || Level.NetMode == NM_Standalone);		if (bInside != (MultiSkins[2] == Texture'FlakAmmoLED'))		{			if (bInside)				MultiSkins[2] = Texture'FlakAmmoLED';			else				MultiSkins[2] = Core;		}
+			(PlayerPawn(WeaponController).Player != None || Level.NetMode == NM_Standalone || 
+			(OwnerVehicle != None && OwnerVehicle.VehicleState != None && OwnerVehicle.VehicleState.bHidden));		if (bInside != (MultiSkins[2] == Texture'FlakAmmoLED'))		{			if (bInside)				MultiSkins[2] = Texture'FlakAmmoLED';			else				MultiSkins[2] = Core;		}
 	}
 }
 
