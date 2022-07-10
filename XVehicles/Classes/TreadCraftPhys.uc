@@ -373,6 +373,11 @@ simulated function UpdateDriverInput( float Delta )
 	//Treads control
 	if (Level.NetMode != NM_DedicatedServer)
 		UpdateTreads(Delta);
+		
+	if (!bOldOnGround && bOnGround) // Landed just now
+	{ // clear velocity part which orthogonal to floor
+		Velocity -= ActualFloorNormal*(Velocity dot ActualFloorNormal);
+	}
 	
 	// Update vehicle speed
 	if (Accel != 0)

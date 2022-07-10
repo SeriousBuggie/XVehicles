@@ -213,6 +213,11 @@ simulated function UpdateDriverInput( float Delta )
 				FMin(FMax(Region.Zone.ZoneGroundFriction, WheelsTraction), 1.0);
 		if (DesTurn != 0)		{			VehicleYaw += DesTurn;			if (!bCameraOnBehindView && Driver!=None)				Driver.ViewRotation.Yaw += DesTurn;		}
 	}
+	
+	if (!bOldOnGround && bOnGround) // Landed just now
+	{ // clear velocity part which orthogonal to floor
+		Velocity -= ActualFloorNormal*(Velocity dot ActualFloorNormal);
+	}
 
 	// Update vehicle speed
 	if (Accel != 0)
