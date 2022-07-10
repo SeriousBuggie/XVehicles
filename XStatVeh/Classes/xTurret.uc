@@ -13,6 +13,13 @@ Begin:
 	GoToState('EmptyVehicle');
 }
 
+simulated function PostNetBeginPlay()
+{
+	Super.PostNetBeginPlay();
+	if (VehicleYaw == 0)
+		VehicleYaw = Rotation.Yaw;
+}
+
 defaultproperties
 {
       Health=500
