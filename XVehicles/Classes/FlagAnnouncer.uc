@@ -85,6 +85,8 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch,
 				PlayerPawn(P).ClientPlaySound(Sound);
 }
 
+function ClientVoiceMessage(PlayerReplicationInfo Sender, PlayerReplicationInfo Recipient, name messagetype, byte messageID);
+
 defaultproperties
 {
 }
