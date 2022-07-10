@@ -6,6 +6,7 @@ class EnergyTurretFactory expands VehicleFactory;
 defaultproperties
 {
       VehicleClass=Class'XStatVeh.EnergyTurret'
+      VehicleRespawnTime=30.000000
       AnimSequence="UnTransform"
       Texture=Texture'XStatVeh.Skins.CybotMetal'
       Mesh=LodMesh'XStatVeh.CybDualSentinelGun'
