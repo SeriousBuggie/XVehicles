@@ -50,8 +50,8 @@ function bool HealthTooLowFor(Pawn Other)
 	if (Super.HealthTooLowFor(Other))
 		return true;
 	Bot = Bot(Other);
-	if (Bot == None)
-		return false;	
+	if (Bot == None || Bot.Orders != 'Freelance')
+		return false;
 	if (Bot.Orders != 'Defend' && Bot.Orders != 'Hold')
 		return true;
 	if (Bot.OrderObject == None || VSize(Bot.OrderObject.Location - Location) > 2000 || 
