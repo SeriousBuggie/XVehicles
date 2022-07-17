@@ -461,7 +461,7 @@ function float GetProjSpeed(byte Mode, vector P, rotator R)
 
 function FireTurret( byte Mode, optional bool bForceFire )
 {
-	local vector P, Pdual;
+	local vector P, Pdual, L;
 	local rotator R,Rdual,TR,PR;
 	local vector RealFireOffset;
 	local vector E,S,HL,HN;
@@ -554,9 +554,10 @@ function FireTurret( byte Mode, optional bool bForceFire )
 		PlayAnim(WeapSettings[Mode].FireAnim1, WeapSettings[Mode].RefireRate, 0.05);
 
 	if (PitchPart != None)
-		P = PitchPart.Location;
+		L = PitchPart.Location;
 	else
-		P = Location;
+		L = Location;
+	P = L;
 
 	Pdual = P;
 	P+=(RealFireOffset >> R);
@@ -592,8 +593,16 @@ function FireTurret( byte Mode, optional bool bForceFire )
 	}
 
 	if( bPhysicalGunAimOnly || TR.Yaw>3500 || TR.Yaw<-3500 || TR.Pitch>3500 || TR.Pitch<-3500 ) {
-		R = PR;
-		Rdual = PR;
+		if (OwnerVehicle.Trace(HL, HN, L + vector(PR)*40000, L, True) != None)
+		{
+			R = rotator(HL - P);
+			Rdual = rotator(HL - Pdual);
+		}
+		else
+		{
+			R = PR;
+			Rdual = PR;
+		}
 	}
 	Instigator = WeaponController;
 	

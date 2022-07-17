@@ -1782,7 +1782,7 @@ local VehicleAttachment vat;
 */
 }
 
-simulated function CheckBase(Actor PossibleBase, Actor Ac[4])
+simulated function CheckBase(Actor PossibleBase, optional Actor Ac[4])
 {
 	local int i, j, score, best, all;
 	
@@ -4313,7 +4313,7 @@ defaultproperties
       bClientBlewUp=False
       bHadADriver=False
       ResetTimer=-1.000000
-      BotAttract=None
+      botattract=None
       bHasMoveTarget=False
       MoveDest=(X=0.000000,Y=0.000000,Z=0.000000)
       MoveTimer=0.000000

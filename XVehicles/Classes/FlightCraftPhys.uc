@@ -4,6 +4,7 @@ Class FlightCraftPhys extends HoverCraftPhys;
 var() float MaxFlightSpeed,FlyingTurnSpeed,MinFlyingSpeed;
 var int VehiclePitch;
 var bool bReleasedAccel;
+var float CurTurnSpeed;
 
 replication
 {
@@ -241,6 +242,7 @@ defaultproperties
       VehiclePitch=0
       bReleasedAccel=False
       CurTurnSpeed=600.000000
+      JumpDelay=0.000000
       WAccelRate=500.000000
       Health=300
       VehicleName="Flight Craft"
