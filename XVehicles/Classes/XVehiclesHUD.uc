@@ -61,6 +61,9 @@ simulated function CheckHUD()
 
 simulated function PostRender(canvas Canvas)
 {
+	if (NextHUDMutator != None)
+		NextHUDMutator.PostRender(Canvas);
+		
 	if (MyHUD == None)
 		return;
 	if ( MyHUD.PawnOwner == MyHUD.PlayerOwner )
