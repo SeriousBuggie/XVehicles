@@ -6,7 +6,11 @@ class MantaGun expands xHoverVehWeapon;
 function FireTurret( byte Mode, optional bool bForceFire )
 {
 	if (Mode == 1)
-		return;
+	{
+		if (PLayerPawn(WeaponController) != None)
+			return;
+		Mode = 0;
+	}
 	Super.FireTurret(Mode);
 }
 

@@ -61,6 +61,8 @@ defaultproperties
       ExplosionGFX(0)=(bHaveThisExplFX=True,ExplSize=6.750000)
       ExplosionGFX(2)=(bHaveThisExplFX=True,ExplSize=1.750000,bUseCoordOffset=True,bSymetricalCoordY=True,ExplFXOffSet=(X=100.000000,Y=80.000000,Z=-5.000000))
       ExplosionGFX(3)=(bHaveThisExplFX=True,ExplSize=1.750000,bUseCoordOffset=True,bSymetricalCoordY=True,ExplFXOffSet=(X=-64.000000,Y=80.000000,Z=-5.000000))
+      bEnableShield=True
+      ShieldLevel=0.650000
       LODBias=1.000000
       Texture=Texture'XHoverVeh.pics.fan1'
       Mesh=LodMesh'XHoverVeh.Manta'

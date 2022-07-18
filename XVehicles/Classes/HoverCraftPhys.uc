@@ -60,7 +60,6 @@ simulated function bool CheckOnGround()
 	}
 	else
 	{	
-		
 		if (RepulsorTracker == None)
 			RepulsorTracker = Spawn(class'RepulsorTracker', self);
 		
@@ -163,7 +162,8 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 		if (bOnGround)
 			X = SetUpNewMVelocity(X, ActualFloorNormal, 0);
 		// dont slow down if run over
-		bNeedDuck = Driver.Enemy != None && VSize(Driver.Enemy.Location - MoveDest) <= 40;
+		bNeedDuck = Driver.Enemy != None && DriverWeapon(Driver.Enemy.Weapon) == None &&
+			VSize(Driver.Enemy.Location - MoveDest) <= CollisionRadius;
 		if (!bNeedDuck)
 			X -= Velocity;
 		else if (!bDuckFire)
@@ -187,9 +187,8 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 simulated function UpdateDriverInput( float Delta )
 {
 	local byte PitchDif;
-	local float EngP;
 	local vector Ac,End,Start,HL,HN;
-	local float DeAcc, DeAccRat, GoDown, DesiredHoverHeight, Scale, BigScale;
+	local float EngP, DeAcc, DeAccRat, GoDown, DesiredHoverHeight, Scale, BigScale;
 	local rotator R;
 
 	if (bEngDynSndPitch)
@@ -216,9 +215,10 @@ simulated function UpdateDriverInput( float Delta )
 		
 		if (PlayerPawn(Driver) != None && 
 			(Level.NetMode != NM_Client || IsNetOwner(Owner)))		{			if (((Rising < 0 && !bDuck) ||				(Driver.bAltFire != 0 && !bDuckFire)) &&				DuckSound != None)				PlayOwnedSound(DuckSound);			bDuck = Rising < 0;			bDuckFire = Driver.bAltFire != 0;		}				if (bDuck || bDuckFire)		{							DesiredHoverHeight -= HoverDuck;			GoDown = 8;			Scale *= 3;			BigScale *= 3;		}		if (bOnGround && LastJumpTime < Level.TimeSeconds - 0.4)		{			DesiredHoverHeight -= ActualHoverHeight;			if (Abs(DesiredHoverHeight) < 2)				Velocity.Z = 0;			else				Velocity.Z = DesiredHoverHeight*FMax(DesiredHoverHeight*DesiredHoverHeight*BigScale, Scale)*Delta;
-			if (Level.TimeSeconds - DriveFrom > 0.4)
-				Velocity.Z = FMin(Velocity.Z, HoveringHeight/0.4);
-						}
+			BigScale = 5;
+			if (Level.TimeSeconds - DriveFrom < 0.4)
+				BigScale = 2.5; // *2.5 = /0.4
+			Velocity.Z = FMin(Velocity.Z, HoveringHeight*BigScale);		}
 	}
 	else if (bOnGround)
 		Velocity -= ActualFloorNormal*(ActualFloorNormal dot Velocity);
@@ -265,7 +265,7 @@ simulated function UpdateDriverInput( float Delta )
 		Return;
 	}
 
-	Ac = GetAccelDir(Turning,Rising,Accel);
+	Ac = GetAccelDir(Turning, Rising, Accel);
 	if (Ac dot Velocity > 0)
 		Ac *= WAccelRate;
 	else
