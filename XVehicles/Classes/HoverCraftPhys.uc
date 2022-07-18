@@ -21,6 +21,9 @@ var bool bDuck, bDuckFire;
 
 var RepulsorTracker RepulsorTracker;
 
+const HoverGap = 50.0f;
+const HoverDuck = 30.0f;
+
 replication
 {
 	// Variables the server should send to the client.
@@ -151,15 +154,25 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 {
 	local rotator R;
 	local vector X,Y,Z;
+	local bool bNeedDuck;
 
-	if( PlayerPawn(Driver)==None )
-	{
-		X = (MoveDest-Location);
+	if (Driver != None && PlayerPawn(Driver) == None)
+	{ // bot drive code
+		X = MoveDest - Location;
 		X.Z = 0;
-		X = Normal(X);
-		if( bOnGround )
-			Return SetUpNewMVelocity(X,ActualFloorNormal,0);
-		else Return X;
+		if (bOnGround)
+			X = SetUpNewMVelocity(X, ActualFloorNormal, 0);
+		// dont slow down if run over
+		bNeedDuck = Driver.Enemy != None && VSize(Driver.Enemy.Location - MoveDest) <= 40;
+		if (!bNeedDuck)
+			X -= Velocity;
+		else if (!bDuckFire)
+			PlayOwnedSound(DuckSound);
+		bDuckFire = bNeedDuck;
+		// X dot X == VSize(X)*VSize(X)
+		if ((X dot X) > 25 /* 5*5 */)
+			return Normal(X);
+		return vect(0,0,0);
 	}
 	R.Yaw = VehicleYaw;
 	GetAxes(R,X,Y,Z);
@@ -196,12 +209,13 @@ simulated function UpdateDriverInput( float Delta )
 	GoDown = 1;
 	if (bDriving || bHoverWhenNotDriving)
 	{
-		DesiredHoverHeight = HoveringHeight - 50;
+		DesiredHoverHeight = HoveringHeight - HoverGap;
 		GoDown = 0.75;
 		Scale = 1000;
 		BigScale = 0.2;
 		
-		if ((Level.NetMode != NM_Client || IsNetOwner(Owner)))		{			if (((Rising < 0 && !bDuck) ||				(Driver.bAltFire != 0 && !bDuckFire)) &&				DuckSound != None)				PlayOwnedSound(DuckSound);			bDuck = Rising < 0;			bDuckFire = Driver.bAltFire != 0;		}				if (bDuck || bDuckFire)		{							DesiredHoverHeight -= 30;			GoDown = 8;			Scale *= 3;			BigScale *= 3;		}		if (bOnGround && LastJumpTime < Level.TimeSeconds - 0.4)		{			DesiredHoverHeight -= ActualHoverHeight;			if (Abs(DesiredHoverHeight) < 2)				Velocity.Z = 0;			else				Velocity.Z = DesiredHoverHeight*FMax(DesiredHoverHeight*DesiredHoverHeight*BigScale, Scale)*Delta;
+		if (PlayerPawn(Driver) != None && 
+			(Level.NetMode != NM_Client || IsNetOwner(Owner)))		{			if (((Rising < 0 && !bDuck) ||				(Driver.bAltFire != 0 && !bDuckFire)) &&				DuckSound != None)				PlayOwnedSound(DuckSound);			bDuck = Rising < 0;			bDuckFire = Driver.bAltFire != 0;		}				if (bDuck || bDuckFire)		{							DesiredHoverHeight -= HoverDuck;			GoDown = 8;			Scale *= 3;			BigScale *= 3;		}		if (bOnGround && LastJumpTime < Level.TimeSeconds - 0.4)		{			DesiredHoverHeight -= ActualHoverHeight;			if (Abs(DesiredHoverHeight) < 2)				Velocity.Z = 0;			else				Velocity.Z = DesiredHoverHeight*FMax(DesiredHoverHeight*DesiredHoverHeight*BigScale, Scale)*Delta;
 			if (Level.TimeSeconds - DriveFrom > 0.4)
 				Velocity.Z = FMin(Velocity.Z, HoveringHeight/0.4);
 						}
@@ -272,8 +286,22 @@ function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 
 // Returns the bot turning value for target
 function int ShouldTurnFor( vector AcTarget, optional float YawAdjust, optional float DeadZone )
-{
+{ // handled inside GetAccelDir
 	Return 0;
+}
+
+simulated function PostBeginPlay()
+{
+	local int i;
+	local float Avg;
+	Super.PostBeginPlay();
+	if (VehicleAI != None)
+	{
+		for (i = 0; i < ArrayCount(Repulsor); i++)
+			Avg += Repulsor[i].Z;
+		VehicleAI.AirFlyScale = (HoveringHeight - HoverGap - 
+			Avg/ArrayCount(Repulsor) - class'NavigationPoint'.default.CollisionHeight)/CollisionHeight;
+	}
 }
 
 defaultproperties
