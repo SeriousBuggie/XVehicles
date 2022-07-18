@@ -239,11 +239,15 @@ function bool PawnCanDrive( Pawn Other )
 		return false;
 	if (Other.IsInState('Dying'))
 		return false;
+	if (PlayerPawn(Other) == None && HasFlag(Other) && VehicleOwner.DropFlag != VehicleOwner.EDropFlag.DF_None)
+		return false;
 	Return Other.bIsPlayer;
 }
 function bool PawnCanPassenge( Pawn Other, byte SeatNumber )
 {
 	if (Other.IsInState('Dying'))
+		return false;
+	if (PlayerPawn(Other) == None && HasFlag(Other) && VehicleOwner.DropFlag == VehicleOwner.EDropFlag.DF_All)
 		return false;
 	Return Other.bIsPlayer;
 }
