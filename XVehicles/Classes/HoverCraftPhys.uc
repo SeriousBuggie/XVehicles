@@ -52,7 +52,7 @@ simulated function bool CheckOnGround()
 		HN.X = CollisionRadius;
 		HN.Y = HN.X;
 		PossibleBase = Trace(HL, HN, HL, Location, True, HN);
-		bIsOnGround = PossibleBase != None;
+		bIsOnGround = PossibleBase != None && HN.Z >= 0.7;
 		if (!bIsOnGround)
 			HN = vect(0,0,1);
 		ActualFloorNormal = HN;
@@ -88,7 +88,10 @@ simulated function bool CheckOnGround()
 			Dest.Z -= HoveringHeight;
 			if (Trace(HL, HN, Dest, Rep, false) == None)
 				HL = Dest;
-			else {
+			else if (HN.Z < 0.7) // preven climb on walls by repulsors
+				continue;
+			else
+			{
 				bIsOnGround = true;
 				HL.Z += 0.1; // avoid be on edge
 			}
