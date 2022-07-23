@@ -279,16 +279,15 @@ simulated function UpdateDriverInput( float Delta )
 		Ac *= WAccelRate;
 	else
 		Ac *= WDeAccelRate;
-	if (VSize(Velocity) > MaxHoverSpeed && VSize(Normal(Velocity) - Normal(Ac)) < 0.15)
-		Velocity += Ac*Delta/10;
-	else
-		Velocity += Ac*Delta;
+	Velocity += Ac*Delta;	
+	if (VSize(Velocity) > MaxHoverSpeed)
+		Velocity = Normal(Velocity)*MaxHoverSpeed;
 }
 
 function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 						Vector momentum, name damageType)
 {
-	if (DamageType == 'BumpWall')
+	if (DamageType == 'BumpWall' || DamageType == 'Bump')
 		Damage *= 0.04;
 	Super.TakeDamage(Damage, instigatedBy, hitlocation, momentum, damageType);
 }
