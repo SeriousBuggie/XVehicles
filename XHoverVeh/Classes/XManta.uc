@@ -31,7 +31,7 @@ simulated function ChangeColor()
 defaultproperties
 {
       CurrentTeamColor=0
-      MaxHoverSpeed=2000.000000
+      MaxHoverSpeed=2500.000000
       VehicleTurnSpeed=16000.000000
       HoveringHeight=160.000000
       JumpingHeight=730.000000
