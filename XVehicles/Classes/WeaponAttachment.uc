@@ -1008,15 +1008,12 @@ function rotator GetBotInput( float Delta )
 		else		
 			RepAimPos = WeaponController.Focus;
 	}
-	if (OwnerVehicle.bCanFly && RepAimPos == OwnerVehicle.MoveDest)
+	if (RepAimPos == OwnerVehicle.MoveDest)
 	{
-		S = RepAimPos;
-		S.Z -= OwnerVehicle.CollisionHeight*OwnerVehicle.VehicleAI.AirFlyScale;
-		if (OwnerVehicle.Trace(HL, HN, S, RepAimPos) != None)
-			HL.Z += OwnerVehicle.Driver.CollisionHeight;
-		else
-			HL = S;
-		RepAimPos.Z = HL.Z;
+		if ((WeaponController.bFire > 0 || WeaponController.bAltFire > 0) &&
+			!WeaponController.IsInState('RangedAttack'))
+			WeaponController.StopFiring();
+		if (OwnerVehicle.bCanFly)		{			S = RepAimPos;			S.Z -= OwnerVehicle.CollisionHeight*OwnerVehicle.VehicleAI.AirFlyScale;			if (OwnerVehicle.Trace(HL, HN, S, RepAimPos) != None)				HL.Z += OwnerVehicle.Driver.CollisionHeight;			else				HL = S;			RepAimPos.Z = HL.Z;		}
 	}
 	Return GetAimForPos(RepAimPos);
 }
