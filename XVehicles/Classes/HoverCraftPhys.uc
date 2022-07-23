@@ -164,9 +164,9 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 	if (Driver != None && PlayerPawn(Driver) == None)
 	{ // bot drive code
 		X = MoveDest - Location;
-		X.Z = 0;
-		if (bOnGround)
-			X = SetUpNewMVelocity(X, ActualFloorNormal, 0);
+		Rising = 0;
+		if (X.Z > 100)
+			Rising = 1;
 		// dont slow down if run over
 		bNeedDuck = Driver.Enemy != None && DriverWeapon(Driver.Enemy.Weapon) == None &&
 			VSize(Driver.Enemy.Location - MoveDest) <= CollisionRadius;
@@ -175,6 +175,9 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 		else if (!bDuckFire)
 			PlayOwnedSound(DuckSound);
 		bDuckFire = bNeedDuck;
+		X.Z = 0;
+		if (bOnGround)
+			X = SetUpNewMVelocity(X, ActualFloorNormal, 0);
 		// X dot X == VSize(X)*VSize(X)
 		if ((X dot X) > 25 /* 5*5 */)
 			return Normal(X);
@@ -228,7 +231,7 @@ simulated function UpdateDriverInput( float Delta )
 	}
 	else if (bOnGround)
 		Velocity -= ActualFloorNormal*(ActualFloorNormal dot Velocity);
-	
+
 	if (!bOnGround)
 		Velocity += Region.Zone.ZoneGravity*Delta*VehicleGravityScale*GoDown;
 
