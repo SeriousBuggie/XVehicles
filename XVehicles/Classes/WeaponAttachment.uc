@@ -1037,8 +1037,8 @@ function bool FindEnemy()
 		ViewActor = Bot;
 	For( P=Level.PawnList; P!=None; P=P.NextPawn )
 	{
-		if (P.Health <= 0 || (P.PlayerReplicationInfo != None && 
-			(P.PlayerReplicationInfo.bIsSpectator || P.PlayerReplicationInfo.Team == OwnerVehicle.CurrentTeam)))
+		if (P.Health <= 0 || (P.PlayerReplicationInfo != None && P.PlayerReplicationInfo.bIsSpectator) ||
+			Bot.AttitudeTo(P) > ATTITUDE_Frenzy)
 			continue; // check not spectator and other stuff
 //		if (!Bot.LineOfSightTo(P)) continue;
 		HL = P.Location;
