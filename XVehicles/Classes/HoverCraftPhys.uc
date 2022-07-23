@@ -86,7 +86,8 @@ simulated function bool CheckOnGround()
 			
 			Dest = Rep;
 			Dest.Z -= HoveringHeight;
-			if (Trace(HL, HN, Dest, Rep, false) == None)
+			PossibleBase = Trace(HL, HN, Dest, Rep, false);
+			if (PossibleBase == None)
 				HL = Dest;
 			else if (HN.Z < 0.7) // preven climb on walls by repulsors
 				continue;
@@ -112,6 +113,8 @@ simulated function bool CheckOnGround()
 				}
 				Dist = Rep.Z - Dest.Z;
 			}
+			else if (Mover(PossibleBase) != None && (bDuck || bDuckFire))
+				Mover(PossibleBase).Bump(Driver);
 			RepDist[i] = Dist;
 			PushUp[i] = HoveringHeight - Dist;
 			if (PushUpMax != i && PushUp[PushUpMax] < PushUp[i])
