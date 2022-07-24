@@ -249,6 +249,14 @@ simulated function AttachmentsTick( float Delta )
 	}
 }
 
+function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
+						Vector momentum, name damageType)
+{
+	if (DamageType == 'BumpWall')
+		Damage *= 0.4;
+	Super.TakeDamage(Damage, instigatedBy, hitlocation, momentum, damageType);
+}
+
 defaultproperties
 {
       MaxAirSpeed=1400.000000

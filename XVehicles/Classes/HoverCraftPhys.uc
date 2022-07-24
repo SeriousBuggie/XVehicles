@@ -287,7 +287,7 @@ simulated function UpdateDriverInput( float Delta )
 function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 						Vector momentum, name damageType)
 {
-	if (DamageType == 'BumpWall' || DamageType == 'Bump')
+	if (DamageType == 'BumpWall')
 		Damage *= 0.04;
 	Super.TakeDamage(Damage, instigatedBy, hitlocation, momentum, damageType);
 }

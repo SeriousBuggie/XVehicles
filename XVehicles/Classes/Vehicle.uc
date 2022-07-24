@@ -2260,9 +2260,10 @@ function bool AboutToCrash(out int Accel)
 	local int ret;
 	local Actor A;
 
+	// take 500 as crash speed. So use 490 as check
 	// X dot X == VSize(X)*VSize(X)
 	Dir = Velocity dot Velocity;
-	if (Dir > 84100 /* 290*290 */)
+	if (Dir > 240100 /* 490*490 */)
 	{
 		ret = GetMovementDir();
 		// about to crash with damage?
@@ -2270,7 +2271,7 @@ function bool AboutToCrash(out int Accel)
 			vect(1,1,0)*CollisionRadius + vect(0,0,1)*(CollisionHeight - MaxObstclHeight));
 		if (A == None) 
 			return false;
-		if (A == Level && (HitNormal.Z > 0.5 || Dir <= 240100 /* 490*490 */)) // slope?
+		if (A == Level && HitNormal.Z > 0.5) // slope?
 			return false;
 		if (Pawn(A) != None)
 			return false; // teammates protected and can be taken as passengers, all other must die
@@ -2279,7 +2280,7 @@ function bool AboutToCrash(out int Accel)
 			return false; // crash into enemy non-empty vehicle for make damage
 		if (Vehicle(A) != None && Vehicle(A).CurrentTeam == CurrentTeam && Vehicle(A).Driver != None && 
 			(Normal(Vehicle(A).Velocity) dot Normal(Velocity)) > 0.5 &&
-			VSize(Vehicle(A).Velocity) > VSize(Velocity) - 290)
+			VSize(Vehicle(A).Velocity) > VSize(Velocity) - 490)
 			return false; // not slow down when follow teammate vehicle
 //		Log("Detect crash into" @ A @ HitLocation @ HitNormal);
 		Accel = ret*-1; // brake via reverse
@@ -3207,11 +3208,8 @@ simulated function SingularBump( Actor Other )
 					Other.MoveSmooth(Dir*3); */
 			}
 		}
-		else if (VSize(VeryOldVel[1]) > 300)
-		{
-			if (Role == ROLE_Authority)
-				TakeImpactDamage(VSize(VeryOldVel[1])/(Mass/500),None, "Bump");
-		}
+		else if (Role == ROLE_Authority && VSize(VeryOldVel[1]) > 500)
+			TakeImpactDamage((VSize(VeryOldVel[1]) - 500)/2,None, "Bump");
 	}
 }
 
