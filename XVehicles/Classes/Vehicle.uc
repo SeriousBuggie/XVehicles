@@ -3065,7 +3065,7 @@ simulated function Bump( Actor Other )
 simulated function SingularBump( Actor Other )
 {
 	local vector OtVel,MyVel;
-	local float Sp;
+	local float Sp, Dmg;
 	local vector V, Dir;
 	local vector befOtVel, befMyVel, NVelH;
 	local Pawn RealInstigator, RealOtherInstigator;
@@ -3118,10 +3118,11 @@ simulated function SingularBump( Actor Other )
 		if ((Other.Velocity Dot -Dir) <= 0)
 			RealOtherInstigator = Instigator;
 		
-		if (Role == ROLE_Authority && (Other.Mass/Mass >= 2.0 || Mass/Other.Mass >= 2.0))
-		{	
-			Other.TakeDamage(Sp * (Mass/Other.Mass) / 20,RealInstigator,Location,NVelH*Mass,'Crushed');
-			TakeDamage(Sp * (Other.Mass/Mass) / 20,RealOtherInstigator,Other.Location,NVelH*Other.Mass,'Crushed');
+		if (Role == ROLE_Authority && Sp > 500)
+		{
+			Dmg = (Sp - 500) / 4;
+			Other.TakeDamage(Dmg,RealInstigator,Location,NVelH*Mass,'Crushed');
+			TakeDamage(Dmg,RealOtherInstigator,Other.Location,NVelH*Other.Mass,'Crushed');
 		}
 		
 		if (Other.Mass/Mass >= 2.0 && (Velocity Dot Dir)>0 )
