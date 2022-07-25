@@ -264,4 +264,6 @@ defaultproperties
       bGameRelevant=True
       bCarriedItem=True
       CollisionHeight=24.000000
+      bFixedRotationDir=False
+      RotationRate=(Yaw=0)
 }
