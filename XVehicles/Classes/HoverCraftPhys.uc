@@ -113,8 +113,15 @@ simulated function bool CheckOnGround()
 				}
 				Dist = Rep.Z - Dest.Z;
 			}
-			else if (Mover(PossibleBase) != None && (bDuck || bDuckFire))
-				Mover(PossibleBase).Bump(Driver);
+			else if (Mover(PossibleBase) != None)
+			{
+				if (bDuck || bDuckFire)
+				{
+					if (PossibleBase.IsInState('StandOpenTimed'))						Mover(PossibleBase).Attach(Driver);					else						Mover(PossibleBase).Bump(Driver);
+				}
+				if (PossibleBase.Velocity.Z > 0 && PossibleBase.Velocity.Z > Velocity.Z)
+					Velocity.Z = PossibleBase.Velocity.Z;
+			}
 			RepDist[i] = Dist;
 			PushUp[i] = HoveringHeight - Dist;
 			if (PushUpMax != i && PushUp[PushUpMax] < PushUp[i])
