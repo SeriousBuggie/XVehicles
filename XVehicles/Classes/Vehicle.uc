@@ -1922,7 +1922,11 @@ simulated function ResetPhysics(Pawn Other)
 	local EPhysics Desired;
 
 	if (PlayerPawn(Other) != None)
+	{
 		Desired = ReqPPPhysics;
+		if (Other.IsInState('PlayerWalking'))
+			Other.GotoState('PlayerFlying');
+	}
 	else if (bCanFly)
 		Desired = PHYS_Flying;
 	else if (SubmarinePhys(self) != None)
