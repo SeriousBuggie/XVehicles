@@ -2261,15 +2261,14 @@ function bool AboutToCrash(out int Accel)
 	local Actor A;
 
 	// take 500 as crash speed. So use 490 as check
-	// X dot X == VSize(X)*VSize(X)
-	Dir = Velocity dot Velocity;
-	if (Dir > 240100 /* 490*490 */)
+	Dir = VSize(Velocity);
+	if (Dir > 490)
 	{
 		ret = GetMovementDir();
 		// about to crash with damage?
-		A = Trace(HitLocation, HitNormal, Location + ret*Dir*vector(Rotation),,true,
+		A = Trace(HitLocation, HitNormal, Location + vector(Rotation)*ret*Dir/2,,true,
 			vect(1,1,0)*CollisionRadius + vect(0,0,1)*(CollisionHeight - MaxObstclHeight));
-		if (A == None) 
+		if (A == None)
 			return false;
 		if (A == Level && HitNormal.Z > 0.5) // slope?
 			return false;
