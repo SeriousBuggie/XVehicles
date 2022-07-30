@@ -1093,7 +1093,7 @@ function RestartPawn(Pawn Other)
 	//
 	// Without this fix, the player gets stuck in state CheatFlying and PHYS_Falling when switching from ghost/fly to walk
 	// As for tanks it make on server player walk in water;
-    if ( PP != None && NetConnection(PP.Player) != None )
+    if ( PP != None && NetConnection(PP.Player) != None && PP.RemoteRole == ROLE_AutonomousProxy )
     {
         OldRole = PP.RemoteRole;
         PP.RemoteRole = ROLE_None;

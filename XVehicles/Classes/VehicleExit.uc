@@ -2,5 +2,5 @@ class VehicleExit expands PathNode;
 
 defaultproperties
 {
-      Texture=Texture'Engine.S_Inventory'
+      Texture=Texture'XVehicles.Icons.S_LiftExit'
 }
