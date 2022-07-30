@@ -176,10 +176,12 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 			Rising = 1;
 		// dont slow down if run over
 		bNeedDuck = Driver.Enemy != None && DriverWeapon(Driver.Enemy.Weapon) == None &&
-			VSize(Driver.Enemy.Location - MoveDest) <= CollisionRadius;
+			VSize(Driver.Enemy.Location - MoveDest) <= CollisionRadius;		
 		if (!bNeedDuck)
 			X -= Velocity;
-		else if (!bDuckFire)
+		if (LiftCenter(Driver.MoveTarget) != None && LiftCenter(Driver.MoveTarget).MyLift != None)
+			bNeedDuck = true;
+		if (bNeedDuck && !bDuckFire)
 			PlayOwnedSound(DuckSound);
 		bDuckFire = bNeedDuck;
 		X.Z = 0;
