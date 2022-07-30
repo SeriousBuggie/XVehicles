@@ -1924,11 +1924,11 @@ simulated function ResetPhysics(Pawn Other)
 	if (PlayerPawn(Other) != None)
 		Desired = ReqPPPhysics;
 	else if (bCanFly)
-		Desired = Phys_Flying;
+		Desired = PHYS_Flying;
 	else if (SubmarinePhys(self) != None)
-		Desired = Phys_Swimming;
+		Desired = PHYS_Swimming;
 	else
-		Desired = Phys_Walking;
+		Desired = PHYS_Walking;
 	if (Other.Physics != Desired)
 		Other.SetPhysics(Desired);
 }
@@ -4324,7 +4324,7 @@ defaultproperties
       SavedMoves=None
       FreeMoves=None
       MyFactory=None
-      ReqPPPhysics=PHYS_None
+      ReqPPPhysics=PHYS_Flying
       VehicleKeyInfoStr=""
       KeysInfo(0)=""
       KeysInfo(1)=""
