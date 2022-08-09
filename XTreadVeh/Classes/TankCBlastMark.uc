@@ -4,6 +4,6 @@ class TankCBlastMark expands Scorch;
 
 defaultproperties
 {
-      Texture=Texture'XTreadVeh.Decals.TankCBlastMark'
-      DrawScale=3.200000
+	Texture=Texture'XTreadVeh.Decals.TankCBlastMark'
+	DrawScale=3.200000
 }

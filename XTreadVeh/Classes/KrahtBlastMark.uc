@@ -4,6 +4,6 @@ class KrahtBlastMark expands Scorch;
 
 defaultproperties
 {
-      Texture=Texture'XTreadVeh.Decals.KrahtBlastMark'
-      DrawScale=3.000000
+	Texture=Texture'XTreadVeh.Decals.KrahtBlastMark'
+	DrawScale=3.000000
 }

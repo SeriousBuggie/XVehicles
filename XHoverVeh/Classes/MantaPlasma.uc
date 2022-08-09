@@ -49,22 +49,22 @@ simulated function Explode(vector HitLocation,vector HitNormal)
 
 defaultproperties
 {
-      AccelerationMagnitude=16000.000000
-      DamageRadius=170.000000
-      speed=500.000000
-      MaxSpeed=7000.000000
-      Damage=30.000000
-      MomentumTransfer=4000
-      MyDamageType="MantaPlasma"
-      ImpactSound=Sound'XHoverVeh.Manta.BioRifleGoo2'
-      ExplosionDecal=Class'Botpack.BoltScorch'
-      RemoteRole=ROLE_SimulatedProxy
-      LifeSpan=1.600000
-      DrawType=DT_Sprite
-      Style=STY_Translucent
-      DrawScale=0.800000
-      AmbientGlow=100
-      bUnlit=True
-      CollisionRadius=12.000000
-      CollisionHeight=12.000000
+	AccelerationMagnitude=16000.000000
+	DamageRadius=170.000000
+	speed=500.000000
+	MaxSpeed=7000.000000
+	Damage=30.000000
+	MomentumTransfer=4000
+	MyDamageType="MantaPlasma"
+	ImpactSound=Sound'XHoverVeh.Manta.BioRifleGoo2'
+	ExplosionDecal=Class'Botpack.BoltScorch'
+	RemoteRole=ROLE_SimulatedProxy
+	LifeSpan=1.600000
+	DrawType=DT_Sprite
+	Style=STY_Translucent
+	DrawScale=0.800000
+	AmbientGlow=100
+	bUnlit=True
+	CollisionRadius=12.000000
+	CollisionHeight=12.000000
 }

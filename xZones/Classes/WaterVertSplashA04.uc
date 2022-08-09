@@ -18,7 +18,7 @@ class WaterVertSplashA04 expands WaterVertSplashA02;
 
 defaultproperties
 {
-      FinalDrawScale=4.000000
-      Mesh=LodMesh'xZones.WaterVertSplashA04'
-      DrawScale=1.000000
+	FinalDrawScale=4.000000
+	Mesh=LodMesh'xZones.WaterVertSplashA04'
+	DrawScale=1.000000
 }

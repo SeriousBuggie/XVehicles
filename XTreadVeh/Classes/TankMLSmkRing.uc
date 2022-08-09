@@ -24,23 +24,23 @@ simulated function PostBeginPlay()
 
 defaultproperties
 {
-      AnimType="Expand"
-      RemoteRole=ROLE_SimulatedProxy
-      LifeSpan=1.250000
-      DrawType=DT_Mesh
-      Style=STY_Translucent
-      Texture=Texture'USmoke.SmkB01'
-      Mesh=LodMesh'XTreadVeh.SmkRing'
-      DrawScale=8.000000
-      ScaleGlow=2.000000
-      bParticles=True
-      bRandomFrame=True
-      MultiSkins(0)=Texture'USmoke.SmkB01'
-      MultiSkins(1)=Texture'USmoke.SmkB02'
-      MultiSkins(2)=Texture'USmoke.SmkB03'
-      MultiSkins(3)=Texture'USmoke.SmkB04'
-      MultiSkins(4)=Texture'USmoke.SmkB05'
-      MultiSkins(5)=Texture'USmoke.SmkB06'
-      MultiSkins(6)=Texture'USmoke.SmkB07'
-      MultiSkins(7)=Texture'USmoke.SmkB08'
+	AnimType="Expand"
+	RemoteRole=ROLE_SimulatedProxy
+	LifeSpan=1.250000
+	DrawType=DT_Mesh
+	Style=STY_Translucent
+	Texture=Texture'USmoke.SmkB01'
+	Mesh=LodMesh'XTreadVeh.SmkRing'
+	DrawScale=8.000000
+	ScaleGlow=2.000000
+	bParticles=True
+	bRandomFrame=True
+	MultiSkins(0)=Texture'USmoke.SmkB01'
+	MultiSkins(1)=Texture'USmoke.SmkB02'
+	MultiSkins(2)=Texture'USmoke.SmkB03'
+	MultiSkins(3)=Texture'USmoke.SmkB04'
+	MultiSkins(4)=Texture'USmoke.SmkB05'
+	MultiSkins(5)=Texture'USmoke.SmkB06'
+	MultiSkins(6)=Texture'USmoke.SmkB07'
+	MultiSkins(7)=Texture'USmoke.SmkB08'
 }

@@ -23,12 +23,12 @@ simulated function Tick( float DeltaTime)
 
 defaultproperties
 {
-      RemoteRole=ROLE_SimulatedProxy
-      LifeSpan=0.500000
-      DrawType=DT_Mesh
-      Style=STY_Translucent
-      Mesh=LodMesh'XTreadVeh.ShraliFastShock'
-      DrawScale=8.600000
-      ScaleGlow=1.800000
-      bUnlit=True
+	RemoteRole=ROLE_SimulatedProxy
+	LifeSpan=0.500000
+	DrawType=DT_Mesh
+	Style=STY_Translucent
+	Mesh=LodMesh'XTreadVeh.ShraliFastShock'
+	DrawScale=8.600000
+	ScaleGlow=1.800000
+	bUnlit=True
 }

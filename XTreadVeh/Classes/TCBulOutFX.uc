@@ -29,14 +29,13 @@ local TCBulOutFX xs;
 
 defaultproperties
 {
-      bReady=False
-      EffectSound1=None
-      Texture=Texture'UExplosionsSet01.ExplE01'
-      DrawScale=1.500000
-      ScaleGlow=1.350000
-      SpriteProjForward=15.000000
-      LightType=LT_Steady
-      LightBrightness=45
-      LightHue=0
-      LightSaturation=48
+	EffectSound1=None
+	Texture=Texture'UExplosionsSet01.ExplE01'
+	DrawScale=1.500000
+	ScaleGlow=1.350000
+	SpriteProjForward=15.000000
+	LightType=LT_Steady
+	LightBrightness=45
+	LightHue=0
+	LightSaturation=48
 }

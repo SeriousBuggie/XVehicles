@@ -64,5 +64,4 @@ local PlayerPawn p;
 
 defaultproperties
 {
-      DamageRadius=0.000000
 }

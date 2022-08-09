@@ -119,17 +119,15 @@ function int ShouldTurnFor( vector AcTarget, optional float YawAdjust, optional 
 
 defaultproperties
 {
-      MaxWaterSpeed=600.000000
-      VehicleTurnSpeed=8000.000000
-      bCanStrafe=False
-      VehiclePitch=0
-      WAccelRate=2000.000000
-      Health=2000
-      bIsWaterResistant=True
-      VehicleName="Submarine"
-      TranslatorDescription="This is a Submarine, press [Fire] or [AltFire] to fire the different firemodes. Use your Strafe keys and Move Forward/Backward keys to strafe/accelerate/deaccelerate. To leave this vehicle, press your [ThrowWeapon] key."
-      VehicleKeyInfoStr="Submarine keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to strafe|%Jump%, %Duck% to move up/down|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%ThrowWeapon% to exit the vehicle"
-      Mesh=LodMesh'UnrealShare.WoodenBoxM'
-      Mass=6000.000000
-      Buoyancy=6000.000000
+	MaxWaterSpeed=600.000000
+	VehicleTurnSpeed=8000.000000
+	WAccelRate=2000.000000
+	Health=2000
+	bIsWaterResistant=True
+	VehicleName="Submarine"
+	TranslatorDescription="This is a Submarine, press [Fire] or [AltFire] to fire the different firemodes. Use your Strafe keys and Move Forward/Backward keys to strafe/accelerate/deaccelerate. To leave this vehicle, press your [ThrowWeapon] key."
+	VehicleKeyInfoStr="Submarine keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to strafe|%Jump%, %Duck% to move up/down|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%ThrowWeapon% to exit the vehicle"
+	Mesh=LodMesh'UnrealShare.WoodenBoxM'
+	Mass=6000.000000
+	Buoyancy=6000.000000
 }

@@ -51,18 +51,17 @@ simulated function ZoneChange( ZoneInfo newZone)
 
 defaultproperties
 {
-      InitDrawScale=1.000000
-      FinalScale=3.000000
-      inWater=False
-      Physics=PHYS_Falling
-      RemoteRole=ROLE_None
-      LifeSpan=1.000000
-      AnimSequence="Expand"
-      DrawType=DT_Mesh
-      Style=STY_Translucent
-      Mesh=LodMesh'XVehicles.WaterTrail'
-      ScaleGlow=1.750000
-      bUnlit=True
-      bBounce=True
-      Buoyancy=10.000000
+	InitDrawScale=1.000000
+	FinalScale=3.000000
+	Physics=PHYS_Falling
+	RemoteRole=ROLE_None
+	LifeSpan=1.000000
+	AnimSequence="Expand"
+	DrawType=DT_Mesh
+	Style=STY_Translucent
+	Mesh=LodMesh'XVehicles.WaterTrail'
+	ScaleGlow=1.750000
+	bUnlit=True
+	bBounce=True
+	Buoyancy=10.000000
 }

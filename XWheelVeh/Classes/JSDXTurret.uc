@@ -52,22 +52,22 @@ local LPlasmaFireFX LPl;
 
 defaultproperties
 {
-      RotatingSpeed=22000.000000
-      BarrelTurnSound=Sound'XWheelVeh.JeepSDX.JeepTurretH'
-      PitchRange=(Max=14000,Min=-10000)
-      TurretPitchActor=Class'XWheelVeh.JSDXGun'
-      PitchActorOffset=(X=-1.875000,Z=28.750000)
-      WeapSettings(0)=(ProjectileClass=Class'XWheelVeh.JSDXLPlasma',FireStartOffset=(X=87.500000,Y=12.500000,Z=24.000000),RefireRate=2.750000,FireAnim1="LeftLightFire",FireAnim2="RightLightFire",FireSound=Sound'XWheelVeh.Fire.JSDXLFire',DualMode=1)
-      WeapSettings(1)=(ProjectileClass=Class'XWheelVeh.JSDXLPlasma',FireStartOffset=(X=87.500000,Y=12.500000,Z=24.000000),RefireRate=1.200000,FireAnim1="DualLightFire",FireSound=Sound'XWheelVeh.Fire.JSDXLDualFire',DualMode=2)
-      bFireRateByAnim=True
-      bLimitPitchByCarTop=True
-      CarTopRange=0.650000
-      CarTopAllowedPitch=(Max=14000,Min=-850)
-      bPhysicalGunAimOnly=True
-      Mesh=LodMesh'XWheelVeh.JSDXTurret'
-      SoundRadius=150
-      SoundVolume=255
-      CollisionRadius=18.000000
-      CollisionHeight=4.000000
-      NetPriority=3.000000
+	RotatingSpeed=22000.000000
+	BarrelTurnSound=Sound'XWheelVeh.JeepSDX.JeepTurretH'
+	PitchRange=(Max=14000,Min=-10000)
+	TurretPitchActor=Class'XWheelVeh.JSDXGun'
+	PitchActorOffset=(X=-1.875000,Y=0.000000,Z=28.750000)
+	WeapSettings(0)=(ProjectileClass=Class'XWheelVeh.JSDXLPlasma',FireStartOffset=(X=87.500000,Y=12.500000,Z=24.000000),RefireRate=2.750000,FireAnim1="LeftLightFire",FireAnim2="RightLightFire",FireSound=Sound'XWheelVeh.Fire.JSDXLFire',DualMode=1)
+	WeapSettings(1)=(ProjectileClass=Class'XWheelVeh.JSDXLPlasma',FireStartOffset=(X=87.500000,Y=12.500000,Z=24.000000),RefireRate=1.200000,FireAnim1="DualLightFire",FireSound=Sound'XWheelVeh.Fire.JSDXLDualFire',DualMode=2)
+	bFireRateByAnim=True
+	bLimitPitchByCarTop=True
+	CarTopRange=0.650000
+	CarTopAllowedPitch=(Max=14000,Min=-850)
+	bPhysicalGunAimOnly=True
+	Mesh=LodMesh'XWheelVeh.JSDXTurret'
+	SoundRadius=150
+	SoundVolume=255
+	CollisionRadius=18.000000
+	CollisionHeight=4.000000
+	NetPriority=3.000000
 }

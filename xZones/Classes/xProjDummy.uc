@@ -2,6 +2,6 @@ class xProjDummy expands Projectile;
 
 defaultproperties
 {
-      bHidden=True
-      LifeSpan=60.000000
+	bHidden=True
+	LifeSpan=60.000000
 }

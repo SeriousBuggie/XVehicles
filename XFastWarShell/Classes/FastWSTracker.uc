@@ -26,8 +26,8 @@ simulated function Tick(float Delta)
 
 defaultproperties
 {
-      bAlwaysRelevant=True
-      RemoteRole=ROLE_SimulatedProxy
-      NetPriority=3.000000
-      NetUpdateFrequency=100.000000
+	bAlwaysRelevant=True
+	RemoteRole=ROLE_SimulatedProxy
+	NetPriority=3.000000
+	NetUpdateFrequency=100.000000
 }

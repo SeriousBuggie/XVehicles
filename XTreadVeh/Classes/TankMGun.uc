@@ -19,5 +19,5 @@ class TankMGun expands xTreadVehAttach;
 
 defaultproperties
 {
-      Mesh=LodMesh'XTreadVeh.TankMGun'
+	Mesh=LodMesh'XTreadVeh.TankMGun'
 }

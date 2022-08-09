@@ -44,22 +44,22 @@ simulated function DelayFX(byte Mode)
 
 defaultproperties
 {
-      MuzzleFXRotation(0)=(Pitch=0,Yaw=0,Roll=20576)
-      MuzzleFXRotation(1)=(Pitch=0,Yaw=0,Roll=-20576)
-      MuzzleFXRotation(2)=(Pitch=0,Yaw=0,Roll=12192)
-      MuzzleFXRotation(3)=(Pitch=0,Yaw=0,Roll=-12192)
-      RotatingSpeed=27000.000000
-      PitchRange=(Max=4600,Min=-1100)
-      bAltFireZooms=True
-      TurretPitchActor=Class'XTreadVeh.TankMLCannon'
-      PitchActorOffset=(X=79.000000,Z=-4.000000)
-      WeapSettings(0)=(ProjectileClass=Class'XTreadVeh.TankMLProj',FireStartOffset=(X=272.000000),RefireRate=3.500000,FireSound=Sound'XTreadVeh.TankML.TankMLFire',FireSndRange=64,FireSndVolume=180,FireDelay=1.000000,FireDelaySnd=Sound'XTreadVeh.TankML.TankMLDelay',FireDelaySndRange=48,FireDelaySndVolume=235)
-      bPhysicalGunAimOnly=True
-      FiringShaking(0)=(bShakeEnabled=True,ShakeRadius=750.000000,shaketime=0.350000,ShakeVertMag=2400.000000,ShakeRollMag=3250.000000)
-      PartMass=1
-      Mesh=LodMesh'XTreadVeh.TankMLTurret'
-      SoundRadius=150
-      SoundVolume=255
-      CollisionRadius=80.000000
-      CollisionHeight=32.000000
+	MuzzleFXRotation(0)=(Roll=20576)
+	MuzzleFXRotation(1)=(Roll=-20576)
+	MuzzleFXRotation(2)=(Roll=12192)
+	MuzzleFXRotation(3)=(Roll=-12192)
+	RotatingSpeed=27000.000000
+	PitchRange=(Max=4600,Min=-1100)
+	bAltFireZooms=True
+	TurretPitchActor=Class'XTreadVeh.TankMLCannon'
+	PitchActorOffset=(X=79.000000,Y=0.000000,Z=-4.000000)
+	WeapSettings(0)=(ProjectileClass=Class'XTreadVeh.TankMLProj',FireStartOffset=(X=272.000000),RefireRate=3.500000,FireSound=Sound'XTreadVeh.TankML.TankMLFire',FireSndRange=64,FireSndVolume=180,FireDelay=1.000000,FireDelaySnd=Sound'XTreadVeh.TankML.TankMLDelay',FireDelaySndRange=48,FireDelaySndVolume=235)
+	bPhysicalGunAimOnly=True
+	FiringShaking(0)=(bShakeEnabled=True,ShakeRadius=750.000000,shaketime=0.350000,ShakeVertMag=2400.000000,ShakeRollMag=3250.000000)
+	PartMass=1
+	Mesh=LodMesh'XTreadVeh.TankMLTurret'
+	SoundRadius=150
+	SoundVolume=255
+	CollisionRadius=80.000000
+	CollisionHeight=32.000000
 }

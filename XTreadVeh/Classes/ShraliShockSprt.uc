@@ -4,8 +4,8 @@ class ShraliShockSprt expands ShraliShock;
 
 defaultproperties
 {
-      DrawType=DT_Sprite
-      Texture=Texture'XTreadVeh.Coronas.ShraliShockSprt'
-      DrawScale=10.550000
-      SpriteProjForward=0.000000
+	DrawType=DT_Sprite
+	Texture=Texture'XTreadVeh.Coronas.ShraliShockSprt'
+	DrawScale=10.550000
+	SpriteProjForward=0.000000
 }

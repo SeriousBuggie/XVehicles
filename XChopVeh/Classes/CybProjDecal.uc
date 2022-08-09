@@ -8,6 +8,6 @@ class CybProjDecal expands NWDecal;
 
 defaultproperties
 {
-      Texture=Texture'Botpack.ripperblast'
-      DrawScale=0.250000
+	Texture=Texture'Botpack.ripperblast'
+	DrawScale=0.250000
 }

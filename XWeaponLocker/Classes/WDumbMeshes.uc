@@ -7,9 +7,8 @@ var class<Weapon> WeaponClass;
 
 defaultproperties
 {
-      WeaponClass=None
-      bStatic=False
-      bStasis=False
-      RemoteRole=ROLE_None
-      DrawType=DT_Mesh
+	bStatic=False
+	bStasis=False
+	RemoteRole=ROLE_None
+	DrawType=DT_Mesh
 }

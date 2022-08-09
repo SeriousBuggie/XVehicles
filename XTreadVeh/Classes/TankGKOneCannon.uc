@@ -19,5 +19,5 @@ class TankGKOneCannon expands xTreadVehAttach;
 
 defaultproperties
 {
-      Mesh=LodMesh'XTreadVeh.TankGKOneCannon'
+	Mesh=LodMesh'XTreadVeh.TankGKOneCannon'
 }

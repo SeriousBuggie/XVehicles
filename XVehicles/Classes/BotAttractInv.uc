@@ -44,18 +44,17 @@ event float BotDesireability( pawn Bot )
 
 defaultproperties
 {
-      VehicleOwner=None
-      bRotatingPickup=False
-      MaxDesireability=10.000000
-      bTrailerPrePivot=True
-      Physics=PHYS_Trailer
-      RemoteRole=ROLE_None
-      DrawType=DT_Sprite
-      Texture=None
-      bGameRelevant=True
-      CollisionRadius=17.000000
-      CollisionHeight=24.000000
-      bFixedRotationDir=False
-      RotationRate=(Yaw=0)
-      DesiredRotation=(Yaw=0)
+	bRotatingPickup=False
+	MaxDesireability=10.000000
+	bTrailerPrePivot=True
+	Physics=PHYS_Trailer
+	RemoteRole=ROLE_None
+	DrawType=DT_Sprite
+	Texture=None
+	bGameRelevant=True
+	CollisionRadius=17.000000
+	CollisionHeight=24.000000
+	bFixedRotationDir=False
+	RotationRate=(Pitch=0,Yaw=0)
+	DesiredRotation=(Pitch=0,Yaw=0)
 }

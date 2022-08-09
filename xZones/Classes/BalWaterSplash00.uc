@@ -53,22 +53,22 @@ auto state IgnoringWorld
 
 defaultproperties
 {
-      FinalDrawScale=0.375000
-      InitSpeedMult=1.100000
-      SplashSnd(0)=Sound'xZones.WaterSplash.WaterSplashSnd01'
-      SplashSnd(1)=Sound'xZones.WaterSplash.WaterSplashSnd02'
-      SplashSnd(2)=Sound'xZones.WaterSplash.WaterSplashSnd03'
-      SplashSnd(3)=Sound'xZones.WaterSplash.WaterSplashSnd04'
-      Physics=PHYS_Falling
-      RemoteRole=ROLE_SimulatedProxy
-      LifeSpan=0.750000
-      DrawType=DT_Mesh
-      Style=STY_Translucent
-      Texture=Texture'xZones.Particles.WSplsh'
-      Mesh=LodMesh'xZones.BalWaterSplash00'
-      DrawScale=0.077500
-      ScaleGlow=1.500000
-      SpriteProjForward=0.000000
-      bUnlit=True
-      bParticles=True
+	FinalDrawScale=0.375000
+	InitSpeedMult=1.100000
+	SplashSnd(0)=Sound'xZones.WaterSplash.WaterSplashSnd01'
+	SplashSnd(1)=Sound'xZones.WaterSplash.WaterSplashSnd02'
+	SplashSnd(2)=Sound'xZones.WaterSplash.WaterSplashSnd03'
+	SplashSnd(3)=Sound'xZones.WaterSplash.WaterSplashSnd04'
+	Physics=PHYS_Falling
+	RemoteRole=ROLE_SimulatedProxy
+	LifeSpan=0.750000
+	DrawType=DT_Mesh
+	Style=STY_Translucent
+	Texture=Texture'xZones.Particles.WSplsh'
+	Mesh=LodMesh'xZones.BalWaterSplash00'
+	DrawScale=0.077500
+	ScaleGlow=1.500000
+	SpriteProjForward=0.000000
+	bUnlit=True
+	bParticles=True
 }

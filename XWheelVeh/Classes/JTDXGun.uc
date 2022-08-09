@@ -5,5 +5,5 @@ class JTDXGun expands JSDXGun;
 
 defaultproperties
 {
-      MultiSkins(1)=Texture'XWheelVeh.Skins.JeepTDXHGunSk'
+	MultiSkins(1)=Texture'XWheelVeh.Skins.JeepTDXHGunSk'
 }

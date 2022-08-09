@@ -30,27 +30,27 @@ simulated function Explode(vector HitLocation, vector HitNormal)
 
 defaultproperties
 {
-      DamageRadius=50.000000
-      speed=2000.000000
-      MaxSpeed=4000.000000
-      Damage=35.000000
-      MomentumTransfer=6000
-      MyDamageType="Energy"
-      RemoteRole=ROLE_SimulatedProxy
-      AmbientSound=Sound'UnrealShare.Dispersion.DispFly'
-      Style=STY_Translucent
-      Mesh=LodMesh'UnrealShare.DispM1'
-      DrawScale=0.937500
-      ScaleGlow=3.000000
-      bUnlit=True
-      MultiSkins(0)=FireTexture'UnrealShare.Effect1.FireEffect1a'
-      MultiSkins(1)=FireTexture'UnrealShare.Effect1.fireeffect1'
-      SoundRadius=80
-      SoundVolume=60
-      LightType=LT_Steady
-      LightEffect=LE_NonIncidence
-      LightBrightness=150
-      LightHue=85
-      LightSaturation=64
-      LightRadius=4
+	DamageRadius=50.000000
+	speed=2000.000000
+	MaxSpeed=4000.000000
+	Damage=35.000000
+	MomentumTransfer=6000
+	MyDamageType="Energy"
+	RemoteRole=ROLE_SimulatedProxy
+	AmbientSound=Sound'UnrealShare.Dispersion.DispFly'
+	Style=STY_Translucent
+	Mesh=LodMesh'UnrealShare.DispM1'
+	DrawScale=0.937500
+	ScaleGlow=3.000000
+	bUnlit=True
+	MultiSkins(0)=FireTexture'UnrealShare.Effect1.FireEffect1a'
+	MultiSkins(1)=FireTexture'UnrealShare.Effect1.fireeffect1'
+	SoundRadius=80
+	SoundVolume=60
+	LightType=LT_Steady
+	LightEffect=LE_NonIncidence
+	LightBrightness=150
+	LightHue=85
+	LightSaturation=64
+	LightRadius=4
 }

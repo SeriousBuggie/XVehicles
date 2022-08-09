@@ -114,17 +114,11 @@ function Destroyed()
 
 defaultproperties
 {
-      DistortRollPerSec=0
-      bReady=False
-      DistortionAmount=0
-      TimeSec=0.000000
-      OldOwnerZone=None
-      NewOwnerZone=None
-      bHidden=True
-      bNetTemporary=False
-      bTrailerPrePivot=True
-      Physics=PHYS_Trailer
-      RemoteRole=ROLE_SimulatedProxy
-      SoundRadius=20
-      SoundVolume=255
+	bHidden=True
+	bNetTemporary=False
+	bTrailerPrePivot=True
+	Physics=PHYS_Trailer
+	RemoteRole=ROLE_SimulatedProxy
+	SoundRadius=20
+	SoundVolume=255
 }

@@ -28,11 +28,11 @@ function MakeSound()
 
 defaultproperties
 {
-      EffectSound1=Sound'XChopVeh.Explosion.CybProjExplSnd'
-      Texture=Texture'XChopVeh.CybProjExplosions.CybRExpl01'
-      Skin=Texture'XChopVeh.Palletes.RedCybPallete'
-      DrawScale=1.000000
-      ScaleGlow=1.650000
-      LightBrightness=35
-      LightRadius=3
+	EffectSound1=Sound'XChopVeh.Explosion.CybProjExplSnd'
+	Texture=Texture'XChopVeh.CybProjExplosions.CybRExpl01'
+	Skin=Texture'XChopVeh.Palletes.RedCybPallete'
+	DrawScale=1.000000
+	ScaleGlow=1.650000
+	LightBrightness=35
+	LightRadius=3
 }

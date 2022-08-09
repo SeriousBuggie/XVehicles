@@ -5,5 +5,5 @@ class SlimeSplashRing expands WaterSplashRing;
 
 defaultproperties
 {
-      MultiSkins(1)=Texture'xZones.Particles.SlimeSplashRing'
+	MultiSkins(1)=Texture'xZones.Particles.SlimeSplashRing'
 }

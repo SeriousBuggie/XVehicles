@@ -149,22 +149,17 @@ simulated function Tick(float DeltaTime)
 
 defaultproperties
 {
-      OldError=0.000000
-      NewError=0.000000
-      StartError=0.500000
-      aimerror=0.000000
-      AimRotation=(Pitch=0,Yaw=0,Roll=0)
-      AnimTime=0.000000
-      FixSounds(0)=None
-      FixSounds(1)=None
-      FixSounds(2)=None
-      FixSounds(3)=None
-      Damage=82.500000
-      RemoteRole=ROLE_SimulatedProxy
-      LightType=LT_Steady
-      LightEffect=LE_NonIncidence
-      LightBrightness=255
-      LightHue=150
-      LightSaturation=50
-      LightRadius=5
+	StartError=0.500000
+	FixSounds(0)=None
+	FixSounds(1)=None
+	FixSounds(2)=None
+	FixSounds(3)=None
+	Damage=82.500000
+	RemoteRole=ROLE_SimulatedProxy
+	LightType=LT_Steady
+	LightEffect=LE_NonIncidence
+	LightBrightness=255
+	LightHue=150
+	LightSaturation=50
+	LightRadius=5
 }

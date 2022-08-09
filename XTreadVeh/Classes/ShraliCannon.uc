@@ -19,7 +19,7 @@ class ShraliCannon expands xTreadVehAttach;
 
 defaultproperties
 {
-      Mesh=LodMesh'XTreadVeh.ShraliCannon'
-      CollisionRadius=64.000000
-      CollisionHeight=16.000000
+	Mesh=LodMesh'XTreadVeh.ShraliCannon'
+	CollisionRadius=64.000000
+	CollisionHeight=16.000000
 }

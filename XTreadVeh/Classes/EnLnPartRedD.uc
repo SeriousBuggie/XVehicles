@@ -37,11 +37,11 @@
 
 defaultproperties
 {
-      FXSpeed=50.000000
-      ProgressiveFXSpeed=25.000000
-      bExtInitialized=True
-      EffectStyle=ES_ImplPositive60
-      Mesh=LodMesh'XTreadVeh.EnLnPartRedD'
-      DrawScale=2.500000
-      ScaleGlow=2.300000
+	FXSpeed=50.000000
+	ProgressiveFXSpeed=25.000000
+	bExtInitialized=True
+	EffectStyle=ES_ImplPositive60
+	Mesh=LodMesh'XTreadVeh.EnLnPartRedD'
+	DrawScale=2.500000
+	ScaleGlow=2.300000
 }

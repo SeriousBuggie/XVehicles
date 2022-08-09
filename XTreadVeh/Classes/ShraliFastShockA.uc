@@ -14,8 +14,8 @@ class ShraliFastShockA expands ShraliFastShock;
 
 defaultproperties
 {
-      LifeSpan=0.350000
-      Mesh=LodMesh'XTreadVeh.ShraliFastShockA'
-      DrawScale=11.100000
-      ScaleGlow=1.850000
+	LifeSpan=0.350000
+	Mesh=LodMesh'XTreadVeh.ShraliFastShockA'
+	DrawScale=11.100000
+	ScaleGlow=1.850000
 }

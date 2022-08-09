@@ -50,18 +50,17 @@ simulated function Tick( float DeltaTime)
 
 defaultproperties
 {
-      PrePivotRel=(X=0.000000,Y=0.000000,Z=0.000000)
-      RotRate=3.000000
-      bNetTemporary=False
-      bTrailerSameRotation=True
-      bTrailerPrePivot=True
-      Physics=PHYS_Trailer
-      RemoteRole=ROLE_SimulatedProxy
-      LifeSpan=0.750000
-      DrawType=DT_Mesh
-      Style=STY_Translucent
-      Mesh=LodMesh'XTreadVeh.KrahtFXSpirR'
-      DrawScale=0.450000
-      ScaleGlow=1.500000
-      bUnlit=True
+	RotRate=3.000000
+	bNetTemporary=False
+	bTrailerSameRotation=True
+	bTrailerPrePivot=True
+	Physics=PHYS_Trailer
+	RemoteRole=ROLE_SimulatedProxy
+	LifeSpan=0.750000
+	DrawType=DT_Mesh
+	Style=STY_Translucent
+	Mesh=LodMesh'XTreadVeh.KrahtFXSpirR'
+	DrawScale=0.450000
+	ScaleGlow=1.500000
+	bUnlit=True
 }

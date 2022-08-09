@@ -25,14 +25,13 @@ simulated function Tick(float Delta)
 
 defaultproperties
 {
-      SlopedPart=None
-      bAnimByOwner=True
-      bTrailerSameRotation=True
-      Physics=PHYS_Trailer
-      RemoteRole=ROLE_SimulatedProxy
-      LifeSpan=4.000000
-      DrawType=DT_Mesh
-      Style=STY_Translucent
-      ScaleGlow=2.000000
-      bUnlit=True
+	bAnimByOwner=True
+	bTrailerSameRotation=True
+	Physics=PHYS_Trailer
+	RemoteRole=ROLE_SimulatedProxy
+	LifeSpan=4.000000
+	DrawType=DT_Mesh
+	Style=STY_Translucent
+	ScaleGlow=2.000000
+	bUnlit=True
 }

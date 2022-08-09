@@ -22,14 +22,14 @@ local vector vexpl;
 
 defaultproperties
 {
-      EffectSound1=None
-      Texture=Texture'UExplosionsSet01.ExplE01'
-      DrawScale=1.000000
-      ScaleGlow=2.500000
-      SpriteProjForward=48.000000
-      LightType=LT_None
-      LightBrightness=0
-      LightHue=0
-      LightSaturation=0
-      LightRadius=0
+	EffectSound1=None
+	Texture=Texture'UExplosionsSet01.ExplE01'
+	DrawScale=1.000000
+	ScaleGlow=2.500000
+	SpriteProjForward=48.000000
+	LightType=LT_None
+	LightBrightness=0
+	LightHue=0
+	LightSaturation=0
+	LightRadius=0
 }

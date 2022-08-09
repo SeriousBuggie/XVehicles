@@ -33,18 +33,18 @@ local TCBulOutFX LPl;
 
 defaultproperties
 {
-      RotatingSpeed=22000.000000
-      PitchRange=(Max=4500,Min=-1700)
-      bAltFireZooms=True
-      TurretPitchActor=Class'XTreadVeh.TankGKOneCannon'
-      PitchActorOffset=(X=51.250000,Z=4.375000)
-      WeapSettings(0)=(ProjectileClass=Class'XTreadVeh.TankCBullet',FireStartOffset=(X=225.000000),RefireRate=3.000000,FireSound=Sound'XTreadVeh.TankGKOne.TankGKFire01',FireSndRange=64,FireSndVolume=40)
-      bPhysicalGunAimOnly=True
-      FiringShaking(0)=(bShakeEnabled=True,ShakeRadius=365.000000,shaketime=0.350000,ShakeVertMag=1200.000000,ShakeRollMag=1850.000000)
-      PartMass=1
-      Mesh=LodMesh'XTreadVeh.TankGKOneTurret'
-      SoundRadius=150
-      SoundVolume=255
-      CollisionRadius=80.000000
-      CollisionHeight=32.000000
+	RotatingSpeed=22000.000000
+	PitchRange=(Max=4500,Min=-1700)
+	bAltFireZooms=True
+	TurretPitchActor=Class'XTreadVeh.TankGKOneCannon'
+	PitchActorOffset=(X=51.250000,Y=0.000000,Z=4.375000)
+	WeapSettings(0)=(ProjectileClass=Class'XTreadVeh.TankCBullet',FireStartOffset=(X=225.000000),RefireRate=3.000000,FireSound=Sound'XTreadVeh.TankGKOne.TankGKFire01',FireSndRange=64,FireSndVolume=40)
+	bPhysicalGunAimOnly=True
+	FiringShaking(0)=(bShakeEnabled=True,ShakeRadius=365.000000,shaketime=0.350000,ShakeVertMag=1200.000000,ShakeRollMag=1850.000000)
+	PartMass=1
+	Mesh=LodMesh'XTreadVeh.TankGKOneTurret'
+	SoundRadius=150
+	SoundVolume=255
+	CollisionRadius=80.000000
+	CollisionHeight=32.000000
 }

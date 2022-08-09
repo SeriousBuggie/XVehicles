@@ -171,8 +171,6 @@ simulated function bool TraceIdentify(canvas Canvas)
 
 defaultproperties
 {
-      myHUD=None
-      IdentifyTarget=None
-      bAlwaysRelevant=True
-      RemoteRole=ROLE_SimulatedProxy
+	bAlwaysRelevant=True
+	RemoteRole=ROLE_SimulatedProxy
 }

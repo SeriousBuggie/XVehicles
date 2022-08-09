@@ -498,33 +498,28 @@ simulated function float CheckProperUTMass(Actor Other)
 
 defaultproperties
 {
-      enableWaterZoneFX=True
-      WaterZoneFXDetail=5
-      hasDistortion=True
-      enableFirstPersonPlayerSplash=True
-      isWaterFX=False
-      DistortionAmount=0
-      DistortRollPerSec=75
-      WaterMinSplashSpeed=345.000000
-      ZoneAmbSound=None
-      ZoneAmbPitch=64
-      ZoneAmbVolume=128
-      SplashClass(0)=Class'xZones.WaterVertSplashA00'
-      SplashClass(1)=Class'xZones.WaterVertSplashA01'
-      SplashClass(2)=Class'xZones.WaterVertSplashA02'
-      SplashClass(3)=Class'xZones.WaterVertSplashA03'
-      SplashClass(4)=Class'xZones.WaterVertSplashA04'
-      SplashClass(5)=Class'xZones.WaterVertSplashA05'
-      SplashClass(6)=Class'xZones.WaterVertSplashA06'
-      SplashClass(7)=Class'xZones.WaterVertSplashA07'
-      BallisticSplashClass(0)=Class'xZones.BalWaterSplash00'
-      BallisticSplashClass(1)=Class'xZones.BalWaterSplash01'
-      BallisticSplashClass(2)=Class'xZones.BalWaterSplash02'
-      BallisticSplashClass(3)=Class'xZones.BalWaterSplash03'
-      WaterRingClass=Class'xZones.WaterSplashRing'
-      SplashDamage=0
-      hasGivenZoneObj=False
-      bStatic=False
-      SoundRadius=0
-      SoundVolume=0
+	enableWaterZoneFX=True
+	WaterZoneFXDetail=5
+	hasDistortion=True
+	enableFirstPersonPlayerSplash=True
+	DistortRollPerSec=75
+	WaterMinSplashSpeed=345.000000
+	ZoneAmbPitch=64
+	ZoneAmbVolume=128
+	SplashClass(0)=Class'xZones.WaterVertSplashA00'
+	SplashClass(1)=Class'xZones.WaterVertSplashA01'
+	SplashClass(2)=Class'xZones.WaterVertSplashA02'
+	SplashClass(3)=Class'xZones.WaterVertSplashA03'
+	SplashClass(4)=Class'xZones.WaterVertSplashA04'
+	SplashClass(5)=Class'xZones.WaterVertSplashA05'
+	SplashClass(6)=Class'xZones.WaterVertSplashA06'
+	SplashClass(7)=Class'xZones.WaterVertSplashA07'
+	BallisticSplashClass(0)=Class'xZones.BalWaterSplash00'
+	BallisticSplashClass(1)=Class'xZones.BalWaterSplash01'
+	BallisticSplashClass(2)=Class'xZones.BalWaterSplash02'
+	BallisticSplashClass(3)=Class'xZones.BalWaterSplash03'
+	WaterRingClass=Class'xZones.WaterSplashRing'
+	bStatic=False
+	SoundRadius=0
+	SoundVolume=0
 }

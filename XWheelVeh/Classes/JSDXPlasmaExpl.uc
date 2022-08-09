@@ -4,9 +4,9 @@ class JSDXPlasmaExpl expands SpriteYellowE;
 
 defaultproperties
 {
-      EffectSound1=Sound'XWheelVeh.Plasma.JSDXLPlasmaHit'
-      Texture=Texture'UnrealShare.DispExpl.DISE_A00'
-      Skin=Texture'UnrealShare.Effects.PalGreen'
-      DrawScale=0.937500
-      LightRadius=10
+	EffectSound1=Sound'XWheelVeh.Plasma.JSDXLPlasmaHit'
+	Texture=Texture'UnrealShare.DispExpl.DISE_A00'
+	Skin=Texture'UnrealShare.Effects.PalGreen'
+	DrawScale=0.937500
+	LightRadius=10
 }

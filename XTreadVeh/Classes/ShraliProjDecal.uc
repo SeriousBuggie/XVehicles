@@ -2,5 +2,5 @@ class ShraliProjDecal expands RipperMark;
 
 defaultproperties
 {
-      DrawScale=20.000000
+	DrawScale=20.000000
 }

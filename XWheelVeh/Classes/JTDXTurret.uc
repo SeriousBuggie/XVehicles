@@ -37,8 +37,8 @@ local LPlasmaFireFX LPl;
 
 defaultproperties
 {
-      TurretPitchActor=Class'XWheelVeh.JTDXGun'
-      WeapSettings(0)=(ProjectileClass=Class'XWheelVeh.JTDXLPlasma',RefireRate=2.200000,FireAnim1="LeftHeavyFire",FireAnim2="RightHeavyFire",FireSound=Sound'XWheelVeh.Fire.JTDXLFire')
-      WeapSettings(1)=(ProjectileClass=Class'XWheelVeh.JTDXLPlasma',RefireRate=1.000000,FireAnim1="DualHeavyFire",FireSound=Sound'XWheelVeh.Fire.JTDXLDualFire')
-      MultiSkins(1)=Texture'XWheelVeh.Skins.JeepTDXHTurretSk'
+	TurretPitchActor=Class'XWheelVeh.JTDXGun'
+	WeapSettings(0)=(ProjectileClass=Class'XWheelVeh.JTDXLPlasma',RefireRate=2.200000,FireAnim1="LeftHeavyFire",FireAnim2="RightHeavyFire",FireSound=Sound'XWheelVeh.Fire.JTDXLFire')
+	WeapSettings(1)=(ProjectileClass=Class'XWheelVeh.JTDXLPlasma',RefireRate=1.000000,FireAnim1="DualHeavyFire",FireSound=Sound'XWheelVeh.Fire.JTDXLDualFire')
+	MultiSkins(1)=Texture'XWheelVeh.Skins.JeepTDXHTurretSk'
 }

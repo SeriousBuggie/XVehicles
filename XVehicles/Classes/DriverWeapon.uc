@@ -238,32 +238,27 @@ State ClientDown
 
 defaultproperties
 {
-      VehicleOwner=None
-      MyNotifier=None
-      bPassengerGun=False
-      SeatNumber=0
-      UseStandardCrosshair=False
-      bWarnTarget=True
-      AIRating=1.000000
-      bRotatingPickup=False
-      PickupMessage="You got a vehicle"
-      ItemName="Vehicle"
-      PlayerViewMesh=LodMesh'Botpack.AutoML'
-      PlayerViewScale=0.000100
-      PickupViewMesh=LodMesh'Botpack.MagPick'
-      PickupViewScale=0.000100
-      ThirdPersonMesh=LodMesh'Botpack.AutoHand'
-      ThirdPersonScale=0.000100
-      Charge=1
-      MaxDesireability=10.000000
-      bHidden=True
-      Physics=PHYS_Trailer
-      DrawType=DT_Sprite
-      Mesh=LodMesh'Botpack.MagPick'
-      DrawScale=0.000100
-      bGameRelevant=True
-      bCarriedItem=True
-      CollisionHeight=24.000000
-      bFixedRotationDir=False
-      RotationRate=(Yaw=0)
+	bWarnTarget=True
+	AIRating=1.000000
+	bRotatingPickup=False
+	PickupMessage="You got a vehicle"
+	ItemName="Vehicle"
+	PlayerViewMesh=LodMesh'Botpack.AutoML'
+	PlayerViewScale=0.000100
+	PickupViewMesh=LodMesh'Botpack.MagPick'
+	PickupViewScale=0.000100
+	ThirdPersonMesh=LodMesh'Botpack.AutoHand'
+	ThirdPersonScale=0.000100
+	Charge=1
+	MaxDesireability=10.000000
+	bHidden=True
+	Physics=PHYS_Trailer
+	DrawType=DT_Sprite
+	Mesh=LodMesh'Botpack.MagPick'
+	DrawScale=0.000100
+	bGameRelevant=True
+	bCarriedItem=True
+	CollisionHeight=24.000000
+	bFixedRotationDir=False
+	RotationRate=(Pitch=0,Yaw=0)
 }

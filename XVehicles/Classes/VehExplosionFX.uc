@@ -22,13 +22,13 @@ local vector vexpl;
 
 defaultproperties
 {
-      EffectSound1=None
-      Texture=Texture'UExplosionsSet01.ExplE01'
-      DrawScale=1.000000
-      ScaleGlow=2.500000
-      LightType=LT_Steady
-      LightBrightness=50
-      LightHue=0
-      LightSaturation=192
-      LightRadius=5
+	EffectSound1=None
+	Texture=Texture'UExplosionsSet01.ExplE01'
+	DrawScale=1.000000
+	ScaleGlow=2.500000
+	LightType=LT_Steady
+	LightBrightness=50
+	LightHue=0
+	LightSaturation=192
+	LightRadius=5
 }

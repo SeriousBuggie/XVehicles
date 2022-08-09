@@ -22,15 +22,14 @@ simulated function Tick( float DeltaTime)
 
 defaultproperties
 {
-      InitDrawScale=0.000000
-      Physics=PHYS_Rotating
-      RemoteRole=ROLE_None
-      LifeSpan=1.250000
-      DrawType=DT_Mesh
-      Style=STY_Translucent
-      Mesh=LodMesh'xZones.WaterSplashRing'
-      DrawScale=3.000000
-      ScaleGlow=1.800000
-      bUnlit=True
-      bFixedRotationDir=True
+	Physics=PHYS_Rotating
+	RemoteRole=ROLE_None
+	LifeSpan=1.250000
+	DrawType=DT_Mesh
+	Style=STY_Translucent
+	Mesh=LodMesh'xZones.WaterSplashRing'
+	DrawScale=3.000000
+	ScaleGlow=1.800000
+	bUnlit=True
+	bFixedRotationDir=True
 }

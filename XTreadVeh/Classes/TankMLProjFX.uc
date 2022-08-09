@@ -14,26 +14,26 @@ class TankMLProjFX expands xTreadVehEffects;
 
 defaultproperties
 {
-      bAnimByOwner=True
-      bNetTemporary=False
-      bTrailerSameRotation=True
-      Physics=PHYS_Trailer
-      RemoteRole=ROLE_None
-      DrawType=DT_Mesh
-      Style=STY_Translucent
-      Texture=Texture'XVehicles.Misc.TransInvis'
-      Mesh=LodMesh'XTreadVeh.TankMLProjFX'
-      DrawScale=0.650000
-      ScaleGlow=1.500000
-      bUnlit=True
-      bParticles=True
-      bRandomFrame=True
-      MultiSkins(0)=Texture'XVehicles.Misc.TransInvis'
-      MultiSkins(1)=Texture'XVehicles.Misc.TransInvis'
-      MultiSkins(2)=Texture'XVehicles.Misc.TransInvis'
-      MultiSkins(3)=Texture'XVehicles.Misc.TransInvis'
-      MultiSkins(4)=Texture'XVehicles.Misc.TransInvis'
-      MultiSkins(5)=Texture'XVehicles.Misc.TransInvis'
-      MultiSkins(6)=Texture'XVehicles.Misc.TransInvis'
-      MultiSkins(7)=Texture'XVehicles.Misc.TransInvis'
+	bAnimByOwner=True
+	bNetTemporary=False
+	bTrailerSameRotation=True
+	Physics=PHYS_Trailer
+	RemoteRole=ROLE_None
+	DrawType=DT_Mesh
+	Style=STY_Translucent
+	Texture=Texture'XVehicles.Misc.TransInvis'
+	Mesh=LodMesh'XTreadVeh.TankMLProjFX'
+	DrawScale=0.650000
+	ScaleGlow=1.500000
+	bUnlit=True
+	bParticles=True
+	bRandomFrame=True
+	MultiSkins(0)=Texture'XVehicles.Misc.TransInvis'
+	MultiSkins(1)=Texture'XVehicles.Misc.TransInvis'
+	MultiSkins(2)=Texture'XVehicles.Misc.TransInvis'
+	MultiSkins(3)=Texture'XVehicles.Misc.TransInvis'
+	MultiSkins(4)=Texture'XVehicles.Misc.TransInvis'
+	MultiSkins(5)=Texture'XVehicles.Misc.TransInvis'
+	MultiSkins(6)=Texture'XVehicles.Misc.TransInvis'
+	MultiSkins(7)=Texture'XVehicles.Misc.TransInvis'
 }

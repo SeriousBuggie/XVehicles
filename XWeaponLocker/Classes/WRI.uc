@@ -52,13 +52,5 @@ simulated function Timer()
 
 defaultproperties
 {
-      WeaponClass(0)=None
-      WeaponClass(1)=None
-      WeaponClass(2)=None
-      WeaponClass(3)=None
-      WeaponClass(4)=None
-      WeaponClass(5)=None
-      WeaponClass(6)=None
-      WeaponClass(7)=None
-      RemoteRole=ROLE_SimulatedProxy
+	RemoteRole=ROLE_SimulatedProxy
 }

@@ -9,16 +9,16 @@ simulated function Tick( float DeltaTime)
 
 defaultproperties
 {
-      RemoteRole=ROLE_SimulatedProxy
-      LifeSpan=0.750000
-      DrawType=DT_Sprite
-      Style=STY_Translucent
-      Texture=Texture'XTreadVeh.Effects.ShraliMuzBCor'
-      DrawScale=4.000000
-      ScaleGlow=1.500000
-      SpriteProjForward=4.500000
-      bUnlit=True
-      LightType=LT_Steady
-      LightBrightness=74
-      LightRadius=25
+	RemoteRole=ROLE_SimulatedProxy
+	LifeSpan=0.750000
+	DrawType=DT_Sprite
+	Style=STY_Translucent
+	Texture=Texture'XTreadVeh.Effects.ShraliMuzBCor'
+	DrawScale=4.000000
+	ScaleGlow=1.500000
+	SpriteProjForward=4.500000
+	bUnlit=True
+	LightType=LT_Steady
+	LightBrightness=74
+	LightRadius=25
 }

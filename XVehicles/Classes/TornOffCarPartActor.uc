@@ -141,26 +141,23 @@ local byte i;
 
 defaultproperties
 {
-      Heavyness=0
-      IniRotRate=(Pitch=0,Yaw=0,Roll=0)
-      InitLifeSpan=0.000000
-      RndLightHitSnds(0)=Sound'XVehicles.Impacts.VehicleCollision02'
-      RndLightHitSnds(1)=Sound'XVehicles.Impacts.VehicleCollision04'
-      RndLightHitSnds(2)=Sound'XVehicles.Impacts.VehicleCollision05'
-      RndMediumHitSnds(0)=Sound'XVehicles.Impacts.VehicleCollision01'
-      RndMediumHitSnds(1)=Sound'XVehicles.Impacts.VehicleCollision03'
-      RndMediumHitSnds(2)=Sound'XVehicles.Impacts.VehicleCollision07'
-      RndHeavyHitSnds(0)=Sound'XVehicles.Impacts.HeavyPartHit01'
-      RndHeavyHitSnds(1)=Sound'XVehicles.Impacts.HeavyPartHit02'
-      RndHeavyHitSnds(2)=Sound'XVehicles.Impacts.HeavyPartHit03'
-      Physics=PHYS_Falling
-      RemoteRole=ROLE_None
-      LifeSpan=20.000000
-      DrawType=DT_Mesh
-      Fatness=75
-      CollisionRadius=4.000000
-      CollisionHeight=4.000000
-      bCollideWorld=True
-      bBounce=True
-      bFixedRotationDir=True
+	RndLightHitSnds(0)=Sound'XVehicles.Impacts.VehicleCollision02'
+	RndLightHitSnds(1)=Sound'XVehicles.Impacts.VehicleCollision04'
+	RndLightHitSnds(2)=Sound'XVehicles.Impacts.VehicleCollision05'
+	RndMediumHitSnds(0)=Sound'XVehicles.Impacts.VehicleCollision01'
+	RndMediumHitSnds(1)=Sound'XVehicles.Impacts.VehicleCollision03'
+	RndMediumHitSnds(2)=Sound'XVehicles.Impacts.VehicleCollision07'
+	RndHeavyHitSnds(0)=Sound'XVehicles.Impacts.HeavyPartHit01'
+	RndHeavyHitSnds(1)=Sound'XVehicles.Impacts.HeavyPartHit02'
+	RndHeavyHitSnds(2)=Sound'XVehicles.Impacts.HeavyPartHit03'
+	Physics=PHYS_Falling
+	RemoteRole=ROLE_None
+	LifeSpan=20.000000
+	DrawType=DT_Mesh
+	Fatness=75
+	CollisionRadius=4.000000
+	CollisionHeight=4.000000
+	bCollideWorld=True
+	bBounce=True
+	bFixedRotationDir=True
 }

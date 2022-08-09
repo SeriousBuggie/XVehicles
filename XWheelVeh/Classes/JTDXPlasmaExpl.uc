@@ -5,11 +5,11 @@ class JTDXPlasmaExpl expands UT_FlameExplosion;
 
 defaultproperties
 {
-      EffectSound1=Sound'XWheelVeh.Plasma.JTDXLPlasmaHit'
-      Texture=Texture'XWheelVeh.PlasmaExpl.HeavyPlasmExpl01'
-      DrawScale=1.000000
-      SpriteProjForward=47.500000
-      LightBrightness=40
-      LightHue=0
-      LightSaturation=0
+	EffectSound1=Sound'XWheelVeh.Plasma.JTDXLPlasmaHit'
+	Texture=Texture'XWheelVeh.PlasmaExpl.HeavyPlasmExpl01'
+	DrawScale=1.000000
+	SpriteProjForward=47.500000
+	LightBrightness=40
+	LightHue=0
+	LightSaturation=0
 }

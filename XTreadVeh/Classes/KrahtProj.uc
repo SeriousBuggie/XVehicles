@@ -53,27 +53,27 @@ simulated function Explode(vector HitLocation, vector HitNormal)
 
 defaultproperties
 {
-      DamageRadius=550.000000
-      speed=4500.000000
-      MaxSpeed=9000.000000
-      Damage=750.000000
-      MomentumTransfer=50000
-      MyDamageType="KrahtEnergy"
-      ExplosionDecal=Class'XTreadVeh.KrahtBlastMark'
-      RemoteRole=ROLE_SimulatedProxy
-      AmbientSound=Sound'XTreadVeh.Kraht.KrahtProjAmb'
-      Style=STY_Translucent
-      Mesh=LodMesh'XTreadVeh.KrahtProj'
-      DrawScale=6.500000
-      ScaleGlow=1.750000
-      bUnlit=True
-      SoundRadius=150
-      SoundVolume=150
-      LightType=LT_Steady
-      LightEffect=LE_NonIncidence
-      LightBrightness=80
-      LightHue=40
-      LightSaturation=240
-      LightRadius=10
-      Mass=150.000000
+	DamageRadius=550.000000
+	speed=4500.000000
+	MaxSpeed=9000.000000
+	Damage=750.000000
+	MomentumTransfer=50000
+	MyDamageType="KrahtEnergy"
+	ExplosionDecal=Class'XTreadVeh.KrahtBlastMark'
+	RemoteRole=ROLE_SimulatedProxy
+	AmbientSound=Sound'XTreadVeh.Kraht.KrahtProjAmb'
+	Style=STY_Translucent
+	Mesh=LodMesh'XTreadVeh.KrahtProj'
+	DrawScale=6.500000
+	ScaleGlow=1.750000
+	bUnlit=True
+	SoundRadius=150
+	SoundVolume=150
+	LightType=LT_Steady
+	LightEffect=LE_NonIncidence
+	LightBrightness=80
+	LightHue=40
+	LightSaturation=240
+	LightRadius=10
+	Mass=150.000000
 }

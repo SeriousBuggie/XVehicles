@@ -13,10 +13,10 @@ class CybProjCor expands NaliTrail;
 
 defaultproperties
 {
-      DrawType=DT_Sprite
-      Style=STY_Translucent
-      Texture=Texture'XVehicles.Coronas.CybProjCorRed'
-      DrawScale=0.180000
-      ScaleGlow=1.650000
-      SpriteProjForward=16.000000
+	DrawType=DT_Sprite
+	Style=STY_Translucent
+	Texture=Texture'XVehicles.Coronas.CybProjCorRed'
+	DrawScale=0.180000
+	ScaleGlow=1.650000
+	SpriteProjForward=16.000000
 }

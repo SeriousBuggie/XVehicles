@@ -12,9 +12,9 @@ simulated function PostBeginPlay()
 
 defaultproperties
 {
-      EffectSound1=None
-      Texture=Texture'UExplosionsSet01.ExplF05'
-      DrawScale=1.500000
-      ScaleGlow=1.350000
-      LightType=LT_None
+	EffectSound1=None
+	Texture=Texture'UExplosionsSet01.ExplF05'
+	DrawScale=1.500000
+	ScaleGlow=1.350000
+	LightType=LT_None
 }

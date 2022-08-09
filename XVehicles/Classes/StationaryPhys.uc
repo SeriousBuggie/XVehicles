@@ -62,12 +62,12 @@ function bool HealthTooLowFor(Pawn Other)
 
 defaultproperties
 {
-      Health=300
-      bShouldRepVehYaw=False
-      bStationaryTurret=True
-      VehicleName="Stationary Turret"
-      TranslatorDescription="This is a stationary turret. You can fire using [Fire] and [AltFire] and zoom in and out using movement keys. To leave this vehicle press [ThrowWeapon] key."
-      VehicleKeyInfoStr="Turret keys:|%Fire% to fire, %AltFire% to alt fire|%ThrowWeapon% to exit the vehicle"
-      Physics=PHYS_None
-      Mesh=LodMesh'UnrealShare.WoodenBoxM'
+	Health=300
+	bShouldRepVehYaw=False
+	bStationaryTurret=True
+	VehicleName="Stationary Turret"
+	TranslatorDescription="This is a stationary turret. You can fire using [Fire] and [AltFire] and zoom in and out using movement keys. To leave this vehicle press [ThrowWeapon] key."
+	VehicleKeyInfoStr="Turret keys:|%Fire% to fire, %AltFire% to alt fire|%ThrowWeapon% to exit the vehicle"
+	Physics=PHYS_None
+	Mesh=LodMesh'UnrealShare.WoodenBoxM'
 }

@@ -30,11 +30,10 @@ simulated function Destroyed()
 
 defaultproperties
 {
-      Shadow=None
-      bNetTemporary=False
-      bTrailerSameRotation=True
-      bTrailerPrePivot=True
-      Physics=PHYS_Trailer
-      RemoteRole=ROLE_None
-      DrawType=DT_Mesh
+	bNetTemporary=False
+	bTrailerSameRotation=True
+	bTrailerPrePivot=True
+	Physics=PHYS_Trailer
+	RemoteRole=ROLE_None
+	DrawType=DT_Mesh
 }

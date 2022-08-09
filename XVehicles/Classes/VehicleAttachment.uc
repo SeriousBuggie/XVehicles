@@ -68,11 +68,7 @@ simulated function AddCanvasOverlay( Canvas C )
 
 defaultproperties
 {
-      OwnerVehicle=None
-      NextAttachment=None
-      bAutoDestroyWithVehicle=True
-      bMasterPart=False
-      PartMass=0
-      RemoteRole=ROLE_None
-      bGameRelevant=True
+	bAutoDestroyWithVehicle=True
+	RemoteRole=ROLE_None
+	bGameRelevant=True
 }

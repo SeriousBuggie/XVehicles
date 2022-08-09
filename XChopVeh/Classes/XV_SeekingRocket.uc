@@ -103,10 +103,10 @@ function BlowUp(vector HitLocation)
 
 defaultproperties
 {
-      AccelRate=2000.000000
-      MinAim=0.900000
-      speed=2000.000000
-      MaxSpeed=4000.000000
-      Damage=100.000000
-      DrawScale=0.080000
+	AccelRate=2000.000000
+	MinAim=0.900000
+	speed=2000.000000
+	MaxSpeed=4000.000000
+	Damage=100.000000
+	DrawScale=0.080000
 }

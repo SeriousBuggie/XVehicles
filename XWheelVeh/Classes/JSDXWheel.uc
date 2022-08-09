@@ -34,6 +34,6 @@ class JSDXWheel expands VehicleWheel;
 
 defaultproperties
 {
-      Mesh=LodMesh'XWheelVeh.JSDXWheel'
-      DrawScale=1.000000
+	Mesh=LodMesh'XWheelVeh.JSDXWheel'
+	DrawScale=1.000000
 }

@@ -91,55 +91,54 @@ function ChangeColor()
 
 defaultproperties
 {
-      CurrentTeamColor=0
-      MaxAirSpeed=2000.000000
-      YawTurnSpeed=36000.000000
-      AIRating=5.000000
-      WAccelRate=1000.000000
-      Health=360
-      VehicleName="Cybot Helico"
-      TranslatorDescription="This is a Cybot Helico, you can fire different firemodes using [Fire] and [AltFire] buttons. To move higher or lover use [Jump] and [Crouch] buttons and to move around use movement keys. To leave this vehicle press [ThrowWeapon] key."
-      ExitOffset=(Y=140.000000)
-      BehinViewViewOffset=(X=-400.000000,Z=208.000000)
-      StartSound=Sound'XChopVeh.Pickups.RessurectSnd'
-      EngineSound=Sound'XChopVeh.Loop.CybHeliAmb'
-      ImpactSounds(0)=Sound'XChopVeh.Damage.CybSndArmorDmg1'
-      ImpactSounds(1)=Sound'XChopVeh.Damage.CybSndArmorDmg2'
-      ImpactSounds(2)=Sound'XChopVeh.Damage.CybSndArmorDmg3'
-      ImpactSounds(3)=Sound'XChopVeh.Hit.CybWreckMetalHit'
-      ImpactSounds(4)=Sound'XChopVeh.Damage.CybSndArmorDmg1'
-      ImpactSounds(5)=Sound'XChopVeh.Damage.CybSndArmorDmg2'
-      ImpactSounds(6)=Sound'XChopVeh.Hit.CybWreckMetalHit'
-      ImpactSounds(7)=Sound'XChopVeh.Fragments.FragSound01'
-      BulletHitSounds(0)=Sound'XChopVeh.Damage.CybSndArmorDmg1'
-      BulletHitSounds(1)=Sound'XChopVeh.Damage.CybSndArmorDmg2'
-      BulletHitSounds(2)=Sound'XChopVeh.Damage.CybSndArmorDmg3'
-      BulletHitSounds(3)=Sound'XChopVeh.Hit.CybWreckMetalHit'
-      BulletHitSounds(4)=Sound'XChopVeh.Damage.CybSndArmorDmg1'
-      BulletHitSounds(5)=Sound'XChopVeh.Damage.CybSndArmorDmg2'
-      DriverWeapon=(WeaponClass=Class'XChopVeh.CybBlades')
-      VehicleKeyInfoStr="Cybot Helico keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to strafe|%Jump%, %Duck% to move up/down|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%ThrowWeapon% to exit the vehicle"
-      WDeAccelRate=200.000000
-      DropFlag=DF_All
-      DamageGFX(0)=(bHaveThisGFX=True,bHaveFlames=True,DmgFXOffset=(X=-32.000000,Z=20.000000),FXRange=15)
-      DestroyedExplDmg=70
-      ExplosionGFX(0)=(bHaveThisExplFX=True,ExplSize=6.750000)
-      ExplosionGFX(1)=(bHaveThisExplFX=True,ExplSize=2.000000,AttachName="CybBlades")
-      ExplosionGFX(2)=(bHaveThisExplFX=True,ExplSize=1.750000,bUseCoordOffset=True,bSymetricalCoordY=True,ExplFXOffSet=(X=100.000000,Y=80.000000,Z=-5.000000))
-      ExplosionGFX(3)=(bHaveThisExplFX=True,ExplSize=1.750000,bUseCoordOffset=True,bSymetricalCoordY=True,ExplFXOffSet=(X=-64.000000,Y=80.000000,Z=-5.000000))
-      bEnableShield=True
-      ShieldLevel=0.600000
-      AnimSequence="Still"
-      Mesh=LodMesh'XChopVeh.CybHeli'
-      DrawScale=8.000000
-      PrePivot=(Z=-26.000000)
-      AmbientGlow=17
-      MultiSkins(1)=Texture'XVehicles.Skins.CybotSk'
-      MultiSkins(4)=Texture'XVehicles.Skins.CybotCoreRed'
-      MultiSkins(5)=Texture'XVehicles.LaserFX.SentinelLaserFXRed'
-      SoundRadius=96
-      SoundVolume=192
-      SoundPitch=56
-      CollisionRadius=112.000000
-      CollisionHeight=88.000000
+	MaxAirSpeed=2000.000000
+	YawTurnSpeed=36000.000000
+	AIRating=5.000000
+	WAccelRate=1000.000000
+	Health=360
+	VehicleName="Cybot Helico"
+	TranslatorDescription="This is a Cybot Helico, you can fire different firemodes using [Fire] and [AltFire] buttons. To move higher or lover use [Jump] and [Crouch] buttons and to move around use movement keys. To leave this vehicle press [ThrowWeapon] key."
+	ExitOffset=(X=0.000000,Y=140.000000)
+	BehinViewViewOffset=(X=-400.000000,Y=0.000000,Z=208.000000)
+	StartSound=Sound'XChopVeh.Pickups.RessurectSnd'
+	EngineSound=Sound'XChopVeh.Loop.CybHeliAmb'
+	ImpactSounds(0)=Sound'XChopVeh.Damage.CybSndArmorDmg1'
+	ImpactSounds(1)=Sound'XChopVeh.Damage.CybSndArmorDmg2'
+	ImpactSounds(2)=Sound'XChopVeh.Damage.CybSndArmorDmg3'
+	ImpactSounds(3)=Sound'XChopVeh.Hit.CybWreckMetalHit'
+	ImpactSounds(4)=Sound'XChopVeh.Damage.CybSndArmorDmg1'
+	ImpactSounds(5)=Sound'XChopVeh.Damage.CybSndArmorDmg2'
+	ImpactSounds(6)=Sound'XChopVeh.Hit.CybWreckMetalHit'
+	ImpactSounds(7)=Sound'XChopVeh.Fragments.FragSound01'
+	BulletHitSounds(0)=Sound'XChopVeh.Damage.CybSndArmorDmg1'
+	BulletHitSounds(1)=Sound'XChopVeh.Damage.CybSndArmorDmg2'
+	BulletHitSounds(2)=Sound'XChopVeh.Damage.CybSndArmorDmg3'
+	BulletHitSounds(3)=Sound'XChopVeh.Hit.CybWreckMetalHit'
+	BulletHitSounds(4)=Sound'XChopVeh.Damage.CybSndArmorDmg1'
+	BulletHitSounds(5)=Sound'XChopVeh.Damage.CybSndArmorDmg2'
+	DriverWeapon=(WeaponClass=Class'XChopVeh.CybBlades',WeaponOffset=(X=0.000000))
+	VehicleKeyInfoStr="Cybot Helico keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to strafe|%Jump%, %Duck% to move up/down|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%ThrowWeapon% to exit the vehicle"
+	WDeAccelRate=200.000000
+	DropFlag=DF_All
+	DamageGFX(0)=(bHaveThisGFX=True,bHaveFlames=True,DmgFXOffset=(X=-32.000000,Z=20.000000),FXRange=15)
+	DestroyedExplDmg=70
+	ExplosionGFX(0)=(bHaveThisExplFX=True,ExplSize=6.750000)
+	ExplosionGFX(1)=(bHaveThisExplFX=True,ExplSize=2.000000,AttachName="CybBlades")
+	ExplosionGFX(2)=(bHaveThisExplFX=True,ExplSize=1.750000,bUseCoordOffset=True,bSymetricalCoordY=True,ExplFXOffSet=(X=100.000000,Y=80.000000,Z=-5.000000))
+	ExplosionGFX(3)=(bHaveThisExplFX=True,ExplSize=1.750000,bUseCoordOffset=True,bSymetricalCoordY=True,ExplFXOffSet=(X=-64.000000,Y=80.000000,Z=-5.000000))
+	bEnableShield=True
+	ShieldLevel=0.600000
+	AnimSequence="Still"
+	Mesh=LodMesh'XChopVeh.CybHeli'
+	DrawScale=8.000000
+	PrePivot=(X=0.000000,Y=0.000000,Z=-26.000000)
+	AmbientGlow=17
+	MultiSkins(1)=Texture'XVehicles.Skins.CybotSk'
+	MultiSkins(4)=Texture'XVehicles.Skins.CybotCoreRed'
+	MultiSkins(5)=Texture'XVehicles.LaserFX.SentinelLaserFXRed'
+	SoundRadius=96
+	SoundVolume=192
+	SoundPitch=56
+	CollisionRadius=112.000000
+	CollisionHeight=88.000000
 }

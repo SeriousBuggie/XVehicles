@@ -26,13 +26,12 @@ simulated function Tick( float DeltaTime)
 
 defaultproperties
 {
-      Count=0.000000
-      Physics=PHYS_Projectile
-      RemoteRole=ROLE_SimulatedProxy
-      LifeSpan=1.000000
-      DrawType=DT_Mesh
-      Style=STY_Translucent
-      Mesh=LodMesh'XJumpPad.JPadEmitGrid'
-      ScaleGlow=1.750000
-      bUnlit=True
+	Physics=PHYS_Projectile
+	RemoteRole=ROLE_SimulatedProxy
+	LifeSpan=1.000000
+	DrawType=DT_Mesh
+	Style=STY_Translucent
+	Mesh=LodMesh'XJumpPad.JPadEmitGrid'
+	ScaleGlow=1.750000
+	bUnlit=True
 }

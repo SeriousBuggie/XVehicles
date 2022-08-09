@@ -43,6 +43,6 @@ simulated function PostBeginPlay()
 
 defaultproperties
 {
-      NumPuffs=1
-      DrawScale=0.160000
+	NumPuffs=1
+	DrawScale=0.160000
 }

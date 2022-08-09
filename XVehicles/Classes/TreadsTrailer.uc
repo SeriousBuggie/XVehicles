@@ -27,11 +27,10 @@ function Timer()
 
 defaultproperties
 {
-      PrePivotRel=(X=0.000000,Y=0.000000,Z=0.000000)
-      bNetTemporary=False
-      bTrailerSameRotation=True
-      bTrailerPrePivot=True
-      Physics=PHYS_Trailer
-      RemoteRole=ROLE_None
-      DrawType=DT_Mesh
+	bNetTemporary=False
+	bTrailerSameRotation=True
+	bTrailerPrePivot=True
+	Physics=PHYS_Trailer
+	RemoteRole=ROLE_None
+	DrawType=DT_Mesh
 }

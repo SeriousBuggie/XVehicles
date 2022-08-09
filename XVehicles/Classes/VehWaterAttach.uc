@@ -53,13 +53,10 @@ event HitWall(vector HitNormal, actor Wall);
 
 defaultproperties
 {
-      WaveSize=0.000000
-      WaveLenght=0.000000
-      OldWaterZone=None
-      bHidden=True
-      RemoteRole=ROLE_None
-      SoundRadius=255
-      CollisionRadius=0.500000
-      CollisionHeight=0.500000
-      bCollideWorld=True
+	bHidden=True
+	RemoteRole=ROLE_None
+	SoundRadius=255
+	CollisionRadius=0.500000
+	CollisionHeight=0.500000
+	bCollideWorld=True
 }

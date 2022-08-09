@@ -499,17 +499,7 @@ simulated static function vector NormalWeightSum(float ratioA, vector A, vector 
 
 defaultproperties
 {
-      OverlayMActor=None
-      StaticPP=None
-      PrevCurrentYawA=0
-      PrevGroundNormalA=(X=0.000000,Y=0.000000,Z=0.000000)
-      PrevCurrentPitchA=0
-      PrevTransformForGroundRotA=(Pitch=0,Yaw=0,Roll=0)
-      PrevCurrentYawB=0
-      PrevGroundNormalB=(X=0.000000,Y=0.000000,Z=0.000000)
-      PrevCurrentPitchB=0
-      PrevTransformForGroundRotB=(Pitch=0,Yaw=0,Roll=0)
-      DistDetail=2.000000
-      LODBias=4.000000
-      DrawType=DT_Mesh
+	DistDetail=2.000000
+	LODBias=4.000000
+	DrawType=DT_Mesh
 }

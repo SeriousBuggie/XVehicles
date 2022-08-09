@@ -18,8 +18,8 @@ class BalWaterSplash02 expands BalWaterSplash00;
 
 defaultproperties
 {
-      FinalDrawScale=1.500000
-      InitSpeedMult=1.400000
-      Mesh=LodMesh'xZones.BalWaterSplash02'
-      DrawScale=0.310000
+	FinalDrawScale=1.500000
+	InitSpeedMult=1.400000
+	Mesh=LodMesh'xZones.BalWaterSplash02'
+	DrawScale=0.310000
 }

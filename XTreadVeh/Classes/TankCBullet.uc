@@ -76,20 +76,18 @@ simulated function Explode(vector HitLocation, vector HitNormal)
 
 defaultproperties
 {
-      DistCount=0.000000
-      bFirstSmk=False
-      DamageRadius=660.000000
-      speed=4500.000000
-      MaxSpeed=9000.000000
-      Damage=300.000000
-      MomentumTransfer=100000
-      MyDamageType="TankBlast"
-      ExplosionDecal=Class'XTreadVeh.TankCBlastMark'
-      RemoteRole=ROLE_SimulatedProxy
-      AmbientSound=Sound'XTreadVeh.TankGKOne.TCBulletFly'
-      Mesh=LodMesh'XTreadVeh.TankCBullet'
-      DrawScale=0.500000
-      SoundRadius=80
-      SoundVolume=60
-      Mass=150.000000
+	DamageRadius=660.000000
+	speed=4500.000000
+	MaxSpeed=9000.000000
+	Damage=300.000000
+	MomentumTransfer=100000
+	MyDamageType="TankBlast"
+	ExplosionDecal=Class'XTreadVeh.TankCBlastMark'
+	RemoteRole=ROLE_SimulatedProxy
+	AmbientSound=Sound'XTreadVeh.TankGKOne.TCBulletFly'
+	Mesh=LodMesh'XTreadVeh.TankCBullet'
+	DrawScale=0.500000
+	SoundRadius=80
+	SoundVolume=60
+	Mass=150.000000
 }

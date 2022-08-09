@@ -85,17 +85,17 @@ function SetState(byte CurrentTeam, bool bTeamLocked, bool bUsed)
 
 defaultproperties
 {
-      bOwnerNoSee=True
-      bNetTemporary=False
-      bTrailerPrePivot=True
-      Physics=PHYS_Trailer
-      RemoteRole=ROLE_SimulatedProxy
-      DrawType=DT_Sprite
-      Style=STY_Translucent
-      Sprite=Texture'Botpack.Translocator.Tranglow'
-      Texture=Texture'Botpack.Translocator.Tranglow'
-      Skin=Texture'Botpack.Translocator.Tranglow'
-      DrawScale=0.500000
-      PrePivot=(Z=70.000000)
-      Mass=0.000000
+	bOwnerNoSee=True
+	bNetTemporary=False
+	bTrailerPrePivot=True
+	Physics=PHYS_Trailer
+	RemoteRole=ROLE_SimulatedProxy
+	DrawType=DT_Sprite
+	Style=STY_Translucent
+	Sprite=Texture'Botpack.Translocator.Tranglow'
+	Texture=Texture'Botpack.Translocator.Tranglow'
+	Skin=Texture'Botpack.Translocator.Tranglow'
+	DrawScale=0.500000
+	PrePivot=(X=0.000000,Y=0.000000,Z=70.000000)
+	Mass=0.000000
 }

@@ -237,20 +237,18 @@ function FixDamage(Actor Target, int Damage, Pawn EventInstigator, vector HitLoc
 
 defaultproperties
 {
-      LastFix=0.000000
-      FixSounds(0)=Sound'UnrealShare.Dispersion.number1'
-      FixSounds(1)=Sound'UnrealShare.Dispersion.number2'
-      FixSounds(2)=Sound'UnrealShare.Dispersion.number3'
-      FixSounds(3)=Sound'UnrealShare.Dispersion.number4'
-      LastLevel=""
-      SpriteAnim(0)=FireTexture'UnrealShare.EffectASMD.fireeffectASMD'
-      SpriteAnim(1)=FireTexture'UnrealShare.EffectASMD.fireeffectASMD'
-      SpriteAnim(2)=FireTexture'UnrealShare.EffectASMD.fireeffectASMD'
-      SpriteAnim(3)=FireTexture'UnrealShare.EffectASMD.fireeffectASMD'
-      SpriteAnim(4)=FireTexture'UnrealShare.EffectASMD.fireeffectASMD'
-      BeamSize=80.000000
-      ExplosionDecal=Class'FixGun.FixScorch'
-      LifeSpan=0.000000
-      Texture=FireTexture'UnrealShare.EffectASMD.fireeffectASMD'
-      Skin=FireTexture'UnrealShare.EffectASMD.fireeffectASMD'
+	FixSounds(0)=Sound'UnrealShare.Dispersion.number1'
+	FixSounds(1)=Sound'UnrealShare.Dispersion.number2'
+	FixSounds(2)=Sound'UnrealShare.Dispersion.number3'
+	FixSounds(3)=Sound'UnrealShare.Dispersion.number4'
+	SpriteAnim(0)=FireTexture'UnrealShare.EffectASMD.fireeffectASMD'
+	SpriteAnim(1)=FireTexture'UnrealShare.EffectASMD.fireeffectASMD'
+	SpriteAnim(2)=FireTexture'UnrealShare.EffectASMD.fireeffectASMD'
+	SpriteAnim(3)=FireTexture'UnrealShare.EffectASMD.fireeffectASMD'
+	SpriteAnim(4)=FireTexture'UnrealShare.EffectASMD.fireeffectASMD'
+	BeamSize=80.000000
+	ExplosionDecal=Class'FixGun.FixScorch'
+	LifeSpan=0.000000
+	Texture=FireTexture'UnrealShare.EffectASMD.fireeffectASMD'
+	Skin=FireTexture'UnrealShare.EffectASMD.fireeffectASMD'
 }

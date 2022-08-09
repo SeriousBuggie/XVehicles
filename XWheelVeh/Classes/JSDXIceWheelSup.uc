@@ -44,12 +44,12 @@ function Timer()
 
 defaultproperties
 {
-      bNetTemporary=False
-      bTrailerSameRotation=True
-      Physics=PHYS_Trailer
-      RemoteRole=ROLE_None
-      DrawType=DT_Mesh
-      Texture=Texture'XWheelVeh.Skins.DarkMetalShine'
-      Mesh=LodMesh'XWheelVeh.JSDXIceWheelSup'
-      bMeshEnviroMap=True
+	bNetTemporary=False
+	bTrailerSameRotation=True
+	Physics=PHYS_Trailer
+	RemoteRole=ROLE_None
+	DrawType=DT_Mesh
+	Texture=Texture'XWheelVeh.Skins.DarkMetalShine'
+	Mesh=LodMesh'XWheelVeh.JSDXIceWheelSup'
+	bMeshEnviroMap=True
 }

@@ -11,7 +11,7 @@ simulated function Tick( float Delta )
 
 defaultproperties
 {
-      bHidden=True
-      Mesh=LodMesh'UnrealShare.WoodenBoxM'
-      DrawScale=0.010000
+	bHidden=True
+	Mesh=LodMesh'UnrealShare.WoodenBoxM'
+	DrawScale=0.010000
 }

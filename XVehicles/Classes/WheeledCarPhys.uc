@@ -681,61 +681,25 @@ local byte i;
 
 defaultproperties
 {
-      Wheels(0)=(WheelOffset=(X=25.320000,Y=28.540001,Z=-23.000000),WheelRot=(Pitch=0,Yaw=0,Roll=0),WheelClass=Class'XVehicles.VehicleWheel',WheelMesh=LodMesh'UnrealShare.WoodenBoxM',WheelType=TT_TurningWheel,bMirroredWheel=False)
-      Wheels(1)=(WheelOffset=(X=25.320000,Y=-28.540001,Z=-23.000000),WheelRot=(Pitch=0,Yaw=0,Roll=0),WheelClass=Class'XVehicles.VehicleWheel',WheelMesh=LodMesh'UnrealShare.WoodenBoxM',WheelType=TT_TurningWheel,bMirroredWheel=False)
-      Wheels(2)=(WheelOffset=(X=-25.320000,Y=28.540001,Z=-23.000000),WheelRot=(Pitch=0,Yaw=0,Roll=0),WheelClass=Class'XVehicles.VehicleWheel',WheelMesh=LodMesh'UnrealShare.WoodenBoxM',WheelType=TT_None,bMirroredWheel=False)
-      Wheels(3)=(WheelOffset=(X=-25.320000,Y=-28.540001,Z=-23.000000),WheelRot=(Pitch=0,Yaw=0,Roll=0),WheelClass=Class'XVehicles.VehicleWheel',WheelMesh=LodMesh'UnrealShare.WoodenBoxM',WheelType=TT_None,bMirroredWheel=False)
-      Wheels(4)=(WheelOffset=(X=0.000000,Y=0.000000,Z=0.000000),WheelRot=(Pitch=0,Yaw=0,Roll=0),WheelClass=None,WheelMesh=None,WheelType=TT_None,bMirroredWheel=False)
-      Wheels(5)=(WheelOffset=(X=0.000000,Y=0.000000,Z=0.000000),WheelRot=(Pitch=0,Yaw=0,Roll=0),WheelClass=None,WheelMesh=None,WheelType=TT_None,bMirroredWheel=False)
-      Wheels(6)=(WheelOffset=(X=0.000000,Y=0.000000,Z=0.000000),WheelRot=(Pitch=0,Yaw=0,Roll=0),WheelClass=None,WheelMesh=None,WheelType=TT_None,bMirroredWheel=False)
-      Wheels(7)=(WheelOffset=(X=0.000000,Y=0.000000,Z=0.000000),WheelRot=(Pitch=0,Yaw=0,Roll=0),WheelClass=None,WheelMesh=None,WheelType=TT_None,bMirroredWheel=False)
-      MaxGroundSpeed=3000.000000
-      WheelMaxYaw=8000.000000
-      WheelTurnSpeed=12000.000000
-      MyWheels(0)=None
-      MyWheels(1)=None
-      MyWheels(2)=None
-      MyWheels(3)=None
-      MyWheels(4)=None
-      MyWheels(5)=None
-      MyWheels(6)=None
-      MyWheels(7)=None
-      NumWheels=0
-      WheelsTurning=0
-      bHasWheelMeshes=False
-      bWasStuckOnW=False
-      bReversing=False
-      WheelYaw=0.000000
-      StuckTimer=0.000000
-      ReverseTimer=0.000000
-      WheelsPitch=0
-      bEngDynSndPitch=False
-      MinEngPitch=0
-      MaxEngPitch=0
-      WheelsTraction=0.100000
-      IronWheelsTerrainDmg=25
-      VelFriction=(X=0.000000,Y=0.000000,Z=0.000000)
-      IronC=0.000000
-      bUsePerfectWheelAngSpeed=True
-      WheelsRadius=0.000000
-      TractionWheelsPosition=0.000000
-      VWaterT(0)=None
-      VWaterT(1)=None
-      VWaterT(2)=None
-      VWaterT(3)=None
-      VWaterT(4)=None
-      VWaterT(5)=None
-      VWaterT(6)=None
-      VWaterT(7)=None
-      WAccelRate=500.000000
-      Health=500
-      bFPViewUseRelRot=True
-      bFPRepYawUpdatesView=True
-      VehicleName="Wheeled Car"
-      TranslatorDescription="This is a wheeled vehicle, press [Fire] or [AltFire] to fire the different firemodes. Use your Strafe keys to turn this vehicle and Move Forward/Backward keys to accelerate/deaccelerate. To leave this vehicle, press your [ThrowWeapon] key."
-      bMaster=True
-      VehicleKeyInfoStr="Wheeled car keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to turn|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%PrevWeapon%, %NextWeapon%, %SwitchToBestWeapon% to change camera|%ThrowWeapon% to exit the vehicle"
-      bDestroyUpsideDown=True
-      WDeAccelRate=50.000000
-      Mesh=LodMesh'UnrealShare.WoodenBoxM'
+	Wheels(0)=(WheelOffset=(X=25.320000,Y=28.540001,Z=-23.000000),WheelClass=Class'XVehicles.VehicleWheel',WheelMesh=LodMesh'UnrealShare.WoodenBoxM',WheelType=TT_TurningWheel)
+	Wheels(1)=(WheelOffset=(X=25.320000,Y=-28.540001,Z=-23.000000),WheelClass=Class'XVehicles.VehicleWheel',WheelMesh=LodMesh'UnrealShare.WoodenBoxM',WheelType=TT_TurningWheel)
+	Wheels(2)=(WheelOffset=(X=-25.320000,Y=28.540001,Z=-23.000000),WheelClass=Class'XVehicles.VehicleWheel',WheelMesh=LodMesh'UnrealShare.WoodenBoxM')
+	Wheels(3)=(WheelOffset=(X=-25.320000,Y=-28.540001,Z=-23.000000),WheelClass=Class'XVehicles.VehicleWheel',WheelMesh=LodMesh'UnrealShare.WoodenBoxM')
+	MaxGroundSpeed=3000.000000
+	WheelMaxYaw=8000.000000
+	WheelTurnSpeed=12000.000000
+	WheelsTraction=0.100000
+	IronWheelsTerrainDmg=25
+	bUsePerfectWheelAngSpeed=True
+	WAccelRate=500.000000
+	Health=500
+	bFPViewUseRelRot=True
+	bFPRepYawUpdatesView=True
+	VehicleName="Wheeled Car"
+	TranslatorDescription="This is a wheeled vehicle, press [Fire] or [AltFire] to fire the different firemodes. Use your Strafe keys to turn this vehicle and Move Forward/Backward keys to accelerate/deaccelerate. To leave this vehicle, press your [ThrowWeapon] key."
+	bMaster=True
+	VehicleKeyInfoStr="Wheeled car keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to turn|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%PrevWeapon%, %NextWeapon%, %SwitchToBestWeapon% to change camera|%ThrowWeapon% to exit the vehicle"
+	bDestroyUpsideDown=True
+	WDeAccelRate=50.000000
+	Mesh=LodMesh'UnrealShare.WoodenBoxM'
 }

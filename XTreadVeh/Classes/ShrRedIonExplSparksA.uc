@@ -14,17 +14,17 @@ simulated function Tick(float DeltaTime)
 
 defaultproperties
 {
-      RemoteRole=ROLE_SimulatedProxy
-      LifeSpan=0.300000
-      DrawType=DT_Mesh
-      Style=STY_Translucent
-      Mesh=LodMesh'XTreadVeh.EnLnPartRedA'
-      DrawScale=2.000000
-      bUnlit=True
-      MultiSkins(1)=Texture'XTreadVeh.Effects.RedIonEnFX'
-      MultiSkins(2)=Texture'XTreadVeh.Effects.RedIonEnFX'
-      MultiSkins(3)=Texture'XTreadVeh.Effects.RedIonEnFX'
-      MultiSkins(4)=Texture'XTreadVeh.Effects.RedIonEnFX'
-      MultiSkins(5)=Texture'XTreadVeh.Effects.RedIonEnFX'
-      MultiSkins(6)=Texture'XTreadVeh.Effects.RedIonEnFX'
+	RemoteRole=ROLE_SimulatedProxy
+	LifeSpan=0.300000
+	DrawType=DT_Mesh
+	Style=STY_Translucent
+	Mesh=LodMesh'XTreadVeh.EnLnPartRedA'
+	DrawScale=2.000000
+	bUnlit=True
+	MultiSkins(1)=Texture'XTreadVeh.Effects.RedIonEnFX'
+	MultiSkins(2)=Texture'XTreadVeh.Effects.RedIonEnFX'
+	MultiSkins(3)=Texture'XTreadVeh.Effects.RedIonEnFX'
+	MultiSkins(4)=Texture'XTreadVeh.Effects.RedIonEnFX'
+	MultiSkins(5)=Texture'XTreadVeh.Effects.RedIonEnFX'
+	MultiSkins(6)=Texture'XTreadVeh.Effects.RedIonEnFX'
 }

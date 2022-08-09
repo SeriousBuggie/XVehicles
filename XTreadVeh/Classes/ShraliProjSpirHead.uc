@@ -34,18 +34,16 @@ simulated function Tick(float Delta)
 
 defaultproperties
 {
-      PrePivotRel=(X=0.000000,Y=0.000000,Z=0.000000)
-      OwnerRot=(Pitch=0,Yaw=0,Roll=0)
-      bNetTemporary=False
-      bTrailerSameRotation=True
-      bTrailerPrePivot=True
-      Physics=PHYS_Trailer
-      RemoteRole=ROLE_SimulatedProxy
-      DrawType=DT_Mesh
-      Style=STY_Translucent
-      Mesh=LodMesh'XTreadVeh.ShraliProjSpirHead'
-      DrawScale=1.500000
-      ScaleGlow=1.600000
-      bUnlit=True
-      bFixedRotationDir=True
+	bNetTemporary=False
+	bTrailerSameRotation=True
+	bTrailerPrePivot=True
+	Physics=PHYS_Trailer
+	RemoteRole=ROLE_SimulatedProxy
+	DrawType=DT_Mesh
+	Style=STY_Translucent
+	Mesh=LodMesh'XTreadVeh.ShraliProjSpirHead'
+	DrawScale=1.500000
+	ScaleGlow=1.600000
+	bUnlit=True
+	bFixedRotationDir=True
 }

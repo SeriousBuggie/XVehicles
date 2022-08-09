@@ -11,10 +11,10 @@ Begin:
 
 defaultproperties
 {
-      bTrailerSameRotation=True
-      Physics=PHYS_Trailer
-      AnimSequence="Still"
-      Mesh=LodMesh'XChopVeh.CybHeliGuideBlades'
-      DrawScale=8.000000
-      PrePivot=(Z=-30.000000)
+	bTrailerSameRotation=True
+	Physics=PHYS_Trailer
+	AnimSequence="Still"
+	Mesh=LodMesh'XChopVeh.CybHeliGuideBlades'
+	DrawScale=8.000000
+	PrePivot=(X=0.000000,Y=0.000000,Z=-30.000000)
 }

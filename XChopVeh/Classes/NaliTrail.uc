@@ -42,12 +42,10 @@ simulated function Tick(float Delta)
 
 defaultproperties
 {
-      PrePivotRel=(X=0.000000,Y=0.000000,Z=0.000000)
-      bReplicatePrePivotRel=False
-      UpdateInClientOnly=True
-      bNetTemporary=False
-      bTrailerSameRotation=True
-      Physics=PHYS_Trailer
-      RemoteRole=ROLE_SimulatedProxy
-      Mass=0.000000
+	UpdateInClientOnly=True
+	bNetTemporary=False
+	bTrailerSameRotation=True
+	Physics=PHYS_Trailer
+	RemoteRole=ROLE_SimulatedProxy
+	Mass=0.000000
 }

@@ -104,16 +104,15 @@ simulated exec function XVJumpReleased()
 
 defaultproperties
 {
-      bKeysSet=False
-      bRotatingPickup=False
-      bIsAnArmor=True
-      bHidden=True
-      Physics=PHYS_Trailer
-      InitialState="Idle2"
-      bGameRelevant=True
-      CollisionRadius=0.000000
-      CollisionHeight=0.000000
-      bCollideActors=False
-      bFixedRotationDir=False
-      RotationRate=(Yaw=0)
+	bRotatingPickup=False
+	bIsAnArmor=True
+	bHidden=True
+	Physics=PHYS_Trailer
+	InitialState="Idle2"
+	bGameRelevant=True
+	CollisionRadius=0.000000
+	CollisionHeight=0.000000
+	bCollideActors=False
+	bFixedRotationDir=False
+	RotationRate=(Pitch=0,Yaw=0)
 }

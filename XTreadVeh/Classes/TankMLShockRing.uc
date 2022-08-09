@@ -4,8 +4,8 @@ class TankMLShockRing expands ShraliShock;
 
 defaultproperties
 {
-      LifeSpan=0.500000
-      DrawScale=40.000000
-      ScaleGlow=1.350000
-      MultiSkins(1)=Texture'XTreadVeh.Coronas.NormalShock'
+	LifeSpan=0.500000
+	DrawScale=40.000000
+	ScaleGlow=1.350000
+	MultiSkins(1)=Texture'XTreadVeh.Coronas.NormalShock'
 }

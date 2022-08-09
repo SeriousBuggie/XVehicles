@@ -143,25 +143,20 @@ simulated function rotator GetDriverInput( float Delta )
 
 defaultproperties
 {
-      TraceActor=Class'Botpack.MTracer'
-      CurrentTeamColor=0
-      LaserTexture=2
-      Core=None
-      beam=None
-      TracerCount=0
-      PuffSide=0
-      RotatingSpeed=65000.000000
-      PitchRange=(Max=17000,Min=-8500)
-      bAltFireZooms=True
-      TurretPitchActor=Class'XStatVeh.MinigunTurretGun'
-      WeapSettings(0)=(FireStartOffset=(X=120.000000,Z=45.000000),RefireRate=0.150000,FireSound=Sound'XStatVeh.Attack.CybFire',bInstantHit=True,hitdamage=20,HitType="Ballistic",HitMomentum=10000.000000,HitHeavyness=2)
-      bPhysicalGunAimOnly=True
-      AnimSequence="Still"
-      Texture=Texture'XStatVeh.Skins.CybotMetal'
-      Mesh=LodMesh'XStatVeh.CybSentinelTurret'
-      DrawScale=5.000000
-      MultiSkins(1)=Texture'XVehicles.Skins.CybotSk'
-      MultiSkins(2)=Texture'XVehicles.Skins.CybotCoreRed'
-      CollisionRadius=70.000000
-      CollisionHeight=45.000000
+	TraceActor=Class'Botpack.MTracer'
+	LaserTexture=2
+	RotatingSpeed=65000.000000
+	PitchRange=(Max=17000,Min=-8500)
+	bAltFireZooms=True
+	TurretPitchActor=Class'XStatVeh.MinigunTurretGun'
+	WeapSettings(0)=(FireStartOffset=(X=120.000000,Z=45.000000),RefireRate=0.150000,FireSound=Sound'XStatVeh.Attack.CybFire',bInstantHit=True,hitdamage=20,HitType="Ballistic",HitMomentum=10000.000000,HitHeavyness=2)
+	bPhysicalGunAimOnly=True
+	AnimSequence="Still"
+	Texture=Texture'XStatVeh.Skins.CybotMetal'
+	Mesh=LodMesh'XStatVeh.CybSentinelTurret'
+	DrawScale=5.000000
+	MultiSkins(1)=Texture'XVehicles.Skins.CybotSk'
+	MultiSkins(2)=Texture'XVehicles.Skins.CybotCoreRed'
+	CollisionRadius=70.000000
+	CollisionHeight=45.000000
 }

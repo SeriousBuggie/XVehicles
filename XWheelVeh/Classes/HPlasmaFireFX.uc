@@ -4,6 +4,6 @@ class HPlasmaFireFX expands LPlasmaFireFX;
 
 defaultproperties
 {
-      Texture=Texture'XWheelVeh.Effects.HPlasmaFireFX'
-      DrawScale=0.625000
+	Texture=Texture'XWheelVeh.Effects.HPlasmaFireFX'
+	DrawScale=0.625000
 }

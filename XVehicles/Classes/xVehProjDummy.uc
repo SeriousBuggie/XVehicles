@@ -13,9 +13,9 @@ simulated function ProcessTouch (Actor Other, Vector HitLocation)
 
 defaultproperties
 {
-      speed=50000.000000
-      MaxSpeed=50000.000000
-      bHidden=True
-      LifeSpan=60.000000
-      Mass=1.000000
+	speed=50000.000000
+	MaxSpeed=50000.000000
+	bHidden=True
+	LifeSpan=60.000000
+	Mass=1.000000
 }

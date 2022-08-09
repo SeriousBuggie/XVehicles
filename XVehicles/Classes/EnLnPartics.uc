@@ -136,31 +136,25 @@ local rotator tempR;
 
 defaultproperties
 {
-      FXSpeed=10.000000
-      ProgressiveFXSpeed=5.000000
-      RollRate=16
-      bExtInitialized=False
-      Lifetime=0.000000
-      eAnimList(0)="Impl00"
-      eAnimList(1)="ImplP30"
-      eAnimList(2)="ImplP60"
-      eAnimList(3)="ImplN30"
-      eAnimList(4)="ImplN60"
-      eAnimList(5)="Expl00"
-      eAnimList(6)="ExplP30"
-      eAnimList(7)="ExplP60"
-      eAnimList(8)="ExplN30"
-      eAnimList(9)="ExplN60"
-      rolling=0.000000
-      currentAnimR=0.000000
-      eOffset=(X=0.000000,Y=0.000000,Z=0.000000)
-      EffectStyle=ES_ImplNormal00
-      bNetTemporary=False
-      RemoteRole=ROLE_SimulatedProxy
-      LifeSpan=10.000000
-      DrawType=DT_Mesh
-      Style=STY_Translucent
-      Mesh=LodMesh'XVehicles.EnLnPartics'
-      ScaleGlow=2.000000
-      bUnlit=True
+	FXSpeed=10.000000
+	ProgressiveFXSpeed=5.000000
+	RollRate=16
+	eAnimList(0)="Impl00"
+	eAnimList(1)="ImplP30"
+	eAnimList(2)="ImplP60"
+	eAnimList(3)="ImplN30"
+	eAnimList(4)="ImplN60"
+	eAnimList(5)="Expl00"
+	eAnimList(6)="ExplP30"
+	eAnimList(7)="ExplP60"
+	eAnimList(8)="ExplN30"
+	eAnimList(9)="ExplN60"
+	bNetTemporary=False
+	RemoteRole=ROLE_SimulatedProxy
+	LifeSpan=10.000000
+	DrawType=DT_Mesh
+	Style=STY_Translucent
+	Mesh=LodMesh'XVehicles.EnLnPartics'
+	ScaleGlow=2.000000
+	bUnlit=True
 }

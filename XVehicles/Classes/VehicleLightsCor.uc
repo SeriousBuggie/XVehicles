@@ -37,16 +37,14 @@ simulated function Tick(float Delta)
 
 defaultproperties
 {
-      bReady=False
-      POffSet=(X=0.000000,Y=0.000000,Z=0.000000)
-      bHidden=True
-      bNetTemporary=False
-      bTrailerSameRotation=True
-      bTrailerPrePivot=True
-      Physics=PHYS_Trailer
-      RemoteRole=ROLE_SimulatedProxy
-      DrawType=DT_Sprite
-      Style=STY_Translucent
-      ScaleGlow=1.500000
-      bUnlit=True
+	bHidden=True
+	bNetTemporary=False
+	bTrailerSameRotation=True
+	bTrailerPrePivot=True
+	Physics=PHYS_Trailer
+	RemoteRole=ROLE_SimulatedProxy
+	DrawType=DT_Sprite
+	Style=STY_Translucent
+	ScaleGlow=1.500000
+	bUnlit=True
 }

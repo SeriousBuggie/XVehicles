@@ -8,6 +8,6 @@ class CybProjExplBlue expands CybProjExplRed;
 
 defaultproperties
 {
-      Texture=Texture'XChopVeh.CybProjExplosions.CybBExpl01'
-      Skin=Texture'XChopVeh.Palletes.BlueCybPallete'
+	Texture=Texture'XChopVeh.CybProjExplosions.CybBExpl01'
+	Skin=Texture'XChopVeh.Palletes.BlueCybPallete'
 }

@@ -138,23 +138,16 @@ function Destroyed()
 
 defaultproperties
 {
-      VehicleClass=None
-      TeamNum=0
-      bStartTeamLocked=True
-      bInitialActive=True
-      VehicleRespawnTime=5.000000
-      VehicleResetTime=60.000000
-      MyVehicle=None
-      NextRespawnTimer=0.000000
-      bInitAct=False
-      InitialTeamNum=0
-      bDisableTeamSpawn=True
-      bUseMultipleSpawn=False
-      bHidden=True
-      RemoteRole=ROLE_None
-      bDirectional=True
-      DrawType=DT_Mesh
-      Mesh=LodMesh'UnrealShare.WoodenBoxM'
-      bCollideWhenPlacing=True
-      bCollideWorld=True
+	bStartTeamLocked=True
+	bInitialActive=True
+	VehicleRespawnTime=5.000000
+	VehicleResetTime=60.000000
+	bDisableTeamSpawn=True
+	bHidden=True
+	RemoteRole=ROLE_None
+	bDirectional=True
+	DrawType=DT_Mesh
+	Mesh=LodMesh'UnrealShare.WoodenBoxM'
+	bCollideWhenPlacing=True
+	bCollideWorld=True
 }

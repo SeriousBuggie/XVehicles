@@ -47,24 +47,22 @@ simulated function Tick( float DeltaTime)
 
 defaultproperties
 {
-      RotTex(0)=Texture'XTreadVeh.Effects.RedKCoron01'
-      RotTex(1)=Texture'XTreadVeh.Effects.RedKCoron02'
-      RotTex(2)=Texture'XTreadVeh.Effects.RedKCoron03'
-      RotTex(3)=Texture'XTreadVeh.Effects.RedKCoron04'
-      RotTex(4)=Texture'XTreadVeh.Effects.RedKCoron05'
-      RotTex(5)=Texture'XTreadVeh.Effects.RedKCoron06'
-      RotTex(6)=Texture'XTreadVeh.Effects.RedKCoron07'
-      RotTex(7)=Texture'XTreadVeh.Effects.RedKCoron08'
-      TransTime=0.010000
-      CurrentSprt=0
-      bRotateBackwards=False
-      RemoteRole=ROLE_SimulatedProxy
-      LifeSpan=0.500000
-      DrawType=DT_Sprite
-      Style=STY_Translucent
-      Texture=Texture'XTreadVeh.Effects.RedKCoron01'
-      DrawScale=0.200000
-      ScaleGlow=2.000000
-      SpriteProjForward=22.000000
-      bUnlit=True
+	RotTex(0)=Texture'XTreadVeh.Effects.RedKCoron01'
+	RotTex(1)=Texture'XTreadVeh.Effects.RedKCoron02'
+	RotTex(2)=Texture'XTreadVeh.Effects.RedKCoron03'
+	RotTex(3)=Texture'XTreadVeh.Effects.RedKCoron04'
+	RotTex(4)=Texture'XTreadVeh.Effects.RedKCoron05'
+	RotTex(5)=Texture'XTreadVeh.Effects.RedKCoron06'
+	RotTex(6)=Texture'XTreadVeh.Effects.RedKCoron07'
+	RotTex(7)=Texture'XTreadVeh.Effects.RedKCoron08'
+	TransTime=0.010000
+	RemoteRole=ROLE_SimulatedProxy
+	LifeSpan=0.500000
+	DrawType=DT_Sprite
+	Style=STY_Translucent
+	Texture=Texture'XTreadVeh.Effects.RedKCoron01'
+	DrawScale=0.200000
+	ScaleGlow=2.000000
+	SpriteProjForward=22.000000
+	bUnlit=True
 }

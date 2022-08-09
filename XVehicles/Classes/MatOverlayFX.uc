@@ -29,5 +29,5 @@ simulated function Tick(float DeltaTime)
 
 defaultproperties
 {
-      RemoteRole=ROLE_None
+	RemoteRole=ROLE_None
 }

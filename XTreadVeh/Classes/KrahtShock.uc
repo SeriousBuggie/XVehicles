@@ -4,7 +4,7 @@ class KrahtShock expands ShraliShock;
 
 defaultproperties
 {
-      DrawScale=25.000000
-      ScaleGlow=2.350000
-      MultiSkins(1)=Texture'XTreadVeh.Coronas.KrahtShock'
+	DrawScale=25.000000
+	ScaleGlow=2.350000
+	MultiSkins(1)=Texture'XTreadVeh.Coronas.KrahtShock'
 }

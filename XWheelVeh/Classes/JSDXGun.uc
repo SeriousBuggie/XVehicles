@@ -25,7 +25,7 @@ class JSDXGun expands xWheelVehAttach;
 
 defaultproperties
 {
-      Mesh=LodMesh'XWheelVeh.JSDXGun'
-      CollisionRadius=20.000000
-      CollisionHeight=8.000000
+	Mesh=LodMesh'XWheelVeh.JSDXGun'
+	CollisionRadius=20.000000
+	CollisionHeight=8.000000
 }

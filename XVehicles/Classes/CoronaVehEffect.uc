@@ -199,33 +199,14 @@ local vector X, Y, Z;
 
 defaultproperties
 {
-      MaxDistance=0.000000
-      Lifetime=0.000000
-      StartScaleTime=0.000000
-      EndScaleTime=0.000000
-      FadeInTime=0.000000
-      FadeOutTime=0.000000
-      EndScaleCoef=1.000000
-      StartScaleCoef=1.000000
-      CoronaSprite=None
-      MaxCoronaSize=0.000000
-      MinCoronaSize=0.000000
-      CGlow=0.000000
-      bReceivedData=False
-      CountA=0.000000
-      CountB=0.000000
-      bVisible=False
-      OldOwnerDir=(X=0.000000,Y=0.000000,Z=0.000000)
-      CurOwnerDir=(X=0.000000,Y=0.000000,Z=0.000000)
-      OldCamLoc=(X=0.000000,Y=0.000000,Z=0.000000)
-      NewCamLoc=(X=0.000000,Y=0.000000,Z=0.000000)
-      bCoronasCollisionDetail=False
-      RemoteRole=ROLE_SimulatedProxy
-      LifeSpan=5000.000000
-      Style=STY_Translucent
-      Texture=None
-      bUnlit=True
-      CollisionRadius=0.000000
-      CollisionHeight=0.000000
-      Mass=0.000000
+	EndScaleCoef=1.000000
+	StartScaleCoef=1.000000
+	RemoteRole=ROLE_SimulatedProxy
+	LifeSpan=5000.000000
+	Style=STY_Translucent
+	Texture=None
+	bUnlit=True
+	CollisionRadius=0.000000
+	CollisionHeight=0.000000
+	Mass=0.000000
 }

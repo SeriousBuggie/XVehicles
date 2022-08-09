@@ -31,15 +31,5 @@ final function Clear()
 
 defaultproperties
 {
-      NextMove=None
-      TimeStamp=0.000000
-      Delta=0.000000
-      Yaw=0.000000
-      Rise=0
-      Turn=0
-      Accel=0
-      SavedLocation=(X=0.000000,Y=0.000000,Z=0.000000)
-      SavedVelocity=(X=0.000000,Y=0.000000,Z=0.000000)
-      SavedYaw=0.000000
-      RemoteRole=ROLE_None
+	RemoteRole=ROLE_None
 }

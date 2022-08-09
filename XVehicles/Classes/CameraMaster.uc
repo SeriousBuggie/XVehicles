@@ -58,6 +58,5 @@ function Timer()
 
 defaultproperties
 {
-      Master=None
-      Pending="("
+	Pending="("
 }

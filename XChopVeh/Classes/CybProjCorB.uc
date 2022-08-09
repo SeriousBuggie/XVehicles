@@ -8,5 +8,5 @@ class CybProjCorB expands CybProjCor;
 
 defaultproperties
 {
-      Texture=Texture'XVehicles.Coronas.CybProjCorBlue'
+	Texture=Texture'XVehicles.Coronas.CybProjCorBlue'
 }

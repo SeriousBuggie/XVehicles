@@ -116,6 +116,5 @@ function Tick(float delta)
 
 defaultproperties
 {
-      PulseForHeal=PFH_Auto
-      bShowFlagBase=True
+	bShowFlagBase=True
 }

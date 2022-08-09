@@ -30,16 +30,16 @@ simulated function PostBeginPlay()
 
 defaultproperties
 {
-      RndExplSnd1=Sound'XTreadVeh.Explosions.TExplSnd01'
-      RndExplSnd2=Sound'XTreadVeh.Explosions.TExplSnd02'
-      RndExplSnd3=Sound'XTreadVeh.Explosions.TExplSnd03'
-      EffectSound1=None
-      Texture=Texture'UExplosionsSet01.ExplB01'
-      DrawScale=7.500000
-      ScaleGlow=1.800000
-      LightType=LT_Steady
-      LightBrightness=100
-      LightHue=0
-      LightSaturation=128
-      LightRadius=10
+	RndExplSnd1=Sound'XTreadVeh.Explosions.TExplSnd01'
+	RndExplSnd2=Sound'XTreadVeh.Explosions.TExplSnd02'
+	RndExplSnd3=Sound'XTreadVeh.Explosions.TExplSnd03'
+	EffectSound1=None
+	Texture=Texture'UExplosionsSet01.ExplB01'
+	DrawScale=7.500000
+	ScaleGlow=1.800000
+	LightType=LT_Steady
+	LightBrightness=100
+	LightHue=0
+	LightSaturation=128
+	LightRadius=10
 }

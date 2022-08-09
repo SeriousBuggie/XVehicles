@@ -12,10 +12,4 @@ var() config bool bDisableFlagAnnouncer;
 
 defaultproperties
 {
-      bHideState=False
-      bPulseAltHeal=False
-      bDisableTeamSpawn=False
-      bDisableFastWarShell=False
-      bAllowTranslocator=False
-      bDisableFlagAnnouncer=False
 }

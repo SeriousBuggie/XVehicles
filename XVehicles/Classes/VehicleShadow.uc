@@ -63,6 +63,5 @@ simulated event Update(Actor L)
 
 defaultproperties
 {
-      OwnerVehicle=None
-      Physics=PHYS_Trailer
+	Physics=PHYS_Trailer
 }

@@ -4,5 +4,5 @@ Class ChopperRotor extends VehicleAttachment
 
 defaultproperties
 {
-      Mesh=LodMesh'UnrealShare.WoodenBoxM'
+	Mesh=LodMesh'UnrealShare.WoodenBoxM'
 }

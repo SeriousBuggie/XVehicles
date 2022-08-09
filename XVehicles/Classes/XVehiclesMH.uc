@@ -123,5 +123,4 @@ function SetupVehicleClass(Class<vehicle> cl)
 
 defaultproperties
 {
-      DynClass=None
 }

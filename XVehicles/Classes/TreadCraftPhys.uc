@@ -802,85 +802,28 @@ simulated function AttachmentsTick( float Delta )
 
 defaultproperties
 {
-      MaxGroundSpeed=600.000000
-      VehicleTurnSpeed=15000.000000
-      CurTurnSpeed=0.000000
-      NextAUpdTime=0.000000
-      TurningRep=0
-      NumMoveAnimFrames=0
-      CurrentAnimFrame=0
-      bHasAnimTread=False
-      bWasStuckOnW=False
-      bReversing=False
-      StuckTimer=0.000000
-      ReverseTimer=0.000000
-      TreadPan(0)=None
-      TreadPan(1)=None
-      TreadPan(2)=None
-      TreadPan(3)=None
-      TreadPan(4)=None
-      TreadPan(5)=None
-      TreadPan(6)=None
-      TreadPan(7)=None
-      TreadPan(8)=None
-      TreadPan(9)=None
-      TreadPan(10)=None
-      TreadPan(11)=None
-      TreadPan(12)=None
-      TreadPan(13)=None
-      TreadPan(14)=None
-      TreadPan(15)=None
-      AltTreadPan(0)=None
-      AltTreadPan(1)=None
-      AltTreadPan(2)=None
-      AltTreadPan(3)=None
-      AltTreadPan(4)=None
-      AltTreadPan(5)=None
-      AltTreadPan(6)=None
-      AltTreadPan(7)=None
-      AltTreadPan(8)=None
-      AltTreadPan(9)=None
-      AltTreadPan(10)=None
-      AltTreadPan(11)=None
-      AltTreadPan(12)=None
-      AltTreadPan(13)=None
-      AltTreadPan(14)=None
-      AltTreadPan(15)=None
-      Treads(0)=(MovPerTreadCycle=0.000000,TreadMesh=None,TreadSkinN=0,TreadOffset=(X=0.000000,Y=0.000000,Z=0.000000),TreadScale=1.000000,bUseAltTread=False,TTread=None,CurrentTPan=0,TPanCount=0.000000,bHaveAnimTWheels=False,WheelFramesN=0,WheelAnimSet="None",WheelSize=0.000000,bWheenAnimInverted=False,CurrentWheelFrame=0.000000,TrackWidth=64.000000,TrackFrontOffset=(X=0.000000,Y=0.000000,Z=0.000000),TrackBackOffset=(X=0.000000,Y=0.000000,Z=0.000000))
-      Treads(1)=(MovPerTreadCycle=0.000000,TreadMesh=None,TreadSkinN=0,TreadOffset=(X=0.000000,Y=0.000000,Z=0.000000),TreadScale=1.000000,bUseAltTread=False,TTread=None,CurrentTPan=0,TPanCount=0.000000,bHaveAnimTWheels=False,WheelFramesN=0,WheelAnimSet="None",WheelSize=0.000000,bWheenAnimInverted=False,CurrentWheelFrame=0.000000,TrackWidth=64.000000,TrackFrontOffset=(X=0.000000,Y=0.000000,Z=0.000000),TrackBackOffset=(X=0.000000,Y=0.000000,Z=0.000000))
-      Treads(2)=(MovPerTreadCycle=0.000000,TreadMesh=None,TreadSkinN=0,TreadOffset=(X=0.000000,Y=0.000000,Z=0.000000),TreadScale=1.000000,bUseAltTread=False,TTread=None,CurrentTPan=0,TPanCount=0.000000,bHaveAnimTWheels=False,WheelFramesN=0,WheelAnimSet="None",WheelSize=0.000000,bWheenAnimInverted=False,CurrentWheelFrame=0.000000,TrackWidth=64.000000,TrackFrontOffset=(X=0.000000,Y=0.000000,Z=0.000000),TrackBackOffset=(X=0.000000,Y=0.000000,Z=0.000000))
-      Treads(3)=(MovPerTreadCycle=0.000000,TreadMesh=None,TreadSkinN=0,TreadOffset=(X=0.000000,Y=0.000000,Z=0.000000),TreadScale=1.000000,bUseAltTread=False,TTread=None,CurrentTPan=0,TPanCount=0.000000,bHaveAnimTWheels=False,WheelFramesN=0,WheelAnimSet="None",WheelSize=0.000000,bWheenAnimInverted=False,CurrentWheelFrame=0.000000,TrackWidth=64.000000,TrackFrontOffset=(X=0.000000,Y=0.000000,Z=0.000000),TrackBackOffset=(X=0.000000,Y=0.000000,Z=0.000000))
-      Treads(4)=(MovPerTreadCycle=0.000000,TreadMesh=None,TreadSkinN=0,TreadOffset=(X=0.000000,Y=0.000000,Z=0.000000),TreadScale=1.000000,bUseAltTread=False,TTread=None,CurrentTPan=0,TPanCount=0.000000,bHaveAnimTWheels=False,WheelFramesN=0,WheelAnimSet="None",WheelSize=0.000000,bWheenAnimInverted=False,CurrentWheelFrame=0.000000,TrackWidth=64.000000,TrackFrontOffset=(X=0.000000,Y=0.000000,Z=0.000000),TrackBackOffset=(X=0.000000,Y=0.000000,Z=0.000000))
-      Treads(5)=(MovPerTreadCycle=0.000000,TreadMesh=None,TreadSkinN=0,TreadOffset=(X=0.000000,Y=0.000000,Z=0.000000),TreadScale=1.000000,bUseAltTread=False,TTread=None,CurrentTPan=0,TPanCount=0.000000,bHaveAnimTWheels=False,WheelFramesN=0,WheelAnimSet="None",WheelSize=0.000000,bWheenAnimInverted=False,CurrentWheelFrame=0.000000,TrackWidth=64.000000,TrackFrontOffset=(X=0.000000,Y=0.000000,Z=0.000000),TrackBackOffset=(X=0.000000,Y=0.000000,Z=0.000000))
-      Treads(6)=(MovPerTreadCycle=0.000000,TreadMesh=None,TreadSkinN=0,TreadOffset=(X=0.000000,Y=0.000000,Z=0.000000),TreadScale=1.000000,bUseAltTread=False,TTread=None,CurrentTPan=0,TPanCount=0.000000,bHaveAnimTWheels=False,WheelFramesN=0,WheelAnimSet="None",WheelSize=0.000000,bWheenAnimInverted=False,CurrentWheelFrame=0.000000,TrackWidth=64.000000,TrackFrontOffset=(X=0.000000,Y=0.000000,Z=0.000000),TrackBackOffset=(X=0.000000,Y=0.000000,Z=0.000000))
-      Treads(7)=(MovPerTreadCycle=0.000000,TreadMesh=None,TreadSkinN=0,TreadOffset=(X=0.000000,Y=0.000000,Z=0.000000),TreadScale=1.000000,bUseAltTread=False,TTread=None,CurrentTPan=0,TPanCount=0.000000,bHaveAnimTWheels=False,WheelFramesN=0,WheelAnimSet="None",WheelSize=0.000000,bWheenAnimInverted=False,CurrentWheelFrame=0.000000,TrackWidth=64.000000,TrackFrontOffset=(X=0.000000,Y=0.000000,Z=0.000000),TrackBackOffset=(X=0.000000,Y=0.000000,Z=0.000000))
-      bEngDynSndPitch=False
-      MinEngPitch=0
-      MaxEngPitch=0
-      TreadsTraction=0.100000
-      VelFriction=(X=0.000000,Y=0.000000,Z=0.000000)
-      OldVehicleYaw=0.000000
-      OldTTurnDir=False
-      IceFix=False
-      WreckTrackColHeight=15.000000
-      WreckTrackColRadius=15.000000
-      VWaterT(0)=None
-      VWaterT(1)=None
-      VWaterT(2)=None
-      VWaterT(3)=None
-      VWaterT(4)=None
-      VWaterT(5)=None
-      VWaterT(6)=None
-      VWaterT(7)=None
-      AIRating=2.000000
-      WAccelRate=800.000000
-      Health=1000
-      bFPViewUseRelRot=True
-      bFPRepYawUpdatesView=True
-      VehicleName="Tread Craft"
-      TranslatorDescription="This is a Tread Craft, press [Fire] or [AltFire] to fire the different firemodes. Use your Strafe keys to turn this vehicle and Move Forward/Backward keys to accelerate/deaccelerate. To leave this vehicle, press your [ThrowWeapon] key."
-      VehicleKeyInfoStr="Tread craft keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to turn|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%PrevWeapon%, %NextWeapon%, %SwitchToBestWeapon% to change camera|%ThrowWeapon% to exit the vehicle"
-      bDestroyUpsideDown=True
-      WDeAccelRate=35.000000
-      Mesh=LodMesh'UnrealShare.WoodenBoxM'
+	MaxGroundSpeed=600.000000
+	VehicleTurnSpeed=15000.000000
+	Treads(0)=(TreadScale=1.000000,TrackWidth=64.000000)
+	Treads(1)=(TreadScale=1.000000,TrackWidth=64.000000)
+	Treads(2)=(TreadScale=1.000000,TrackWidth=64.000000)
+	Treads(3)=(TreadScale=1.000000,TrackWidth=64.000000)
+	Treads(4)=(TreadScale=1.000000,TrackWidth=64.000000)
+	Treads(5)=(TreadScale=1.000000,TrackWidth=64.000000)
+	Treads(6)=(TreadScale=1.000000,TrackWidth=64.000000)
+	Treads(7)=(TreadScale=1.000000,TrackWidth=64.000000)
+	TreadsTraction=0.100000
+	WreckTrackColHeight=15.000000
+	WreckTrackColRadius=15.000000
+	AIRating=2.000000
+	WAccelRate=800.000000
+	Health=1000
+	bFPViewUseRelRot=True
+	bFPRepYawUpdatesView=True
+	VehicleName="Tread Craft"
+	TranslatorDescription="This is a Tread Craft, press [Fire] or [AltFire] to fire the different firemodes. Use your Strafe keys to turn this vehicle and Move Forward/Backward keys to accelerate/deaccelerate. To leave this vehicle, press your [ThrowWeapon] key."
+	VehicleKeyInfoStr="Tread craft keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to turn|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%PrevWeapon%, %NextWeapon%, %SwitchToBestWeapon% to change camera|%ThrowWeapon% to exit the vehicle"
+	bDestroyUpsideDown=True
+	WDeAccelRate=35.000000
+	Mesh=LodMesh'UnrealShare.WoodenBoxM'
 }

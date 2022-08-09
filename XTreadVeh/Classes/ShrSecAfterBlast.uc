@@ -16,7 +16,7 @@ class ShrSecAfterBlast expands ShrAfterBlast;
 
 defaultproperties
 {
-      AdvanceX=112.500000
-      Mesh=LodMesh'XTreadVeh.ShrSecAfterBlast'
-      DrawScale=12.500000
+	AdvanceX=112.500000
+	Mesh=LodMesh'XTreadVeh.ShrSecAfterBlast'
+	DrawScale=12.500000
 }

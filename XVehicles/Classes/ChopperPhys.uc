@@ -259,23 +259,16 @@ function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 
 defaultproperties
 {
-      MaxAirSpeed=1400.000000
-      YawTurnSpeed=18000.000000
-      CurrentYawSpeed=5.000000
-      NextCutTime=0.000000
-      MaxYawRates(0)=6000.000000
-      MaxYawRates(1)=-6000.000000
-      MyRotor=None
-      ChopperRotorClass=None
-      RotorOffset=(X=0.000000,Y=0.000000,Z=0.000000)
-      RotorSize=(X=0.000000,Y=0.000000,Z=0.000000)
-      RotorYaw=0
-      bHasRotorDmg=False
-      WAccelRate=900.000000
-      Health=300
-      bCanFly=True
-      VehicleName="Helicopter"
-      TranslatorDescription="This is a chopper vehicle, you can fire different firemodes using [Fire] and [AltFire] buttons. To move higher or lover use [Jump] and [Crouch] buttons and to move around use movement keys. To leave this vehicle press [ThrowWeapon] key."
-      VehicleKeyInfoStr="Chopper craft keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to strafe|%Jump%, %Duck% to move up/down|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%ThrowWeapon% to exit the vehicle"
-      Mesh=LodMesh'UnrealShare.WoodenBoxM'
+	MaxAirSpeed=1400.000000
+	YawTurnSpeed=18000.000000
+	CurrentYawSpeed=5.000000
+	MaxYawRates(0)=6000.000000
+	MaxYawRates(1)=-6000.000000
+	WAccelRate=900.000000
+	Health=300
+	bCanFly=True
+	VehicleName="Helicopter"
+	TranslatorDescription="This is a chopper vehicle, you can fire different firemodes using [Fire] and [AltFire] buttons. To move higher or lover use [Jump] and [Crouch] buttons and to move around use movement keys. To leave this vehicle press [ThrowWeapon] key."
+	VehicleKeyInfoStr="Chopper craft keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to strafe|%Jump%, %Duck% to move up/down|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%ThrowWeapon% to exit the vehicle"
+	Mesh=LodMesh'UnrealShare.WoodenBoxM'
 }

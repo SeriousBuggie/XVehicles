@@ -52,7 +52,6 @@ simulated event Actor SpawnNotification(Actor A)
 
 defaultproperties
 {
-      bGameEnded=False
-      ActorClass=Class'Botpack.GuidedWarshell'
-      RemoteRole=ROLE_SimulatedProxy
+	ActorClass=Class'Botpack.GuidedWarshell'
+	RemoteRole=ROLE_SimulatedProxy
 }

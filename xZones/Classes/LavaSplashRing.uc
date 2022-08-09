@@ -5,5 +5,5 @@ class LavaSplashRing expands WaterSplashRing;
 
 defaultproperties
 {
-      MultiSkins(1)=Texture'xZones.Particles.LavaSplashRing'
+	MultiSkins(1)=Texture'xZones.Particles.LavaSplashRing'
 }

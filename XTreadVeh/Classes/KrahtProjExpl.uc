@@ -22,15 +22,15 @@ simulated function PostBeginPlay()
 
 defaultproperties
 {
-      EffectSound1=Sound'XTreadVeh.Explosions.KrahtExpl'
-      LifeSpan=1.500000
-      Texture=Texture'UExplEffects01.GFXA01'
-      DrawScale=10.000000
-      ScaleGlow=1.800000
-      SpriteProjForward=0.000000
-      LightType=LT_Steady
-      LightBrightness=100
-      LightHue=40
-      LightSaturation=240
-      LightRadius=10
+	EffectSound1=Sound'XTreadVeh.Explosions.KrahtExpl'
+	LifeSpan=1.500000
+	Texture=Texture'UExplEffects01.GFXA01'
+	DrawScale=10.000000
+	ScaleGlow=1.800000
+	SpriteProjForward=0.000000
+	LightType=LT_Steady
+	LightBrightness=100
+	LightHue=40
+	LightSaturation=240
+	LightRadius=10
 }

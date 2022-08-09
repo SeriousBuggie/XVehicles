@@ -97,16 +97,12 @@ function VehicleFlag SetFlag(Decoration InFlag)
 
 defaultproperties
 {
-      myFlag=None
-      Next=None
-      LastCheck=0.000000
-      pos=0
-      bNetTemporary=False
-      bTrailerSameRotation=True
-      bTrailerPrePivot=True
-      RemoteRole=ROLE_SimulatedProxy
-      DrawType=DT_Mesh
-      Skin=Texture'Botpack.Skins.JpflagB'
-      Mesh=LodMesh'Botpack.newflag'
-      PrePivot=(Z=70.000000)
+	bNetTemporary=False
+	bTrailerSameRotation=True
+	bTrailerPrePivot=True
+	RemoteRole=ROLE_SimulatedProxy
+	DrawType=DT_Mesh
+	Skin=Texture'Botpack.Skins.JpflagB'
+	Mesh=LodMesh'Botpack.newflag'
+	PrePivot=(X=0.000000,Y=0.000000,Z=70.000000)
 }

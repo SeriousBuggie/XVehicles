@@ -53,24 +53,21 @@ local CoronaVehEffect ce;
 
 defaultproperties
 {
-      MaxDistance=4000.000000
-      Lifetime=8.000000
-      StartScaleTime=0.000000
-      EndScaleTime=0.000000
-      FadeInTime=1.000000
-      FadeOutTime=1.000000
-      EndScaleCoef=1.000000
-      StartScaleCoef=1.000000
-      CoronaSprite=None
-      MaxCoronaSize=5.000000
-      MinCoronaSize=1.000000
-      CGlow=1.500000
-      bHidden=True
-      RemoteRole=ROLE_SimulatedProxy
-      Style=STY_Translucent
-      Texture=None
-      bUnlit=True
-      CollisionRadius=0.000000
-      CollisionHeight=0.000000
-      Mass=0.000000
+	MaxDistance=4000.000000
+	Lifetime=8.000000
+	FadeInTime=1.000000
+	FadeOutTime=1.000000
+	EndScaleCoef=1.000000
+	StartScaleCoef=1.000000
+	MaxCoronaSize=5.000000
+	MinCoronaSize=1.000000
+	CGlow=1.500000
+	bHidden=True
+	RemoteRole=ROLE_SimulatedProxy
+	Style=STY_Translucent
+	Texture=None
+	bUnlit=True
+	CollisionRadius=0.000000
+	CollisionHeight=0.000000
+	Mass=0.000000
 }

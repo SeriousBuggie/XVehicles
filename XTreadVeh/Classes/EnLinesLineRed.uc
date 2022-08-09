@@ -41,16 +41,14 @@ simulated function Tick(float Delta)
 
 defaultproperties
 {
-      LifeSError=0.250000
-      InitDrawScale=2.000000
-      GlowCount=0.000000
-      InitLifeSpan=0.000000
-      RemoteRole=ROLE_SimulatedProxy
-      LifeSpan=0.125000
-      DrawType=DT_Mesh
-      Style=STY_Translucent
-      Mesh=LodMesh'XTreadVeh.EnLinesLineRed'
-      ScaleGlow=2.500000
-      bUnlit=True
-      bRandomFrame=True
+	LifeSError=0.250000
+	InitDrawScale=2.000000
+	RemoteRole=ROLE_SimulatedProxy
+	LifeSpan=0.125000
+	DrawType=DT_Mesh
+	Style=STY_Translucent
+	Mesh=LodMesh'XTreadVeh.EnLinesLineRed'
+	ScaleGlow=2.500000
+	bUnlit=True
+	bRandomFrame=True
 }

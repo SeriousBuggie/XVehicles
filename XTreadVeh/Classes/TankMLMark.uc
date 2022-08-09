@@ -4,6 +4,6 @@ class TankMLMark expands Scorch;
 
 defaultproperties
 {
-      Texture=Texture'XTreadVeh.Decals.TankMLMark'
-      DrawScale=6.400000
+	Texture=Texture'XTreadVeh.Decals.TankMLMark'
+	DrawScale=6.400000
 }

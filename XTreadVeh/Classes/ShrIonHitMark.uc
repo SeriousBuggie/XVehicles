@@ -7,6 +7,6 @@ simulated function AttachToSurface()
 
 defaultproperties
 {
-      Texture=Texture'Botpack.bigshockmark'
-      DrawScale=0.750000
+	Texture=Texture'Botpack.bigshockmark'
+	DrawScale=0.750000
 }

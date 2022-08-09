@@ -299,8 +299,6 @@ function bool FixBot(Bot Bot) {
 
 defaultproperties
 {
-      VehicleOwner=None
-      TracePawn=None
-      AirFlyScale=6.000000
-      RemoteRole=ROLE_None
+	AirFlyScale=6.000000
+	RemoteRole=ROLE_None
 }

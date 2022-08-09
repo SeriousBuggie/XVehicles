@@ -4,8 +4,8 @@ class ShraliSpirR expands KrahtFXSpirR;
 
 defaultproperties
 {
-      RotRate=2.000000
-      DrawScale=25.000000
-      ScaleGlow=2.000000
-      MultiSkins(1)=Texture'XTreadVeh.Effects.SpiralBurstMir'
+	RotRate=2.000000
+	DrawScale=25.000000
+	ScaleGlow=2.000000
+	MultiSkins(1)=Texture'XTreadVeh.Effects.SpiralBurstMir'
 }

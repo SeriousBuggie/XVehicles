@@ -323,35 +323,16 @@ simulated function PostBeginPlay()
 
 defaultproperties
 {
-      MaxHoverSpeed=800.000000
-      VehicleTurnSpeed=55000.000000
-      HoveringHeight=100.000000
-      JumpingHeight=500.000000
-      MaxPushUpDiff=0.000000
-      JumpDelay=3.000000
-      bHoverWhenNotDriving=False
-      Repulsor(0)=(X=0.000000,Y=0.000000,Z=0.000000)
-      Repulsor(1)=(X=0.000000,Y=0.000000,Z=0.000000)
-      Repulsor(2)=(X=0.000000,Y=0.000000,Z=0.000000)
-      JumpSound=None
-      DuckSound=None
-      bEngDynSndPitch=False
-      MinEngPitch=0
-      MaxEngPitch=0
-      LastJumpTime=0.000000
-      ActualHoverHeight=0.000000
-      DriveFrom=0.000000
-      RepDist(0)=0.000000
-      RepDist(1)=0.000000
-      RepDist(2)=0.000000
-      bDuck=False
-      bDuckFire=False
-      RepulsorTracker=None
-      WAccelRate=700.000000
-      Health=200
-      bCanFly=True
-      VehicleName="Hover Craft"
-      TranslatorDescription="This is a Hover Craft, press [Fire] or [AltFire] to fire the different firemodes. Use your Strafe keys and Move Forward/Backward keys to strafe/accelerate/deaccelerate. To leave this vehicle, press your [ThrowWeapon] key."
-      VehicleKeyInfoStr="Hover craft keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%,%StrafeRight% to strafe|%Jump% to jump with the vehicle|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%ThrowWeapon% to exit the vehicle"
-      Mesh=LodMesh'UnrealShare.WoodenBoxM'
+	MaxHoverSpeed=800.000000
+	VehicleTurnSpeed=55000.000000
+	HoveringHeight=100.000000
+	JumpingHeight=500.000000
+	JumpDelay=3.000000
+	WAccelRate=700.000000
+	Health=200
+	bCanFly=True
+	VehicleName="Hover Craft"
+	TranslatorDescription="This is a Hover Craft, press [Fire] or [AltFire] to fire the different firemodes. Use your Strafe keys and Move Forward/Backward keys to strafe/accelerate/deaccelerate. To leave this vehicle, press your [ThrowWeapon] key."
+	VehicleKeyInfoStr="Hover craft keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%,%StrafeRight% to strafe|%Jump% to jump with the vehicle|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%ThrowWeapon% to exit the vehicle"
+	Mesh=LodMesh'UnrealShare.WoodenBoxM'
 }

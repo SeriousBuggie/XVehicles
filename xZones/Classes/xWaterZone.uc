@@ -13,18 +13,18 @@ class xWaterZone expands xZoneInfo;
 
 defaultproperties
 {
-      isWaterFX=True
-      DistortionAmount=4
-      ZoneAmbSound=Sound'xZones.UnderWater.Underwater04'
-      ZoneAmbVolume=190
-      ZoneName="Underwater"
-      EntrySound=Sound'UnrealShare.Generic.DSplash'
-      ExitSound=Sound'UnrealShare.Generic.WtrExit1'
-      EntryActor=Class'UnrealShare.WaterImpact'
-      ExitActor=Class'UnrealShare.WaterImpact'
-      bWaterZone=True
-      ViewFlash=(X=-0.075000,Y=-0.075000,Z=-0.075000)
-      ViewFog=(X=0.100000,Y=0.200000,Z=0.325000)
-      AmbientSound=Sound'xZones.WaterTrailFX.WaterTrailFXLoop'
-      Skin=Texture'xZones.Particles.WaterTrail'
+	isWaterFX=True
+	DistortionAmount=4
+	ZoneAmbSound=Sound'xZones.UnderWater.Underwater04'
+	ZoneAmbVolume=190
+	ZoneName="Underwater"
+	EntrySound=Sound'UnrealShare.Generic.DSplash'
+	ExitSound=Sound'UnrealShare.Generic.WtrExit1'
+	EntryActor=Class'UnrealShare.WaterImpact'
+	ExitActor=Class'UnrealShare.WaterImpact'
+	bWaterZone=True
+	ViewFlash=(X=-0.075000,Y=-0.075000,Z=-0.075000)
+	ViewFog=(X=0.100000,Y=0.200000,Z=0.325000)
+	AmbientSound=Sound'xZones.WaterTrailFX.WaterTrailFXLoop'
+	Skin=Texture'xZones.Particles.WaterTrail'
 }

@@ -236,16 +236,14 @@ simulated function UpdateDriverInput( float Delta )
 
 defaultproperties
 {
-      MaxFlightSpeed=4000.000000
-      FlyingTurnSpeed=10000.000000
-      MinFlyingSpeed=800.000000
-      VehiclePitch=0
-      bReleasedAccel=False
-      CurTurnSpeed=600.000000
-      JumpDelay=0.000000
-      WAccelRate=500.000000
-      Health=300
-      VehicleName="Flight Craft"
-      TranslatorDescription="This is a Flight Craft, press [Fire] or [AltFire] to fire the different firemodes. Use your Strafe keys and Move Forward/Backward keys to strafe/accelerate/deaccelerate while on ground, if you accelerated fast enough you can take off and steer this plane through air. To leave this vehicle, press your [ThrowWeapon] key."
-      VehicleKeyInfoStr="Flight craft keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to strafe (when not in air)|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%ThrowWeapon% to exit the vehicle"
+	MaxFlightSpeed=4000.000000
+	FlyingTurnSpeed=10000.000000
+	MinFlyingSpeed=800.000000
+	CurTurnSpeed=600.000000
+	JumpDelay=0.000000
+	WAccelRate=500.000000
+	Health=300
+	VehicleName="Flight Craft"
+	TranslatorDescription="This is a Flight Craft, press [Fire] or [AltFire] to fire the different firemodes. Use your Strafe keys and Move Forward/Backward keys to strafe/accelerate/deaccelerate while on ground, if you accelerated fast enough you can take off and steer this plane through air. To leave this vehicle, press your [ThrowWeapon] key."
+	VehicleKeyInfoStr="Flight craft keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to strafe (when not in air)|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%ThrowWeapon% to exit the vehicle"
 }

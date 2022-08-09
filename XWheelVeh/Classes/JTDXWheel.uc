@@ -6,6 +6,6 @@ class JTDXWheel expands JSDXWheel;
 
 defaultproperties
 {
-      MultiSkins(1)=Texture'XWheelVeh.Skins.WheelHIIITDXSk01'
-      MultiSkins(2)=Texture'XWheelVeh.Skins.WheelHIIITDXSk02'
+	MultiSkins(1)=Texture'XWheelVeh.Skins.WheelHIIITDXSk01'
+	MultiSkins(2)=Texture'XWheelVeh.Skins.WheelHIIITDXSk02'
 }

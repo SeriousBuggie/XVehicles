@@ -69,20 +69,18 @@ local Effects s;
 
 defaultproperties
 {
-      AscendSpeed=4000.000000
-      TimeCount=0.000000
-      PartSpawnClass=Class'XTreadVeh.IncadescentPart'
-      PartSeq="Grow"
-      PartSeqMin=0.100000
-      PartSeqMax=0.500000
-      MaxScale=0.250000
-      MinScale=0.062500
-      TimeSpan=0.080000
-      Amount=1
-      TimeCntSpan=0.000000
-      EffectSound1=Sound'XTreadVeh.TankML.TankMLProjExplSnd01'
-      EffectSound2=Sound'XTreadVeh.TankML.TankMLProjExplSnd02'
-      Physics=PHYS_Projectile
-      RemoteRole=ROLE_SimulatedProxy
-      LifeSpan=0.325000
+	AscendSpeed=4000.000000
+	PartSpawnClass=Class'XTreadVeh.IncadescentPart'
+	PartSeq="Grow"
+	PartSeqMin=0.100000
+	PartSeqMax=0.500000
+	MaxScale=0.250000
+	MinScale=0.062500
+	TimeSpan=0.080000
+	Amount=1
+	EffectSound1=Sound'XTreadVeh.TankML.TankMLProjExplSnd01'
+	EffectSound2=Sound'XTreadVeh.TankML.TankMLProjExplSnd02'
+	Physics=PHYS_Projectile
+	RemoteRole=ROLE_SimulatedProxy
+	LifeSpan=0.325000
 }
