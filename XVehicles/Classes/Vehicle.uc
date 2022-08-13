@@ -65,7 +65,7 @@ var() bool bTeamLocked,
 var() byte CurrentTeam;
 var() localized string VehicleName,TranslatorDescription,MsgVehicleDesc;
 var() vector ExitOffset,BehinViewViewOffset,InsideViewOffset;
-var(Sounds) sound StartSound,EndSound,EngineSound,IdleSound,ImpactSounds[8],BulletHitSounds[6];
+var(Sounds) Sound SpawnSound,StartSound,EndSound,EngineSound,IdleSound,ImpactSounds[8],BulletHitSounds[6];
 var() config bool bUseBehindView;
 var() texture TeamOverlays[4];
 var() bool bDriverWOffset;	//Use BehindView offset settings relative to weapon in driver mode
@@ -361,6 +361,12 @@ replication
 	// Functions client can call.
 	reliable if( Role<ROLE_Authority )
 		ServerPerformPackedMove,ServerSetBehindView;
+}
+
+function Spawned()
+{
+	Super.Spawned();
+	PlaySound(SpawnSound, SLOT_Misc);
 }
 
 function AnalyzeZone( ZoneInfo newZone)
@@ -4375,6 +4381,7 @@ defaultproperties
 	ExitOffset=(Y=45.000000)
 	BehinViewViewOffset=(X=-650.000000,Z=120.000000)
 	InsideViewOffset=(X=5.000000,Y=-15.000000)
+	SpawnSound=Sound'XVehicles.Effects.BWeaponSpawn1'
 	ImpactSounds(0)=Sound'XVehicles.Impacts.VehicleCollision01'
 	ImpactSounds(1)=Sound'XVehicles.Impacts.VehicleCollision02'
 	ImpactSounds(2)=Sound'XVehicles.Impacts.VehicleCollision03'
