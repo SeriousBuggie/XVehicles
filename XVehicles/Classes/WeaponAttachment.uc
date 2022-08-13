@@ -1107,7 +1107,6 @@ function bool FindEnemy()
 			if (Veh != OwnerVehicle && Veh.CurrentTeam != Bot.PlayerReplicationInfo.Team &&
 				!Veh.HealthTooLowFor(Bot))
 			{
-				log(veh @ TraceHit(Bot, Veh, HL, HN) @ HL @ HN);
 				if (Veh != TraceHit(Bot, Veh, HL, HN))
 					continue;
 				HL = Veh.Location - OwnerVehicle.Location;
