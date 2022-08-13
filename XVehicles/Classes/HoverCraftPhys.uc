@@ -117,7 +117,10 @@ simulated function bool CheckOnGround()
 			{
 				if (bDuck || bDuckFire)
 				{
-					if (PossibleBase.IsInState('StandOpenTimed'))						Mover(PossibleBase).Attach(Driver);					else						Mover(PossibleBase).Bump(Driver);
+					if (PossibleBase.IsInState('StandOpenTimed'))
+						Mover(PossibleBase).Attach(Driver);
+					else
+						Mover(PossibleBase).Bump(Driver);
 				}
 				if (PossibleBase.Velocity.Z > 0 && PossibleBase.Velocity.Z > Velocity.Z)
 					Velocity.Z = PossibleBase.Velocity.Z;
@@ -232,11 +235,35 @@ simulated function UpdateDriverInput( float Delta )
 		BigScale = 0.2;
 		
 		if (PlayerPawn(Driver) != None && 
-			(Level.NetMode != NM_Client || IsNetOwner(Owner)))		{			if (((Rising < 0 && !bDuck) ||				(Driver.bAltFire != 0 && !bDuckFire)) &&				DuckSound != None)				PlayOwnedSound(DuckSound);			bDuck = Rising < 0;			bDuckFire = Driver.bAltFire != 0;		}				if (bDuck || bDuckFire)		{							DesiredHoverHeight -= HoverDuck;			GoDown = 8;			Scale *= 3;			BigScale *= 3;		}		if (bOnGround && LastJumpTime < Level.TimeSeconds - 0.4)		{			DesiredHoverHeight -= ActualHoverHeight;			if (Abs(DesiredHoverHeight) < 2)				Velocity.Z = 0;			else				Velocity.Z = DesiredHoverHeight*FMax(DesiredHoverHeight*DesiredHoverHeight*BigScale, Scale)*Delta;
+			(Level.NetMode != NM_Client || IsNetOwner(Owner)))
+		{
+			if (((Rising < 0 && !bDuck) ||
+				(Driver.bAltFire != 0 && !bDuckFire)) &&
+				DuckSound != None)
+				PlayOwnedSound(DuckSound);
+			bDuck = Rising < 0;
+			bDuckFire = Driver.bAltFire != 0;
+		}
+		
+		if (bDuck || bDuckFire)
+		{				
+			DesiredHoverHeight -= HoverDuck;
+			GoDown = 8;
+			Scale *= 3;
+			BigScale *= 3;
+		}
+		if (bOnGround && LastJumpTime < Level.TimeSeconds - 0.4)
+		{
+			DesiredHoverHeight -= ActualHoverHeight;
+			if (Abs(DesiredHoverHeight) < 2)
+				Velocity.Z = 0;
+			else
+				Velocity.Z = DesiredHoverHeight*FMax(DesiredHoverHeight*DesiredHoverHeight*BigScale, Scale)*Delta;
 			BigScale = 5;
 			if (Level.TimeSeconds - DriveFrom < 0.4)
 				BigScale = 2.5; // *2.5 = /0.4
-			Velocity.Z = FMin(Velocity.Z, HoveringHeight*BigScale);		}
+			Velocity.Z = FMin(Velocity.Z, HoveringHeight*BigScale);
+		}
 	}
 	else if (bOnGround)
 		Velocity -= ActualFloorNormal*(ActualFloorNormal dot Velocity);

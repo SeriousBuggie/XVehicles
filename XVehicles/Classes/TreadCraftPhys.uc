@@ -91,7 +91,8 @@ simulated function PostBeginPlay()
 
 simulated function SpawnFurtherParts()
 {
-	local byte i;	local TornOffCarPartActor WT;
+	local byte i;
+	local TornOffCarPartActor WT;
 
 	if (Level.NetMode == NM_DedicatedServer)
 		return;
@@ -190,7 +191,9 @@ simulated function FellToGround()
 
 simulated function UpdateTreads(float Delta)
 {
-	local byte i;	local float YDelta, TLinSpeed, TWheelAng, MaxFrT, CycleStep, VSizeVel;	local int PanSkip, dir;
+	local byte i;
+	local float YDelta, TLinSpeed, TWheelAng, MaxFrT, CycleStep, VSizeVel;
+	local int PanSkip, dir;
 
 	//Treads control
 	if (FMax(Region.Zone.ZoneGroundFriction,TreadsTraction) > 4.0)
@@ -209,7 +212,8 @@ simulated function UpdateTreads(float Delta)
 	{
 		VSizeVel = VSize(GetVirtualSpeedOnIce(Delta));
 		dir = VirtOldAccel;
-		if (Level.NetMode == NM_Client && !IsNetOwner(Driver))			dir = GetIcedMovementDir();
+		if (Level.NetMode == NM_Client && !IsNetOwner(Driver))
+			dir = GetIcedMovementDir();
 	}
 	for (i = 0; i < ArrayCount(Treads); i++)
 	{
@@ -307,7 +311,11 @@ simulated function UpdateDriverInput( float Delta )
 	{
 		if (!(Level.NetMode==NM_Client && !IsNetOwner(Driver)))
 		{
-			if (!Region.Zone.bWaterZone)				Velocity+=Region.Zone.ZoneGravity*Delta*VehicleGravityScale;			else				Velocity+=Region.Zone.ZoneGravity*Delta*VehicleGravityScale*0.35;			FallingLenghtZ += Abs(OldLocation.Z - Location.Z);
+			if (!Region.Zone.bWaterZone)
+				Velocity+=Region.Zone.ZoneGravity*Delta*VehicleGravityScale;
+			else
+				Velocity+=Region.Zone.ZoneGravity*Delta*VehicleGravityScale*0.35;
+			FallingLenghtZ += Abs(OldLocation.Z - Location.Z);
 		}
 		if (Level.NetMode != NM_DedicatedServer)
 			UpdateTreads(Delta);
@@ -432,7 +440,10 @@ simulated function UpdateDriverInput( float Delta )
 				{
 					Ac = GetAccelDir(Turning,Rising,OldAccelD);
 					Velocity-=Normal(Velocity)*DeAccRat;
-					if (Velocity dot Ac > 0)						Velocity = VSize(Velocity)*Normal(Ac);					else						OldAccelD = -OldAccelD;
+					if (Velocity dot Ac > 0)
+						Velocity = VSize(Velocity)*Normal(Ac);
+					else
+						OldAccelD = -OldAccelD;
 				}
 
 				SetSignalLights(SL_Stop);

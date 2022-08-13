@@ -69,7 +69,16 @@ simulated function Tick( float Delta )
 	{
 		if (CurrentViewMult != DesiredViewMult)
 		{
-			if (CurrentViewMult < DesiredViewMult)				CurrentViewMult += (FMax(0.1,Abs(CurrentViewMult - DesiredViewMult)) * Delta);			else if (CurrentViewMult > DesiredViewMult)				CurrentViewMult -= (FMax(0.1,Abs(CurrentViewMult - DesiredViewMult)) * Delta);					if (CurrentViewMult != DesiredViewMult && Abs(CurrentViewMult - DesiredViewMult) < 0.025)			{				CurrentViewMult = DesiredViewMult;				OldDesiredViewMult = DesiredViewMult;			}
+			if (CurrentViewMult < DesiredViewMult)
+				CurrentViewMult += (FMax(0.1,Abs(CurrentViewMult - DesiredViewMult)) * Delta);
+			else if (CurrentViewMult > DesiredViewMult)
+				CurrentViewMult -= (FMax(0.1,Abs(CurrentViewMult - DesiredViewMult)) * Delta);
+		
+			if (CurrentViewMult != DesiredViewMult && Abs(CurrentViewMult - DesiredViewMult) < 0.025)
+			{
+				CurrentViewMult = DesiredViewMult;
+				OldDesiredViewMult = DesiredViewMult;
+			}
 		}
 	}
 	else

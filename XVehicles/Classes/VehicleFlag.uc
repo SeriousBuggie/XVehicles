@@ -64,7 +64,10 @@ simulated function Tick(float Delta)
 		r.Roll = -r.Roll;
 		SetRotation(r);
 	}
-	if (Vehicle(Owner) != None && Vehicle(Owner).IsNetOwned())		Style = STY_Translucent;	else		Style = STY_Normal;
+	if (Vehicle(Owner) != None && Vehicle(Owner).IsNetOwned())
+		Style = STY_Translucent;
+	else
+		Style = STY_Normal;
 }
 
 function Destroyed()
@@ -72,7 +75,16 @@ function Destroyed()
 	local VehicleFlag Prev;
 	if (Vehicle(Owner) != None)
 	{
-		if (Vehicle(Owner).VehicleFlag == self || Vehicle(Owner).VehicleFlag == None)			Vehicle(Owner).VehicleFlag = Next;		else		{			for (Prev = Vehicle(Owner).VehicleFlag; Prev != None; Prev = Prev.Next)				if (Prev.Next == self)					break;			if (Prev != None)				Prev.Next = Next;		}
+		if (Vehicle(Owner).VehicleFlag == self || Vehicle(Owner).VehicleFlag == None)
+			Vehicle(Owner).VehicleFlag = Next;
+		else
+		{
+			for (Prev = Vehicle(Owner).VehicleFlag; Prev != None; Prev = Prev.Next)
+				if (Prev.Next == self)
+					break;
+			if (Prev != None)
+				Prev.Next = Next;
+		}
 	}
 	Super.Destroyed();
 }
