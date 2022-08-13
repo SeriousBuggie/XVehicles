@@ -408,21 +408,29 @@ local byte i;
 		if (HeadLightOn!=None)
 			PlaySound(HeadLightOn);
 
-		VLov = Spawn(Class'VehicleLightsOv', Self);
-
-		if (LightsOverlayer[8] != None)
-			VLov.Texture = LightsOverlayer[8];
-		else
-			VLov.Texture = Texture'TransInvis';
-		VLov.Mesh = Mesh;
-		VLov.DrawScale = DrawScale;
-		
-		For (i=0; i<8; i++)
-		{
+		For (i = 0; i < ArrayCount(LightsOverlayer); i++)
 			if (LightsOverlayer[i] != None)
-				VLov.MultiSkins[i] = LightsOverlayer[i];
+			{
+				VLov = Spawn(Class'VehicleLightsOv', Self);
+				break;
+			}
+
+		if (VLov != None)
+		{
+			if (LightsOverlayer[8] != None)
+				VLov.Texture = LightsOverlayer[8];
 			else
-				VLov.MultiSkins[i] = Texture'TransInvis';
+				VLov.Texture = Texture'TransInvis';
+			VLov.Mesh = Mesh;
+			VLov.DrawScale = DrawScale;
+			
+			For (i = 0; i < ArrayCount(LightsOverlayer); i++)
+			{
+				if (LightsOverlayer[i] != None)
+					VLov.MultiSkins[i] = LightsOverlayer[i];
+				else
+					VLov.MultiSkins[i] = Texture'TransInvis';
+			}
 		}
 
 		For (i=0; i<ArrayCount(HeadLights); i++)
