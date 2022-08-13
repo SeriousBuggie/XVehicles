@@ -721,9 +721,22 @@ simulated function Tick( float Delta )
 
 	if (!bSkipFiringShaking)
 	{
-		For (i = 0; i < 4; i++)		{			if (FiringShaking[i].bShakeEnabled && FiringShaking[i].bShakeByStep && FiringShaking[i].StepAmount > 0)			{				FiringShaking[i].StepShkCount += Delta;							if (FiringShaking[i].StepShkCount >= FiringShaking[i].StepInterval)				{					FiringShaking[i].StepAmount--;					FiringShaking[i].StepShkCount = 0;					ClientShakes(i);				}
+		For (i = 0; i < 4; i++)
+		{
+			if (FiringShaking[i].bShakeEnabled && FiringShaking[i].bShakeByStep && FiringShaking[i].StepAmount > 0)
+			{
+				FiringShaking[i].StepShkCount += Delta;
+			
+				if (FiringShaking[i].StepShkCount >= FiringShaking[i].StepInterval)
+				{
+					FiringShaking[i].StepAmount--;
+					FiringShaking[i].StepShkCount = 0;
+					ClientShakes(i);
+				}
 				if (!bNeedFiringShaking && FiringShaking[i].StepAmount > 0)
-					bNeedFiringShaking = true;			}		}
+					bNeedFiringShaking = true;
+			}
+		}
 		bSkipFiringShaking = !bNeedFiringShaking;
 	}
 
@@ -1013,7 +1026,16 @@ function rotator GetBotInput( float Delta )
 		if ((WeaponController.bFire > 0 || WeaponController.bAltFire > 0) &&
 			!WeaponController.IsInState('RangedAttack'))
 			WeaponController.StopFiring();
-		if (OwnerVehicle.bCanFly)		{			S = RepAimPos;			S.Z -= OwnerVehicle.CollisionHeight*OwnerVehicle.VehicleAI.AirFlyScale;			if (OwnerVehicle.Trace(HL, HN, S, RepAimPos) != None)				HL.Z += OwnerVehicle.Driver.CollisionHeight;			else				HL = S;			RepAimPos.Z = HL.Z;		}
+		if (OwnerVehicle.bCanFly)
+		{
+			S = RepAimPos;
+			S.Z -= OwnerVehicle.CollisionHeight*OwnerVehicle.VehicleAI.AirFlyScale;
+			if (OwnerVehicle.Trace(HL, HN, S, RepAimPos) != None)
+				HL.Z += OwnerVehicle.Driver.CollisionHeight;
+			else
+				HL = S;
+			RepAimPos.Z = HL.Z;
+		}
 	}
 	Return GetAimForPos(RepAimPos);
 }
@@ -1040,7 +1062,7 @@ function bool FindEnemy()
 		if (P.Health <= 0 || (P.PlayerReplicationInfo != None && P.PlayerReplicationInfo.bIsSpectator) ||
 			Bot.AttitudeTo(P) > ATTITUDE_Frenzy)
 			continue; // check not spectator and other stuff
-//		if (!Bot.LineOfSightTo(P)) continue;
+		if (!Bot.FastTrace(P.Location)) continue;
 		HL = P.Location;
 		if (PitchPart != None)
 			HN = PitchPart.Location;
