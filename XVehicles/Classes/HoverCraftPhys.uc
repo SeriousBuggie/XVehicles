@@ -173,6 +173,8 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 
 	if (Driver != None && PlayerPawn(Driver) == None)
 	{ // bot drive code
+		if (Driver.IsInState('GameEnded') || Driver.IsInState('Dying'))
+			return vect(0,0,0);
 		X = MoveDest - Location;
 		Rising = 0;
 		if (X.Z > 100)
@@ -234,8 +236,8 @@ simulated function UpdateDriverInput( float Delta )
 		Scale = 1000;
 		BigScale = 0.2;
 		
-		if (PlayerPawn(Driver) != None && 
-			(Level.NetMode != NM_Client || IsNetOwner(Owner)))
+		if (PlayerPawn(Driver) != None && (Level.NetMode != NM_Client || IsNetOwner(Owner)) && 
+			!Driver.IsInState('GameEnded'))
 		{
 			if (((Rising < 0 && !bDuck) ||
 				(Driver.bAltFire != 0 && !bDuckFire)) &&

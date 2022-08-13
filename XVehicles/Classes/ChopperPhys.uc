@@ -66,8 +66,9 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 //	log("Turn" @ InTurn @ "Accel" @ InAccel @ "Rise" @ InRise @ "VehicleYaw" @ VehicleYaw);
 
 	if (Driver != None && PlayerPawn(Driver) == None)
-	{
-		// bot drive code
+	{ // bot drive code
+		if (Driver.IsInState('GameEnded') || Driver.IsInState('Dying'))
+			return vect(0,0,0);
 		X = MoveDest - Location;		
 		/*
 		S = VSize(Velocity);		
@@ -83,7 +84,7 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 		// X dot X == VSize(X)*VSize(X)
 		if ((X dot X) > 25 /* 5*5 */)
 			return Normal(X);
-		return vect(0,0,0);		
+		return vect(0,0,0);
 	}
 	if( InTurn==0 && InRise==0 && InAccel==0 )
 		return vect(0,0,0);
