@@ -5,7 +5,7 @@
 ///////////////////////
 //ATTENTION: this is not a true dynamic corona, as it doesn't blend color
 
-class CoronaVehEffect expands Actor;
+class CoronaVehEffect expands Actor Config(XVehicles);
 
 //configurable in the main corona controller
 

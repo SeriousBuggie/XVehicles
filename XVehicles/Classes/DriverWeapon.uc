@@ -1,4 +1,4 @@
-class DriverWeapon expands TournamentWeapon;
+class DriverWeapon expands TournamentWeapon Config(XVehicles);
 
 var Vehicle VehicleOwner;
 var DriverWNotifier MyNotifier;
