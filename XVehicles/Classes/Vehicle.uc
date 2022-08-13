@@ -2427,6 +2427,9 @@ function int ShouldTurnFor( vector AcTarget, optional float YawAdjust, optional 
 	local rotator R;
 	local float Res;
 	
+	if (!bOnGround && !bCanFly)
+		return 0;
+	
 	if (DeadZone == 0)
 		DeadZone = 0.001;
 		
