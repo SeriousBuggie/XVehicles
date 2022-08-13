@@ -11,6 +11,12 @@ simulated function Tick(float delta)
 	Super.Tick(delta);
 	if (CurrentTeamColor != CurrentTeam)
 		ChangeColor();
+	if (bHeadLightInUse != bDriving)
+	{
+		bUseVehicleLights = true;
+		SwitchVehicleLights();
+		bUseVehicleLights = false;
+	}
 }
 
 simulated function ChangeColor()
@@ -54,6 +60,10 @@ defaultproperties
 	EngineSound=Sound'XHoverVeh.Manta.HoverBikeEng02'
 	DriverWeapon=(WeaponClass=Class'XHoverVeh.MantaGun',WeaponOffset=(X=0.000000))
 	WDeAccelRate=1500.000000
+	HeadLights(0)=(VLightOffset=(X=85.000000,Y=11.000000,Z=-2.000000),VLightTex=Texture'XHoverVeh.pics.FlashFlare1',VLightScale=0.500000)
+	HeadLights(1)=(VLightOffset=(X=85.000000,Y=-11.000000,Z=-2.000000),VLightTex=Texture'XHoverVeh.pics.FlashFlare1',VLightScale=0.500000)
+	HeadLightOn=None
+	HeadLightOff=None
 	DropFlag=DF_All
 	DamageGFX(0)=(bHaveThisGFX=True,bHaveFlames=True,DmgFXOffset=(X=50.000000,Y=-25.000000,Z=-7.000000))
 	DestroyedExplDmg=70
