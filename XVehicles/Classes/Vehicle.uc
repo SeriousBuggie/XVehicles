@@ -2538,7 +2538,7 @@ Ignores FireWeapon,ReadDriverInput,ReadBotInput,DriverLeft;
 	}
 	function EndState()
 	{
-		bDriving = True;
+		bDriving = Driver != None;
 		if( BotAttract!=None )
 		{
 			BotAttract.Destroy();
