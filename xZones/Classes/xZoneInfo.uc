@@ -74,7 +74,6 @@ local byte willFloat;
 local actor A;
 local vector AddVelocity;
 
-
 	if (bWaterZone && isWaterFX && enableWaterZoneFX && !Other.bStatic)
 	{
 		InstP = Other.Instigator;
@@ -126,77 +125,58 @@ local vector AddVelocity;
 		}
 		else if (Other.bCollideWorld)
 		{
-		if (!Other.IsA('Pawn') && !Other.IsA('Decoration') && !Other.IsA('TornOffCarPartActor') && (Other.Physics == PHYS_Falling || Other.Physics == PHYS_Projectile) && Other.Mass > 10 && willFloat < 2)
-		{
-			if (willFloat == 0 || (willFloat == 1 && !Other.bLensFlare))
+			if (!Other.IsA('Pawn') && !Other.IsA('Decoration') && !Other.IsA('TornOffCarPartActor') && (Other.Physics == PHYS_Falling || Other.Physics == PHYS_Projectile) && Other.Mass > 10 && willFloat < 2)
 			{
-				StartLoc = (Other.OldLocation + Other.Location) / 2;
-				OldLD = Spawn(Class'xOldLocDummy',,, StartLoc);
-				if (OldLD != None && OldLD.Region.Zone.bWaterZone)
-					OldLD.SetLocation(Other.OldLocation);
-				if (OldLD != None && !OldLD.Region.Zone.bWaterZone)
-					SpawnWaterFX(Other, GetMassCategory(Other));
-			}
-
-			if (willFloat == 1 && !Other.bLensFlare)
-				Other.bLensFlare = True;
-		}
-		else if (!Other.bHidden && (Other.IsA('Pawn') || Other.IsA('TornOffCarPartActor') || (Other.IsA('Decoration') && (Other.Physics == PHYS_Falling || Other.Physics == PHYS_Projectile) && willFloat < 2)))
-		{
-			if (willFloat == 0 || Other.IsA('Pawn') || (willFloat == 1 && !Other.bLensFlare))
-			{
-				StartLoc = (Other.OldLocation + Other.Location) / 2;
-				OldLD = Spawn(Class'xOldLocDummy',,, StartLoc);
-				if (OldLD != None && OldLD.Region.Zone.bWaterZone)
-					OldLD.SetLocation(Other.OldLocation);
-				if (OldLD != None && !OldLD.Region.Zone.bWaterZone)
+				if (willFloat == 0 || (willFloat == 1 && !Other.bLensFlare))
 				{
-					if (!Other.IsA('PlayerPawn'))
-						SpawnWaterFX(Other, GetCollisionCategory(Other), VSize(Other.Velocity) < WaterMinSplashSpeed);
-					else
-						SpawnWaterFX(Other, GetCollisionCategory(Other), PlayerPawn(Other) != None && (PlayerPawn(Other).ViewTarget == None || !PlayerPawn(Other).bBehindView || !enableFirstPersonPlayerSplash) && VSize(Other.Velocity) < WaterMinSplashSpeed);
-
+					StartLoc = (Other.OldLocation + Other.Location) / 2;
+					OldLD = Spawn(Class'xOldLocDummy',,, StartLoc);
+					if (OldLD != None && OldLD.Region.Zone.bWaterZone)
+						OldLD.SetLocation(Other.OldLocation);
+					if (OldLD != None && !OldLD.Region.Zone.bWaterZone)
+						SpawnWaterFX(Other, GetMassCategory(Other));
 				}
+	
+				if (willFloat == 1 && !Other.bLensFlare)
+					Other.bLensFlare = True;
 			}
-
-			if (!Other.IsA('Pawn') && willFloat == 1 && !Other.bLensFlare)
+			else if (!Other.bHidden && (Other.IsA('Pawn') || Other.IsA('TornOffCarPartActor') || (Other.IsA('Decoration') && (Other.Physics == PHYS_Falling || Other.Physics == PHYS_Projectile) && willFloat < 2)))
+			{
+				if (willFloat == 0 || Other.IsA('Pawn') || (willFloat == 1 && !Other.bLensFlare))
+				{
+					StartLoc = (Other.OldLocation + Other.Location) / 2;
+					OldLD = Spawn(Class'xOldLocDummy',,, StartLoc);
+					if (OldLD != None && OldLD.Region.Zone.bWaterZone)
+						OldLD.SetLocation(Other.OldLocation);
+					if (OldLD != None && !OldLD.Region.Zone.bWaterZone)
+					{
+						if (!Other.IsA('PlayerPawn'))
+							SpawnWaterFX(Other, GetCollisionCategory(Other), VSize(Other.Velocity) < WaterMinSplashSpeed);
+						else
+							SpawnWaterFX(Other, GetCollisionCategory(Other), PlayerPawn(Other) != None && (PlayerPawn(Other).ViewTarget == None || !PlayerPawn(Other).bBehindView || !enableFirstPersonPlayerSplash) && VSize(Other.Velocity) < WaterMinSplashSpeed);
+	
+					}
+				}
+	
+				if (!Other.IsA('Pawn') && willFloat == 1 && !Other.bLensFlare)
+					Other.bLensFlare = True;
+			}
+			else if ((Other.Physics == PHYS_Falling || Other.Physics == PHYS_Projectile) && !Other.IsA('Pawn') && Other.Mass > 10 && willFloat >= 2 && !Other.bLensFlare)
+			{
+				StartLoc = (Other.OldLocation + Other.Location) / 2;
+				OldLD = Spawn(Class'xOldLocDummy',,, StartLoc);
+				if (OldLD != None && OldLD.Region.Zone.bWaterZone)
+					OldLD.SetLocation(Other.OldLocation);
+				if (OldLD != None && !OldLD.Region.Zone.bWaterZone)
+					SpawnWaterFX(Other, GetMassCategory(Other), True);
+	
 				Other.bLensFlare = True;
-		}
-		else if ((Other.Physics == PHYS_Falling || Other.Physics == PHYS_Projectile) && !Other.IsA('Pawn') && Other.Mass > 10 && willFloat >= 2 && !Other.bLensFlare)
-		{
-			StartLoc = (Other.OldLocation + Other.Location) / 2;
-			OldLD = Spawn(Class'xOldLocDummy',,, StartLoc);
-			if (OldLD != None && OldLD.Region.Zone.bWaterZone)
-				OldLD.SetLocation(Other.OldLocation);
-			if (OldLD != None && !OldLD.Region.Zone.bWaterZone)
-				SpawnWaterFX(Other, GetMassCategory(Other), True);
-
-			Other.bLensFlare = True;
-		}
+			}
 		}
 	}
-
-	if ( bNoInventory && Other.IsA('Inventory') && (Other.Owner == None) )
-    {
-        Other.LifeSpan = 1.5;
-        return;
-    }
-
-    if( Pawn(Other)!=None && Pawn(Other).bIsPlayer )
-        if( ++ZonePlayerCount==1 && ZonePlayerEvent!='' )
-            foreach AllActors( class 'Actor', A, ZonePlayerEvent )
-                A.Trigger( Self, Pawn(Other) );
-
-    if ( bMoveProjectiles && (ZoneVelocity != vect(0,0,0)) )
-    {
-        if ( Other.Physics == PHYS_Projectile )
-            Other.Velocity += ZoneVelocity;
-        else if ( !Other.IsA('VehWaterAttach') && Other.IsA('Effects') && (Other.Physics == PHYS_None))
-        {
-            Other.SetPhysics(PHYS_Projectile);
-            Other.Velocity += ZoneVelocity;
-        }
-    }
+	
+	if (!Other.IsA('VehWaterAttach'))
+		Super.ActorEntered(Other);
 }
 
 singular simulated function ActorLeaving( actor Other )
