@@ -3183,7 +3183,7 @@ simulated function SingularBump( Actor Other )
 		Dir = Other.Location-Location;
 		Dir.Z = 0;
 		Sp = VSize(Dir) - (CollisionRadius + Other.CollisionRadius);
-		if (Sp < -1) // stuck inside other
+		if (Sp < -1 && StationaryPhys(Other) == None) // stuck inside other
 		{
 //			V = Location;
 			Sp -= 1;
