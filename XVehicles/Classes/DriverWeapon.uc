@@ -72,9 +72,11 @@ function float RateSelf( out int bUseAltMode )
 
 simulated event RenderOverlays( canvas Canvas );
 
-function PostBeginPlay()
+simulated function PostBeginPlay()
 {
 	bOwnsCrosshair = !class'DriverWeapon'.default.UseStandardCrosshair;
+	if (Role != ROLE_Authority)
+		return;
 	MyNotifier = Spawn(Class'DriverWNotifier');
 	//VehicleOwner.InitInventory(MyNotifier);
 	MyNotifier.WeaponOwner = Self;
