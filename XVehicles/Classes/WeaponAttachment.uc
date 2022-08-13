@@ -1039,36 +1039,39 @@ function rotator GetBotInput( float Delta )
 	}
 	Return GetAimForPos(RepAimPos);
 }
+function Actor TraceHit(Bot Bot, Actor A, out vector HL, out vector HN)
+{
+	HL = A.Location;
+	if (PitchPart != None)
+		HN = PitchPart.Location;
+	else
+		HN = Location;
+	if (!Bot.FastTrace(HL, HN)) return Level;
+	return OwnerVehicle.Trace(HL, HN, HL, HN, true);
+}
 function bool FindEnemy()
 {
-	local Pawn P, Best;
+	local Pawn P;
 	local Bot Bot;
 	local float Dist, BestDist;
-	local Actor ViewActor, Hit;
+	local Actor Hit, Best;
 	local vector HL, HN;
 	local name BotState;
+	local Vehicle Veh;
 	Bot = Bot(WeaponController);
 	if (Bot == None || Bot.Enemy != None || NextTimeRangedAttack > Level.TimeSeconds)
 		return false;
 	BotState = Bot.GetStateName();
 	if (BotState == 'RangedAttack' || BotState == 'FallingState' || BotState == 'TakeHit' || BotState == 'ImpactJumping')
 		return false;
-	if (OwnerVehicle != None && OwnerVehicle.MyCameraAct != None)
-		ViewActor = OwnerVehicle.MyCameraAct; // try use actor with small size
-	else
-		ViewActor = Bot;
 	For( P=Level.PawnList; P!=None; P=P.NextPawn )
 	{
 		if (P.Health <= 0 || (P.PlayerReplicationInfo != None && P.PlayerReplicationInfo.bIsSpectator) ||
 			Bot.AttitudeTo(P) > ATTITUDE_Frenzy)
 			continue; // check not spectator and other stuff
-		if (!Bot.FastTrace(P.Location)) continue;
-		HL = P.Location;
-		if (PitchPart != None)
-			HN = PitchPart.Location;
-		else
-			HN = Location;
-		Hit = ViewActor.Trace(HL, HN, HL, HN, true);
+		Hit = TraceHit(Bot, P, HL, HN);
+		if (Hit == Level)
+			continue;
 		if (Hit != P && (DriverWeapon(P.Weapon) == None || DriverWeapon(P.Weapon).VehicleOwner != Hit))
 			continue;
 		HL = P.Location - OwnerVehicle.Location;
@@ -1080,6 +1083,23 @@ function bool FindEnemy()
 			BestDist = Dist;
 		}
 	}
+	if (Best == None && Bot.PlayerReplicationInfo != None)
+		foreach AllActors(class'Vehicle', Veh)
+			if (Veh != OwnerVehicle && Veh.CurrentTeam != Bot.PlayerReplicationInfo.Team &&
+				!Veh.HealthTooLowFor(Bot))
+			{
+				log(veh @ TraceHit(Bot, Veh, HL, HN) @ HL @ HN);
+				if (Veh != TraceHit(Bot, Veh, HL, HN))
+					continue;
+				HL = Veh.Location - OwnerVehicle.Location;
+				// X dot X == VSize(X)*VSize(X)
+				Dist = HL dot HL;
+				if (Best == None || Dist < BestDist)
+				{
+					Best = Veh;
+					BestDist = Dist;
+				}
+			}				
 	if (Best == None)
 		return false;
 	Bot.Target = Best;
@@ -1099,7 +1119,7 @@ function bool SeeEnemy(Actor Enemy)
 	local vector P, Dir;
 	local float VProj, V1, V;
 	local rotator R;
-	if( Enemy==None || (Pawn(Enemy) != None && Pawn(Enemy).Health <= 0) || !WeaponController.LineOfSightTo(Enemy) )
+	if (Enemy == None || (Pawn(Enemy) != None && Pawn(Enemy).Health <= 0) || !WeaponController.LineOfSightTo(Enemy))
 		return false;
 	RepAimPos = Enemy.Location;
 
