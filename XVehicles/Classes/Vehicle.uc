@@ -1418,6 +1418,9 @@ simulated function Tick( float Delta )
 	local float f;
 	local SavedMoveXV NewMove;
 	
+	if (Pawn(Base) != None)
+		SetBase(None);
+	
 	if (IsInState('EmptyVehicle') && ResetTimer != Default.ResetTimer && Level.TimeSeconds > ResetTimer)
 		Destroy();
 	
