@@ -258,7 +258,8 @@ simulated function UpdateDriverInput( float Delta )
 			if (Abs(DesiredHoverHeight) < 2)
 				Velocity.Z = 0;
 			else
-				Velocity.Z = DesiredHoverHeight*FMax(DesiredHoverHeight*DesiredHoverHeight*BigScale, Scale)*Delta;
+				Velocity.Z = DesiredHoverHeight*FMax(DesiredHoverHeight*DesiredHoverHeight*BigScale, Scale)*0.01/
+					(1 + (Delta - 0.01)*25);
 			BigScale = 5;
 			if (Level.TimeSeconds - DriveFrom < 0.4)
 				BigScale = 2.5; // *2.5 = /0.4
