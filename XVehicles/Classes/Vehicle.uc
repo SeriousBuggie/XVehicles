@@ -385,8 +385,13 @@ function SetSignalLights(ESignalLights InSignalLights)
 	if (bUseSignalLights && SignalLights != InSignalLights)
 	{
 		if (SignalLights == SL_Stop || InSignalLights == SL_Stop)
-			for (i = 0; i < ArrayCount(StopLights); i++)				if (StopLights[i].VLC != None)					StopLights[i].VLC.bHidden = SignalLights == SL_Stop;
-		if (SignalLights == SL_Backwards || InSignalLights == SL_Backwards)			for (i = 0; i < ArrayCount(BackwardsLights); i++)				if (BackwardsLights[i].VLC != None)					BackwardsLights[i].VLC.bHidden = SignalLights == SL_Backwards;
+			for (i = 0; i < ArrayCount(StopLights); i++)
+				if (StopLights[i].VLC != None)
+					StopLights[i].VLC.bHidden = SignalLights == SL_Stop;
+		if (SignalLights == SL_Backwards || InSignalLights == SL_Backwards)
+			for (i = 0; i < ArrayCount(BackwardsLights); i++)
+				if (BackwardsLights[i].VLC != None)
+					BackwardsLights[i].VLC.bHidden = SignalLights == SL_Backwards;
 				
 		SignalLights = InSignalLights;
 	}
@@ -1155,7 +1160,8 @@ local vector ExitVect;
 				Driver.Velocity += Velocity; // inertial exit
 				Driver.Weapon = Driver.PendingWeapon;
 				Driver.ChangedWeapon();
-				if( Driver.Weapon != None && Driver.Weapon.Owner != None )					Driver.Weapon.BringUp();
+				if( Driver.Weapon != None && Driver.Weapon.Owner != None )
+					Driver.Weapon.BringUp();
 				Driver.bDuck = 0; // prevent enter again
 			}
 			LastDriver = Driver;
@@ -1437,7 +1443,30 @@ simulated function Tick( float Delta )
 
 	if (Health*2 < FirstHealth)
 	{
-		if (Health*5 < FirstHealth)		{			DmgFXCount += Delta;			if (DmgFXCount > (0.065 + FRand()*0.15))				DmgFXGen(3);		}		else if (Health*4 < FirstHealth)		{			DmgFXCount += Delta;			if (DmgFXCount > (0.1 + FRand()*0.15))				DmgFXGen(2);		}		else if (Health*3 < FirstHealth)		{			DmgFXCount += Delta;			if (DmgFXCount > (0.1 + FRand()*0.15))				DmgFXGen(1);		}		else		{			DmgFXCount += Delta;			if (DmgFXCount > (0.5 + FRand()))				DmgFXGen(0);		}
+		if (Health*5 < FirstHealth)
+		{
+			DmgFXCount += Delta;
+			if (DmgFXCount > (0.065 + FRand()*0.15))
+				DmgFXGen(3);
+		}
+		else if (Health*4 < FirstHealth)
+		{
+			DmgFXCount += Delta;
+			if (DmgFXCount > (0.1 + FRand()*0.15))
+				DmgFXGen(2);
+		}
+		else if (Health*3 < FirstHealth)
+		{
+			DmgFXCount += Delta;
+			if (DmgFXCount > (0.1 + FRand()*0.15))
+				DmgFXGen(1);
+		}
+		else
+		{
+			DmgFXCount += Delta;
+			if (DmgFXCount > (0.5 + FRand()))
+				DmgFXGen(0);
+		}
 	}
 
 	if (bHitAPawn || bHitASmallerVehicle)
@@ -1903,11 +1932,84 @@ simulated function bool CheckOnGround()
 	}
 	else
 	{
-		if (bSlopedPhys && GVT!=None)		{			if (Location != OldLocation || !bFirstCheckOnGround)			{				ePointsOffSet[0] = FrontWide;				ePointsOffSet[1] = ePointsOffSet[0];				ePointsOffSet[1].Y = -FrontWide.Y;				ePointsOffSet[2] = BackWide;				ePointsOffSet[3] = ePointsOffSet[2];				ePointsOffSet[3].Y = -BackWide.Y;					//************************************************************************				//Walls climbing bug fix				//************************************************************************				WSt = Location + GVT.PrePivot;				WExt.X = FMax(FrontWide.Y,BackWide.Y);				WExt.Y = WExt.X;				WExt.Z = CollisionHeight - MaxObstclHeight;				WEnd = WSt + vector(Rotation)*OldAccelD*(WExt.X + 2);				WAs = Trace(WHL,WHN,WEnd,WSt,False,WExt);					if (WAs == None)				{					if (WallHitDir == -Accel && WallHitDir!=0)					{						WEnd = WSt + vector(Rotation)*WallHitDir*(WExt.X + 2);						WBs = Trace(WHL,WHN,WEnd,WSt,False,WExt);												if (WBs == None)						{							WallHitDir = 0;							WHN = HN;						}					}					else						WHN = HN;				}				else					WallHitDir = OldAccelD;				//************************************************************************
+		if (bSlopedPhys && GVT!=None)
+		{
+			if (Location != OldLocation || !bFirstCheckOnGround)
+			{
+				ePointsOffSet[0] = FrontWide;
+				ePointsOffSet[1] = ePointsOffSet[0];
+				ePointsOffSet[1].Y = -FrontWide.Y;
+				ePointsOffSet[2] = BackWide;
+				ePointsOffSet[3] = ePointsOffSet[2];
+				ePointsOffSet[3].Y = -BackWide.Y;
+	
+				//************************************************************************
+				//Walls climbing bug fix
+				//************************************************************************
+				WSt = Location + GVT.PrePivot;
+				WExt.X = FMax(FrontWide.Y,BackWide.Y);
+				WExt.Y = WExt.X;
+				WExt.Z = CollisionHeight - MaxObstclHeight;
+				WEnd = WSt + vector(Rotation)*OldAccelD*(WExt.X + 2);
+				WAs = Trace(WHL,WHN,WEnd,WSt,False,WExt);
+	
+				if (WAs == None)
+				{
+					if (WallHitDir == -Accel && WallHitDir!=0)
+					{
+						WEnd = WSt + vector(Rotation)*WallHitDir*(WExt.X + 2);
+						WBs = Trace(WHL,WHN,WEnd,WSt,False,WExt);
+						
+						if (WBs == None)
+						{
+							WallHitDir = 0;
+							WHN = HN;
+						}
+					}
+					else
+						WHN = HN;
+				}
+				else
+					WallHitDir = OldAccelD;
+				//************************************************************************
 				
 				WZRange.Z = -Abs(ZRange);
 				WZRange = WZRange >> Rotation;
-				for (b = 0; b < 4; b++)				{					S = Location + (ePointsOffSet[b] >> Rotation);					E = S + WZRange;					Ac[b] = Trace(sHL[b], sHN[b], E, S, False);					if (Ac[b] != None && (sHN[b] dot WHN > 0.5) /*&& (ActualFloorNormal dot sHN[b] >= 0.3)*/)						AcCount++;				}			}				if (bArcMovement && AcCount > 2)			{				ArcInitDir[0] = FloorNormal;				ArcInitDir[1] = GVTNormal;			}				if (AcCount == 4)			{				MLoc = (sHL[0] + sHL[1] + sHL[2] + sHL[3]) / 4 - 					(vect(0.5,0,0)*(FrontWide.X + BackWide.X) >> Rotation);				CrossedVect[0] = Normal(sHL[0] - sHL[3]);				CrossedVect[1] = Normal(sHL[1] - sHL[2]);				ActualGVTNormal = Normal(CrossedVect[0] cross CrossedVect[1]);				if (ActualGVTNormal.Z < 0)					ActualGVTNormal = -ActualGVTNormal;				GVTLoc = MLoc + ActualGVTNormal*CollisionHeight;				GVT.PrePivot = GVTLoc - Location;			}			else if (Location != OldLocation || !bFirstCheckOnGround)				ActualGVTNormal = HN;		}			if ((Location != OldLocation || !bSlopedPhys || !bFirstCheckOnGround) /*&& (HN dot ActualFloorNormal) <= 0.5*/)			ActualFloorNormal = HN;
+
+				for (b = 0; b < 4; b++)
+				{
+					S = Location + (ePointsOffSet[b] >> Rotation);
+					E = S + WZRange;
+					Ac[b] = Trace(sHL[b], sHN[b], E, S, False);
+					if (Ac[b] != None && (sHN[b] dot WHN > 0.5) /*&& (ActualFloorNormal dot sHN[b] >= 0.3)*/)
+						AcCount++;
+				}
+			}
+	
+			if (bArcMovement && AcCount > 2)
+			{
+				ArcInitDir[0] = FloorNormal;
+				ArcInitDir[1] = GVTNormal;
+			}
+	
+			if (AcCount == 4)
+			{
+				MLoc = (sHL[0] + sHL[1] + sHL[2] + sHL[3]) / 4 - 
+					(vect(0.5,0,0)*(FrontWide.X + BackWide.X) >> Rotation);
+				CrossedVect[0] = Normal(sHL[0] - sHL[3]);
+				CrossedVect[1] = Normal(sHL[1] - sHL[2]);
+				ActualGVTNormal = Normal(CrossedVect[0] cross CrossedVect[1]);
+				if (ActualGVTNormal.Z < 0)
+					ActualGVTNormal = -ActualGVTNormal;
+				GVTLoc = MLoc + ActualGVTNormal*CollisionHeight;
+				GVT.PrePivot = GVTLoc - Location;
+			}
+			else if (Location != OldLocation || !bFirstCheckOnGround)
+				ActualGVTNormal = HN;
+		}
+	
+		if ((Location != OldLocation || !bSlopedPhys || !bFirstCheckOnGround) /*&& (HN dot ActualFloorNormal) <= 0.5*/)
+			ActualFloorNormal = HN;
 		ret = ActualFloorNormal.Z >= 0.7;
 	}
 	CheckBase(PossibleBase, Ac);
@@ -3643,9 +3745,11 @@ function MakeHitSound(PlayerPawn Instigator, int Damage)
 		return;
 	Instigator.ReceiveLocalizedMessage(ClassPureHitSound, Damage, Damaged.PlayerReplicationInfo, 
 		Instigator.PlayerReplicationInfo);
-	for (P = Level.PawnList; P != None; P = P.NextPawn)		if (Spectator(P) != None && Spectator(P).ViewTarget != None && 
+	for (P = Level.PawnList; P != None; P = P.NextPawn)
+		if (Spectator(P) != None && Spectator(P).ViewTarget != None && 
 			(Spectator(P).ViewTarget == Instigator || 
-			Spectator(P).ViewTarget == DriverCameraActor(Instigator.ViewTarget)))			P.ReceiveLocalizedMessage(ClassPureHitSound, Damage, Damaged.PlayerReplicationInfo, 
+			Spectator(P).ViewTarget == DriverCameraActor(Instigator.ViewTarget)))
+			P.ReceiveLocalizedMessage(ClassPureHitSound, Damage, Damaged.PlayerReplicationInfo, 
 				Instigator.PlayerReplicationInfo);
 }
 
@@ -4137,7 +4241,21 @@ function PassengerLeave( byte Seat, optional bool bForcedLeave )
 			}
 		}
 	}
-	if (PassengerSeats[Seat].PGun != None)	{		if (Seat == 0 && DriverGun == None)			Other = Driver;		PassengerSeats[Seat].PGun.WeaponController = Other;		PassengerSeats[Seat].PGun.SetOwner(Other);	}	if (PassengerSeats[Seat].PHGun != None)	{		PassengerSeats[Seat].PHGun.NotifyDriverLeft(Driver);		PassengerSeats[Seat].PHGun.ChangeOwner(None);	}	if (PassengerSeats[Seat].PassengerCam != None && PassengerSeats[Seat].PassengerCam.Owner != None )		PassengerSeats[Seat].PassengerCam.SetCamOwner(None);	Passengers[Seat] = None;
+	if (PassengerSeats[Seat].PGun != None)
+	{
+		if (Seat == 0 && DriverGun == None)
+			Other = Driver;
+		PassengerSeats[Seat].PGun.WeaponController = Other;
+		PassengerSeats[Seat].PGun.SetOwner(Other);
+	}
+	if (PassengerSeats[Seat].PHGun != None)
+	{
+		PassengerSeats[Seat].PHGun.NotifyDriverLeft(Driver);
+		PassengerSeats[Seat].PHGun.ChangeOwner(None);
+	}
+	if (PassengerSeats[Seat].PassengerCam != None && PassengerSeats[Seat].PassengerCam.Owner != None )
+		PassengerSeats[Seat].PassengerCam.SetCamOwner(None);
+	Passengers[Seat] = None;
 
 	HasPassengers();
 	CheckForEmpty();
