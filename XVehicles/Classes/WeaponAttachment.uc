@@ -999,6 +999,25 @@ simulated function rotator GetAimForPos(vector Pos)
 	}
 	Return ret;
 }
+function vector CorrectAim(vector AimPoint, float CollisionHeight)
+{
+	local vector Loc, Dir, NewAimPoint;
+	if (CollisionHeight > 2)
+	{
+		if (PitchPart != None)
+			Loc = PitchPart.Location;
+		else
+			Loc = Location;
+		Dir = AimPoint - Loc;
+		if (Dir.Z > 0 && rotator(Dir).Pitch > 1000) {
+			NewAimPoint = AimPoint;
+			NewAimPoint.Z += CollisionHeight;
+			if (FastTrace(NewAimPoint, Loc))
+				AimPoint = NewAimPoint;
+		}
+	}
+	return AimPoint;
+}
 function rotator GetBotInput( float Delta )
 {
 	local vector HL, HN, S;
@@ -1008,7 +1027,7 @@ function rotator GetBotInput( float Delta )
 		!SeeEnemy(WeaponController.FaceTarget) )
 	{
 		if (FindEnemy() && WeaponController.Target != None)
-			RepAimPos = WeaponController.Target.Location;
+			RepAimPos = CorrectAim(WeaponController.Target.Location, WeaponController.Target.CollisionHeight);
 		else if (WeaponController.MoveTarget != None && Pawn(WeaponController.MoveTarget) == None && 
 			Vsize(WeaponController.Focus - WeaponController.MoveTarget.Location) < 10)
 			RepAimPos = OwnerVehicle.MoveDest;
@@ -1125,33 +1144,37 @@ function bool SeeEnemy(Actor Enemy)
 
 	if (bPhysicalGunAimOnly && WeapSettings[0].ProjectileClass != None)
 	{
-		if (PitchPart != None)
-		{
-			P = PitchPart.Location;
-			R = PitchPart.Rotation;
-		}
-		else
-		{
-			P = Location;
-			R = Rotation;
-		}
-	
-		P += (WeapSettings[0].FireStartOffset >> R);
-		
-		Dir = Enemy.Location - P;
-		
-		VProj = Fmax(1, WeapSettings[0].ProjectileClass.default.Speed);
-		V1 = Normal(Dir) dot Enemy.Velocity;
 		V = VSize(Enemy.Velocity);
-		V = VProj*VProj + V1*V1 - V*V; 
-		
-		if (V > V1*V1)
+		if (V >= 0.0001)
 		{
-			RepAimPos += Enemy.Velocity * VSize(Dir)/(Sqrt(V) - V1);
-			if ( !FastTrace(RepAimPos))
-				RepAimPos = 0.5 * (RepAimPos + Enemy.Location);
+			if (PitchPart != None)
+			{
+				P = PitchPart.Location;
+				R = PitchPart.Rotation;
+			}
+			else
+			{
+				P = Location;
+				R = Rotation;
+			}
+		
+			P += (WeapSettings[0].FireStartOffset >> R);
+			
+			Dir = Enemy.Location - P;
+			
+			VProj = Fmax(1, WeapSettings[0].ProjectileClass.default.Speed);
+			V1 = Normal(Dir) dot Enemy.Velocity;		
+			V = VProj*VProj + V1*V1 - V*V; 
+			
+			if (V > V1*V1)
+			{
+				RepAimPos += Enemy.Velocity * VSize(Dir)/(Sqrt(V) - V1);
+				if ( !FastTrace(RepAimPos))
+					RepAimPos = 0.5 * (RepAimPos + Enemy.Location);
+			}
 		}
 	}
+	RepAimPos = CorrectAim(RepAimPos, Enemy.CollisionHeight);
 
 	return true;
 }
