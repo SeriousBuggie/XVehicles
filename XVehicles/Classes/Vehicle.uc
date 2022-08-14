@@ -2241,27 +2241,8 @@ function bool HealthTooLowFor(Pawn Other)
 function bool CrewFit(Pawn Other)
 {
 	local Bot Bot, DBot;
-	local DefensePoint DP;
 	Bot = Bot(Other);
-	if (Bot == None || Bot.Orders == 'Freelance')
-		return true;
-	if (StationaryPhys(self) != None)
-	{
-		if (Bot.Orders == 'Defend')
-		{
-			if (Bot.OrderObject == None || FastTrace(Bot.OrderObject.Location))
-				return true;
-			foreach RadiusActors(class'DefensePoint', DP, 256)
-				if (DP.Team == Bot.PlayerReplicationInfo.Team && FastTrace(DP.Location))
-					return true;
-		}
-		if ((Bot.Orders == 'Hold' || Bot.Orders == 'Follow') && Bot.OrderObject != None && 
-			VSize(Bot.OrderObject.Location - Location) <= 256 && FastTrace(Bot.OrderObject.Location))
-			return true;
-		if (Bot.Orders == 'Attack')
-			return Bot.Enemy != None && !Bot.IsInState('Fallback') && FastTrace(Bot.Enemy.Location);
-	}
-	if (Driver == None || Driver == Other)
+	if (Bot == None || Bot.Orders == 'Freelance' || Driver == None || Driver == Other)
 		return true;
 	if (PlayerPawn(Driver) != None && Other.PlayerReplicationInfo != None && Other.PlayerReplicationInfo.HasFlag != None)
 		return true;

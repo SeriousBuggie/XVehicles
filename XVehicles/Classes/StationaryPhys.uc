@@ -47,16 +47,25 @@ function ReadBotInput( float Delta );
 function bool HealthTooLowFor(Pawn Other)
 {
 	local Bot Bot;
+	local DefensePoint DP;
 	if (Super.HealthTooLowFor(Other))
 		return true;
 	Bot = Bot(Other);
-	if (Bot == None || Bot.Orders != 'Freelance')
+	if (Bot == None || Bot.Orders == 'Freelance')
 		return false;
-	if (Bot.Orders != 'Defend' && Bot.Orders != 'Hold')
-		return true;
-	if (Bot.OrderObject == None || VSize(Bot.OrderObject.Location - Location) > 2000 || 
-		!FastTrace(Bot.OrderObject.Location))
-		return true;
+	if (Bot.Orders == 'Defend')
+	{
+		if (Bot.OrderObject == None || FastTrace(Bot.OrderObject.Location))
+			return false;
+		foreach RadiusActors(class'DefensePoint', DP, 256)
+			if (DP.Team == Bot.PlayerReplicationInfo.Team && FastTrace(DP.Location))
+				return false;
+	}
+	if ((Bot.Orders == 'Hold' || Bot.Orders == 'Follow') && Bot.OrderObject != None && 
+		VSize(Bot.OrderObject.Location - Location) <= 256 && FastTrace(Bot.OrderObject.Location))
+		return false;
+	if (Bot.Orders == 'Attack')
+		return Bot.Enemy == None || Bot.IsInState('Fallback') || !FastTrace(Bot.Enemy.Location);
 	return false;
 }
 

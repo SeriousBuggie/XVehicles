@@ -1105,7 +1105,7 @@ function bool FindEnemy()
 	if (Best == None && Bot.PlayerReplicationInfo != None)
 		foreach AllActors(class'Vehicle', Veh)
 			if (Veh != OwnerVehicle && Veh.CurrentTeam != Bot.PlayerReplicationInfo.Team &&
-				!Veh.HealthTooLowFor(Bot))
+				!Veh.HealthTooLowFor(None))
 			{
 				if (Veh != TraceHit(Bot, Veh, HL, HN))
 					continue;
