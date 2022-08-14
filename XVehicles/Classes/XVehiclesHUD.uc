@@ -134,7 +134,7 @@ simulated function string getVal(Actor actor, string prop) {
 
 simulated function bool TraceIdentify(canvas Canvas)
 {
-	local actor Other, Camera;
+	local actor Other, Camera, TraceActor;
 	local vector HitLocation, HitNormal, StartTrace, EndTrace;
 	local rotator CamRot;
 	local float X;
@@ -142,8 +142,12 @@ simulated function bool TraceIdentify(canvas Canvas)
 	
 	Canvas.ViewPort.Actor.PlayerCalcView(Camera, StartTrace, CamRot);
 	
+	TraceActor = MyHUD.PawnOwner;
+	if (DriverWeapon(MyHUD.PawnOwner.Weapon) != None && DriverWeapon(MyHUD.PawnOwner.Weapon).VehicleOwner != None)
+		TraceActor = DriverWeapon(MyHUD.PawnOwner.Weapon).VehicleOwner;
+	
 	EndTrace = StartTrace + vector(CamRot) * 1000.0;
-	Other = Trace(HitLocation, HitNormal, EndTrace, StartTrace, true);
+	Other = TraceActor.Trace(HitLocation, HitNormal, EndTrace, StartTrace, true);
 	
 	if (Vehicle(Other) != None && DriverWeapon(MyHUD.PawnOwner.Weapon) != None && 
 		VSize(Other.Location - MyHUD.PawnOwner.Location) < FMin(Other.CollisionRadius, Other.CollisionHeight))
@@ -153,7 +157,7 @@ simulated function bool TraceIdentify(canvas Canvas)
 	{
 		X = (vector(CamRot) dot (MyVehicle.Location - StartTrace));
 		StartTrace += vector(CamRot)*2*Abs(X);
-		Other = Trace(HitLocation, HitNormal, EndTrace, StartTrace, true);
+		Other = TraceActor.Trace(HitLocation, HitNormal, EndTrace, StartTrace, true);
 	}
 
 	if ( Vehicle(Other) != None && (Vehicle(Other).Driver != None || Vehicle(Other).HasPassengers()) )
