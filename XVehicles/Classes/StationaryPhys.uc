@@ -42,7 +42,10 @@ simulated function bool CheckOnGround()
 }
 
 // No inputs for bots!
-function ReadBotInput( float Delta );
+function ReadBotInput( float Delta )
+{
+	MoveDest = Location + (vect(10000,0,0) >> Rotation);
+}
 
 function bool HealthTooLowFor(Pawn Other)
 {
