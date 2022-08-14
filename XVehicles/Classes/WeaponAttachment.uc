@@ -1009,7 +1009,7 @@ function vector CorrectAim(vector AimPoint, float CollisionHeight)
 		else
 			Loc = Location;
 		Dir = AimPoint - Loc;
-		if (Dir.Z > 0 && rotator(Dir).Pitch > 1000) {
+		if (Dir.Z > 0 && rotator(Dir).Pitch > 300) {
 			NewAimPoint = AimPoint;
 			NewAimPoint.Z += CollisionHeight;
 			if (FastTrace(NewAimPoint, Loc))
