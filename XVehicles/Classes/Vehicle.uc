@@ -125,7 +125,7 @@ var Pawn Driver,Passengers[8];
 
 var bool bHasPassengers;
 
-var vector FloorNormal,ActualFloorNormal, GVTNormal, ActualGVTNormal;
+var vector FloorNormal, ActualFloorNormal, GVTNormal, ActualGVTNormal;
 var VehicleAttachment AttachmentList; // Vehicle attachment list.
 var bool bDriving,bOnGround,bOldOnGround,bCameraOnBehindView,bVehicleBlewUp,bClientBlewUp,bHadADriver;
 var float ResetTimer;
@@ -1583,6 +1583,8 @@ simulated function Tick( float Delta )
 			}
 		}
 	}
+	if (Driver != None)
+		UpdateDriverPos();
 	if (!bDriving || (Driver != None && Driver.IsInState('GameEnded')))
 	{
 		Turning = 0;
@@ -1679,8 +1681,6 @@ simulated function Tick( float Delta )
 			GVTNormal = ActualGVTNormal;
 	}
 	bOwnerNoSee = False;
-	if( Driver!=None )
-		UpdateDriverPos();
 	bOnGround = bSlopedG;
 	if (NewMove != None)
 	{

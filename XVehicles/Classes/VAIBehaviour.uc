@@ -98,12 +98,16 @@ function bool CanReach(vector Point)
 function vector GetNextMoveTarget()
 {
 	local int i, best;
-	local float Dist, BestDist, Closest, HeightDiff;
-	Local vector V, S, T, NextT, HitLocation, HitNormal;
+	local float Z, Dist, BestDist, Closest, HeightDiff;
+	Local vector V, S, T, T2, NextT, HitLocation, HitNormal;
 	local string dbg;
 	local NavigationPoint Visible[ArrayCount(VehicleOwner.Driver.RouteCache)], NP;
 	local vector Pos[ArrayCount(VehicleOwner.Driver.RouteCache)];
 	local bool bHasNext;
+	
+	local vector D;
+	local rotator Dir;
+	local bool bMovePawn;
 	
 	if (VehicleOwner.Driver.Target != None && Vehicle(VehicleOwner.Driver.Target) == None &&
 		!VehicleOwner.Driver.IsInState('Fallback') && !VehicleOwner.Driver.IsInState('RangedAttack') && 
@@ -141,24 +145,56 @@ function vector GetNextMoveTarget()
 			T.Z -= NP.CollisionHeight - HeightDiff;
 			NextT = T;
 			bHasNext = true;
-			if (//!VehicleOwner.Driver.LineOfSightTo(NP) || 
-				VehicleOwner.Trace(HitLocation, HitNormal, T, S, true, V) != None)
+			
+			T2 = T - VehicleOwner.Location;
+			T2.Z -= VehicleOwner.MaxObstclHeight/2;
+			T2 = Normal(T2);
+			if (T2.Z > 0.71)
+				continue;
+			Z = T2.Z;	
+			T2.Z = 0;
+			Z = Z*VehicleOwner.CollisionRadius/VSize(T2);
+			T2 = T;
+			T2.Z += Z;
+			
+			if (VehicleOwner.Trace(HitLocation, HitNormal, T2, S, true, V) != None && 
+				VSize(HitLocation - T2) >= VehicleOwner.CollisionRadius)
 			{
-//				Log(i @ "!Trace" @ T @ NP);
+//				Log(i @ "!Trace" @ VehicleOwner.CollisionRadius @ VSize(HitLocation - T2) @ T @ NP);
 //				if (i == 0) Log(i @ NP @ HitLocation @ HitNormal);
 //				dbg = dbg @ "-";
-				if (T.Z < S.Z && T.Z + VehicleOwner.CollisionHeight > S.Z && 
-					VehicleOwner.Trace(HitLocation, HitNormal, T + vect(0,0,1)*(S.Z - T.Z), S, true, V) == None)
+				if (T2.Z < S.Z && T2.Z + VehicleOwner.CollisionHeight > S.Z && 
+					(VehicleOwner.Trace(HitLocation, HitNormal, T2 + vect(0,0,1)*(S.Z - T2.Z), S, true, V) == None ||
+					VSize(HitLocation - T2) < VehicleOwner.CollisionRadius))
 					; // skip it
 				else
 				{
-//					Log(i @ "!Trace2" @ T @ NP);
+//					Log(i @ "!Trace2" @ VSize(HitLocation - T2) @ T2 @ NP);
 					continue;
 				}
 			}
-			if (!CanReach(T))
+
+			if (false && !bMovePawn)
 			{
-//				Log(i @ "!CanReach" @ T @ NP);
+				bMovePawn = true;
+				if (!VehicleOwner.bCanFly && VehicleOwner.bOnGround && 
+					VehicleOwner.ActualFloorNormal.Z < 0.999)
+				{
+					D.X = VehicleOwner.CollisionRadius - VehicleOwner.Driver.Default.CollisionRadius - 10;
+					Dir.Yaw = rotator(VehicleOwner.ActualFloorNormal).Yaw + 32768;
+					D = D >> Dir;
+//					log("MovePawn:" @ D);
+					//VehicleOwner.Driver.Move(D);
+					//VehicleOwner.Driver.Move(vect(0,0,20));
+				}
+			}
+			
+			if (!CanReach(T - vect(0,0,1)*(VehicleOwner.CollisionHeight - VehicleOwner.Driver.Default.CollisionHeight)))
+			{
+				if (false)
+					Log(Level.TimeSeconds @ i @ "!CanReach" @ T @ NP @ T - NP.Location @ 
+						VehicleOwner.CollisionHeight - VehicleOwner.Driver.Default.CollisionHeight @
+						VehicleOwner.Driver.pointReachable(NP.Location) @ VehicleOwner.Driver.Location);
 				continue;
 			}
 //			Log(i @ "Visible" @ T @ NP);
