@@ -3201,7 +3201,7 @@ simulated function SingularBump( Actor Other )
 		Dir = Other.Location-Location;
 		Dir.Z = 0;
 		Sp = VSize(Dir) - (CollisionRadius + Other.CollisionRadius);
-		if (Sp < -1 && StationaryPhys(Other) == None) // stuck inside other
+		if (Sp < -1 && StationaryPhys(self) == None) // stuck inside other
 		{
 //			V = Location;
 			Sp -= 1;
@@ -3250,12 +3250,12 @@ simulated function SingularBump( Actor Other )
 		
 		if (Other.Mass/Mass >= 2.0 && (Velocity Dot Dir)>0 )
 			Velocity *= 0.25;
-		else if (Other.Mass/Mass >= 2.0)
+		else if (Other.Mass/Mass >= 2.0 || StationaryPhys(Other) != None)
 		{
 			Velocity = Other.Velocity * 1.15;
 			Move((Other.Location - Other.OldLocation)*1.5);
 		}
-		else if (Mass/Other.Mass >= 2.0 && (Velocity Dot Dir)>0 )
+		else if ((Mass/Other.Mass >= 2.0 && (Velocity Dot Dir) > 0) || StationaryPhys(self) != None)
 		{
 			Other.Velocity = Velocity * 1.15;
 			Other.Move((Location - OldLocation)*1.5);
