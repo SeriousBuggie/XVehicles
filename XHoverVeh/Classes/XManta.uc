@@ -104,6 +104,13 @@ simulated function ChangeColor()
 	}
 }
 
+simulated function Destroyed()
+{
+	if (DriverMesh != None)
+		DriverMesh.Destroy();
+	Super.Destroyed();
+}
+
 defaultproperties
 {
 	DMC(0)=(Mesh="Botpack.FCommando",pos=(X=-15.000000,Y=-1.000000,Z=5.000000),Rot=(Pitch=5000),DrawScale=1.000000,AnimSequence="DuckWlkS")
