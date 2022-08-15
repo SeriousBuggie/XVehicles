@@ -1,13 +1,26 @@
 //=============================================================================
 // XManta.
 //=============================================================================
-class XManta expands HoverCraftPhys;
+class XManta expands HoverCraftPhys config(XManta);
 
 var byte CurrentTeamColor;
+var DumbMesh DriverMesh;
+
+struct DriverMeshConfig
+{
+	var() string Mesh;
+	var() vector Pos;
+	var() rotator Rot;
+	var() float DrawScale;
+	var() name AnimSequence;
+	var() float AnimFrame;
+};
+
+var() config DriverMeshConfig DMC[1024];
+var int CurDMC;
 
 simulated function Tick(float delta)
 {
-	local bool bInside;
 	Super.Tick(delta);
 	if (CurrentTeamColor != CurrentTeam)
 		ChangeColor();
@@ -16,6 +29,63 @@ simulated function Tick(float delta)
 		bUseVehicleLights = true;
 		SwitchVehicleLights();
 		bUseVehicleLights = false;
+	}
+	if (Level.NetMode != NM_DedicatedServer)
+		SetDriverModel();
+}
+
+simulated function SetDriverModel()
+{
+	local int i;
+	local string MeshName;
+	if (DriverMesh == None)
+	{
+		DriverMesh = Spawn(class'DumbMesh', self);
+		if (DriverMesh != None)
+			DriverMesh.Target = self;
+	}
+	if (DriverMesh == None)
+		return;
+	
+	if (DriverMesh.Base != self)
+		DriverMesh.SetBase(self);
+	if (DriverMesh.Target != Driver)
+	{
+		DriverMesh.Target = Driver;
+		if (Driver != None && Driver.Mesh != None)
+		{
+			DriverMesh.Mesh = Driver.Mesh;
+			MeshName = Driver.Mesh.Outer.Name $ "." $ Driver.Mesh.Name;
+			for (i = 0; i < ArrayCount(DMC); i++)
+				if (DMC[i].Mesh == "" || DMC[i].Mesh == MeshName)
+					break;
+			if (DMC[i].Mesh == "")
+				CurDMC = 0;
+			else
+				CurDMC = i;
+			if (DMC[CurDMC].DrawScale > 0)
+				DriverMesh.DrawScale = DMC[CurDMC].DrawScale;
+			else
+				DriverMesh.DrawScale = Driver.default.DrawScale;
+			if (Driver.HasAnim(DMC[CurDMC].AnimSequence))
+				DriverMesh.AnimSequence = DMC[CurDMC].AnimSequence;
+			else
+				DriverMesh.AnimSequence = '';
+			DriverMesh.AnimFrame = DMC[CurDMC].AnimFrame;
+			
+			DriverMesh.Texture = Driver.Texture;
+			DriverMesh.Skin = Driver.Skin;			
+			for (i = 0; i < ArrayCount(Driver.MultiSkins); i++)
+				DriverMesh.MultiSkins[i] = Driver.MultiSkins[i];
+		}
+		else
+			DriverMesh.Mesh = None;
+	}
+	if (DriverMesh.Mesh != None)
+	{
+		DriverMesh.PrePivot = DMC[CurDMC].Pos >> Rotation;
+		DriverMesh.SetLocation(Location);
+		DriverMesh.SetRotation(Rotation + DMC[CurDMC].Rot);
 	}
 }
 
@@ -36,6 +106,10 @@ simulated function ChangeColor()
 
 defaultproperties
 {
+	DMC(0)=(Mesh="Botpack.FCommando",pos=(X=-15.000000,Y=-1.000000,Z=5.000000),Rot=(Pitch=5000),DrawScale=1.000000,AnimSequence="DuckWlkS")
+	DMC(1)=(Mesh="EpicCustomModels.TCowMesh",pos=(X=-15.000000,Y=-1.000000,Z=5.000000),Rot=(Pitch=5000),DrawScale=0.500000,AnimSequence="DuckWlkS",AnimFrame=0.450000)
+	DMC(2)=(Mesh="EpicCustomModels.tnalimesh",pos=(X=-10.000000,Y=-1.000000,Z=10.000000),Rot=(Pitch=5000),DrawScale=1.000000,AnimSequence="DuckWlkS",AnimFrame=0.450000)
+	DMC(3)=(Mesh="EpicCustomModels.TSkM",pos=(X=-10.000000,Y=-1.000000,Z=10.000000),Rot=(Pitch=5000),DrawScale=1.000000,AnimSequence="DuckWlkS",AnimFrame=0.450000)
 	MaxHoverSpeed=2500.000000
 	VehicleTurnSpeed=16000.000000
 	HoveringHeight=160.000000
