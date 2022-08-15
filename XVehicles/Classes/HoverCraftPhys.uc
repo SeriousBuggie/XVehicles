@@ -364,6 +364,33 @@ simulated function PostBeginPlay()
 	}
 }
 
+simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte Seat )
+{
+	local float Y, XS, X;
+	Super.RenderCanvasOverlays(C, Cam, Seat);
+	if (Seat == 0)
+	{
+		Y = C.ClipY/6*5;
+		XS = C.ClipX/4;
+		X = C.ClipX/2;
+		DrawJumpBar(C, X, Y + 24, XS, 6);
+	}
+}
+
+simulated function DrawJumpBar(Canvas C, int X, int Y, float Width, float Height)
+{
+	local float Pct;
+	
+	Pct = Fmin(1.0, (Level.TimeSeconds - LastJumpTime)/JumpDelay);
+
+	C.DrawColor.R = 0;
+	C.DrawColor.G = 0;
+	C.DrawColor.B = 64;
+	
+	C.SetPos(X + (0.5 - Pct)*Width, Y);
+	C.DrawTile(Texture'Misc', Width*Pct, Height, 60, 60, 64, 64);
+}
+
 defaultproperties
 {
 	MaxHoverSpeed=800.000000
