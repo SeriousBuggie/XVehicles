@@ -56,6 +56,7 @@ simulated function bool CheckOnGround()
 		if (!bIsOnGround)
 			HN = vect(0,0,1);
 		ActualFloorNormal = HN;
+		ActualHoverHeight = 0;
 		CheckBase(PossibleBase);
 	}
 	else
