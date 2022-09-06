@@ -142,8 +142,17 @@ function Inventory SpawnCopy( pawn P )
 
 function ChangeWeaponClass(int i, Class<Weapon> WeaponClass)
 {
-	if (WeaponClass != Weapons[i].WeaponClass) // for next time	{
-		Weapons[i].WeaponClass = WeaponClass;		if (i < ArrayCount(WMesh))		{			if (WRI == None)				WRI = Spawn(class'WRI', self);			else				WRI.WeaponClass[i] = Weapons[i].WeaponClass;		}	}
+	if (WeaponClass != Weapons[i].WeaponClass) // for next time
+	{
+		Weapons[i].WeaponClass = WeaponClass;
+		if (i < ArrayCount(WMesh))
+		{
+			if (WRI == None)
+				WRI = Spawn(class'WRI', self);
+			else
+				WRI.WeaponClass[i] = Weapons[i].WeaponClass;
+		}
+	}
 }
 
 function bool RefillAmmo(Pawn P, class<Weapon> WeaponClass, int ExtraAmmo)
@@ -362,6 +371,7 @@ defaultproperties
 	RemoteRole=ROLE_DumbProxy
 	Mesh=Mesh'XWeaponLocker.WeaponLocker'
 	AmbientGlow=127
+	bNoSmooth=False
 	bGameRelevant=True
 	bTravel=False
 	CollisionRadius=50.000000
