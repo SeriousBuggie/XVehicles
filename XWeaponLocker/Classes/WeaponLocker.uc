@@ -171,12 +171,34 @@ function bool RefillAmmo(Pawn P, class<Weapon> WeaponClass, int ExtraAmmo)
 simulated function PostBeginPlay()
 {
 	local int i;
-	local Mutator Mutator;
+	local Info Mutator;
+	local string NewNetPrefix;
+	local class<TournamentWeapon> cls;
 	
-	foreach AllActors(class'Mutator', Mutator)
+	foreach AllActors(class'Info', Mutator)
+	{
 		if (Mutator.isA('NWReplacer'))
-			break;
-	bNW3hack = Mutator != None;
+			bNW3hack = true;
+		if (Mutator.isA('ST_Mutator') && NewNetPrefix == "")
+			NewNetPrefix = Mutator.Class.Outer.Name $ "." $ "ST_";
+		if (Mutator.isA('UN_Mutator'))
+			NewNetPrefix = Mutator.Class.Outer.Name $ "." $ "NN_";
+		if (Mutator.isA('NewNetServer'))			
+		{
+			if (Mutator.GetPropertyText("UNM") != "")
+				NewNetPrefix = Mutator.Class.Outer.Name $ "." $ "NN_";
+			else
+				NewNetPrefix = Mutator.Class.Outer.Name $ "." $ "ST_";
+		}
+	}
+	if (NewNetPrefix != "")
+		for (i=0; i<ArrayCount(Weapons); i++)
+			if (Weapons[i].WeaponClass != None)
+			{
+				cls = class<TournamentWeapon>(DynamicLoadObject(NewNetPrefix $ Weapons[i].WeaponClass.Name, class'Class'));
+				if (cls != None)
+					Weapons[i].WeaponClass = cls;
+			}
 
 	for (i=0; i<ArrayCount(Weapons); i++)
 		if (Weapons[i].WeaponClass != None && AIRating < Weapons[i].WeaponClass.default.AIRating)
