@@ -11,8 +11,24 @@ class XManta expands HoverCraftPhys config(XManta);
 
 #forceexec MESHMAP NEW MESHMAP=Manta MESH=Manta
 #forceexec MESHMAP SCALE MESHMAP=Manta X=0.125 Y=0.125 Z=0.25
+
+#forceexec MESHMAP SETTEXTURE MESHMAP=Manta NUM=0 TEXTURE=MantaYellow
+#forceexec MESHMAP SETTEXTURE MESHMAP=Manta NUM=1 TEXTURE=fan1
+#forceexec MESHMAP SETTEXTURE MESHMAP=Manta NUM=2 TEXTURE=fan1
 // */
 
+/*
+#forceexec MESH  MODELIMPORT MESH=Manta2 MODELFILE=Z:\XV\HoverBike.psk LODSTYLE=10
+//#forceexec ANIM  IMPORT ANIM=Manta2Anims ANIMFILE=Z:\XV\HoverBike.psa COMPRESS=1 MAXKEYS=999999 IMPORTSEQS=1
+#forceexec MESH  LODPARAMS MESH=Manta2 STRENGTH=0
+#forceexec MESHMAP   SCALE MESHMAP=Manta2 X=0.5 Y=0.5 Z=0.5
+//#forceexec MESH  DEFAULTANIM MESH=Manta2 ANIM=Manta2Anims
+
+//#forceexec ANIM  SEQUENCE ANIM=Manta2Anims SEQ=All STARTFRAME=0 NUMFRAMES=1 RATE=30.0000 COMPRESS=1.00
+//#forceexec ANIM  SEQUENCE ANIM=Manta2Anims SEQ=Still STARTFRAME=0 NUMFRAMES=1 RATE=30.0000 COMPRESS=1.00
+
+//#forceexec ANIM DIGEST ANIM=Manta2Anims  VERBOSE
+// */
 
 var byte CurrentTeamColor;
 var DumbMesh DriverMesh;
