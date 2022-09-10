@@ -7,8 +7,7 @@ defaultproperties
 {
 	VehicleClass=Class'XHoverVeh.XManta'
 	Texture=Texture'XHoverVeh.pics.fan1'
-	Mesh=LodMesh'XHoverVeh.Manta'
-	DrawScale=25.000000
+	Mesh=Mesh'XHoverVeh.Manta'
 	AmbientGlow=127
 	MultiSkins(1)=Texture'XHoverVeh.pics.fan1'
 	MultiSkins(2)=Texture'XHoverVeh.pics.fan1'

@@ -3,6 +3,17 @@
 //=============================================================================
 class XManta expands HoverCraftPhys config(XManta);
 
+/*
+#forceexec MESH IMPORT MESH=Manta ANIVFILE=Z:\XV\Manta_a.3d DATAFILE=Z:\XV\Manta_d.3d X=0 Y=0 Z=0 mlod=0 
+#forceexec MESH ORIGIN MESH=Manta X=-94 Y=0 Z=67
+
+#forceexec MESH SEQUENCE MESH=Manta SEQ=All STARTFRAME=0 NUMFRAMES=1
+
+#forceexec MESHMAP NEW MESHMAP=Manta MESH=Manta
+#forceexec MESHMAP SCALE MESHMAP=Manta X=0.125 Y=0.125 Z=0.25
+// */
+
+
 var byte CurrentTeamColor;
 var DumbMesh DriverMesh;
 
@@ -155,8 +166,7 @@ defaultproperties
 	ShieldLevel=0.650000
 	LODBias=1.000000
 	Texture=Texture'XHoverVeh.pics.fan1'
-	Mesh=LodMesh'XHoverVeh.Manta'
-	DrawScale=25.000000
+	Mesh=Mesh'XHoverVeh.Manta'
 	MultiSkins(1)=Texture'XHoverVeh.pics.fan1'
 	MultiSkins(2)=Texture'XHoverVeh.pics.fan1'
 	SoundRadius=255
