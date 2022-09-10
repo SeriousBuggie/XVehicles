@@ -5,6 +5,26 @@ class FixGun expands PulseGun;
 
 var Actor Actor;
 var float CheckTimer;
+var bool bSpawned;
+
+function Spawned()
+{
+	bSpawned = true;
+	Super.Spawned();
+}
+
+function Destroyed()
+{
+	local PulseGun PulseGun;
+	if (!bSpawned)
+	{
+		if (Spawn(class'FixGunRestore', self) != None)
+			foreach RadiusActors(class'PulseGun', PulseGun, 10)
+				if (PulseGun != self)
+					PulseGun.Destroy();
+	}
+	Super.Destroyed();
+}
 
 simulated event RenderOverlays( canvas Canvas )
 {
