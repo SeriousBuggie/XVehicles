@@ -1158,7 +1158,15 @@ local vector ExitVect;
 				}
 			}
 			if (Driver != None)
+			{
+				Driver.Velocity += Velocity; // inertial exit
+				Driver.Weapon = Driver.PendingWeapon;
+				Driver.ChangedWeapon();
+				if( Driver.Weapon != None && Driver.Weapon.Owner != None )
+					Driver.Weapon.BringUp();
+				Driver.bDuck = 0; // prevent enter again
 				Driver.SetCollision(True,True,True);
+			}
 			if( PlayerPawn(Driver)!=None )
 			{
 				PlayerPawn(Driver).ViewTarget = None;
@@ -1168,15 +1176,6 @@ local vector ExitVect;
 			else if (Driver != None)
 				Driver.SetRotation(rotator(Driver.Location - Location));
 			MyCameraAct.SetCamOwner(None);
-			if (Driver != None)
-			{
-				Driver.Velocity += Velocity; // inertial exit
-				Driver.Weapon = Driver.PendingWeapon;
-				Driver.ChangedWeapon();
-				if( Driver.Weapon != None && Driver.Weapon.Owner != None )
-					Driver.Weapon.BringUp();
-				Driver.bDuck = 0; // prevent enter again
-			}
 			LastDriver = Driver;
 			LastDriverTime = Level.TimeSeconds;
 		}
@@ -4236,15 +4235,6 @@ function PassengerLeave( byte Seat, optional bool bForcedLeave )
 				}
 			}
 			if (Passengers[Seat] != None)
-				Passengers[Seat].SetCollision(True, True, True);
-			if (PlayerPawn(Passengers[Seat]) != None)
-			{
-				PlayerPawn(Passengers[Seat]).ViewTarget = None;
-				PlayerPawn(Passengers[Seat]).EndZoom();
-				Passengers[Seat].ClientSetLocation(Passengers[Seat].Location, Rotation);
-			}
-			PassengerSeats[Seat].PassengerCam.setCamOwner(None);
-			if (Passengers[Seat] != None)
 			{
 				Passengers[Seat].Velocity += Velocity; // inertial exit
 				Passengers[Seat].Weapon = Passengers[Seat].PendingWeapon;
@@ -4252,7 +4242,15 @@ function PassengerLeave( byte Seat, optional bool bForcedLeave )
 				if (Passengers[Seat].Weapon != None)
 					Passengers[Seat].Weapon.BringUp();
 				Passengers[Seat].bDuck = 0; // prevent enter again
+				Passengers[Seat].SetCollision(True, True, True);
 			}
+			if (PlayerPawn(Passengers[Seat]) != None)
+			{
+				PlayerPawn(Passengers[Seat]).ViewTarget = None;
+				PlayerPawn(Passengers[Seat]).EndZoom();
+				Passengers[Seat].ClientSetLocation(Passengers[Seat].Location, Rotation);
+			}
+			PassengerSeats[Seat].PassengerCam.setCamOwner(None);
 		}
 	}
 	if (PassengerSeats[Seat].PGun != None)
