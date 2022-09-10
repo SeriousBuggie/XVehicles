@@ -21,9 +21,13 @@ var(FX) int SplashDamage;
 
 var bool hasGivenZoneObj;
 
+var() int MinDesiredFrameRate;
+var bool bLowFps;
+
 simulated function PostBeginPlay()
 {
 	local xZoneInfo xZObj;
+	local PlayerPawn PP;
 
 	/* // XZonesMut disabled. for more info look at XZonesMut class
 	// hackish way instantiate mutator only once.
@@ -36,6 +40,17 @@ simulated function PostBeginPlay()
 	*/
 
 	SetTimer(0.5, False);
+	
+	foreach AllActors(class'PlayerPawn', PP)
+		if (PP.Player != None)
+			MinDesiredFrameRate = Max(MinDesiredFrameRate, 
+				int(PP.ConsoleCommand("get ini:Engine.Engine.ViewportManager MinDesiredFrameRate")));
+}
+
+simulated function Tick(float Delta)
+{
+	bLowFps = Delta*MinDesiredFrameRate > 1;
+	Super.Tick(Delta);
 }
 
 simulated function Timer()
@@ -74,7 +89,7 @@ local byte willFloat;
 local actor A;
 local vector AddVelocity;
 
-	if (bWaterZone && isWaterFX && enableWaterZoneFX && !Other.bStatic)
+	if (bWaterZone && isWaterFX && enableWaterZoneFX && !Other.bStatic && !bLowFps)
 	{
 		InstP = Other.Instigator;
 
@@ -188,7 +203,7 @@ local Pawn InstP;
 local vector StartLoc;
 local byte willFloat;
 
-	if (bWaterZone && isWaterFX && enableWaterZoneFX && !Other.bStatic)
+	if (bWaterZone && isWaterFX && enableWaterZoneFX && !Other.bStatic && !bLowFps)
 	{
 		InstP = Other.Instigator;
 
@@ -210,53 +225,53 @@ local byte willFloat;
 		}
 		else if (Other.bCollideWorld && Other.Mass > 15)
 		{
-		if (!Other.IsA('Pawn') && !Other.IsA('Decoration') && !Other.IsA('TornOffCarPartActor') && (Other.Physics == PHYS_Falling || Other.Physics == PHYS_Projectile) && Other.Mass > 10 && willFloat < 2)
-		{
-			if (willFloat == 0 || (willFloat == 1 && !Other.bLensFlare))
+			if (!Other.IsA('Pawn') && !Other.IsA('Decoration') && !Other.IsA('TornOffCarPartActor') && (Other.Physics == PHYS_Falling || Other.Physics == PHYS_Projectile) && Other.Mass > 10 && willFloat < 2)
 			{
-				StartLoc = (Other.OldLocation + Other.Location) / 2;
-				OldLD = Spawn(Class'xOldLocDummy',,, StartLoc);
-				if (OldLD != None && !OldLD.Region.Zone.bWaterZone)
-					OldLD.SetLocation(Other.OldLocation);
-				if (OldLD != None && OldLD.Region.Zone.bWaterZone)
-					SpawnWaterFX(Other, GetMassCategory(Other),,True);
-			}
-
-			if (willFloat == 1 && !Other.bLensFlare)
-				Other.bLensFlare = True;
-		}
-		else if (!Other.bHidden && (Other.IsA('Pawn') || Other.IsA('TornOffCarPartActor') || (Other.IsA('Decoration') && (Other.Physics == PHYS_Falling || Other.Physics == PHYS_Projectile) && willFloat < 2)))
-		{
-			if (willFloat == 0 || Other.IsA('Pawn') || (willFloat == 1 && !Other.bLensFlare))
-			{
-				StartLoc = (Other.OldLocation + Other.Location) / 2;
-				OldLD = Spawn(Class'xOldLocDummy',,, StartLoc);
-				if (OldLD != None && !OldLD.Region.Zone.bWaterZone)
-					OldLD.SetLocation(Other.OldLocation);
-				if (OldLD != None && OldLD.Region.Zone.bWaterZone)
+				if (willFloat == 0 || (willFloat == 1 && !Other.bLensFlare))
 				{
-					if (!Other.IsA('PlayerPawn'))
-						SpawnWaterFX(Other, GetCollisionCategory(Other), VSize(Other.Velocity) < WaterMinSplashSpeed, True);
-					else
-						SpawnWaterFX(Other, GetCollisionCategory(Other), PlayerPawn(Other) != None && (PlayerPawn(Other).ViewTarget == None || !PlayerPawn(Other).bBehindView || !enableFirstPersonPlayerSplash) && VSize(Other.Velocity) < WaterMinSplashSpeed, True);
-
+					StartLoc = (Other.OldLocation + Other.Location) / 2;
+					OldLD = Spawn(Class'xOldLocDummy',,, StartLoc);
+					if (OldLD != None && !OldLD.Region.Zone.bWaterZone)
+						OldLD.SetLocation(Other.OldLocation);
+					if (OldLD != None && OldLD.Region.Zone.bWaterZone)
+						SpawnWaterFX(Other, GetMassCategory(Other),,True);
 				}
+	
+				if (willFloat == 1 && !Other.bLensFlare)
+					Other.bLensFlare = True;
 			}
-
-			if (!Other.IsA('Pawn') && willFloat == 1 && !Other.bLensFlare)
+			else if (!Other.bHidden && (Other.IsA('Pawn') || Other.IsA('TornOffCarPartActor') || (Other.IsA('Decoration') && (Other.Physics == PHYS_Falling || Other.Physics == PHYS_Projectile) && willFloat < 2)))
+			{
+				if (willFloat == 0 || Other.IsA('Pawn') || (willFloat == 1 && !Other.bLensFlare))
+				{
+					StartLoc = (Other.OldLocation + Other.Location) / 2;
+					OldLD = Spawn(Class'xOldLocDummy',,, StartLoc);
+					if (OldLD != None && !OldLD.Region.Zone.bWaterZone)
+						OldLD.SetLocation(Other.OldLocation);
+					if (OldLD != None && OldLD.Region.Zone.bWaterZone)
+					{
+						if (!Other.IsA('PlayerPawn'))
+							SpawnWaterFX(Other, GetCollisionCategory(Other), VSize(Other.Velocity) < WaterMinSplashSpeed, True);
+						else
+							SpawnWaterFX(Other, GetCollisionCategory(Other), PlayerPawn(Other) != None && (PlayerPawn(Other).ViewTarget == None || !PlayerPawn(Other).bBehindView || !enableFirstPersonPlayerSplash) && VSize(Other.Velocity) < WaterMinSplashSpeed, True);
+	
+					}
+				}
+	
+				if (!Other.IsA('Pawn') && willFloat == 1 && !Other.bLensFlare)
+					Other.bLensFlare = True;
+			}
+			else if ((Other.Physics == PHYS_Falling || Other.Physics == PHYS_Projectile) && !Other.IsA('Pawn') && willFloat >= 2 && !Other.bLensFlare)
+			{
+				StartLoc = (Other.OldLocation + Other.Location) / 2;
+				OldLD = Spawn(Class'xOldLocDummy',,, StartLoc);
+				if (OldLD != None && !OldLD.Region.Zone.bWaterZone)
+					OldLD.SetLocation(Other.OldLocation);
+				if (OldLD != None && OldLD.Region.Zone.bWaterZone)
+					SpawnWaterFX(Other, GetMassCategory(Other), True, True);
+	
 				Other.bLensFlare = True;
-		}
-		else if ((Other.Physics == PHYS_Falling || Other.Physics == PHYS_Projectile) && !Other.IsA('Pawn') && willFloat >= 2 && !Other.bLensFlare)
-		{
-			StartLoc = (Other.OldLocation + Other.Location) / 2;
-			OldLD = Spawn(Class'xOldLocDummy',,, StartLoc);
-			if (OldLD != None && !OldLD.Region.Zone.bWaterZone)
-				OldLD.SetLocation(Other.OldLocation);
-			if (OldLD != None && OldLD.Region.Zone.bWaterZone)
-				SpawnWaterFX(Other, GetMassCategory(Other), True, True);
-
-			Other.bLensFlare = True;
-		}
+			}	
 		}
 	}
 
@@ -499,6 +514,7 @@ defaultproperties
 	BallisticSplashClass(2)=Class'xZones.BalWaterSplash02'
 	BallisticSplashClass(3)=Class'xZones.BalWaterSplash03'
 	WaterRingClass=Class'xZones.WaterSplashRing'
+	MinDesiredFrameRate=60
 	bStatic=False
 	SoundRadius=0
 	SoundVolume=0
