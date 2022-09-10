@@ -127,6 +127,8 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch,
 
 function ClientVoiceMessage(PlayerReplicationInfo Sender, PlayerReplicationInfo Recipient, name messagetype, byte messageID);
 
+function TeamMessage(PlayerReplicationInfo PRI, coerce string S, name Type, optional bool bBeep);
+
 defaultproperties
 {
 }
