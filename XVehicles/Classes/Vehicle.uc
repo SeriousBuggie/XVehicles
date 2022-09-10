@@ -108,7 +108,6 @@ var WeaponAttachment DriverGun;
 
 var Vehicle PendingBump;
 var bool bReadyToRun;
-var bool bFirstCheckOnGround;
 var vector LastCheckOnGroundLocation;
 var float LastCheckOnGroundTime;
 var bool bLastCheckOnGroundResult;
@@ -1854,8 +1853,6 @@ simulated function CheckBase(Actor PossibleBase, optional Actor Ac[4])
 	}
 	if (Base != PossibleBase)
 		SetBase(PossibleBase);
-		
-	bFirstCheckOnGround = true;
 }
 
 // Vehicle is currently on ground?
@@ -1949,9 +1946,9 @@ simulated function bool CheckOnGround()
 	}
 	else
 	{
-		if (bSlopedPhys && GVT!=None)
+		if (bSlopedPhys && GVT != None)
 		{
-			if (Location != OldLocation || !bFirstCheckOnGround)
+			if (true)
 			{
 				ePointsOffSet[0] = FrontWide;
 				ePointsOffSet[1] = ePointsOffSet[0];
@@ -2021,12 +2018,11 @@ simulated function bool CheckOnGround()
 				GVTLoc = MLoc + ActualGVTNormal*CollisionHeight;
 				GVT.PrePivot = GVTLoc - Location;
 			}
-			else if (Location != OldLocation || !bFirstCheckOnGround)
+			else
 				ActualGVTNormal = HN;
 		}
 	
-		if ((Location != OldLocation || !bSlopedPhys || !bFirstCheckOnGround) /*&& (HN dot ActualFloorNormal) <= 0.5*/)
-			ActualFloorNormal = HN;
+		ActualFloorNormal = HN;
 		ret = ActualFloorNormal.Z >= 0.7;
 	}
 	CheckBase(PossibleBase, Ac);
