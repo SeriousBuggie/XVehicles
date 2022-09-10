@@ -48,6 +48,8 @@ function int ArmorPriority(name DamageType)
 function bool HandleDamage( int Damage, name DamageType, vector HitLocation )
 {
 	local Vehicle veh;
+	if (Damage == 0) // skip notification for inventory
+		return false;
 	veh = GetVehicle();
 	if (veh == None)
 		return false;
