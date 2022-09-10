@@ -479,6 +479,12 @@ simulated event Touch( Actor Other )
     // Accept only pawns
     if( !bEnabled || Pawn(Other) == None || Other.Physics == PHYS_None  )
         return;
+        
+	if (Other.IsA('bbPlayer'))
+	{ // NewNet ugly stuff
+		if (float(Other.GetPropertyText("zzForceUpdateUntil")) < Level.TimeSeconds + 0.15)
+			Other.SetPropertyText("zzForceUpdateUntil", string(Level.TimeSeconds + 0.15));
+	}
 
     // Setup PostTouch
     PendingTouch = Other.PendingTouch;
