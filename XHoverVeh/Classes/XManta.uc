@@ -1,7 +1,7 @@
 //=============================================================================
 // XManta.
 //=============================================================================
-class XManta expands HoverCraftPhys config(XManta);
+class XManta expands HoverCraftPhys;
 
 /*
 #forceexec MESH IMPORT MESH=Manta ANIVFILE=Z:\XV\Manta_a.3d DATAFILE=Z:\XV\Manta_d.3d X=0 Y=0 Z=0 mlod=0 
