@@ -5,12 +5,12 @@ class XManta expands HoverCraftPhys config(XManta);
 
 /*
 #forceexec MESH IMPORT MESH=Manta ANIVFILE=Z:\XV\Manta_a.3d DATAFILE=Z:\XV\Manta_d.3d X=0 Y=0 Z=0 mlod=0 
-#forceexec MESH ORIGIN MESH=Manta X=-94 Y=0 Z=67
+#forceexec MESH ORIGIN MESH=Manta X=-2 Y=0 Z=0
 
 #forceexec MESH SEQUENCE MESH=Manta SEQ=All STARTFRAME=0 NUMFRAMES=1
 
 #forceexec MESHMAP NEW MESHMAP=Manta MESH=Manta
-#forceexec MESHMAP SCALE MESHMAP=Manta X=0.125 Y=0.125 Z=0.25
+#forceexec MESHMAP SCALE MESHMAP=Manta X=0.1185 Y=0.1185 Z=0.237
 
 #forceexec MESHMAP SETTEXTURE MESHMAP=Manta NUM=0 TEXTURE=MantaYellow
 #forceexec MESHMAP SETTEXTURE MESHMAP=Manta NUM=1 TEXTURE=fan1
@@ -20,14 +20,18 @@ class XManta expands HoverCraftPhys config(XManta);
 /*
 #forceexec MESH  MODELIMPORT MESH=Manta2 MODELFILE=Z:\XV\HoverBike.psk LODSTYLE=10
 //#forceexec ANIM  IMPORT ANIM=Manta2Anims ANIMFILE=Z:\XV\HoverBike.psa COMPRESS=1 MAXKEYS=999999 IMPORTSEQS=1
+#forceexec MESH ORIGIN MESH=Manta2 X=-11.63 Y=0 Z=16.75
 #forceexec MESH  LODPARAMS MESH=Manta2 STRENGTH=0
-#forceexec MESHMAP   SCALE MESHMAP=Manta2 X=0.5 Y=0.5 Z=0.5
+#forceexec MESHMAP   SCALE MESHMAP=Manta2 X=1 Y=1 Z=1
 //#forceexec MESH  DEFAULTANIM MESH=Manta2 ANIM=Manta2Anims
 
 //#forceexec ANIM  SEQUENCE ANIM=Manta2Anims SEQ=All STARTFRAME=0 NUMFRAMES=1 RATE=30.0000 COMPRESS=1.00
 //#forceexec ANIM  SEQUENCE ANIM=Manta2Anims SEQ=Still STARTFRAME=0 NUMFRAMES=1 RATE=30.0000 COMPRESS=1.00
 
 //#forceexec ANIM DIGEST ANIM=Manta2Anims  VERBOSE
+#forceexec MESHMAP SETTEXTURE MESHMAP=Manta2 NUM=0 TEXTURE=MantaYellow
+#forceexec MESHMAP SETTEXTURE MESHMAP=Manta2 NUM=1 TEXTURE=fan1
+#forceexec MESHMAP SETTEXTURE MESHMAP=Manta2 NUM=2 TEXTURE=fan1
 // */
 
 var byte CurrentTeamColor;
