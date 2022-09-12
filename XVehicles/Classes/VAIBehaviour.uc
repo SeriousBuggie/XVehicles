@@ -264,8 +264,11 @@ function vector GetNextMoveTarget()
 			VehicleOwner.Driver.MoveTimer = -1f; // time to refresh path
 		else if (VehicleOwner.bCanFly && Closest >= 400f)
 			VehicleOwner.Driver.MoveTimer = 1f; // prevent refresh path in air
-//		Log("Use driver RouteCache" @ best @ Visible[best] @ Visible[best].getHumanName());
+//		Log("Use driver RouteCache" @ best @ Visible[best] @ Visible[best].getHumanName() @ VSize(V - VehicleOwner.Location) @ VehicleOwner.CollisionRadius);
 		V = Pos[best];
+		if (best == 0 && VehicleOwner.Driver.RouteCache[1] != None &&
+			VSize(V - VehicleOwner.Location) < VehicleOwner.CollisionRadius)
+			V = Pos[1]; // prevent stuck at pos 0
 		if (VSize(V - Location) < 100 && Vsize(V - Visible[best].Location) > 100)
 			V = Visible[best].Location;
 		if (FlagBase(Visible[best]) != None)
