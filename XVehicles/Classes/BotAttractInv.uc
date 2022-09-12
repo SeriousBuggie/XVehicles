@@ -23,7 +23,7 @@ Begin:
 event float BotDesireability( pawn Bot )
 {
 	local vector L;
-//	Log(VehicleOwner @ "BotDesireability 1" @ Bot.GetHumanName());
+//	Log(VehicleOwner @ "BotDesireability 1" @ Bot.GetHumanName() @ Bot.MoveTarget);
 	if( VehicleOwner==None || VehicleOwner.bDeleteMe )
 		Return -1;
 //	Log(VehicleOwner @ "BotDesireability 2" @ Bot.GetHumanName() @ VehicleOwner.CurrentTeam @ VehicleOwner.CanEnter(Bot) @ 

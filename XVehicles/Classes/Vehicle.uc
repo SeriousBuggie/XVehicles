@@ -1142,7 +1142,7 @@ local vector ExitVect;
 			RestartPawn(Driver);
 			ChangeCollision(Driver, false);
 
-			ExitVect = ExitOffset;
+			ExitVect = GetExitOffset(Driver);
 			if ((Normal(Velocity) Dot Normal(ExitVect >> Rotation)) > 0.35)
 				ExitVect.Y = -ExitVect.Y;
 			if( !bForcedLeave && !Driver.Move(Location+(ExitVect >> Rotation) - Driver.Location) )
@@ -1159,6 +1159,7 @@ local vector ExitVect;
 			}
 			if (Driver != None)
 			{
+				Driver.MoveTimer = -1; // time to refresh paths
 				Driver.Velocity += Velocity; // inertial exit
 				Driver.Weapon = Driver.PendingWeapon;
 				Driver.ChangedWeapon();
@@ -2219,6 +2220,27 @@ simulated function ReadDriverInput( PlayerPawn Other, float DeltaTime )
 	MoveDest = CalcPlayerAimPos(0);
 }
 
+function vector GetExitOffset(Pawn Other)
+{
+	local vector Goal;
+	if (Bot(Other) != None)
+	{
+		Goal = Other.Destination;
+		if (Goal == Location)
+		{
+			if (Other.RouteCache[1] != None)
+				Goal = Other.RouteCache[1].Location;
+			else if (Other.RouteCache[0] != None)
+				Goal = Other.RouteCache[0].Location;
+			else
+				return ExitOffset;
+		}
+			
+		return (Normal(Goal - Other.Location) << Rotation)*VSize(ExitOffset);
+	}
+	return ExitOffset;
+}
+
 // Update server behindview
 function ServerSetBehindView( bool bNewView )
 {
@@ -2285,7 +2307,7 @@ function ReadBotInput( float Delta )
 			DriverLeft(False, "NeedStop stuck");
 		if (Driver == None && Bot != None)
 		{
-			Bot.EnemyDropped = DWeapon; // bot must want return back, after take flag
+//			Bot.EnemyDropped = DWeapon; // bot must want return back, after take flag
 			if (!HasPassengers())
 				foreach RadiusActors(class'Bot', Bot, 800)
 					if (Bot.PlayerReplicationInfo.Team != CurrentTeam)
@@ -2308,14 +2330,7 @@ function ReadBotInput( float Delta )
 			Driver.SetCollisionSize(CollisionRadius, CollisionHeight);
 //			log(self @ driver @ MoveDest @ Driver.PointReachable(MoveDest));
 			if (!Driver.PointReachable(MoveDest))
-			{				
-				V = ExitOffset; // hack for prevent bot looping
-				ExitOffset = (MoveDest - Location) << Rotation;
-				ExitOffset.Z = 0;
-				ExitOffset = Normal(ExitOffset)*VSize(V);
 				DriverLeft(False, "PointReachable");
-				ExitOffset = V;
-			}
 			else
 				Driver.SetCollisionSize(Driver.default.CollisionRadius, Driver.default.CollisionHeight);
 			if (Driver == None)
@@ -4220,7 +4235,7 @@ function PassengerLeave( byte Seat, optional bool bForcedLeave )
 			RestartPawn(Passengers[Seat]);
 			ChangeCollision(Passengers[Seat], false);
 
-			ExitVect = ExitOffset;
+			ExitVect = GetExitOffset(Passengers[Seat]);
 			if ((Normal(Velocity) Dot Normal(ExitVect >> Rotation)) > 0.35)
 				ExitVect.Y = -ExitVect.Y;
 			if (!bForcedLeave && !Passengers[Seat].SetLocation(Location+(ExitVect >> Rotation)))
@@ -4236,6 +4251,7 @@ function PassengerLeave( byte Seat, optional bool bForcedLeave )
 			}
 			if (Passengers[Seat] != None)
 			{
+				Passengers[Seat].MoveTimer = -1; // time to refresh paths
 				Passengers[Seat].Velocity += Velocity; // inertial exit
 				Passengers[Seat].Weapon = Passengers[Seat].PendingWeapon;
 				Passengers[Seat].ChangedWeapon();
