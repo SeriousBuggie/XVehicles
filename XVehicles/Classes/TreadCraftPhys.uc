@@ -532,9 +532,11 @@ function int ShouldAccel( vector AcTarget )
 	
 	A = AcTarget-Location;
 	A.Z = 0;
+	/*
 	V = Velocity;
 	V.Z = 0;
-//	if (VSize(V) > Vsize(A)) Return 0;
+	if (VSize(V) > Vsize(A)) Return 0;
+	*/
 	B = vector(Rotation);
 	B.Z = 0;
 	dir = Normal(A) dot Normal(B);
@@ -602,8 +604,13 @@ function int ShouldTurnFor( vector AcTarget, optional float YawAdjust, optional 
 			YawAdjust += 12000;
 		else
 			YawAdjust -= 12000;
+	ret = 1;
+	if ((AcTarget - Location) dot vector(Rotation) < 0)
+		ret = -1;
 
-	return Super.ShouldTurnFor(AcTarget, YawAdjust, DeadZone);
+	ret *= Super.ShouldTurnFor(AcTarget, YawAdjust, DeadZone);
+	
+	return ret;
 }
 simulated function int GetIcedMovementDir()
 {

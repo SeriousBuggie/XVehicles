@@ -372,6 +372,10 @@ function int ShouldAccelFor( vector AcTarget )
 	
 	if (AboutToCrash(ret))
 		return ret;
+		
+	ret = 1;
+	if ((AcTarget - Location) dot vector(Rotation) < 0)
+		ret = -1;
 
 	if( bReversing )
 	{
@@ -379,9 +383,9 @@ function int ShouldAccelFor( vector AcTarget )
 		{
 			bReversing = False;
 			StuckTimer = Level.TimeSeconds+3;
-			Return 1;
+			Return ret;
 		}
-		Return -1;
+		Return -ret;
 	}
 	// X dot X == VSize(X)*VSize(X)
 	bStuck = (Velocity dot Velocity) < MaxGroundSpeed*MaxGroundSpeed/25 /* 5*5 */;
@@ -390,7 +394,7 @@ function int ShouldAccelFor( vector AcTarget )
 		GetAxes(Rotation,X,Y,Z);
 		Res = Normal(AcTarget-Location) dot X;
 //		Log("ShouldAccelFor" @ res);
-		bStuck = Res < 0.7; // direction not in forward way
+		bStuck = Abs(Res) < 0.7; // direction not in forward/backward way
 	}
 	if( bWasStuckOnW!=bStuck )
 	{
@@ -402,9 +406,9 @@ function int ShouldAccelFor( vector AcTarget )
 	{
 		bReversing = True;
 		ReverseTimer = Level.TimeSeconds+2;
-		Return -1;
+		Return -ret;
 	}
-	Return 1;
+	Return ret;
 }
 function int ShouldTurnFor( vector AcTarget, optional float YawAdjust, optional float DeadZone )
 {
@@ -415,6 +419,8 @@ function int ShouldTurnFor( vector AcTarget, optional float YawAdjust, optional 
 	local float Res, res2;
 		
 	YawAdjust = WheelYaw*FMin(1, Vsize(Velocity)/400);
+	if ((AcTarget - Location) dot vector(Rotation) < 0)
+		YawAdjust = -YawAdjust;
 
 	ret = Super.ShouldTurnFor(AcTarget, YawAdjust, DeadZone);
 /*	
@@ -430,7 +436,7 @@ function int ShouldTurnFor( vector AcTarget, optional float YawAdjust, optional 
 	log("ShouldTurnFor" @ "VehicleYaw" @ VehicleYaw @ "WheelYaw" @ WheelYaw @ "YawAdjust" @ YawAdjust @ "ret" @ ret @ "res" @ res @ "res2" @ res2);
 */	
 	if( bReversing )
-		Return ret*-1;
+		Return -ret;
 	else
 		Return ret;
 }
