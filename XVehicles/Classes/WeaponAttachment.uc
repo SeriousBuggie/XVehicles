@@ -1072,11 +1072,13 @@ function bool FindEnemy()
 {
 	local Pawn P;
 	local Bot Bot;
-	local float Dist, BestDist;
-	local Actor Hit, Best;
+	local float Dist, BestDist, BestVehDist[2];
+	local Actor Hit, Best, BestVeh[2];
 	local vector HL, HN;
 	local name BotState;
 	local Vehicle Veh;
+	local int i;
+	
 	Bot = Bot(WeaponController);
 	if (Bot == None || Bot.Enemy != None || NextTimeRangedAttack > Level.TimeSeconds)
 		return false;
@@ -1103,21 +1105,33 @@ function bool FindEnemy()
 		}
 	}
 	if (Best == None && Bot.PlayerReplicationInfo != None)
+	{
 		foreach AllActors(class'Vehicle', Veh)
-			if (Veh != OwnerVehicle && Veh.CurrentTeam != Bot.PlayerReplicationInfo.Team &&
-				!Veh.HealthTooLowFor(None))
+			if (Veh != OwnerVehicle)
 			{
+				if (Veh.CurrentTeam != Bot.PlayerReplicationInfo.Team && !Veh.HealthTooLowFor(None))
+					i = 0;
+				else if (Veh.CurrentTeam == Bot.PlayerReplicationInfo.Team && Veh.HealthTooLowFor(None) && 
+					Veh.Driver == None && !Veh.bHasPassengers && Level.TimeSeconds - Veh.LastFix > 15)
+					i = 1;
+				else
+					continue;
 				if (Veh != TraceHit(Bot, Veh, HL, HN))
 					continue;
 				HL = Veh.Location - OwnerVehicle.Location;
 				// X dot X == VSize(X)*VSize(X)
 				Dist = HL dot HL;
-				if (Best == None || Dist < BestDist)
+				if (BestVeh[i] == None || Dist < BestVehDist[i])
 				{
-					Best = Veh;
-					BestDist = Dist;
+					BestVeh[i] = Veh;
+					BestVehDist[i] = Dist;
 				}
-			}				
+			}
+		if (BestVeh[0] != None)
+			Best = BestVeh[0];
+		else
+			Best = BestVeh[1];
+	}			
 	if (Best == None)
 		return false;
 	Bot.Target = Best;
