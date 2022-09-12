@@ -2324,6 +2324,7 @@ function ReadBotInput( float Delta )
 		bHasMoveTarget = True;
 		V = MoveDest;
 		MoveDest = VehicleAI.GetNextMoveTarget();
+//		log(Level.TimeSeconds @ self @ "GetNextMoveTarget" @ MoveDest);
 		if (V == MoveDest && Trace(HitLocation, HitNormal, Location + 2*CollisionRadius*GetMovementDir()*Normal(MoveDest - Location),,true,
 			vect(1,1,0)*CollisionRadius + vect(0,0,1)*(CollisionHeight - MaxObstclHeight)) != None && Driver.PointReachable(MoveDest))
 		{
@@ -2347,7 +2348,8 @@ function ReadBotInput( float Delta )
 			bHasMoveTarget = False;
 			Return;
 		}
-		MoveTimer = Level.TimeSeconds+ FMin(0.25, Vsize(Location-MoveDest) / Fmax(1, Vsize(Velocity)) / 4);
+		MoveTimer = Level.TimeSeconds + FMin(0.25, VSize(Location - MoveDest)/Fmax(1, Vsize(Velocity))/4);
+//		log(Level.TimeSeconds @ self @ "MoveTimer" @ MoveTimer @ MoveTimer - Level.TimeSeconds);
 	}
 	V = Location - MoveDest;
 	V.Z = 0;

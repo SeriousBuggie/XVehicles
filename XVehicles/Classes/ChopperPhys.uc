@@ -80,7 +80,7 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 		*/
 		// dont slow down if run over
 		if (Driver.Enemy == None || VSize(Driver.Enemy.Location - MoveDest) > 40)
-			X -= Velocity;
+			X -= Velocity*0.9;
 		// X dot X == VSize(X)*VSize(X)
 		if ((X dot X) > 25 /* 5*5 */)
 			return Normal(X);

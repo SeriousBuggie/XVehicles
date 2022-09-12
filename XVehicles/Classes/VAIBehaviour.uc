@@ -70,7 +70,7 @@ function vector AdjustLocation(Actor NP, optional bool bInMid)
 		V.Z = 1;
 		if (VehicleOwner.Trace(HL, HN, pos, NP.Location, true, V) != None)
 		{
-			offset = VSize(HL - ret) - VehicleOwner.CollisionHeight*1.5;
+			offset = VSize(HL - ret) - VehicleOwner.CollisionHeight*2;
 			if (offset > 0)
 				ret += offset*vect(0,0,1);
 		}
@@ -112,6 +112,7 @@ function vector GetNextMoveTarget()
 	local vector D;
 	local rotator Dir;
 	local bool bMovePawn;
+	local Actor Hit;
 	
 	if (VehicleOwner.Driver.Target != None && Vehicle(VehicleOwner.Driver.Target) == None &&
 		!VehicleOwner.Driver.IsInState('Fallback') && !VehicleOwner.Driver.IsInState('RangedAttack') && 
@@ -149,21 +150,25 @@ function vector GetNextMoveTarget()
 			NextT = T;
 			bHasNext = true;
 			
-			T2 = T - VehicleOwner.Location;
-			T2.Z -= VehicleOwner.MaxObstclHeight/2;
-			T2 = Normal(T2);
-			if (T2.Z > 0.71)
-				continue;
-			Z = T2.Z;	
-			T2.Z = 0;
-			Z = Z*VehicleOwner.CollisionRadius/VSize(T2);
-			T2 = T;
-			T2.Z += Z;
-			
-			if (VehicleOwner.Trace(HitLocation, HitNormal, T2, S, true, V) != None && 
-				VSize(HitLocation - T2) >= VehicleOwner.CollisionRadius)
+			if (!VehicleOwner.bCanFly)
 			{
-//				Log(i @ "!Trace" @ VehicleOwner.CollisionRadius @ VSize(HitLocation - T2) @ T @ NP);
+				T2 = T - VehicleOwner.Location;
+				T2.Z -= VehicleOwner.MaxObstclHeight/2;
+				T2 = Normal(T2);
+				if (T2.Z > 0.71)
+					continue;
+				Z = T2.Z;	
+				T2.Z = 0;
+				Z = Z*VehicleOwner.CollisionRadius/VSize(T2);
+			}
+			T2 = T;
+			if (!VehicleOwner.bCanFly)
+				T2.Z += Z;
+			
+			Hit = VehicleOwner.Trace(HitLocation, HitNormal, T2, S, true, V);
+			if (Hit != None && VSize(HitLocation - T2) >= VehicleOwner.CollisionRadius)
+			{
+//				Log(i @ "!Trace" @ VehicleOwner.CollisionRadius @ VSize(HitLocation - T2) @ T @ NP @ Hit);
 //				if (i == 0) Log(i @ NP @ HitLocation @ HitNormal);
 //				dbg = dbg @ "-";
 				if (T2.Z < S.Z && T2.Z + VehicleOwner.CollisionHeight > S.Z && 
