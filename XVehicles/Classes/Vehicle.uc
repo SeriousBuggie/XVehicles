@@ -2410,10 +2410,18 @@ function bool AboutToCrash(out int Accel)
 		if (Vehicle(A) != None && Vehicle(A).CurrentTeam != CurrentTeam && 
 			(Vehicle(A).Driver != None || Vehicle(A).HasPassengers()))
 			return false; // crash into enemy non-empty vehicle for make damage
-		if (Vehicle(A) != None && Vehicle(A).CurrentTeam == CurrentTeam && Vehicle(A).Driver != None && 
-			(Normal(Vehicle(A).Velocity) dot Normal(Velocity)) > 0.5 &&
-			VSize(Vehicle(A).Velocity) > VSize(Velocity) - 490)
-			return false; // not slow down when follow teammate vehicle
+		if (Vehicle(A) != None && Vehicle(A).CurrentTeam == CurrentTeam)
+		{
+			if (bCanFly)
+			{
+				Rising = 1;
+				return false;
+			}
+			if (Vehicle(A).Driver != None && 
+				(Normal(Vehicle(A).Velocity) dot Normal(Velocity)) > 0.5 &&
+				VSize(Vehicle(A).Velocity) > VSize(Velocity) - 490)
+				return false; // not slow down when follow teammate vehicle
+		}
 //		Log("Detect crash into" @ A @ HitLocation @ HitNormal);
 		Accel = ret*-1; // brake via reverse
 		return true;
@@ -3219,6 +3227,8 @@ simulated function SingularBump( Actor Other )
 			Sp -= 1;
 			MoveSmooth(Sp*Normal(Dir));
 //			log(self @ "stuck" @ Other @ Sp @ vSize(Location - V));
+			if (bCanFly)
+				Rising = 1;
 		}
 		if( PendingBump==Other )
 			Return; // Just bumped...
