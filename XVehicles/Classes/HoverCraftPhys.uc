@@ -197,7 +197,7 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 			}
 		}
 		if (!bNeedDuck)
-			X -= Velocity;
+			X -= Velocity*0.85;
 		if (LiftCenter(Driver.MoveTarget) != None && LiftCenter(Driver.MoveTarget).MyLift != None)
 			bNeedDuck = true;
 		if (bNeedDuck && !bDuckFire)
