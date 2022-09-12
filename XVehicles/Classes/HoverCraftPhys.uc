@@ -171,6 +171,7 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 	local rotator R;
 	local vector X,Y,Z;
 	local bool bNeedDuck;
+	local Actor HitDuck;
 
 	if (Driver != None && PlayerPawn(Driver) == None)
 	{ // bot drive code
@@ -200,6 +201,18 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 			X -= Velocity*0.85;
 		if (LiftCenter(Driver.MoveTarget) != None && LiftCenter(Driver.MoveTarget).MyLift != None)
 			bNeedDuck = true;
+		if (!bNeedDuck)
+		{
+			Z.X = CollisionRadius;
+			Z.Y = Z.X;
+			Z.Z = CollisionHeight;						
+			HitDuck = Trace(Y, Y, MoveDest - vect(0,0,1)*HoverDuck, Location - vect(0,0,1)*HoverDuck, true, Z);
+			if (Pawn(HitDuck) != None && Pawn(HitDuck).PlayerReplicationInfo != None && 
+				Pawn(HitDuck).PlayerReplicationInfo.Team != CurrentTeam)
+				bNeedDuck = true; // run over enemy
+			else if (HitDuck == None && Trace(Y, Y, MoveDest, Location, true, Z) != None)
+				bNeedDuck = true; // need crouch for pass this place
+		}
 		if (bNeedDuck && !bDuckFire)
 			PlayOwnedSound(DuckSound);
 		bDuckFire = bNeedDuck;
