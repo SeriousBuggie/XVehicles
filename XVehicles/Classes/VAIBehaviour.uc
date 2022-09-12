@@ -59,8 +59,9 @@ function vector AdjustLocation(Actor NP, optional bool bInMid)
 	local float offset;
 	ret = NP.Location;	
 	if (VehicleOwner.bCanFly && NavigationPoint(NP) != None && 
-		!NP.FastTrace(NP.Location - vect(0,0,1)*2*VehicleOwner.Collisionheight) &&
-		(bInMid || PathNode(NP) != None || NP.isA('AirPath')))
+		!NP.FastTrace(NP.Location - vect(0,0,1)*2*VehicleOwner.CollisionHeight) &&
+		(VSize(NP.Location - VehicleOwner.Location) > 2*AirFlyScale*VehicleOwner.CollisionRadius || 
+		bInMid || PathNode(NP) != None || NP.isA('AirPath')))
 	{
 		offset = VehicleOwner.CollisionHeight*AirFlyScale;
 		pos = ret + offset*vect(0,0,1);
@@ -139,8 +140,7 @@ function vector GetNextMoveTarget()
 				(bHasNext && !VehicleOwner.FastTrace(NextT, T)) ||
 				(!bHasNext && i == 0)
 				))
-				//VehicleOwner.Trace(HitLocation, HitNormal, NextT, T - vect(0,0,1)*(NP.CollisionHeight - HeightDiff), true) != None)
-				T = NP.Location;
+				T = NP.location;
 			Pos[i] = T;
 			T.Z -= NP.CollisionHeight - HeightDiff;
 			NextT = T;
