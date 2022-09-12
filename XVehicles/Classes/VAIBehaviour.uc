@@ -27,7 +27,7 @@ function float GetVehAIRating( Pawn Seeker )
 		Seeker.PlayerReplicationInfo != None && Seeker.PlayerReplicationInfo.Team == VehicleOwner.CurrentTeam)
 		return -1; // prevent take it if someone heal it
 //	log(VehicleOwner @ "GetVehAIRating2" @ Seeker @ VehicleOwner.LastDriver @ Level.TimeSeconds - VehicleOwner.LastDriverTime);
-	if (VehicleOwner.LastDriver == Seeker && Level.TimeSeconds - VehicleOwner.LastDriverTime < 2)
+	if (VehicleOwner.LastDriver == Seeker && Level.TimeSeconds - VehicleOwner.LastDriverTime < 1)
 		return -1; // for avoid bot loops exit/enter
 //	log(VehicleOwner @ "GetVehAIRating3" @ Seeker);
 	if (VehicleOwner.HealthTooLowFor(Seeker) || VehicleOwner.NeedStop(Seeker) || !VehicleOwner.CrewFit(Seeker))
@@ -55,7 +55,7 @@ function float GetVehAIRating( Pawn Seeker )
 
 function vector AdjustLocation(Actor NP, optional bool bInMid)
 {
-	local vector ret, HL, HN, pos;
+	local vector ret, HL, HN, pos, V;
 	local float offset;
 	ret = NP.Location;	
 	if (VehicleOwner.bCanFly && NavigationPoint(NP) != None && 
@@ -65,7 +65,10 @@ function vector AdjustLocation(Actor NP, optional bool bInMid)
 	{
 		offset = VehicleOwner.CollisionHeight*(AirFlyScale + 1);
 		pos = ret + offset*vect(0,0,1);
-		if (NP.Trace(HL, HN, pos) != None)
+		V.X = VehicleOwner.CollisionRadius;
+		V.Y = VehicleOwner.CollisionRadius;
+		V.Z = 1;
+		if (VehicleOwner.Trace(HL, HN, pos, NP.Location, true, V) != None)
 		{
 			offset = VSize(HL - ret) - VehicleOwner.CollisionHeight*1.5;
 			if (offset > 0)
