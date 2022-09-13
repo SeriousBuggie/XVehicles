@@ -364,29 +364,30 @@ simulated function bool CanGetOver( float MSHV, float AllowedZVal ) // Check if 
 		Return False;
 	Ex.X = CollisionRadius;
 	Ex.Y = Ex.X;
+	Ex.Z = CollisionHeight;
 	Start = Location;
-	Start.Z-=(CollisionHeight-MSHV);
+	Start.Z += MSHV;
 	NVe = Velocity;
 	NVe.Z = 0;
 	NVe = Normal(NVe);
-	End = Start+NVe*12;
-	A = Trace(HL,HN,End,Start,True,Ex);
-	if( A!=None )
+	End = Start + NVe*12;
+	A = Trace(HL, HN, End, Start, True, Ex);
+	if (A != None)
 	{
-		if( HN.Z>=AllowedZVal )
+		if (HN.Z >= AllowedZVal)
 		{
-			Move(vect(0,0,1)*MSHV+NVe*VSize(Start-HL));
+			Move(vect(0,0,1)*MSHV + NVe*VSize(Start - HL));
 			HitWall(HN,A);
 			Return True;
 		}
 		Return False;
 	}
 	Start = End;
-	End.Z-=MSHV;
-	A = Trace(HL,HN,End,Start,True,Ex);
-	if( A!=None && HN.Z>=AllowedZVal )
+	End.Z -= MSHV;
+	A = Trace(HL, HN, End, Start, True, Ex);
+	if (A != None && HN.Z >= AllowedZVal)
 	{
-		Move(vect(0,0,1)*MSHV+NVe*12);
+		Move(vect(0,0,1)*MSHV + NVe*12);
 		HitWall(HN,A);
 		Return True;
 	}

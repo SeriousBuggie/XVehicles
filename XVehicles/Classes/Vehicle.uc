@@ -3417,15 +3417,18 @@ simulated function bool CanGetOver( float MSHV, float AllowedZVal ) // Check if 
 			Return False;
 		Ex.X = CollisionRadius;
 		Ex.Y = Ex.X;
+		Ex.Z = CollisionHeight;
 		Start = Location;
-		Start.Z-=(CollisionHeight-MSHV);
-		NVe = Velocity;
+		Start.Z += MSHV;
+		NVe = vector(Rotation);
+		if (NVe dot Velocity < 0)
+			NVe = -NVe;
 		NVe.Z = 0;
 		NVe = Normal(NVe);
-		End = Start+NVe*64;
-		A = Trace(HL,HN,End,Start,True,Ex);
-//Log(A @ VSize(HL-Start) @ MSHV @ (HL-Start) @ HN);
-		if( A!=None )
+		End = Start + NVe*64;
+		A = Trace(HL, HN, End, Start, True, Ex);
+//Log(A @ VSize(HL-Start) @ MSHV @ (HL-Start) @ HN @ NVe);
+		if (A != None)
 		{
 //			if( HN.Z>=AllowedZVal )
 			if (VSize(Start-HL) >= 2*MSHV) // 30 degrees, almost same as AllowedZVal = 0.85, which is 31 degrees.
