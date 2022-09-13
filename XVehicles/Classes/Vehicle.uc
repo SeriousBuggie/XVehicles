@@ -2280,8 +2280,9 @@ function bool CrewFit(Pawn Other)
 // Figure out a good move for bots
 function ReadBotInput( float Delta )
 {
-	local vector V, HitLocation, HitNormal;
+	local vector V, VS, T, HitLocation, HitNormal, X, Y, Z;
 	local float S;
+	local int Dir;
 	local Bot Bot;
 	
 	if (Driver != None && (Driver.IsInState('GameEnded') || Driver.IsInState('Dying')))
@@ -2325,17 +2326,37 @@ function ReadBotInput( float Delta )
 		V = MoveDest;
 		MoveDest = VehicleAI.GetNextMoveTarget();
 //		log(Level.TimeSeconds @ self @ "GetNextMoveTarget" @ MoveDest);
-		if (V == MoveDest && Trace(HitLocation, HitNormal, Location + 2*CollisionRadius*GetMovementDir()*Normal(MoveDest - Location),,true,
-			vect(1,1,0)*CollisionRadius + vect(0,0,1)*(CollisionHeight - MaxObstclHeight)) != None && Driver.PointReachable(MoveDest))
+		if (V == MoveDest)
 		{
-			Driver.SetCollisionSize(CollisionRadius, CollisionHeight);
-//			log(self @ driver @ MoveDest @ Driver.PointReachable(MoveDest));
-			if (!Driver.PointReachable(MoveDest))
-				DriverLeft(False, "PointReachable");
-			else
-				Driver.SetCollisionSize(Driver.default.CollisionRadius, Driver.default.CollisionHeight);
-			if (Driver == None)
-				return;
+			VS.X = CollisionRadius;
+			VS.Y = VS.X;
+			VS.Z = CollisionHeight - MaxObstclHeight;
+			T = Location + 2.0*CollisionRadius*GetMovementDir()*Normal(MoveDest - Location);
+			if (Trace(HitLocation, HitNormal, T, Location, true, VS) != None)
+			{
+				GetAxes(rotator(MoveDest - Location), X, Y, Z);
+				Dir = 1;
+				if ((Y dot HitNormal) < 0)
+					Dir = -1;
+				//log(1 @ X dot HitNormal @ Y dot HitNormal @ HitLocation);
+				if (((X dot HitNormal) < -0.999 || 
+					Trace(HitLocation, HitNormal, T, Location + Y*Dir*CollisionRadius, true, VS) != None) && 
+					Driver.PointReachable(MoveDest))
+				{
+					//log(2 @ X dot HitNormal @ Y dot HitNormal @ HitLocation);
+					
+					Driver.SetCollisionSize(CollisionRadius, CollisionHeight);
+					//log(self @ driver @ MoveDest @ Driver.PointReachable(MoveDest));
+					if (!Driver.PointReachable(MoveDest))
+						DriverLeft(False, "PointReachable");
+					else
+						Driver.SetCollisionSize(Driver.default.CollisionRadius, Driver.default.CollisionHeight);
+					if (Driver == None)
+						return;
+				}
+				else
+					MoveDest.Z += 0.1; // for not be equal next time
+			}
 		}
 		V = Location - MoveDest;
 		V.Z = 0;
