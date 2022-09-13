@@ -7,6 +7,7 @@ var Pawn TracePawn;
 var float AirFlyScale;
 
 const AimError = 0.001;
+const bDebug = false;
 
 function bool HasFlag(Actor Other)
 {
@@ -168,7 +169,7 @@ function vector GetNextMoveTarget()
 			Hit = VehicleOwner.Trace(HitLocation, HitNormal, T2, S, true, V);
 			if (Hit != None && VSize(HitLocation - T2) >= VehicleOwner.CollisionRadius)
 			{
-//				Log(i @ "!Trace" @ VehicleOwner.CollisionRadius @ VSize(HitLocation - T2) @ T @ NP @ Hit);
+				if (bDebug) Log(i @ "!Trace" @ VehicleOwner.CollisionRadius @ VSize(HitLocation - T2) @ T @ NP @ Hit);
 //				if (i == 0) Log(i @ NP @ HitLocation @ HitNormal);
 //				dbg = dbg @ "-";
 				if (T2.Z < S.Z && T2.Z + VehicleOwner.CollisionHeight > S.Z && 
@@ -177,7 +178,7 @@ function vector GetNextMoveTarget()
 					; // skip it
 				else
 				{
-//					Log(i @ "!Trace2" @ VSize(HitLocation - T2) @ T2 @ NP);
+					if (bDebug) Log(i @ "!Trace2" @ VSize(HitLocation - T2) @ T2 @ NP);
 					continue;
 				}
 			}
@@ -197,15 +198,24 @@ function vector GetNextMoveTarget()
 				}
 			}
 			
-			if (!CanReach(T - vect(0,0,1)*(VehicleOwner.CollisionHeight - VehicleOwner.Driver.Default.CollisionHeight)))
+			T2 = T;
+			T2.Z -= VehicleOwner.CollisionHeight - VehicleOwner.Driver.Default.CollisionHeight;
+			if (!CanReach(T2) && 
+				!CanReach(T2 - vect(0,0,0.25)*NP.CollisionHeight) && 
+				!CanReach(T2 - vect(0,0,0.5)*NP.CollisionHeight))
 			{
-				if (false)
+				if (bDebug)
+				{
+					Hit = Spawn(class'Flag1',,, T2);
+					Hit.LifeSpan = 1;
+					Hit.Style = STY_Translucent;
 					Log(Level.TimeSeconds @ i @ "!CanReach" @ T @ NP @ T - NP.Location @ 
 						VehicleOwner.CollisionHeight - VehicleOwner.Driver.Default.CollisionHeight @
 						VehicleOwner.Driver.pointReachable(NP.Location) @ VehicleOwner.Driver.Location);
+				}
 				continue;
 			}
-//			Log(i @ "Visible" @ T @ NP);
+			if (bDebug) Log(i @ "Visible" @ T @ NP);
 			Visible[i] = NP;
 			Dist = VSize(T - VehicleOwner.Driver.Location);
 			if (BestDist < 0 || dist < BestDist)
@@ -216,7 +226,7 @@ function vector GetNextMoveTarget()
 			}
 //			else dbg = dbg @ "+";
 		}
-//		log(VehicleOwner.Driver @ 1 @ dbg);
+		if (bDebug) log(VehicleOwner.Driver @ 1 @ dbg);
 		if (BestDist < 0)
 		{
 //			Log("Use driver MoveTarget" @ VehicleOwner.Driver.MoveTarget @ VehicleOwner.Driver.MoveTarget.getHumanName());
@@ -258,7 +268,7 @@ function vector GetNextMoveTarget()
 //				dbg = dbg @ "!";
 			}				
 		}
-//		log(VehicleOwner.Driver @ 2 @ dbg);
+		if (bDebug) log(VehicleOwner.Driver @ 2 @ dbg);
 		
 		if (i >= 14) // too old?
 			VehicleOwner.Driver.MoveTimer = -1f; // time to refresh path
