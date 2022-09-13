@@ -12,6 +12,9 @@ enum EPulseForHeal
 var() EPulseForHeal PulseForHeal;
 var() bool bShowFlagBase;
 
+var Bot Bots[1024];
+var int BotsCount;
+
 event PreBeginPlay()
 {
 	local Actor A;
@@ -72,7 +75,65 @@ event PreBeginPlay()
 					xFB.MultiSkins[0] = Texture'FlagBaseSkinB';				
 			}
 		}
+		
+	if (Spawn(class'BotSpawnNotify', self) != None)
+		SetTimer(0.1, true);
 }
+
+function AddBot(Bot Bot) {
+	local int i;
+	if (Bot == None)
+		return;
+	for (i = 0; i < ArrayCount(Bots); i++)
+		if (Bots[i] == None || Bots[i].bDeleteMe) {
+			Bots[i] = Bot;
+			if (BotsCount <= i)
+				BotsCount = i + 1;
+			break;
+		}
+}
+
+function Timer() {
+	local int i;
+	for (i = BotsCount - 1; i >= 0; i--)
+		if (Bots[i] != None && !Bots[i].bDeleteMe)
+			FixBot(Bots[i]);
+		else if (i == BotsCount - 1)
+			BotsCount--;
+}
+
+function FixBot(Bot Bot) {
+	local CTFFlag MyFlag, FriendlyFlag;
+	local Vehicle Veh, Best;
+	local float Dist, BestDist;
+	
+	if (DriverWeapon(Bot.Weapon) != None || Bot.PlayerReplicationInfo == None || Vehicle(Bot.MoveTarget) != None)
+		return;		
+	MyFlag = CTFFlag(Bot.PlayerReplicationInfo.HasFlag);
+	if (MyFlag == None)
+		return;
+		
+	FriendlyFlag = CTFReplicationInfo(Level.Game.GameReplicationInfo).FlagList[Bot.PlayerReplicationInfo.Team];
+	if (VSize(FriendlyFlag.HomeBase.Location - Bot.Location) < 800)
+		return;
+	
+	foreach Bot.RadiusActors(class'Vehicle', Veh, 600)
+	{
+		Dist = Veh.BotAttract.BotDesireability(Bot);
+		if (Dist > 0)
+		{
+			Dist *= VSize(Veh.Location - Bot.Location);
+			if (Best == None || BestDist > Dist)
+			{
+				Best = Veh;
+				BestDist = Dist;
+			}
+		}
+	}
+	if (Best != None)
+		Bot.MoveTarget = Best;
+}
+
 
 /*
 function Tick(float delta)
