@@ -37,7 +37,6 @@ local LPlasmaFireFX LPl;
 				ROffset.Y = -ROffset.Y;
 			LPl = Spawn(Class'LPlasmaFireFX',PitchPart,,PitchPart.Location + (ROffset >> PitchPart.Rotation));
 			LPl.PrePivotRel = ROffSet;
-			
 		}
 		else
 		{
@@ -48,6 +47,36 @@ local LPlasmaFireFX LPl;
 			LPl.PrePivotRel = ROffSet;
 		}
 	}
+}
+
+function FireTurret( byte Mode, optional bool bForceFire )
+{
+	local Vehicle EnemyVehicle;
+	local float Dist;
+	if (PLayerPawn(WeaponController) == None)
+	{ // bot select proper mode for shoot, 1 = dual mode, which fire more often, but together
+		Mode = 0; // single mode, which fire more rare, but one-by-one
+		if (Vehicle(WeaponController.Target) != None) // empty vehicle
+			Mode = 1;
+		else if (Pawn(WeaponController.Target) != None)
+		{
+			Dist = VSize(WeaponController.Target.Location - Location);			
+			if (DriverWeapon(Pawn(WeaponController.Target).Weapon) != None)
+				EnemyVehicle = DriverWeapon(Pawn(WeaponController.Target).Weapon).VehicleOwner;
+			if (EnemyVehicle == None) // enemy on foot
+			{
+				if (Dist < WeapSettings[1].ProjectileClass.default.Speed*
+					(0.25 + 0.5*Min(WeaponController.Target.CollisionHeight, 
+					WeaponController.Target.CollisionRadius)/Pawn(WeaponController.Target).GroundSpeed))
+					Mode = 1;
+			}
+			else if (StationaryPhys(EnemyVehicle) != None) // enemy in turret
+				Mode = 1;
+			else if (Dist < WeapSettings[1].ProjectileClass.default.Speed/2) // close to vehicle
+				Mode = 1;
+		}
+	}
+	Super.FireTurret(Mode);
 }
 
 defaultproperties
