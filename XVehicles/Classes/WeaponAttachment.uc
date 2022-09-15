@@ -474,10 +474,10 @@ function FireTurret( byte Mode, optional bool bForceFire )
 	if (WeaponController != None && WeaponController.IsInState('GameEnded'))
 		return;
 
-	if( bAltFireZooms && Mode==1 )
+	if (bAltFireZooms && Mode == 1)
 	{
-		if( PlayerPawn(WeaponController)!=None )
-			Return;
+		if (PlayerPawn(WeaponController) != None)
+			return;
 		else Mode = 0;
 	}
 
