@@ -20,26 +20,12 @@ Ignores Touch,ZoneChange;
 Begin:
 	Stop;
 }
-event float BotDesireability( pawn Bot )
+
+event float BotDesireability(Pawn Bot)
 {
-	local vector L;
-//	Log(VehicleOwner @ "BotDesireability 1" @ Bot.GetHumanName() @ Bot.MoveTarget);
-	if( VehicleOwner==None || VehicleOwner.bDeleteMe )
-		Return -1;
-//	Log(VehicleOwner @ "BotDesireability 2" @ Bot.GetHumanName() @ VehicleOwner.CurrentTeam @ VehicleOwner.CanEnter(Bot) @ 
-//		VehicleOwner.IsTeamLockedFor(Bot) @ VehicleOwner.VehicleAI.PawnCanDrive(Bot) @ Bot.bIsPlayer);
-	if( !VehicleOwner.CanEnter(Bot) || VehicleOwner.IsTeamLockedFor(Bot) || !VehicleOwner.VehicleAI.PawnCanDrive(Bot) )
-		Return -1;
-/*	if (!Bot.actorReachable(self))
-	{
-		L = Bot.Location - Location;
-		L.z = 0;
-		L = Normal(L)*(VehicleOwner.CollisionRadius + 10);
-		Move(L);
-		Log("Moved!" @ L);
-	}*/
-//	Log(VehicleOwner @ "BotDesireability 3" @ Bot.GetHumanName() @ VehicleOwner.VehicleAI.GetVehAIRating(Bot) @ Bot.actorReachable(self));
-	Return VehicleOwner.VehicleAI.GetVehAIRating(Bot);
+	if (VehicleOwner != None)
+		return VehicleOwner.BotDesireability(Bot);
+	return -1;
 }
 
 defaultproperties

@@ -2521,6 +2521,28 @@ simulated function int GetMovementDir()
 	else Return -1;
 }
 
+event float BotDesireability(Pawn Bot)
+{
+	local vector L;
+//	Log(self @ "BotDesireability 1" @ Bot.GetHumanName() @ Bot.MoveTarget);
+	if (bDeleteMe )
+		Return -1;
+//	Log(self @ "BotDesireability 2" @ Bot.GetHumanName() @ CurrentTeam @ CanEnter(Bot) @ 
+//		IsTeamLockedFor(Bot) @ VehicleAI.PawnCanDrive(Bot) @ Bot.bIsPlayer);
+	if (!CanEnter(Bot) || IsTeamLockedFor(Bot) || !VehicleAI.PawnCanDrive(Bot))
+		Return -1;
+/*	if (!Bot.actorReachable(self))
+	{
+		L = Bot.Location - Location;
+		L.z = 0;
+		L = Normal(L)*(CollisionRadius + 10);
+		Move(L);
+		Log("Moved!" @ L);
+	}*/
+//	Log(self @ "BotDesireability 3" @ Bot.GetHumanName() @ VehicleAI.GetVehAIRating(Bot) @ Bot.actorReachable(self));
+	Return VehicleAI.GetVehAIRating(Bot);
+}
+
 Auto State EmptyVehicle
 {
 Ignores FireWeapon,ReadDriverInput,ReadBotInput,DriverLeft;

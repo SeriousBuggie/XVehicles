@@ -45,11 +45,11 @@ function ChangeOwner(Actor NewOwner)
 	Inventory = MyNotifier;
 }
 
-event float BotDesireability( pawn Bot )
+event float BotDesireability(Pawn Bot)
 {
-	if (VehicleOwner == None || VehicleOwner.BotAttract == None)
-		return -1;
-	return VehicleOwner.BotAttract.BotDesireability(Bot);
+	if (VehicleOwner != None)
+		return VehicleOwner.BotDesireability(Bot);
+	return -1;
 }
 
 function float SuggestAttackStyle()
