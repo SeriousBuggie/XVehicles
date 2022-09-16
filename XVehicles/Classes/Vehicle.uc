@@ -1584,7 +1584,8 @@ simulated function Tick( float Delta )
 	}
 	if (Driver != None)
 		UpdateDriverPos();
-	if (!bDriving || (Driver != None && Driver.IsInState('GameEnded')))
+	if (!bDriving || (Driver != None && Driver.IsInState('GameEnded')) || 
+		(Level.Game != None && Level.Game.bGameEnded))
 	{
 		Turning = 0;
 		Rising = 0;
@@ -2171,10 +2172,6 @@ simulated function DoSpecialSpaceKey();	//Run whatever code when space is presse
 // Read whatever input driver is pressing now
 simulated function ReadDriverInput( PlayerPawn Other, float DeltaTime )
 {
-	// possible this feature now
-//	if (Other != None && Other.IsInState('GameEnded'))
-//		return;
-
 	if( Other.bWasForward )
 		Accel = 1;
 	else if( Other.bWasBack )
@@ -2285,7 +2282,7 @@ function ReadBotInput( float Delta )
 	local int Dir;
 	local Bot Bot;
 	
-	if (Driver != None && (Driver.IsInState('GameEnded') || Driver.IsInState('Dying')))
+	if ((Driver != None && (Driver.IsInState('GameEnded') || Driver.IsInState('Dying'))) || Level.Game.bGameEnded)
 		return;
 	
 	if (HealthTooLowFor(Driver))
@@ -2501,7 +2498,7 @@ function bool CanEnter( Pawn Other, optional bool bIgnoreDuck )
 {
 	local vector HL, HN;
 	if( Other.Health<=0 || (!bIgnoreDuck && PlayerPawn(Other)!=None && Other.bDuck==0) || DriverWeapon(Other.Weapon)!=None ||
-		Other.IsInState('PlayerWaiting') || Other.IsInState('GameEnded') || !Other.bCollideActors || 
+		Other.IsInState('PlayerWaiting') || Other.IsInState('GameEnded') || Level.Game.bGameEnded || !Other.bCollideActors || 
 		!Other.FastTrace(Location) || (VSize(Other.Location - Location) > 10 && Other.Trace(HL, HN, Location, , true) != self))
 		Return False;
 	Return True;

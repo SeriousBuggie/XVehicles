@@ -471,7 +471,7 @@ function FireTurret( byte Mode, optional bool bForceFire )
 	
 	//Log(self @ OwnerVehicle @ WeaponController.getHumanName() @ WeaponController.bFire @ WeaponController.bAltFire);
 	
-	if (WeaponController != None && WeaponController.IsInState('GameEnded'))
+	if ((WeaponController != None && WeaponController.IsInState('GameEnded')) || Level.Game.bGameEnded)
 		return;
 
 	if (bAltFireZooms && Mode == 1)
@@ -1021,7 +1021,8 @@ function vector CorrectAim(vector AimPoint, float CollisionHeight)
 function rotator GetBotInput( float Delta )
 {
 	local vector HL, HN, S;
-	if( !WeaponController.IsInState('GameEnded') &&
+	if( !WeaponController.IsInState('GameEnded') && 
+		!Level.Game.bGameEnded &&
 		!SeeEnemy(WeaponController.Target) &&
 		!SeeEnemy(WeaponController.Enemy) &&
 		!SeeEnemy(WeaponController.FaceTarget) )

@@ -67,7 +67,8 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 
 	if (Driver != None && PlayerPawn(Driver) == None)
 	{ // bot drive code
-		if (Driver.IsInState('GameEnded') || Driver.IsInState('Dying'))
+		if (Driver.IsInState('GameEnded') || Driver.IsInState('Dying') || 
+			(Level.Game != None && Level.Game.bGameEnded))
 			return vect(0,0,0);
 		X = MoveDest - Location;		
 		/*
