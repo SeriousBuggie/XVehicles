@@ -695,6 +695,8 @@ simulated function PostBeginPlay()
 	SetTimer(0.5, true);
 	
 	SetPropertyText("ClassPureHitSound", "Class'PureHitSound'");
+	if (ClassPureHitSound == None)
+		SetPropertyText("ClassPureHitSound", "Class'NN_HitSound'");
 }
 
 function InitInventory(Inventory Inv)
