@@ -1154,8 +1154,11 @@ local vector ExitVect;
 				{
 //					Log("Failed exit Driver for" @ Driver);
 					ChangeCollision(Driver, true);
-					if( PlayerPawn(Driver)!=None )
+					if (PlayerPawn(Driver) != None)
 						Driver.GoToState('PlayerFlying');
+					if (!bDeleteMe && Health > 0)
+						CheckForEmpty();
+					ShowState();
 					Return;
 				}
 			}
@@ -1170,7 +1173,7 @@ local vector ExitVect;
 				Driver.bDuck = 0; // prevent enter again
 				Driver.SetCollision(True,True,True);
 			}
-			if( PlayerPawn(Driver)!=None )
+			if (PlayerPawn(Driver) != None)
 			{
 				PlayerPawn(Driver).ViewTarget = None;
 				PlayerPawn(Driver).EndZoom();
@@ -1204,7 +1207,7 @@ local vector ExitVect;
 		Driver.ClearPaths();
 	Driver = None;
 	//SetOwner(None); Set to none 1 sec later to avoid unwanted functions errors.
-	if( !bDeleteMe && Health>0 )
+	if (!bDeleteMe && Health > 0)
 		CheckForEmpty();
 	ShowState();
 }
@@ -4303,6 +4306,10 @@ function PassengerLeave( byte Seat, optional bool bForcedLeave )
 					ChangeCollision(Passengers[Seat], true);
 					if (PlayerPawn(Passengers[Seat]) != None)
 						Passengers[Seat].GoToState('PlayerFlying');
+						
+					HasPassengers();
+					CheckForEmpty();
+					ShowState();
 					Return;
 				}
 			}
