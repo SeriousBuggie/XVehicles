@@ -39,7 +39,8 @@ simulated function PostBeginPlay()
 	}
 	*/
 
-	SetTimer(0.5, False);
+	if (Level.NetMode != NM_DedicatedServer)
+		SetTimer(0.5, False);
 	
 	foreach AllActors(class'PlayerPawn', PP)
 		if (PP.Player != None)
@@ -56,21 +57,17 @@ simulated function Tick(float Delta)
 simulated function Timer()
 {
 local xZoneInfo xZ;
-local Pawn P;
+local PlayerPawn P;
 
 	ForEach AllActors(Class'xZoneInfo', xZ)
 	{
 		if (xZ == Self)
-		{
-			For ( P=Level.PawnList; P!=None; P=P.nextPawn )
-			{
-				if (PlayerPawn(P) != None && P.CollisionRadius > 0 && P.CollisionHeight > 0 && !P.bHidden && P.Health > 0)
+			foreach AllActors(class'PlayerPawn', P)
+				if (P.Player != None && P.CollisionRadius > 0 && P.CollisionHeight > 0 && !P.bHidden && P.Health > 0)
 				{
 					Spawn(Class'xZonePlayerObj', P);
 					hasGivenZoneObj = True;
 				}
-			}
-		}
 		break;
 	}
 
@@ -516,6 +513,7 @@ defaultproperties
 	WaterRingClass=Class'xZones.WaterSplashRing'
 	MinDesiredFrameRate=60
 	bStatic=False
+	RemoteRole=ROLE_SimulatedProxy
 	SoundRadius=0
 	SoundVolume=0
 }
