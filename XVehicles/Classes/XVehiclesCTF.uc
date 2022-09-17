@@ -95,6 +95,8 @@ function AddBot(Bot Bot) {
 
 function Timer() {
 	local int i;
+	if (Level.Game.bGameEnded)
+		return;
 	for (i = BotsCount - 1; i >= 0; i--)
 		if (Bots[i] != None && !Bots[i].bDeleteMe)
 			FixBot(Bots[i]);
