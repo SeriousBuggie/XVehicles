@@ -585,7 +585,7 @@ simulated function PostBeginPlay()
 		return;
 
 	if (InitialDamage > 0)
-		TakeImpactDamage(InitialDamage,None, "InitialDamage");
+		TakeImpactDamage(InitialDamage, None, "InitialDamage", 'InitialDamage');
 
 	if (!bReadyToRun && (Self.IsA('WheeledCarPhys') || Self.IsA('TreadCraftPhys')))
 		SetPhysics(PHYS_Falling);
@@ -3645,10 +3645,12 @@ simulated singular function HitWall( vector HitNormal, Actor Wall )
 	}
 }
 
-function TakeImpactDamage( int Damage, Pawn InstigatedBy, optional coerce string Reason )
+function TakeImpactDamage(int Damage, Pawn InstigatedBy, optional coerce string Reason, optional name DamageType)
 {
 // if (Damage > 0) Log(self @ Level.TimeSeconds @ "TakeImpactDamage" @ Damage @ InstigatedBy @ Reason);
-	TakeDamage(Damage,InstigatedBy,Location,vect(0,0,0),'BumpWall');
+	if (DamageType == '')
+		DamageType = 'BumpWall';
+	TakeDamage(Damage, InstigatedBy, Location, vect(0,0,0), DamageType);
 }
 
 function FixDamage(int Damage, Pawn EventInstigator, vector HitLocation, vector Momentum, name DamageType)
