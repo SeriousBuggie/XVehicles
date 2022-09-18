@@ -3926,53 +3926,54 @@ simulated function SpawnExplosionFX()
 	bHidden = True;
 
 	//Custom explosion set
-	For(i=0; i<16; i++)
-	{
-		if (ExplosionGFX[i].bHaveThisExplFX)
+	if (Level.NetMode != NM_DedicatedServer)
+		for (i = 0; i < ArrayCount(ExplosionGFX); i++)
 		{
-			if (ExplosionGFX[i].bUseCoordOffset)
+			if (ExplosionGFX[i].bHaveThisExplFX)
 			{
-				vxc = ExplosionGFX[i].ExplFXOffSet;
-
-				CastVectorialExpl( i, vxc);
-
-				if (ExplosionGFX[i].bSymetricalCoordX)
+				if (ExplosionGFX[i].bUseCoordOffset)
 				{
-					vxc.X = -vxc.X;
+					vxc = ExplosionGFX[i].ExplFXOffSet;
+	
 					CastVectorialExpl( i, vxc);
-				}
-
-				if (ExplosionGFX[i].bSymetricalCoordY)
-				{
-					vxc.Y = -vxc.Y;
-					CastVectorialExpl( i, vxc);
-					
+	
 					if (ExplosionGFX[i].bSymetricalCoordX)
 					{
 						vxc.X = -vxc.X;
 						CastVectorialExpl( i, vxc);
 					}
-				}
-			}
-			else if (ExplosionGFX[i].AttachName != '')
-			{
-				For( W=AttachmentList; W!=None; W=W.NextAttachment )
-				{
-					if (W.IsA(ExplosionGFX[i].AttachName))
+	
+					if (ExplosionGFX[i].bSymetricalCoordY)
 					{
-						exhx = Spawn(ExplosionGFX[i].ExplClass,,, W.Location);
-						exhx.DrawScale = ExplosionGFX[i].ExplSize;
+						vxc.Y = -vxc.Y;
+						CastVectorialExpl( i, vxc);
+						
+						if (ExplosionGFX[i].bSymetricalCoordX)
+						{
+							vxc.X = -vxc.X;
+							CastVectorialExpl( i, vxc);
+						}
 					}
 				}
+				else if (ExplosionGFX[i].AttachName != '')
+				{
+					For( W=AttachmentList; W!=None; W=W.NextAttachment )
+					{
+						if (W.IsA(ExplosionGFX[i].AttachName))
+						{
+							exhx = Spawn(ExplosionGFX[i].ExplClass,,, W.Location);
+							exhx.DrawScale = ExplosionGFX[i].ExplSize;
+						}
+					}
+				}
+				else
+				{
+					exhx = Spawn(ExplosionGFX[i].ExplClass,,, Location);
+					exhx.DrawScale = ExplosionGFX[i].ExplSize;
+				}
+					
 			}
-			else
-			{
-				exhx = Spawn(ExplosionGFX[i].ExplClass,,, Location);
-				exhx.DrawScale = ExplosionGFX[i].ExplSize;
-			}
-				
 		}
-	}
 
 	For( W=AttachmentList; W!=None; W=NW )
 	{

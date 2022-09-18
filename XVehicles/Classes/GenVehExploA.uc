@@ -2,7 +2,7 @@ class GenVehExploA expands UT_FlameExplosion;
 
 #exec obj load file=..\Textures\UExplosionsSet01.utx package=UExplosionsSet01
 
-simulated function PostBeginPlay()
+function PostBeginPlay()
 {
 	SetTimer(0.2,False);
 	Super(AnimSpriteEffect).PostBeginPlay();
@@ -10,8 +10,8 @@ simulated function PostBeginPlay()
 
 function Timer()
 {
-local GenVehExploB xs;
-local vector vexpl;
+	local GenVehExploB xs;
+	local vector vexpl;
 
 	vexpl.X = FRand()*300 - 150;
 	vexpl.Y = FRand()*300 - 150;
@@ -23,6 +23,7 @@ local vector vexpl;
 defaultproperties
 {
 	EffectSound1=None
+	RemoteRole=ROLE_None
 	Texture=Texture'UExplosionsSet01.ExplE01'
 	DrawScale=1.000000
 	ScaleGlow=2.500000
