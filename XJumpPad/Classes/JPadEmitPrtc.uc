@@ -44,7 +44,7 @@ simulated function Tick( float DeltaTime)
 defaultproperties
 {
 	Physics=PHYS_Projectile
-	RemoteRole=ROLE_SimulatedProxy
+	RemoteRole=ROLE_None
 	LifeSpan=5.000000
 	DrawType=DT_Mesh
 	Style=STY_Translucent
