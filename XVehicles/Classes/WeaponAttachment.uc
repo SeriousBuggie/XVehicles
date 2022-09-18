@@ -1211,6 +1211,9 @@ simulated function WRenderOverlay( Canvas C )
 	local float X, Y;
 	local Texture Crossh;
 	
+	if (OwnerVehicle == None)
+		return;
+	
 	X = ZAimOffset;
 	if (PitchPart != None)
 	{
@@ -1223,20 +1226,10 @@ simulated function WRenderOverlay( Canvas C )
 	HN.Z = X;
 	HN = ViewActor.Location + (HN >> ViewActor.Rotation);
 	HL = HN + CamLoc*40000;
-	if (OwnerVehicle != None)
-	{
-		X = (CamLoc dot (OwnerVehicle.Location - HN));
-		if (X > 0)
-			HN += CamLoc*2*X;
-	}
-	if (OwnerVehicle != None && OwnerVehicle.MyCameraAct != None)
-		ViewActor = OwnerVehicle.MyCameraAct; // try use actor with small size
-	else
-		ViewActor = self;
-	ViewActor.Trace(HL, HN, HL, HN, true);
+	OwnerVehicle.Trace(HL, HN, HL, HN, true);
 	
 	C.ViewPort.Actor.PlayerCalcView(ViewActor, CamLoc, CamRot);
-	WorldToScreen(HL,C.ViewPort.Actor,CamLoc,CamRot,C.ClipX,C.ClipY,X,Y);
+	WorldToScreen(HL, C.ViewPort.Actor, CamLoc, CamRot, C.ClipX, C.ClipY, X, Y);
 
 	Crossh = Texture'Botpack.Crosshair6';
 	C.SetPos(X - Crossh.USize/2, Y - Crossh.VSize/2);
