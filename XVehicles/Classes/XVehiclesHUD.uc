@@ -134,11 +134,11 @@ simulated function string getVal(Actor actor, string prop) {
 
 simulated function bool TraceIdentify(canvas Canvas)
 {
-	local actor Other, Camera, TraceActor;
+	local actor Camera, TraceActor;
 	local vector HitLocation, HitNormal, StartTrace, EndTrace;
 	local rotator CamRot;
 	local float X;
-	local Vehicle MyVehicle;
+	local Vehicle Other;
 	
 	Canvas.ViewPort.Actor.PlayerCalcView(Camera, StartTrace, CamRot);
 	
@@ -147,25 +147,17 @@ simulated function bool TraceIdentify(canvas Canvas)
 		TraceActor = DriverWeapon(MyHUD.PawnOwner.Weapon).VehicleOwner;
 	
 	EndTrace = StartTrace + vector(CamRot) * 1000.0;
-	Other = TraceActor.Trace(HitLocation, HitNormal, EndTrace, StartTrace, true);
-	
-	if (Vehicle(Other) != None && DriverWeapon(MyHUD.PawnOwner.Weapon) != None && 
-		VSize(Other.Location - MyHUD.PawnOwner.Location) < FMin(Other.CollisionRadius, Other.CollisionHeight))
-		MyVehicle = Vehicle(Other);
-	
-	if (MyVehicle != None && Other == MyVehicle)
-	{
-		X = (vector(CamRot) dot (MyVehicle.Location - StartTrace));
-		StartTrace += vector(CamRot)*2*Abs(X);
-		Other = TraceActor.Trace(HitLocation, HitNormal, EndTrace, StartTrace, true);
-	}
-
-	if ( Vehicle(Other) != None && (Vehicle(Other).Driver != None || Vehicle(Other).HasPassengers()) )
-	{
-		IdentifyTarget = Vehicle(Other);
-		MyHUD.IdentifyTarget = None;
-		MyHUD.IdentifyFadeTime = 3.0;
-	}
+	foreach TraceActor.TraceActors(class'Vehicle', Other, HitLocation, HitNormal, EndTrace, StartTrace)
+		if (Other != TraceActor)
+		{		
+			if (Other.Driver != None || Other.HasPassengers())
+			{
+				IdentifyTarget = Other;
+				MyHUD.IdentifyTarget = None;
+				MyHUD.IdentifyFadeTime = 3.0;
+			}
+			break;
+		}
 
 	if ( (MyHUD.IdentifyFadeTime == 0.0) || (IdentifyTarget == None) || MyHUD.IdentifyTarget != None )
 		return false;
