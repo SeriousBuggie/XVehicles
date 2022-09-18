@@ -118,7 +118,7 @@ defaultproperties
 	bNetTemporary=False
 	bTrailerPrePivot=True
 	Physics=PHYS_Trailer
-	RemoteRole=ROLE_SimulatedProxy
+	RemoteRole=ROLE_None
 	SoundRadius=20
 	SoundVolume=255
 }
