@@ -13,7 +13,7 @@ replication
 		VehicleOwner,SeatNum,GunAttachM,DesiredViewMult;
 }
 
-simulated function PostBeginPlay()
+function PostBeginPlay()
 {
 	Super.PostBeginPlay();
 	
