@@ -39,7 +39,10 @@ simulated function PostNetBeginPlay()
 
 simulated function Tick(float DeltaTime)
 {
-local rotator r;
+	local rotator r;
+
+	if (Level.NetMode == NM_DedicatedServer)
+		return;
 
 	DistCount += VSize(Location-OldLocation);
 

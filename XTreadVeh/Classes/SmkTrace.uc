@@ -19,7 +19,7 @@ var() texture RndSmk[16];
 var() name RndAnimFX[4];
 var float GlowCount;
 
-simulated function PostBeginPlay()
+function PostBeginPlay()
 {
 local byte i;
 
@@ -37,7 +37,7 @@ local byte i;
 		TweenAnim(RndAnimFX[0], 3.0);*/
 }
 
-simulated function Tick(float Delta)
+function Tick(float Delta)
 {
 	if (Default.LifeSpan - LifeSpan <= 0.1)
 	{
@@ -70,7 +70,7 @@ defaultproperties
 	RndAnimFX(1)="SmkFX2"
 	RndAnimFX(2)="SmkFX3"
 	RndAnimFX(3)="SmkFX4"
-	RemoteRole=ROLE_SimulatedProxy
+	RemoteRole=ROLE_None
 	LifeSpan=3.100000
 	DrawType=DT_Mesh
 	Style=STY_Translucent

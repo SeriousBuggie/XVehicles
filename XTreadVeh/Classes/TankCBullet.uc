@@ -27,7 +27,7 @@ simulated function PostBeginPlay()
 
 simulated function Tick(float DeltaTime)
 {
-	if (!Region.Zone.bWaterZone)
+	if (Level.NetMode != NM_DedicatedServer && !Region.Zone.bWaterZone)
 	{
 		DistCount += VSize(Location-OldLocation);
 

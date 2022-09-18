@@ -16,14 +16,14 @@ class EnLinesLineRed expands xTreadVehEffects;
 var() float LifeSError, InitDrawScale;
 var float GlowCount, InitLifeSpan;
 
-simulated function PostBeginPlay()
+function PostBeginPlay()
 {
 	InitLifeSpan = Default.LifeSpan + FRand()*LifeSError;
 	LifeSpan = InitLifeSpan;
 	DrawScale = InitDrawScale*Default.DrawScale;
 }
 
-simulated function Tick(float Delta)
+function Tick(float Delta)
 {
 	if (InitLifeSpan != 0)
 	{
@@ -43,7 +43,7 @@ defaultproperties
 {
 	LifeSError=0.250000
 	InitDrawScale=2.000000
-	RemoteRole=ROLE_SimulatedProxy
+	RemoteRole=ROLE_None
 	LifeSpan=0.125000
 	DrawType=DT_Mesh
 	Style=STY_Translucent
