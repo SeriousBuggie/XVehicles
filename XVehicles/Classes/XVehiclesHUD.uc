@@ -66,7 +66,7 @@ simulated function PostRender(canvas Canvas)
 		
 	if (MyHUD == None)
 		return;
-	if ( MyHUD.PawnOwner == MyHUD.PlayerOwner )
+	if (MyHUD.PawnOwner == MyHUD.PlayerOwner)
 		DrawIdentifyInfo(Canvas);
 }
 
@@ -74,19 +74,18 @@ simulated function bool DrawIdentifyInfo(canvas Canvas)
 {
 	local float XL, YL, Y;
 	local int i;
-	local font Big, Small;
+	local Font Big, Small;
 	
-	if ( !TraceIdentify(Canvas))
+	if (!TraceIdentify(Canvas))
 		return false;
 
 	if (IdentifyTarget != None)
 	{
-		Y = Canvas.ClipY - 256 * MyHUD.Scale;
-	
-		Big = MyHUD.MyFonts.GetBigFont(Canvas.ClipX);
+		Big = MyHUD.MyFonts.GetBigFont(Canvas.ClipX);		
 		Small = MyHUD.MyFonts.GetSmallFont(Canvas.ClipX);
 		Canvas.Font = Small;
 		Canvas.StrLen("TEST", XL, YL);
+		Y = Canvas.ClipY - 256 * MyHUD.Scale;
 		
 		if (IdentifyTarget.Driver != None)
 			Y = DrawPlayer(Canvas, Big, Small, YL, Y, IdentifyTarget.Driver);
@@ -98,6 +97,47 @@ simulated function bool DrawIdentifyInfo(canvas Canvas)
 		MyHUD.IdentifyTarget = None;
 	}
 	return true;
+}
+
+simulated function DrawFixProgress(Canvas Canvas, Vehicle Vehicle)
+{
+	local float XL, YL, X, Y;
+	local string Str;
+	local Texture Tex;
+	
+	const XOffset = 3;
+	const YOffset = 2;
+	
+	if (MyHUD.PlayerOwner != None && 
+		(FixGun(MyHUD.PlayerOwner.Weapon) != None ||
+		(class'VehiclesConfig'.default.bPulseAltHeal && PulseGun(MyHUD.PlayerOwner.Weapon) != None)) &&
+		(!Level.Game.bTeamGame ||
+		(MyHUD.PlayerOwner.PlayerReplicationInfo != None && 
+		MyHUD.PlayerOwner.PlayerReplicationInfo.Team == Vehicle.CurrentTeam)) &&
+		MyHUD.PlayerOwner.bAltFire != 0)
+	{
+		Y = 100.0f*Vehicle.Health/Vehicle.FirstHealth;
+		Str = string(Y);
+		if (Y < 10 || Y >= 100)
+			Str = Left(Str, 3);
+		else
+			Str = Left(Str, 4);
+		Str = Str $ "%";
+		Canvas.Font = MyHUD.MyFonts.GetBigFont(Canvas.ClipX);			
+		Canvas.StrLen(Str, XL, YL);
+		X = (Canvas.ClipX - XL)/2;
+		Y = Canvas.ClipY/2 - 1.5*YL;
+		
+		//Canvas.Style = ERenderStyle.STY_Translucent;
+		Canvas.SetPos(X - XOffset, Y - YOffset);
+		Tex = Texture'AmmoLedBase';
+		Canvas.DrawTile(Tex, XL + XOffset*2, YL, 0, 0, Tex.USize, Tex.VSize);
+		
+		//Canvas.Style = ERenderStyle.STY_Normal;
+		Canvas.DrawColor = MyHUD.WhiteColor;
+		Canvas.SetPos(X, Y);
+		Canvas.DrawText(Str);
+	}
 }
 
 simulated function float DrawPlayer(canvas Canvas, font Big, font Small, float YL, float Y, Pawn Pawn)
@@ -149,7 +189,8 @@ simulated function bool TraceIdentify(canvas Canvas)
 	EndTrace = StartTrace + vector(CamRot) * 1000.0;
 	foreach TraceActor.TraceActors(class'Vehicle', Other, HitLocation, HitNormal, EndTrace, StartTrace)
 		if (Other != TraceActor)
-		{		
+		{
+			DrawFixProgress(Canvas, Other);
 			if (Other.Driver != None || Other.HasPassengers())
 			{
 				IdentifyTarget = Other;
@@ -159,7 +200,7 @@ simulated function bool TraceIdentify(canvas Canvas)
 			break;
 		}
 
-	if ( (MyHUD.IdentifyFadeTime == 0.0) || (IdentifyTarget == None) || MyHUD.IdentifyTarget != None )
+	if ((MyHUD.IdentifyFadeTime == 0.0) || (IdentifyTarget == None) || MyHUD.IdentifyTarget != None)
 		return false;
 
 	return true;
