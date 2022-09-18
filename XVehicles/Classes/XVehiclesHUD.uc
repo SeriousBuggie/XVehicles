@@ -111,7 +111,7 @@ simulated function DrawFixProgress(Canvas Canvas, Vehicle Vehicle)
 	if (MyHUD.PlayerOwner != None && 
 		(FixGun(MyHUD.PlayerOwner.Weapon) != None ||
 		(class'VehiclesConfig'.default.bPulseAltHeal && PulseGun(MyHUD.PlayerOwner.Weapon) != None)) &&
-		(!Level.Game.bTeamGame ||
+		((MyHUD.PlayerOwner.GameReplicationInfo != None && !MyHUD.PlayerOwner.GameReplicationInfo.bTeamGame) ||
 		(MyHUD.PlayerOwner.PlayerReplicationInfo != None && 
 		MyHUD.PlayerOwner.PlayerReplicationInfo.Team == Vehicle.CurrentTeam)) &&
 		MyHUD.PlayerOwner.bAltFire != 0)
