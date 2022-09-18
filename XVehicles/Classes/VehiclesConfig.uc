@@ -12,4 +12,5 @@ var() config bool bDisableFlagAnnouncer;
 
 defaultproperties
 {
+	bPulseAltHeal=True
 }

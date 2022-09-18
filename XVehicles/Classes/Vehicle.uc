@@ -3694,12 +3694,13 @@ function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 
 	if (!bVehicleBlewUp)
 	{
-		if( bDeleteMe || Level.NetMode==NM_Client )
+		if (bDeleteMe || Level.NetMode == NM_Client)
 			Return;
 		if (damageType == 'jolted' && Damage > 100)
 			Damage *= 0.05; // reduce instagib damage
 		if (instigatedBy != None && damageType == 'zapped' && class'VehiclesConfig'.default.bPulseAltHeal &&
-			instigatedBy.PlayerReplicationInfo != None && instigatedBy.PlayerReplicationInfo.Team == CurrentTeam)
+			(!Level.Game.bTeamGame ||
+			(instigatedBy.PlayerReplicationInfo != None && instigatedBy.PlayerReplicationInfo.Team == CurrentTeam)))
 		{
 			FixDamage(Damage, instigatedBy, hitlocation, momentum, damageType);
 			return;
