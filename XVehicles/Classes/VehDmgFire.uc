@@ -19,19 +19,19 @@ var() name RndPos[5];
 var() texture RndFlameTex[16];
 var float GlowCount;
 
-simulated function PostBeginPlay()
+function PostBeginPlay()
 {
-local vector Dir;
-local byte i;
+	local vector Dir;
+	local byte i;
 
-        Velocity = Rand(200)*vect(0,0,1) + vect(0,0,100);
+	Velocity = Rand(200)*vect(0,0,1) + vect(0,0,100);
 	AnimSequence = RndPos[Min(4,Rand(5))];
 
 	For (i=0; i<8; i++)
 		MultiSkins[i] = RndFlameTex[Min(15,Rand(16))];
 }
 
-simulated function Tick(float Delta)
+function Tick(float Delta)
 {
 	if (Default.LifeSpan - LifeSpan <= 0.1)
 	{
@@ -66,7 +66,7 @@ defaultproperties
 	RndFlameTex(14)=Texture'UFire.FireB15'
 	RndFlameTex(15)=Texture'UFire.FireB16'
 	Physics=PHYS_Projectile
-	RemoteRole=ROLE_SimulatedProxy
+	RemoteRole=ROLE_None
 	LifeSpan=0.280000
 	DrawType=DT_Mesh
 	Style=STY_Translucent

@@ -1465,7 +1465,7 @@ simulated function Tick( float Delta )
 	VeryOldVel[1] = VeryOldVel[0];
 	VeryOldVel[0] = Velocity;
 
-	if (Health*2 < FirstHealth)
+	if (Level.NetMode != NM_DedicatedServer && Health*2 < FirstHealth)
 	{
 		if (Health*5 < FirstHealth)
 		{
