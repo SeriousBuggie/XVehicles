@@ -278,6 +278,8 @@ var bool bInBump;
 var Pawn LastDriver;
 var float LastDriverTime;
 
+var PreventEnter PreventEnter;
+
 enum EDropFlag
 {
 	DF_None,                // Not drop flag at all.
@@ -1170,7 +1172,8 @@ local vector ExitVect;
 				Driver.ChangedWeapon();
 				if( Driver.Weapon != None && Driver.Weapon.Owner != None )
 					Driver.Weapon.BringUp();
-				Driver.bDuck = 0; // prevent enter again
+				if (Driver.bDuck == 1 && bCanFly)
+					PreventEnter = Spawn(class'PreventEnter', Driver);
 				Driver.SetCollision(True,True,True);
 			}
 			if (PlayerPawn(Driver) != None)
@@ -2499,14 +2502,21 @@ function int ShouldRiseFor( vector AcTarget )
 }
 
 // Pawn can enter this vehicle?
-function bool CanEnter( Pawn Other, optional bool bIgnoreDuck )
+function bool CanEnter(Pawn Other, optional bool bIgnoreDuck)
 {
 	local vector HL, HN;
-	if( Other.Health<=0 || (!bIgnoreDuck && PlayerPawn(Other)!=None && Other.bDuck==0) || DriverWeapon(Other.Weapon)!=None ||
-		Other.IsInState('PlayerWaiting') || Other.IsInState('GameEnded') || Level.Game.bGameEnded || !Other.bCollideActors || 
-		!Other.FastTrace(Location) || (VSize(Other.Location - Location) > 10 && Other.Trace(HL, HN, Location, , true) != self))
-		Return False;
-	Return True;
+	if (Other.Health <= 0 || 
+		DriverWeapon(Other.Weapon) != None ||
+		Other.IsInState('PlayerWaiting') || 
+		Other.IsInState('GameEnded') || 
+		Level.Game.bGameEnded || 
+		!Other.bCollideActors || 
+		(!bIgnoreDuck && PlayerPawn(Other) != None && (Other.bDuck == 0 || 
+		(PreventEnter != None && PreventEnter.Instigator == Other))) ||
+		!Other.FastTrace(Location) || 
+		(VSize(Other.Location - Location) > 10 && Other.Trace(HL, HN, Location, , true) != self))
+		return false;
+	return true;
 }
 function bool IsTeamLockedFor( Pawn Other )
 {
@@ -4324,7 +4334,8 @@ function PassengerLeave( byte Seat, optional bool bForcedLeave )
 				Passengers[Seat].ChangedWeapon();
 				if (Passengers[Seat].Weapon != None)
 					Passengers[Seat].Weapon.BringUp();
-				Passengers[Seat].bDuck = 0; // prevent enter again
+				if (Passengers[Seat].bDuck == 1 && bCanFly)
+					PreventEnter = Spawn(class'PreventEnter', Passengers[Seat]);
 				Passengers[Seat].SetCollision(True, True, True);
 			}
 			if (PlayerPawn(Passengers[Seat]) != None)
