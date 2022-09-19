@@ -21,7 +21,7 @@ function Timer()
 	
 	used = 0;
 
-	if (DemoPlaybackSpec(Level.PawnList) != None)
+	if (class'VActor'.static.IsDemoPlayback(Level))
 		foreach AllActors(class'PlayerPawn', Player)
 			ProcessPlayerPawn(Player);
 	else
