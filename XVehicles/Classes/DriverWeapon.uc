@@ -163,7 +163,7 @@ simulated function Tick(float Delta)
 					OtherWeapon = DriverWeapon(Pawn(OldOwner).Weapon);
 					if (OtherWeapon != None && OtherWeapon.VehicleOwner != None)
 						ViewTarget = OtherWeapon.VehicleOwner.GetCam(OtherWeapon);
-					if (ViewTarget == None)
+					if (ViewTarget == None || ViewTarget == Camera)
 						ViewTarget = OldOwner;
 					Camera.ChangeCam(Camera, ViewTarget);
 				}

@@ -142,7 +142,7 @@ simulated function Pawn GetCamOwner()
 	return Pawn(Owner.Owner);
 }
 
-function SetCamOwner(Actor NewOwner)
+simulated function SetCamOwner(Actor NewOwner)
 {
 	local Pawn CamOwner;
 	
