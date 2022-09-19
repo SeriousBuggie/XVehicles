@@ -5,14 +5,16 @@ var DriverWNotifier MyNotifier;
 var bool bPassengerGun;
 var byte SeatNumber;
 
+var Actor OldOwner;
+
 var() config bool UseStandardCrosshair;
 
-/*replication
+replication
 {
 	// Variables the server should send to the client.
-	reliable if( Role==ROLE_Authority )
-		VehicleOwner,SeatNumber;
-}*/
+	reliable if (Role == ROLE_Authority)
+		VehicleOwner, SeatNumber;
+}
 
 simulated function PostNetBeginPlay()
 {
@@ -64,25 +66,27 @@ function float SuggestDefenseStyle()
 	return -10.0; // run away, vehicle override usage of this
 }
 
-function float RateSelf( out int bUseAltMode )
+function float RateSelf(out int bUseAltMode)
 {
 	bUseAltMode = int(FRand() < 0.4);
 	return (AIRating + FRand() * 0.05);
 }
 
-simulated event RenderOverlays( canvas Canvas );
+simulated event RenderOverlays(canvas Canvas);
 
 simulated function PostBeginPlay()
 {
 	bOwnsCrosshair = !class'DriverWeapon'.default.UseStandardCrosshair;
-	if (Role != ROLE_Authority)
-		return;
-	MyNotifier = Spawn(Class'DriverWNotifier');
-	//VehicleOwner.InitInventory(MyNotifier);
-	MyNotifier.WeaponOwner = Self;
-	Inventory = MyNotifier;
+	if (Role == ROLE_Authority)
+	{
+		MyNotifier = Spawn(Class'DriverWNotifier');
+		//VehicleOwner.InitInventory(MyNotifier);
+		MyNotifier.WeaponOwner = Self;
+		Inventory = MyNotifier;
+	}
 	
-	setTimer(1, true);
+	if (Role == ROLE_Authority /*|| class'VActor'.static.IsDemoPlayback(Level)*/)
+		setTimer(1, true);
 }
 event TravelPostAccept()
 {
@@ -91,7 +95,7 @@ event TravelPostAccept()
 
 auto state ClientActive
 {
-ignores BringUp,Finish;
+	ignores BringUp, Finish;
 
 	function bool PutDown()
 	{
@@ -138,6 +142,27 @@ simulated function SetName()
 			ItemName = VehicleOwner.GetWeaponName(SeatNumber);
 		else
 			SetTimer(1, false);
+	}
+}
+
+simulated function Tick(float Delta)
+{
+	local DriverCameraActor Camera;
+	if (Level.NetMode == NM_Client && OldOwner != Owner)
+	{
+		if (VehicleOwner != None && class'VActor'.static.IsDemoPlayback(Level) && 
+			(Pawn(OldOwner) != None || Pawn(Owner) != None))
+		{
+			Camera = VehicleOwner.GetCam(self);
+			if (Camera != None)
+			{
+				if (Pawn(OldOwner) != None)
+					Camera.ChangeCam(Camera, OldOwner);
+				if (Pawn(Owner) != None)
+					Camera.ChangeCam(Owner, Camera);
+			}
+		}
+		OldOwner = Owner;
 	}
 }
 

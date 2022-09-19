@@ -9,15 +9,16 @@ var float DesiredViewMult, CurrentViewMult, OldDesiredViewMult, KeepWait;
 replication
 {
 	// Variables the server should send to the client.
-	reliable if( Role==ROLE_Authority )
-		VehicleOwner,SeatNum,GunAttachM,DesiredViewMult;
+	reliable if (Role == ROLE_Authority)
+		VehicleOwner, SeatNum, GunAttachM, DesiredViewMult;
 }
 
-function PostBeginPlay()
+simulated function PostBeginPlay()
 {
 	Super.PostBeginPlay();
 	
-	class'CameraMaster'.static.Init(self);	
+	if (Level.PawnList != None || class'VActor'.static.IsDemoPlayback(Level))
+		class'CameraMaster'.static.Init(self);
 }
 
 function KeepView()
@@ -174,27 +175,35 @@ function SetCamOwner(Actor NewOwner)
 		ChangeCam(NewOwner, self);
 }
 
-function ChangeCam(Actor IfView, Actor ThenView)
+simulated function ChangeCam(Actor IfView, Actor ThenView)
 {
 	Local Pawn P;
 	local PlayerPawn Player;
+	
+	if (class'VActor'.static.IsDemoPlayback(Level))
+		foreach AllActors(class'PlayerPawn', Player)
+			ChangePlayerCam(Player, IfView, ThenView);
+	else
+		for (P = Level.PawnList; P != None; P = P.nextPawn)
+			if (PlayerPawn(P) != None)
+				ChangePlayerCam(PlayerPawn(P), IfView, ThenView);
+}
 
-	for (P=Level.PawnList; P!=None; P=P.nextPawn)
+simulated function ChangePlayerCam(PlayerPawn Player, Actor IfView, Actor ThenView)
+{
+	if (Player != None && Player != ThenView && Player.ViewTarget == IfView)
 	{
-		Player = PlayerPawn(P);
-		if (Player != None && Player != ThenView && Player.ViewTarget == IfView)
+		Player.SetPropertyText("bLockOn", "False"); // udemo playback hack
+		Player.ViewTarget = ThenView;
+		if (ThenView == self)
 		{
-			Player.ViewTarget = ThenView;
-			if (ThenView == self)
-			{
-				Player.bHiddenEd = Player.bBehindView;
-				Player.bBehindView = false;					
-			}
-			else if (ThenView == None)
-				Player.bBehindView = false;
-			else
-				Player.bBehindView = Player.bHiddenEd;
+			Player.bHiddenEd = Player.bBehindView;
+			Player.bBehindView = false;					
 		}
+		else if (ThenView == None)
+			Player.bBehindView = false;
+		else
+			Player.bBehindView = Player.bHiddenEd;
 	}
 }
 

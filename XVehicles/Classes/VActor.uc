@@ -471,7 +471,6 @@ final simulated function vector CalcGravityStrength( vector Gravity, vector Floo
 	Return Gravity;
 }
 
-
 // Canvas:
 simulated static function bool WorldToScreen(Vector WorldLocation, Pawn ThePlayer, vector EyePos, rotator ScreenRot,
      float ScreenWidth, float ScreenHeight, out float X, out float Y)
@@ -496,6 +495,11 @@ simulated static function vector NormalWeightSum(float ratioA, vector A, vector 
 	if (ratioA >= 1f)
 		return Normal(A);
 	return Normal(ratioA*A + (1f - ratioA)*B);
+}
+
+simulated static function bool IsDemoPlayback(LevelInfo Level)
+{
+	return Level.NetMode == NM_Client && Level.GetAddressURL() == ":7777";
 }
 
 defaultproperties

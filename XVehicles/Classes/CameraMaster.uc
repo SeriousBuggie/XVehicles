@@ -3,8 +3,9 @@ class CameraMaster expands Info;
 var CameraMaster Master;
 
 var string Pending;
+var int used;
 
-static function Init(Actor Instigator)
+static simulated function Init(Actor Instigator)
 {
 	if (default.Master != None && !default.Master.bDeleteMe)
 		return;
@@ -17,43 +18,53 @@ function Timer()
 {
 	Local Pawn P;
 	local PlayerPawn Player;
-	local DriverWeapon Weapon;
-	local Actor Camera;
-	local string Check;
-	local int i, used;
+	
+	used = 0;
 
-	for (P=Level.PawnList; P!=None; P=P.nextPawn)
-	{
-		Player = PlayerPawn(P);
-		if (Player == None || Pawn(Player.ViewTarget) == None)
-			continue;
-		Weapon = DriverWeapon(Pawn(Player.ViewTarget).Weapon);
-		if (Weapon == None || Weapon.VehicleOwner == None)
-			continue;
-		Camera = Weapon.VehicleOwner.GetCam(Weapon);
-
-		if (Camera == None || Camera == Player)
-			continue;
-			
-		Check = Player @ Player.ViewTarget;
-		
-		i = InStr(Pending, Check);
-		if (i < 0)
-		{
-			Pending = Pending $ ";" $ Check;
-			used++;
-			continue;
-		}
-		
-		Pending = Left(Pending, i - 1) $ Mid(Pending, i + Len(Check));
-
-		Player.ViewTarget = Camera;
-		Player.bHiddenEd = Player.bBehindView;
-		Player.bBehindView = false;
-	}
+	if (DemoPlaybackSpec(Level.PawnList) != None)
+		foreach AllActors(class'PlayerPawn', Player)
+			ProcessPlayerPawn(Player);
+	else
+		for (P = Level.PawnList; P != None; P = P.nextPawn)
+			if (PlayerPawn(P) != None)
+				ProcessPlayerPawn(PlayerPawn(P));
 	
 	if (used == 0)
 		Pending = "";
+}
+
+function ProcessPlayerPawn(PlayerPawn Player)
+{
+	local DriverWeapon Weapon;
+	local Actor Camera;
+	local string Check;
+	local int i;
+
+	if (Player == None || Pawn(Player.ViewTarget) == None)
+		return;
+	Weapon = DriverWeapon(Pawn(Player.ViewTarget).Weapon);
+	if (Weapon == None || Weapon.VehicleOwner == None)
+		return;
+	Camera = Weapon.VehicleOwner.GetCam(Weapon);
+	if (Camera == None || Camera == Player)
+		return;
+		
+	Check = Player @ Player.ViewTarget;
+	
+	i = InStr(Pending, Check);
+	if (i < 0)
+	{
+		Pending = Pending $ ";" $ Check;
+		used++;
+		return;
+	}
+	
+	Pending = Left(Pending, i - 1) $ Mid(Pending, i + Len(Check));
+
+	Player.SetPropertyText("bLockOn", "False"); // udemo playback hack
+	Player.ViewTarget = Camera;
+	Player.bHiddenEd = Player.bBehindView;
+	Player.bBehindView = false;
 }
 
 defaultproperties

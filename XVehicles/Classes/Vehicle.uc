@@ -352,15 +352,15 @@ const SmallDrawScale = 0.0001;
 replication
 {
 	// Variables the server should send to the client.
-	reliable if( Role==ROLE_Authority )
+	reliable if (Role == ROLE_Authority)
 		Driver,bDriving,Health,bVehicleBlewUp,ReplicOverlayMat,bTeamLocked,CurrentTeam,Passengers,
 		bReadyToRun, Specials, DriverGun, VehicleState, ServerState, bHasPassengers, // new ones
 		// Functions server can call.
 		ClientSetTranslatorMsg;
-	reliable if( Role==ROLE_Authority && bNetOwner )
+	reliable if (Role == ROLE_Authority && bNetOwner)
 		bCameraOnBehindView,MyCameraAct,WAccelRate;
 	// Functions client can call.
-	reliable if( Role<ROLE_Authority )
+	reliable if (Role < ROLE_Authority)
 		ServerPerformPackedMove,ServerSetBehindView;
 }
 
@@ -583,7 +583,7 @@ simulated function PostBeginPlay()
 	}
 	//*****************************************
 	
-	if( Level.NetMode==NM_Client )
+	if (Level.NetMode == NM_Client)
 		return;
 
 	if (InitialDamage > 0)
@@ -724,7 +724,7 @@ function PassengerChangeBackView( byte SeatN)
 		PassengerSeats[SeatN].PassengerCam.ChangeView();
 }
 
-function DriverCameraActor GetCam(DriverWeapon Weapon)
+simulated function DriverCameraActor GetCam(DriverWeapon Weapon)
 {
 	if (!Weapon.bPassengerGun)
 		return MyCameraAct;
@@ -1293,13 +1293,15 @@ simulated function ClientUpdateState(float Delta)
 	local int i, f;
 	local PlayerPawn LocalPlayer;
 	local VehState ClientState;
+	local bool bNeedUpdateYaw;
 	
 	if (Default.StaticPP != None)
 		LocalPlayer = Default.StaticPP.Actor;
 	else
 		LocalPlayer = FindNetOwner(self);
-	
-	if (ServerState.ClientTime != 0)
+
+	bNeedUpdateYaw = ServerState.ClientTime != 0;
+	if (bNeedUpdateYaw)
 	{
 		ClientState.Location = Location;
 		ClientState.Velocity = Velocity;
@@ -1347,19 +1349,26 @@ simulated function ClientUpdateState(float Delta)
 		}
 		else
 			Velocity = ServerState.Velocity;
-		
-		if (bShouldRepVehYaw)
-		{
-			if (bFPRepYawUpdatesView && !bCameraOnBehindView && Driver != None && IsNetOwner(Driver))
-				Driver.ViewRotation.Yaw += ServerState.Yaw - VehicleYaw;
-			VehicleYaw = ServerState.Yaw;
-		}
 	}
-	ServerPredictLocation = ServerState.Location + (Level.TimeSeconds - ServerStateTime)*ServerState.Velocity;
+	if (ServerStateTime == 0)
+	{ // demoplay from demo recorded on client
+		ServerPredictLocation = ServerState.Location;
+		Velocity = ServerState.Velocity;
+		bNeedUpdateYaw = true;
+	}
+	else
+		ServerPredictLocation = ServerState.Location + (Level.TimeSeconds - ServerStateTime)*ServerState.Velocity;
+		
+	if (bNeedUpdateYaw && bShouldRepVehYaw)
+	{
+		if (bFPRepYawUpdatesView && !bCameraOnBehindView && Driver != None && IsNetOwner(Driver))
+			Driver.ViewRotation.Yaw += ServerState.Yaw - VehicleYaw;
+		VehicleYaw = ServerState.Yaw;
+	}
 		
 	Diff = ServerPredictLocation - Location;
 	Dist = Diff dot Diff; // squared VSize
-
+	
 	if (Dist > 122500) // 350*350
 		SetLocation(ServerPredictLocation);
 	else if (Dist > 1)
@@ -1590,6 +1599,7 @@ simulated function Tick( float Delta )
 			}
 		}
 	}
+
 	if (Driver != None)
 		UpdateDriverPos();
 	if (!bDriving || (Driver != None && Driver.IsInState('GameEnded')) || 
@@ -1676,7 +1686,6 @@ simulated function Tick( float Delta )
 			}
 		}
 	}
-
 	if (bSlopedPhys && bSlopedG && GVTNormal!=ActualGVTNormal)
 	{
 		// smoothly change floor if not sloped and on the ground
@@ -1701,7 +1710,8 @@ simulated function Tick( float Delta )
 		NewMove.Turn = Turning;
 		NewMove.Accel = Accel;
 	}
-	if( Level.NetMode>NM_StandAlone && Level.NetMode<NM_Client )
+
+	if (Level.NetMode < NM_Client) // NM_StandAlone included for demorec support
 		ServerPackState(Delta);
 	UpdateDriverInput(Delta);
 	if (NewMove != None)
@@ -2684,26 +2694,26 @@ simulated function ClientSetTranslatorMsg()
 	local PlayerPawn PP;
 
 	ServerSetBehindView(bUseBehindView);
-	if( Level.NetMode==NM_DedicatedServer )
+	if (Level.NetMode == NM_DedicatedServer)
 		Return;
-	if( Level.NetMode==NM_Client )
+	if (Level.NetMode == NM_Client)
 	{
-		ForEach AllActors(Class'PlayerPawn',PP)
+		foreach AllActors(Class'PlayerPawn', PP)
 		{
-			if( PP.Player!=None )
-				Break;
+			if (PP.Player != None && TournamentPlayer(PP) != None)
+				break;
 		}
 	}
 	else PP = PlayerPawn(Owner);
-	if( PP==None )
+	if (PP == None)
 		Return;
 	PP.bBehindView = False;
-	if( MyCameraAct!=None )
+	if (MyCameraAct != None)
 		PP.ViewTarget = MyCameraAct;
-	PP.ClientMessage(VehicleName,'Pickup');
-	For( I=PP.Inventory; (I!=None && Count<2000); I=I.Inventory )
+	PP.ClientMessage(VehicleName, 'Pickup');
+	for (I = PP.Inventory; I != None && Count < 2000; I = I.Inventory)
 	{
-		if( Translator(I)!=None )
+		if (Translator(I) != None)
 		{
 			PP.ClientMessage(MsgVehicleDesc);
 			Translator(I).NewMessage = TranslatorDescription;
