@@ -188,7 +188,7 @@ simulated function bool TraceIdentify(canvas Canvas)
 	
 	EndTrace = StartTrace + vector(CamRot) * 1000.0;
 	foreach TraceActor.TraceActors(class'Vehicle', Other, HitLocation, HitNormal, EndTrace, StartTrace)
-		if (Other != TraceActor)
+		if (Other.IsA('Vehicle') && Other != TraceActor) // Other can be LevelInfo in v436
 		{
 			DrawFixProgress(Canvas, Other);
 			if (Other.Driver != None || Other.HasPassengers())
