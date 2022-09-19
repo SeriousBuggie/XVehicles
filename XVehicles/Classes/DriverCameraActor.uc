@@ -195,7 +195,7 @@ simulated function ChangePlayerCam(PlayerPawn Player, Actor IfView, Actor ThenVi
 	{
 		Player.SetPropertyText("bLockOn", "False"); // udemo playback hack
 		Player.ViewTarget = ThenView;
-		if (ThenView == self)
+		if (DriverCameraActor(ThenView) != None)
 		{
 			Player.bHiddenEd = Player.bBehindView;
 			Player.bBehindView = false;					

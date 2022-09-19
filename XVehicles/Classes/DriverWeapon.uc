@@ -147,6 +147,9 @@ simulated function SetName()
 simulated function Tick(float Delta)
 {
 	local DriverCameraActor Camera;
+	local DriverWeapon OtherWeapon;
+	local Actor ViewTarget;
+	
 	if (Level.NetMode == NM_Client && OldOwner != Owner)
 	{
 		if (VehicleOwner != None && class'VActor'.static.IsDemoPlayback(Level) && 
@@ -156,7 +159,14 @@ simulated function Tick(float Delta)
 			if (Camera != None)
 			{
 				if (Pawn(OldOwner) != None)
-					Camera.ChangeCam(Camera, OldOwner);
+				{
+					OtherWeapon = DriverWeapon(Pawn(OldOwner).Weapon);
+					if (OtherWeapon != None && OtherWeapon.VehicleOwner != None)
+						ViewTarget = OtherWeapon.VehicleOwner.GetCam(OtherWeapon);
+					if (ViewTarget == None)
+						ViewTarget = OldOwner;
+					Camera.ChangeCam(Camera, ViewTarget);
+				}
 				if (Pawn(Owner) != None)
 					Camera.ChangeCam(Owner, Camera);
 			}

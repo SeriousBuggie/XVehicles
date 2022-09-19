@@ -353,15 +353,15 @@ replication
 {
 	// Variables the server should send to the client.
 	reliable if (Role == ROLE_Authority)
-		Driver,bDriving,Health,bVehicleBlewUp,ReplicOverlayMat,bTeamLocked,CurrentTeam,Passengers,
+		Driver, bDriving, Health, bVehicleBlewUp, ReplicOverlayMat, bTeamLocked, CurrentTeam, Passengers,
 		bReadyToRun, Specials, DriverGun, VehicleState, ServerState, bHasPassengers, // new ones
 		// Functions server can call.
 		ClientSetTranslatorMsg;
 	reliable if (Role == ROLE_Authority && bNetOwner)
-		bCameraOnBehindView,MyCameraAct,WAccelRate;
+		bCameraOnBehindView, MyCameraAct, WAccelRate;
 	// Functions client can call.
 	reliable if (Role < ROLE_Authority)
-		ServerPerformPackedMove,ServerSetBehindView;
+		ServerPerformPackedMove, ServerSetBehindView;
 }
 
 function Spawned()
@@ -726,12 +726,23 @@ function PassengerChangeBackView( byte SeatN)
 
 simulated function DriverCameraActor GetCam(DriverWeapon Weapon)
 {
+	local DriverCameraActor ret;
+	local int SeatNum;
+//	log(self @ Weapon @ Weapon.SeatNumber @ PassengerSeats[Weapon.SeatNumber].PassengerCam @ PassengerSeats[Weapon.SeatNumber].PHGun);	
 	if (!Weapon.bPassengerGun)
-		return MyCameraAct;
-//	log(self @ Weapon @ Weapon.SeatNumber @ PassengerSeats[Weapon.SeatNumber].PassengerCam @ PassengerSeats[Weapon.SeatNumber].PHGun);
-	if (Weapon.SeatNumber < ArrayCount(PassengerSeats))
-		return PassengerSeats[Weapon.SeatNumber].PassengerCam;
-	return None;
+		ret = MyCameraAct;
+	else if (Weapon.SeatNumber < ArrayCount(PassengerSeats))
+		ret = PassengerSeats[Weapon.SeatNumber].PassengerCam;	
+	if (ret == None)
+	{
+		SeatNum = Weapon.SeatNumber;
+		if (Weapon.bPassengerGun)
+			SeatNum++;
+		foreach AllActors(class'DriverCameraActor', ret)
+			if (ret.VehicleOwner == self && ret.SeatNum == SeatNum)
+				break;
+	}
+	return ret;
 }
 
 function KeepCams()
