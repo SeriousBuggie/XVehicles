@@ -13,7 +13,7 @@ replication
 {
 	// Variables the server should send to the client.
 	reliable if (Role == ROLE_Authority)
-		VehicleOwner, SeatNumber;
+		VehicleOwner, SeatNumber, bPassengerGun;
 }
 
 simulated function PostNetBeginPlay()
@@ -127,7 +127,6 @@ ignores BringUp,Finish;
 	simulated function AnimEnd() {}
 Begin:
 }
-
 
 function float SwitchPriority()
 {

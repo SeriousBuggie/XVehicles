@@ -1,4 +1,5 @@
 // Weapon Attachments for vehicles.
+// Network code: Client rotate turret by RepAimPos. Owners use GetDriverInput/GetBotInput
 Class WeaponAttachment extends VehicleAttachment
 	Abstract;
 
@@ -109,18 +110,18 @@ var() class<Actor> HitMark;
 replication
 {
 	// Variables the server should send to the client.
-	reliable if( Role==ROLE_Authority )
-		bInvisGun,TurretOffset,FireFXCounter,
-		PitchPart,WAtt,ClientFireEffect;
-	reliable if( Role==ROLE_Authority && bNetInitial )
+	reliable if (Role == ROLE_Authority)
+		bInvisGun, TurretOffset, FireFXCounter,
+		PitchPart, WAtt, ClientFireEffect;
+	reliable if (Role == ROLE_Authority && bNetInitial)
 		TurretYaw,TurretPitch;
-	reliable if( Role==ROLE_Authority && bNetOwner )
+	reliable if (Role == ROLE_Authority && bNetOwner)
 		PassengerNum;
-	reliable if( Role==ROLE_Authority && !bDriverWeapon && (!bInvisGun || bNetOwner) )
+	reliable if (Role == ROLE_Authority && !bDriverWeapon && (!bInvisGun || bNetOwner))
 		WeaponController;
-	reliable if( Role==ROLE_Authority && !bInvisGun )
+	reliable if (Role == ROLE_Authority && !bInvisGun)
 		bDriverWeapon;
-	reliable if( Role==ROLE_Authority && !bNetOwner )
+	reliable if (Role == ROLE_Authority && (!bNetOwner || bDemoRecording))
 		RepAimPos;
 }
 
@@ -716,7 +717,7 @@ simulated function Tick( float Delta )
 	local VehicleAttachment vat;
 	local bool bNeedFiringShaking;
 
-	if( OwnerVehicle==None )
+	if (OwnerVehicle == None)
 		Return;
 
 	if (!bSkipFiringShaking)
@@ -753,8 +754,7 @@ simulated function Tick( float Delta )
 			bInFiringProcess = 0;
 			FireTurret(j,True);
 			ResetEnergy();
-		}
-			
+		}	
 	}
 	else if (WeaponController != None && !bFireRestrict && WeaponController.bFire + WeaponController.bAltFire > 0)
 		Timer();
@@ -937,7 +937,7 @@ simulated function SetTurretYaw()
 			bYawFromContr = false;
 			OlVehYaw = OwnerVehicle.VehicleYaw;
 		}
-		else if( OlVehYaw != OwnerVehicle.VehicleYaw)
+		else if (OlVehYaw != OwnerVehicle.VehicleYaw)
 		{
 			TurretYaw += OwnerVehicle.VehicleYaw - OlVehYaw;
 			OlVehYaw = OwnerVehicle.VehicleYaw;
