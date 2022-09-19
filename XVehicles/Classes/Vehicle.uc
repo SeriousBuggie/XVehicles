@@ -730,9 +730,17 @@ simulated function DriverCameraActor GetCam(DriverWeapon Weapon)
 	local int SeatNum;
 //	log(self @ Weapon @ Weapon.SeatNumber @ PassengerSeats[Weapon.SeatNumber].PassengerCam @ PassengerSeats[Weapon.SeatNumber].PHGun);	
 	if (!Weapon.bPassengerGun)
+	{
+		if (DWeapon == None)
+			DWeapon = Weapon;
 		ret = MyCameraAct;
+	}
 	else if (Weapon.SeatNumber < ArrayCount(PassengerSeats))
+	{
+		if (PassengerSeats[Weapon.SeatNumber].PHGun == None)
+			PassengerSeats[Weapon.SeatNumber].PHGun = Weapon;
 		ret = PassengerSeats[Weapon.SeatNumber].PassengerCam;	
+	}
 	if (ret == None)
 	{
 		SeatNum = Weapon.SeatNumber;
