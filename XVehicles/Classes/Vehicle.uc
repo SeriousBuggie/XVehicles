@@ -897,9 +897,10 @@ simulated function bool IsNetOwned()
 	return false;
 }
 
-function bool IsGoodFlag(Decoration Flag)
+function bool IsGoodFlag(Decoration Flag, optional Pawn Holder)
 {
-	return Flag != None && !Flag.IsA('PureFlag') && !Flag.IsA('WarmupFlag');
+	return Flag != None && !Flag.IsA('PureFlag') && !Flag.IsA('WarmupFlag') &&
+		(Holder == None || CTFFlag(Flag) == None || CTFFlag(Flag).Holder == Holder);
 }
 
 function ShowFlagOnRoof()
@@ -909,12 +910,12 @@ function ShowFlagOnRoof()
 	local CTFReplicationInfo CTFRI;
 	
 	if (Driver != None && Driver.PlayerReplicationInfo != None && 
-		IsGoodFlag(Driver.PlayerReplicationInfo.HasFlag))
+		IsGoodFlag(Driver.PlayerReplicationInfo.HasFlag, Driver))
 		AddFlag(Driver.PlayerReplicationInfo.HasFlag);
 
 	for (i = 0; i < ArrayCount(Passengers); i++)
 		if (Passengers[i] != None && Passengers[i].PlayerReplicationInfo != None && 
-			IsGoodFlag(Passengers[i].PlayerReplicationInfo.HasFlag))
+			IsGoodFlag(Passengers[i].PlayerReplicationInfo.HasFlag, Passengers[i]))
 			AddFlag(Passengers[i].PlayerReplicationInfo.HasFlag);
 			
 	if (Level != None && Level.Game != None && CTFReplicationInfo(Level.Game.GameReplicationInfo) != None)
