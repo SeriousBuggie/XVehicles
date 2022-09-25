@@ -905,20 +905,23 @@ function ShowFlagOnRoof()
 	
 	if (Driver != None && Driver.PlayerReplicationInfo != None && 
 		Driver.PlayerReplicationInfo.HasFlag != None &&
-		!Driver.PlayerReplicationInfo.HasFlag.IsA('PureFlag'))
-		AddFlag(Driver.PlayerReplicationInfo.HasFlag);
+		(!Driver.PlayerReplicationInfo.HasFlag.IsA('PureFlag') ||
+		!Driver.PlayerReplicationInfo.HasFlag.IsA('WarmupFlag')) )
+			AddFlag(Driver.PlayerReplicationInfo.HasFlag);
 
 	for (i = 0; i < ArrayCount(Passengers); i++)
 		if (Passengers[i] != None && Passengers[i].PlayerReplicationInfo != None && 
 			Passengers[i].PlayerReplicationInfo.HasFlag != None &&
-			!Passengers[i].PlayerReplicationInfo.HasFlag.IsA('PureFlag'))
-			AddFlag(Passengers[i].PlayerReplicationInfo.HasFlag);
+			(!Passengers[i].PlayerReplicationInfo.HasFlag.IsA('PureFlag') ||
+			!Passengers[i].PlayerReplicationInfo.HasFlag.IsA('WarmupFlag')) )
+				AddFlag(Passengers[i].PlayerReplicationInfo.HasFlag);
 			
 	if (Level != None && Level.Game != None && CTFReplicationInfo(Level.Game.GameReplicationInfo) != None)
 	{
 		CTFRI = CTFReplicationInfo(Level.Game.GameReplicationInfo);
 		for (i = 0; i < ArrayCount(CTFRI.FlagList); i++)
-			if (CTFRI.FlagList[i] != None && !CTFRI.FlagList[i].IsA('PureFlag') && 
+			if (CTFRI.FlagList[i] != None && (!CTFRI.FlagList[i].IsA('PureFlag') ||
+				!CTFRI.FlagList[i].IsA('WarmupFlag')) && 
 				CTFRI.FlagList[i].Holder != None &&
 				DriverWeapon(CTFRI.FlagList[i].Holder.Weapon) != None &&
 				DriverWeapon(CTFRI.FlagList[i].Holder.Weapon).VehicleOwner == self)
