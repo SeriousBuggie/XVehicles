@@ -2566,7 +2566,7 @@ simulated function int GetMovementDir()
 	else Return -1;
 }
 
-event float BotDesireability(Pawn Bot)
+function float BotDesireability2(Pawn Bot)
 {
 	local vector L;
 //	Log(self @ "BotDesireability 1" @ Bot.GetHumanName() @ Bot.MoveTarget);

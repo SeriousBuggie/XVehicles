@@ -121,7 +121,7 @@ function FixBot(Bot Bot) {
 	
 	foreach Bot.RadiusActors(class'Vehicle', Veh, 600)
 	{
-		Dist = Veh.BotDesireability(Bot);
+		Dist = Veh.BotDesireability2(Bot);
 		if (Dist > 0)
 		{
 			Dist *= VSize(Veh.Location - Bot.Location);

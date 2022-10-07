@@ -24,7 +24,7 @@ Begin:
 event float BotDesireability(Pawn Bot)
 {
 	if (VehicleOwner != None)
-		return VehicleOwner.BotDesireability(Bot);
+		return VehicleOwner.BotDesireability2(Bot);
 	return -1;
 }
 
