@@ -210,13 +210,21 @@ simulated function SpawnTrail()
 	{
 		Trail1 = Spawn(TrailClass1, Self,, Location + (TrailOffset1 >> Rotation));
 		if (NaliTrail(Trail1) != None)
+		{
+			if (Role != ROLE_Authority)
+				Trail1.RemoteRole = ROLE_None;
 			NaliTrail(Trail1).SetPrePivot(TrailOffset1);
+		}
 	}
 	if (TrailClass2 != None)
 	{
 		Trail2 = Spawn(TrailClass2, Self,, Location + (TrailOffset2 >> Rotation));
 		if (NaliTrail(Trail2) != None)
+		{
+			if (Role != ROLE_Authority)
+				Trail2.RemoteRole = ROLE_None;
 			NaliTrail(Trail2).SetPrePivot(TrailOffset2);
+		}
 	}
 }
 
