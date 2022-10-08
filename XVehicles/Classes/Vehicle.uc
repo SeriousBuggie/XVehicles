@@ -2366,12 +2366,16 @@ function ReadBotInput( float Delta )
 //		log(Level.TimeSeconds @ self @ "GetNextMoveTarget" @ MoveDest);
 		if (V == MoveDest)
 		{
+			X = MoveDest - Driver.Location;
+			Y = Normal(X);
 			VS.X = CollisionRadius;
 			VS.Y = VS.X;
-			VS.Z = CollisionHeight - MaxObstclHeight;
-			T = Location + 2.0*CollisionRadius*GetMovementDir()*Normal(MoveDest - Driver.Location);
-			if (Trace(HitLocation, HitNormal, T, Location, true, VS) != None)
+			VS.Z = Max(16, CollisionHeight - MaxObstclHeight - Abs(Y.Z)*CollisionRadius);
+			T = Location + Min(CollisionRadius, VSize(X))*GetMovementDir()*Y;
+			if (Trace(HitLocation, HitNormal, T, Location, true, VS) != None && 
+				 HitNormal.Z < 0.7 && VSize(HitLocation - Location) < 0.5*CollisionRadius)
 			{
+				//Log(0 @ HitNormal @ VSize(HitLocation - Location) @ VSize(HitLocation - T));
 				GetAxes(rotator(MoveDest - Driver.Location), X, Y, Z);
 				Dir = 1;
 				if ((Y dot HitNormal) < 0)

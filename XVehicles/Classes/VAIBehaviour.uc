@@ -156,9 +156,9 @@ function vector GetNextMoveTarget()
 				T2 = T - VehicleOwner.Location;
 				T2.Z -= VehicleOwner.MaxObstclHeight/2;
 				T2 = Normal(T2);
-				if (T2.Z > 0.71)
+				if (Abs(T2.Z) > 0.71)
 					continue;
-				Z = T2.Z;	
+				Z = Abs(T2.Z);	
 				T2.Z = 0;
 				Z = Z*VehicleOwner.CollisionRadius/VSize(T2);
 			}
@@ -258,7 +258,7 @@ function vector GetNextMoveTarget()
 			}
 			Dist = V dot Normal(Pos[i] - VehicleOwner.Driver.Location);
 			if (VehicleOwner.bCanFly)
-				Dist = i + 10;
+				Dist = i + 10; // Dist before always be in range [0; 1]
 //			dbg = dbg @ "+";
 			if (dist >= BestDist - AimError)
 			{
