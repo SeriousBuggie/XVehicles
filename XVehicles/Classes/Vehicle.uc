@@ -2369,10 +2369,10 @@ function ReadBotInput( float Delta )
 			VS.X = CollisionRadius;
 			VS.Y = VS.X;
 			VS.Z = CollisionHeight - MaxObstclHeight;
-			T = Location + 2.0*CollisionRadius*GetMovementDir()*Normal(MoveDest - Location);
+			T = Location + 2.0*CollisionRadius*GetMovementDir()*Normal(MoveDest - Driver.Location);
 			if (Trace(HitLocation, HitNormal, T, Location, true, VS) != None)
 			{
-				GetAxes(rotator(MoveDest - Location), X, Y, Z);
+				GetAxes(rotator(MoveDest - Driver.Location), X, Y, Z);
 				Dir = 1;
 				if ((Y dot HitNormal) < 0)
 					Dir = -1;
