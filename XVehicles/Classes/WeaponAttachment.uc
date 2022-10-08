@@ -1041,6 +1041,12 @@ function rotator GetBotInput( float Delta )
 		else		
 			RepAimPos = WeaponController.Focus;
 	}
+	if (Level.Game.bTeamGame && WeaponController.MoveTarget != None && 
+		(WeaponController.bFire > 0 || WeaponController.bAltFire > 0) &&
+		VSize(RepAimPos - WeaponController.MoveTarget.Location) < 10 && 
+		Pawn(WeaponController.MoveTarget) != None && Pawn(WeaponController.MoveTarget).PlayerReplicationInfo != None &&
+		Pawn(WeaponController.MoveTarget).PlayerReplicationInfo.Team == WeaponController.PlayerReplicationInfo.Team)
+		WeaponController.StopFiring();
 	if (RepAimPos == OwnerVehicle.MoveDest)
 	{
 		if ((WeaponController.bFire > 0 || WeaponController.bAltFire > 0) &&
