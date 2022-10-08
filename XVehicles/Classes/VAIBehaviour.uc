@@ -275,6 +275,13 @@ function vector GetNextMoveTarget()
 		else if (VehicleOwner.bCanFly && Closest >= 400f)
 			VehicleOwner.Driver.MoveTimer = 1f; // prevent refresh path in air
 //		Log("Use driver RouteCache" @ best @ Visible[best] @ Visible[best].getHumanName() @ VSize(V - VehicleOwner.Location) @ VehicleOwner.CollisionRadius);
+		if (best + 1 < ArrayCount(Visible) && Visible[best + 1] != None)
+		{
+			T = Pos[best] - Pos[best + 1];
+			if ((T dot (Pos[best] - VehicleOwner.Driver.Location))*
+				(T dot (Pos[best + 1] - VehicleOwner.Driver.Location)) < 0)
+				best++; // prevent stuck between points
+		}
 		V = Pos[best];
 		if (best == 0 && VehicleOwner.Driver.RouteCache[1] != None &&
 			VSize(V - VehicleOwner.Location) < VehicleOwner.CollisionRadius)
@@ -282,7 +289,10 @@ function vector GetNextMoveTarget()
 		if (VSize(V - Location) < 100 && Vsize(V - Visible[best].Location) > 100)
 			V = Visible[best].Location;
 		if (FlagBase(Visible[best]) != None)
+		{
 			V -= (Normal(VehicleOwner.ExitOffset)*(VehicleOwner.CollisionRadius + 10 - Visible[best].CollisionRadius/2)) >> VehicleOwner.Rotation;
+			Bot(VehicleOwner.Driver).AlternatePath = None; // hack for prevent bot run to it
+		}
 		return V;
 	}
 //	Log("Use driver Destination" @ VehicleOwner.Driver.Destination @ VSize(VehicleOwner.Driver.Destination - VehicleOwner.Location) @ VSize(VehicleOwner.Driver.Destination - VehicleOwner.Driver.Location));
