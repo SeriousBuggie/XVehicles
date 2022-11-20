@@ -179,6 +179,7 @@ simulated function bool TraceIdentify(canvas Canvas)
 	local rotator CamRot;
 	local float X;
 	local Vehicle Other;
+	local int i;
 	
 	Canvas.ViewPort.Actor.PlayerCalcView(Camera, StartTrace, CamRot);
 	
@@ -188,8 +189,14 @@ simulated function bool TraceIdentify(canvas Canvas)
 	
 	EndTrace = StartTrace + vector(CamRot) * 1000.0;
 	foreach TraceActor.TraceActors(class'Vehicle', Other, HitLocation, HitNormal, EndTrace, StartTrace)
-		if (Other.IsA('Vehicle') && Other != TraceActor) // Other can be LevelInfo in v436
+		// Other can be LevelInfo in v436
+		if (Other.IsA('Vehicle') && Other != TraceActor && Other.Driver != MyHUD.PawnOwner)
 		{
+			for (i = 0; i < ArrayCount(Other.Passengers); i++)
+				if (Other.Passengers[i] == MyHUD.PawnOwner)
+					break;
+			if (i < ArrayCount(Other.Passengers))
+				continue;
 			DrawFixProgress(Canvas, Other);
 			if (Other.Driver != None || Other.HasPassengers())
 			{
