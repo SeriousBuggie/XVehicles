@@ -2695,8 +2695,18 @@ State VehicleDriving
 	{
 		local PlayerPawn PP;
 		local byte Fr;
+		local int i;
 		if (Driver != None)
+		{
 			Driver.MakeNoise(2.0);
+			// sometimes wrong order of events produce pickup flag after pass enter check, so it fixed here
+			if (DropFlag != DF_None)
+				TryDropFlag(Driver);
+		}
+		if (DropFlag == DF_All)
+			for (i = 0; i < ArrayCount(Passengers); i++)
+				if (Passengers[i] != None)
+					TryDropFlag(Passengers[i]);
 		foreach RadiusActors(class'PlayerPawn', PP, CollisionRadius + 100)
 			if (CanAddPassenger(PP, fr))
 				Bump(PP);
