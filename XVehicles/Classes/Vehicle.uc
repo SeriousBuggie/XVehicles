@@ -2696,7 +2696,7 @@ State VehicleDriving
 		local PlayerPawn PP;
 		local byte Fr;
 		if (Driver != None)
-			Driver.MakeNoise(1.0);
+			Driver.MakeNoise(2.0);
 		foreach RadiusActors(class'PlayerPawn', PP, CollisionRadius + 100)
 			if (CanAddPassenger(PP, fr))
 				Bump(PP);
