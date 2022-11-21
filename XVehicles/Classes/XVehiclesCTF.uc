@@ -109,8 +109,15 @@ function FixBot(Bot Bot) {
 	local Vehicle Veh, Best;
 	local float Dist, BestDist;
 	
-	if (DriverWeapon(Bot.Weapon) != None || Bot.PlayerReplicationInfo == None || Vehicle(Bot.MoveTarget) != None)
-		return;		
+	if (DriverWeapon(Bot.Weapon) != None || Bot.PlayerReplicationInfo == None)
+		return;
+	if (Vehicle(Bot.MoveTarget) != None)
+	{
+		if (Vehicle(Bot.MoveTarget).BotDesireability2(Bot) > 0)
+			return;
+		Bot.MoveTarget = None;
+		Bot.MoveTimer = -1;
+	}
 	MyFlag = CTFFlag(Bot.PlayerReplicationInfo.HasFlag);
 	if (MyFlag == None)
 		return;
