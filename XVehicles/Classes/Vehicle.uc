@@ -2555,10 +2555,11 @@ function bool CanEnter(Pawn Other, optional bool bIgnoreDuck)
 		return false;
 	return true;
 }
-function bool IsTeamLockedFor( Pawn Other )
+function bool IsTeamLockedFor(Pawn Other)
 {
-	Return ((bTeamLocked || HasPassengers()) && Level.Game.bTeamGame && Level.Game.bDeathMatch && Other.PlayerReplicationInfo!=None
-	 && Other.PlayerReplicationInfo.Team<=3 && Other.PlayerReplicationInfo.Team!=CurrentTeam);
+	return Level.Game.bTeamGame && Other.PlayerReplicationInfo != None && 
+		Other.PlayerReplicationInfo.Team <= 3 && Other.PlayerReplicationInfo.Team != CurrentTeam &&
+		(bTeamLocked || Driver != None || HasPassengers());
 }
 
 // 1 - Forward
