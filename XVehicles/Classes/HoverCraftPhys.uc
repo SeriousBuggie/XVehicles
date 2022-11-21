@@ -238,8 +238,8 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 simulated function UpdateDriverInput( float Delta )
 {
 	local byte PitchDif;
-	local vector Ac,End,Start,HL,HN;
-	local float EngP, DeAcc, DeAccRat, GoDown, DesiredHoverHeight, Scale, BigScale;
+	local vector Ac, End, Start, HL, HN, X, Y, Z;
+	local float EngP, GoDown, DesiredHoverHeight, Scale, BigScale;
 	local rotator R;
 
 	if (bEngDynSndPitch)
@@ -329,16 +329,24 @@ simulated function UpdateDriverInput( float Delta )
 	}
 	if (Accel == 0 && Turning == 0)
 	{
+		GetAxes(rot(0, 1, 0)*VehicleYaw, X, Y, Z);
 		Ac = Velocity;
 		Ac.Z = 0;
-		DeAcc = VSize(Ac);
-		DeAccRat = Delta*WAccelRate;
-		if (DeAccRat > DeAcc)
-			DeAccRat = DeAcc;
-		Ac -= Normal(Ac)*DeAccRat;
+		Ac -= FMin(1, Delta)*(X dot Ac)*X + 5*FMin(0.2, Delta)*(Y dot Ac)*Y;
 		Velocity.X = Ac.X;
 		Velocity.Y = Ac.Y;
 		Return;
+	}
+	
+	if (Accel == 0)
+	{
+		GetAxes(rot(0, 1, 0)*VehicleYaw, X, Y, Z);
+		Velocity -= FMin(1, Delta)*(X dot Velocity)*X;
+	}
+	else if (Turning == 0)
+	{
+		GetAxes(rot(0, 1, 0)*VehicleYaw, X, Y, Z);
+		Velocity -= 4*FMin(0.25, Delta)*(Y dot Velocity)*Y;
 	}
 
 	Ac = GetAccelDir(Turning, Rising, Accel);
@@ -346,7 +354,7 @@ simulated function UpdateDriverInput( float Delta )
 		Ac *= WAccelRate;
 	else
 		Ac *= WDeAccelRate;
-	Velocity += Ac*Delta;	
+	Velocity += Ac*Delta;
 	if (VSize(Velocity) > MaxHoverSpeed)
 		Velocity = Normal(Velocity)*MaxHoverSpeed;
 }
