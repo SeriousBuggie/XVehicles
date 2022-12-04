@@ -128,13 +128,14 @@ simulated function DrawFixProgress(Canvas Canvas, Vehicle Vehicle)
 		X = (Canvas.ClipX - XL)/2;
 		Y = Canvas.ClipY/2 - 1.5*YL;
 		
+		Canvas.DrawColor = MyHUD.WhiteColor;
+		
 		//Canvas.Style = ERenderStyle.STY_Translucent;
 		Canvas.SetPos(X - XOffset, Y - YOffset);
 		Tex = Texture'AmmoLedBase';
 		Canvas.DrawTile(Tex, XL + XOffset*2, YL, 0, 0, Tex.USize, Tex.VSize);
 		
-		//Canvas.Style = ERenderStyle.STY_Normal;
-		Canvas.DrawColor = MyHUD.WhiteColor;
+		//Canvas.Style = ERenderStyle.STY_Normal;		
 		Canvas.SetPos(X, Y);
 		Canvas.DrawText(Str);
 	}
