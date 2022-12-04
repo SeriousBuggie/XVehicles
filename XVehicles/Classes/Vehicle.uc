@@ -1920,75 +1920,79 @@ simulated function bool CheckOnGround()
 		return bLastCheckOnGroundResult;
 
 	Start = Location;
-	Start.Z-=(CollisionHeight-1);
+	Start.Z -= CollisionHeight - 1;
 	End = Start;
-	End.Z-=6;
+	End.Z -= 6;
 	Ex.X = CollisionRadius;
 	Ex.Y = Ex.X;
 
 	PossibleBase = Trace(HL, HN, End, Start, False, Ex);
 	if (PossibleBase == None)
 	{
-		ePointsOffSet[0] = FrontWide;
-		ePointsOffSet[1] = ePointsOffSet[0];
-		ePointsOffSet[1].Y = -FrontWide.Y;
-		ePointsOffSet[2] = BackWide;
-		ePointsOffSet[3] = ePointsOffSet[2];
-		ePointsOffSet[3].Y = -BackWide.Y;
-		
-		WZRange.Z = -Abs(ZRange);
-		WZRange = WZRange >> Rotation;
-
-		for (b = 0; b < 4; b++)
+		End.Z -= CollisionHeight;
+		if (Trace(HL, HN, End, Start, False, Ex) != None)
 		{
-			S = Location + (ePointsOffSet[b] >> Rotation);
-			E = S + WZRange;
-			Ac[b] = Trace(sHL[b], sHN[b], E, S, False);
-			if (Ac[b] != None)
-				AcCount++;
-		}
-
-		if (AcCount == 4)
-		{
-			Disable('Bump');
-			Disable('HitWall');
-			MoveSmooth(vect(0,0,-1));
-			Enable('Bump');
-			Enable('HitWall');
-			MLoc = (sHL[0] + sHL[1] + sHL[2] + sHL[3]) / 4 - 
-				(vect(0.5,0,0)*(FrontWide.X + BackWide.X) >> Rotation);
-			CrossedVect[0] = Normal(sHL[0] - sHL[3]);
-			CrossedVect[1] = Normal(sHL[1] - sHL[2]);
-			ActualGVTNormal = Normal(CrossedVect[0] cross CrossedVect[1]);
-			if (ActualGVTNormal.Z < 0)
-				ActualGVTNormal = -ActualGVTNormal;
-			GVTLoc = MLoc + ActualGVTNormal*CollisionHeight;
-			if (GVT != None)
-				GVT.PrePivot = GVTLoc - Location;
-
-			/*isNotAble = ((sHN[0].Z > sHN[2].Z && sHN[0].Z > 0 && sHN[2].Z > 0 && (sHN[0].Z - sHN[2].Z) > 0.45
-				&& sHN[1].Z > sHN[3].Z && sHN[1].Z > 0 && sHN[3].Z > 0 && (sHN[1].Z - sHN[3].Z) > 0.45)
-					||
-				(sHN[0].Z < sHN[2].Z && sHN[0].Z > 0 && sHN[2].Z > 0 && (sHN[2].Z - sHN[0].Z) > 0.45
-				&& sHN[1].Z < sHN[3].Z && sHN[1].Z > 0 && sHN[3].Z > 0 && (sHN[3].Z - sHN[1].Z) > 0.45))
-				&& VehicleGravityScale*(Region.Zone.ZoneGravity.Z/8) < VSize(Velocity)/350;*/
-
-			// always false :(
-			if (false && Trace(HL,HN,End,Start,False)!=None)
+			ePointsOffSet[0] = FrontWide;
+			ePointsOffSet[1] = ePointsOffSet[0];
+			ePointsOffSet[1].Y = -FrontWide.Y;
+			ePointsOffSet[2] = BackWide;
+			ePointsOffSet[3] = ePointsOffSet[2];
+			ePointsOffSet[3].Y = -BackWide.Y;
+			
+			WZRange.Z = -Abs(ZRange);
+			WZRange = WZRange >> Rotation;
+	
+			for (b = 0; b < 4; b++)
 			{
-				For (b=0; b<4; b++)
-				{
-					if (HN.Z - sHN[b].Z >= 0.45 && HN.Z >= 0 && sHN[b].Z >= 0)
-					//if ((HN dot sHN[b]) < 0.535)
-						isNotAble = True;
-				}
+				S = Location + (ePointsOffSet[b] >> Rotation);
+				E = S + WZRange;
+				Ac[b] = Trace(sHL[b], sHN[b], E, S, False);
+				if (Ac[b] != None)
+					AcCount++;
 			}
-
-			if (!isNotAble)
+	
+			if (AcCount == 4)
 			{
-				ActualFloorNormal = ActualGVTNormal;
-				ret = True;
-				ret = ActualFloorNormal.Z >= 0.7;
+				Disable('Bump');
+				Disable('HitWall');
+				MoveSmooth(vect(0,0,-1));
+				Enable('Bump');
+				Enable('HitWall');
+				MLoc = (sHL[0] + sHL[1] + sHL[2] + sHL[3]) / 4 - 
+					(vect(0.5,0,0)*(FrontWide.X + BackWide.X) >> Rotation);
+				CrossedVect[0] = Normal(sHL[0] - sHL[3]);
+				CrossedVect[1] = Normal(sHL[1] - sHL[2]);
+				ActualGVTNormal = Normal(CrossedVect[0] cross CrossedVect[1]);
+				if (ActualGVTNormal.Z < 0)
+					ActualGVTNormal = -ActualGVTNormal;
+				GVTLoc = MLoc + ActualGVTNormal*CollisionHeight;
+				if (GVT != None)
+					GVT.PrePivot = GVTLoc - Location;
+	
+				/*isNotAble = ((sHN[0].Z > sHN[2].Z && sHN[0].Z > 0 && sHN[2].Z > 0 && (sHN[0].Z - sHN[2].Z) > 0.45
+					&& sHN[1].Z > sHN[3].Z && sHN[1].Z > 0 && sHN[3].Z > 0 && (sHN[1].Z - sHN[3].Z) > 0.45)
+						||
+					(sHN[0].Z < sHN[2].Z && sHN[0].Z > 0 && sHN[2].Z > 0 && (sHN[2].Z - sHN[0].Z) > 0.45
+					&& sHN[1].Z < sHN[3].Z && sHN[1].Z > 0 && sHN[3].Z > 0 && (sHN[3].Z - sHN[1].Z) > 0.45))
+					&& VehicleGravityScale*(Region.Zone.ZoneGravity.Z/8) < VSize(Velocity)/350;*/
+	
+				// always false :(
+				if (false && Trace(HL,HN,End,Start,False)!=None)
+				{
+					For (b=0; b<4; b++)
+					{
+						if (HN.Z - sHN[b].Z >= 0.45 && HN.Z >= 0 && sHN[b].Z >= 0)
+						//if ((HN dot sHN[b]) < 0.535)
+							isNotAble = True;
+					}
+				}
+	
+				if (!isNotAble)
+				{
+					ActualFloorNormal = ActualGVTNormal;
+					ret = True;
+					ret = ActualFloorNormal.Z >= 0.7;
+				}
 			}
 		}
 	}
@@ -3581,7 +3585,7 @@ simulated singular function HitWall( vector HitNormal, Actor Wall )
 	local vector V;
 	local float BMulti,VSpee;
 	local vector OtherHitN;
-//	Log(self @ Level.TimeSeconds @ "HitWall" @ HitNormal @ Wall);
+//	Log(Name @ Level.TimeSeconds @ Location @ Velocity @ "HitWall" @ HitNormal @ Wall);
 
 	OtherHitN = HitNormal;
 
