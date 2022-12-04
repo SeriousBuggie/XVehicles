@@ -3576,6 +3576,7 @@ simulated singular function HitWall( vector HitNormal, Actor Wall )
 	local float BMulti,VSpee;
 	local vector OtherHitN;
 //	Log(self @ Level.TimeSeconds @ "HitWall" @ HitNormal @ Wall);
+
 	OtherHitN = HitNormal;
 
 	if (Bot(Driver) != None)
@@ -3585,6 +3586,15 @@ simulated singular function HitWall( vector HitNormal, Actor Wall )
 	{
 		bReadyToRun = True;
 		SetPhysics(PHYS_Projectile);
+		return;
+	}
+	
+	if (Level.NetMode == NM_Client && Driver == None && VSize(ServerState.Velocity) == 0)
+	{
+		if (VSize(Velocity) != 0)
+			Velocity = ServerState.Velocity;
+		if (Physics == PHYS_Falling)
+			SetPhysics(PHYS_Projectile);
 		return;
 	}
 	
