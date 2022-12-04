@@ -909,6 +909,9 @@ function ShowFlagOnRoof()
 	local VehicleFlag Prev;
 	local CTFReplicationInfo CTFRI;
 	
+	for (Prev = VehicleFlag; Prev != None; Prev = Prev.Next)
+		Prev.LastCheck = 0;
+	
 	if (Driver != None && Driver.PlayerReplicationInfo != None && 
 		IsGoodFlag(Driver.PlayerReplicationInfo.HasFlag, Driver))
 		AddFlag(Driver.PlayerReplicationInfo.HasFlag);
@@ -1763,6 +1766,9 @@ simulated function Tick( float Delta )
 
 	if (AttachmentList == None)
 		AttachmentsTick(Delta);
+		
+	if (VehicleFlag != None && VehicleFlag.LastCheck < Level.TimeSeconds - 1)
+		ShowState();
 }
 
 simulated function SavedMoveXV GetFreeMove()
