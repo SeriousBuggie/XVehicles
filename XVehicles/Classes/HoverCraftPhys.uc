@@ -393,7 +393,7 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 	Super.RenderCanvasOverlays(C, Cam, Seat);
 	if (Seat == 0)
 	{
-		Y = C.ClipY/6*5;
+		Y = C.CurY; // come from Super call
 		XS = C.ClipX/4;
 		X = C.ClipX/2;
 		DrawJumpBar(C, X, Y + 24, XS, 6);

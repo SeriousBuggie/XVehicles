@@ -2966,8 +2966,8 @@ simulated function vector CalcPlayerAimPos( optional byte SeatN )
 }
 simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte Seat )
 {
-	local float X,Y,XS,HP,XL,YL;
-	local byte i,o;
+	local float X, Y, XS, HP, XL, YL, LastY;
+	local byte i, o;
 	Local Pawn CamOwner;
 	local ChallengeHud HUD;
 	local string str;
@@ -2976,11 +2976,22 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 	local color CrossColor;
 	local float CrossScale;
 	local ERenderStyle CrossStyle;
+	
+	HUD = ChallengeHud(C.Viewport.Actor.myHUD);
 
 	// Draw health bar:	
 	C.Style = ERenderStyle.STY_Normal;
-
-	Y = C.ClipY/6*5;
+	
+	if (HUD == None || HUD.MyFonts == None)
+		Y = C.ClipY/6*5;
+	else
+	{ // place health bar above CTF messages
+		C.Font = HUD.MyFonts.GetBigFont(C.ClipX);
+		C.StrLen("TEST", XL, YL);
+		Y = class'CTFMessage2'.static.GetOffset(1, YL, C.ClipY) - YL;
+	}
+	LastY = Y;
+		
 	//XS = C.ClipX/3*2;
 	XS = C.ClipX/4;
 	X = C.ClipX/2;
@@ -3123,7 +3134,6 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 			o++;
 		}
 	}
-	HUD = ChallengeHud(C.Viewport.Actor.myHUD);
 	// draw only if HP not visible
 	if (HUD == None || HUD.bHideAllWeapons)
 	{
@@ -3173,6 +3183,8 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 	
 	if( AttachmentList!=None )
 		AttachmentList.AddCanvasOverlay(C);
+
+	C.CurY = LastY;
 }
 
 // This function is NOT called by engine, its for Custom Mods to render vehcle status from a third person.
