@@ -1626,7 +1626,7 @@ simulated function Tick( float Delta )
 		}
 	}
 
-	if (Driver != None)
+	if (Driver != None && !bDeleteMe)
 		UpdateDriverPos();
 	if (!bDriving || (Driver != None && Driver.IsInState('GameEnded')) || 
 		(Level.Game != None && Level.Game.bGameEnded))
@@ -1745,7 +1745,7 @@ simulated function Tick( float Delta )
 		NewMove.SavedVelocity = Velocity;
 		NewMove.SavedYaw = VehicleYaw;
 	}
-	if (bHasPassengers)
+	if (bHasPassengers && !bDeleteMe)
 		UpdatePassengerPos();
 	if (Region.Zone.bWaterZone && !bIsWaterResistant && NextWaterDamageTime<Level.TimeSeconds && 
 		Region.Zone.DamagePerSec <= 0)
