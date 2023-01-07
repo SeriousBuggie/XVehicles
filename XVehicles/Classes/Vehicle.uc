@@ -278,6 +278,8 @@ var bool bInBump;
 var Pawn LastDriver;
 var float LastDriverTime;
 
+var float BotDriverJumpZ;
+
 var PreventEnter PreventEnter;
 
 enum EDropFlag
@@ -554,6 +556,8 @@ simulated function PostBeginPlay()
 	
 	if ( Level.NetMode != NM_DedicatedServer )
 		Shadow = Spawn(class'VehicleShadow', self);
+		
+	BotDriverJumpZ = 1.0;
 	
 	//*****************************************
 	//Ground handling
@@ -1078,8 +1082,6 @@ function ChangeCollision(Pawn Other, bool bInside)
 	{
 		if (bInside)
 		{
-			Bot.bCanSwim = bIsWaterResistant; // not help :(
-			Bot.bCanFly = bCanFly;
 			Bot.FootStep1 = None;
 			Bot.FootStep2 = None;
 			Bot.FootStep3 = None;
@@ -1089,14 +1091,17 @@ function ChangeCollision(Pawn Other, bool bInside)
 			Bot.WaterStep = None;
 			Bot.bCollideWorld = True; // for paths work
 			Bot.SetCollisionSize(Other.default.CollisionRadius, Other.default.CollisionHeight);
-			Bot.MaxStepHeight = MaxObstclHeight;
-			Bot.JumpZ = 1;
-			Bot.bCanJump = true;
+			if (Bot == Driver) {
+				BotDriverJumpZ = Bot.JumpZ;
+				Bot.JumpZ = 1;
+				Bot.bCanJump = true;
+				Bot.bCanSwim = bIsWaterResistant; // not help :(
+				Bot.bCanFly = bCanFly;
+				Bot.MaxStepHeight = MaxObstclHeight;
+			}
 		}
 		else
 		{
-			Bot.bCanSwim = Bot.default.bCanSwim;
-			Bot.bCanFly = Bot.default.bCanFly;
 			Bot.FootStep1 = Bot.default.FootStep1;
 			Bot.FootStep2 = Bot.default.FootStep2;
 			Bot.FootStep3 = Bot.default.FootStep3;
@@ -1104,9 +1109,13 @@ function ChangeCollision(Pawn Other, bool bInside)
 			Bot.LandGrunt = Bot.default.LandGrunt;
 			Bot.Land = Bot.default.Land;
 			Bot.WaterStep = Bot.default.WaterStep;
-			Bot.MaxStepHeight = Bot.default.MaxStepHeight;
-			Bot.JumpZ = Bot.default.JumpZ;
-			Bot.bCanJump = Bot.default.bCanJump;
+			if (Bot == Driver) {
+				Bot.JumpZ = BotDriverJumpZ;
+				Bot.bCanJump = Bot.default.bCanJump;
+				Bot.bCanSwim = Bot.default.bCanSwim;
+				Bot.bCanFly = Bot.default.bCanFly;
+				Bot.MaxStepHeight = Bot.default.MaxStepHeight;
+			}
 			Bot.PreSetMovement();
 		}
 	}
