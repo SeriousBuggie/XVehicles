@@ -2374,6 +2374,10 @@ function ReadBotInput( float Delta )
 	}
 	if (Driver == None)
 		return;
+		
+	Bot = Bot(Driver);
+	if (Bot != None && Bot.EnemyDropped != None)
+		Bot.EnemyDropped = None; // Driver not chase for dropped weapons
 	
 	S = Min(100, CollisionRadius - 20);
 
