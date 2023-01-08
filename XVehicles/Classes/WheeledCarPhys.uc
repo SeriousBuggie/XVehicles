@@ -21,7 +21,7 @@ var() float MaxGroundSpeed,WheelMaxYaw,WheelTurnSpeed;
 var VehicleWheel MyWheels[8];
 var byte NumWheels,WheelsTurning;
 var bool bHasWheelMeshes,bWasStuckOnW,bReversing;
-var float WheelYaw,StuckTimer,ReverseTimer;
+var float WheelYaw,WheelYawVis,StuckTimer,ReverseTimer;
 var int WheelsPitch;
 var(WheeledEng) bool bEngDynSndPitch;
 var(WheeledEng) byte MinEngPitch, MaxEngPitch;
@@ -129,7 +129,7 @@ simulated function FellToGround()
 
 simulated function UpdateDriverInput( float Delta )
 {
-	local vector Ac,NVeloc;
+	local vector Ac,NVeloc, X, Y, Z;
 	local float DesTurn,DeAcc,DeAccRat;
 	local rotator R, RA, RB;
 	local byte i;
@@ -170,20 +170,31 @@ simulated function UpdateDriverInput( float Delta )
 	}
 
 	DesTurn = WheelMaxYaw*Turning*-1;
-	if (WheelYaw != DesTurn)
+	if (WheelYawVis != DesTurn)
 	{
-		if (WheelYaw < DesTurn)
+		if (WheelYawVis < DesTurn)
 		{
-			WheelYaw += WheelTurnSpeed*Delta;
-			if (WheelYaw > DesTurn)
-				WheelYaw = DesTurn;
+			WheelYawVis += WheelTurnSpeed*Delta;
+			if (WheelYawVis > DesTurn)
+				WheelYawVis = DesTurn;
 		}
 		else
 		{
-			WheelYaw -= WheelTurnSpeed*Delta;
-			if (WheelYaw < DesTurn)
-				WheelYaw = DesTurn;
+			WheelYawVis -= WheelTurnSpeed*Delta;
+			if (WheelYawVis < DesTurn)
+				WheelYawVis = DesTurn;
 		}
+	}
+	if (Driver == None || PlayerPawn(Driver) != None)
+		WheelYaw = WheelYawVis;
+	else 
+	{
+		GetAxes(Rotation, X, Y, Z);
+		WheelYaw = Abs(Normal(MoveDest - Location) dot Y);
+		if (!bReversing && WheelYaw < 0.04)
+			WheelYaw *= DesTurn;
+		else
+			WheelYaw = DesTurn;
 	}
 	
 	if (Level.NetMode == NM_Client && !IsNetOwner(Owner))
@@ -418,9 +429,12 @@ function int ShouldTurnFor( vector AcTarget, optional float YawAdjust, optional 
 	local rotator R;
 	local float Res, res2;
 		
+	YawAdjust = 0;
+	/*
 	YawAdjust = WheelYaw*FMin(1, Vsize(Velocity)/400);
 	if ((AcTarget - Location) dot vector(Rotation) < 0)
 		YawAdjust = -YawAdjust;
+	*/
 
 	ret = Super.ShouldTurnFor(AcTarget, YawAdjust, DeadZone);
 /*	
@@ -571,9 +585,9 @@ simulated function AttachmentsTick( float Delta )
 				bSet[MyWheels[i].TurnType] = 1;
 				R = MyWheels[i].WheelRot;
 				if( MyWheels[i].TurnType==1 )
-					R.Yaw+=WheelYaw;
+					R.Yaw+=WheelYawVis;
 				else if( MyWheels[i].TurnType==2 )
-					R.Yaw-=WheelYaw;
+					R.Yaw-=WheelYawVis;
 				R.Pitch = WheelsPitch;
 				WQ = RtoQ(R);
 				WQ = WQ Qmulti VehQ;
