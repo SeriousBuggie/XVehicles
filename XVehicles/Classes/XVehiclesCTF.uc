@@ -124,7 +124,10 @@ function FixBot(Bot Bot) {
 	MyFlag = CTFFlag(Bot.PlayerReplicationInfo.HasFlag);
 	if (MyFlag == None)
 	{
-		if (Tmr % 10 == 0 && Bot.IsInState('wandering'))
+		if (Tmr % 10 == 0 && (Bot.IsInState('wandering') || 
+			(Bot.IsInState('Roaming') && Bot.Ambushspot != None && 
+			VSize(Bot.Ambushspot.Location - Bot.Location) <= 512 &&
+			Bot.FastTrace(Bot.Ambushspot.Location))))
 		{
 			Best = class'WeaponAttachment'.static.AttackVehicle(None, Bot, 3000);
 			if (Best != None)
