@@ -15,6 +15,8 @@ var() bool bShowFlagBase;
 var Bot Bots[1024];
 var int BotsCount;
 
+var int Tmr;
+
 event PreBeginPlay()
 {
 	local Actor A;
@@ -102,6 +104,7 @@ function Timer() {
 			FixBot(Bots[i]);
 		else if (i == BotsCount - 1)
 			BotsCount--;
+	Tmr++;
 }
 
 function FixBot(Bot Bot) {
@@ -120,7 +123,15 @@ function FixBot(Bot Bot) {
 	}
 	MyFlag = CTFFlag(Bot.PlayerReplicationInfo.HasFlag);
 	if (MyFlag == None)
+	{
+		if (Tmr % 10 == 0 && Bot.IsInState('wandering'))
+		{
+			Best = class'WeaponAttachment'.static.AttackVehicle(None, Bot, 3000);
+			if (Best != None)
+				class'WeaponAttachment'.static.RangedAttack(Bot, Best, 1.0);
+		}
 		return;
+	}
 		
 	FriendlyFlag = CTFReplicationInfo(Level.Game.GameReplicationInfo).FlagList[Bot.PlayerReplicationInfo.Team];
 	if (VSize(FriendlyFlag.HomeBase.Location - Bot.Location) < 800)

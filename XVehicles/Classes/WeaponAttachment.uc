@@ -1112,46 +1112,66 @@ function bool FindEnemy()
 		}
 	}
 	if (Best == None && Bot.PlayerReplicationInfo != None)
-	{
-		foreach AllActors(class'Vehicle', Veh)
-			if (Veh != OwnerVehicle)
-			{
-				if (Veh.CurrentTeam != Bot.PlayerReplicationInfo.Team && !Veh.HealthTooLowFor(None))
-					i = 0;
-				else if (Veh.CurrentTeam == Bot.PlayerReplicationInfo.Team && Veh.HealthTooLowFor(None) && 
-					Veh.Driver == None && !Veh.bHasPassengers && Level.TimeSeconds - Veh.LastFix > 15)
-					i = 1;
-				else
-					continue;
-				if (Veh != TraceHit(Bot, Veh, HL, HN))
-					continue;
-				HL = Veh.Location - OwnerVehicle.Location;
-				// X dot X == VSize(X)*VSize(X)
-				Dist = HL dot HL;
-				if (BestVeh[i] == None || Dist < BestVehDist[i])
-				{
-					BestVeh[i] = Veh;
-					BestVehDist[i] = Dist;
-				}
-			}
-		if (BestVeh[0] != None)
-			Best = BestVeh[0];
-		else
-			Best = BestVeh[1];
-	}			
+		Best = AttackVehicle(self, Bot, 80000);
 	if (Best == None)
 		return false;
-	Bot.Target = Best;
-	Bot.bComboPaused = true;
-	Bot.SpecialPause = 1.0; // calculate exact time for shoot
 //	Log(Bot @ "FindEnemy" @ Best @ BestDist @ Hit @ Bot.GetStateName() @ Bot.NextState @ Bot.NextLabel);
 //	log(Bot @ self @ BotState @ Bot.NextState @ Bot.NextLabel);
+	NextTimeRangedAttack = Level.TimeSeconds + RangedAttack(Bot, Best, 1.0) + 0.1; // pause for allow do some pathing
+	return true;
+}
+static function float RangedAttack(Bot Bot, Actor Target, float SpecialPause)
+{
+	Bot.Target = Target;
+	Bot.bComboPaused = true;
+	Bot.SpecialPause = SpecialPause; // calculate exact time for shoot
 	Bot.MoveTimer = -1f; // time refresh path
-	NextTimeRangedAttack = Level.TimeSeconds + Bot.SpecialPause + 0.1; // pause for allow do some pathing
-	Bot.NextState = BotState;
+	Bot.NextState = Bot.GetStateName();
 	Bot.NextLabel = 'Begin';
 	Bot.GotoState('RangedAttack');
-	return true;
+	return SpecialPause;
+}
+static function Vehicle AttackVehicle(WeaponAttachment Weap, Bot Bot, float MaxDistance)
+{
+	local Vehicle Veh, BestVeh[2];
+	local float Dist, BestDist, BestVehDist[2];
+	local int i;
+	local vector HL, HN;
+	
+	foreach Bot.RadiusActors(class'Vehicle', Veh, MaxDistance)
+		if (Weap == None || Veh != Weap.OwnerVehicle)
+		{
+			if (Veh.CurrentTeam != Bot.PlayerReplicationInfo.Team && !Veh.HealthTooLowFor(None))
+				i = 0;
+			else if (Veh.CurrentTeam == Bot.PlayerReplicationInfo.Team && Veh.HealthTooLowFor(None) && 
+				Veh.Driver == None && !Veh.bHasPassengers && Veh.Level.TimeSeconds - Veh.LastFix > 15)
+				i = 1;
+			else
+				continue;
+			if (Weap != None)
+			{
+				if (Veh != Weap.TraceHit(Bot, Veh, HL, HN))
+					continue;
+			}
+			else
+			{
+				if (!Bot.FastTrace(Veh.Location) || 
+					Veh != Bot.Trace(HL, HN, Veh.Location, Bot.Location, true))
+					continue;
+			}
+			HL = Veh.Location - Bot.Location;
+			// X dot X == VSize(X)*VSize(X)
+			Dist = HL dot HL;
+			if (BestVeh[i] == None || Dist < BestVehDist[i])
+			{
+				BestVeh[i] = Veh;
+				BestVehDist[i] = Dist;
+			}
+		}
+	if (BestVeh[0] != None)
+		return BestVeh[0];
+	else
+		return BestVeh[1];
 }
 function bool SeeEnemy(Actor Enemy)
 {
