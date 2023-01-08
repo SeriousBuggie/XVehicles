@@ -116,6 +116,7 @@ function vector GetNextMoveTarget()
 	local Actor Hit;
 	
 	if (VehicleOwner.Driver.Target != None && Vehicle(VehicleOwner.Driver.Target) == None &&
+		(Pawn(VehicleOwner.Driver.Target) == None || !VehicleOwner.Driver.Target.IsInState('Dying')) &&
 		!VehicleOwner.Driver.IsInState('Fallback') && !VehicleOwner.Driver.IsInState('RangedAttack') && 
 		VehicleOwner.Driver.LineOfSightTo(VehicleOwner.Driver.Target) &&
 		(VehicleOwner.bCanFly || CanReach(VehicleOwner.Driver.Target.Location)))
