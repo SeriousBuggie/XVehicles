@@ -430,11 +430,12 @@ function int ShouldTurnFor( vector AcTarget, optional float YawAdjust, optional 
 	local float Res, res2;
 		
 	YawAdjust = 0;
-	/*
-	YawAdjust = WheelYaw*FMin(1, Vsize(Velocity)/400);
-	if ((AcTarget - Location) dot vector(Rotation) < 0)
-		YawAdjust = -YawAdjust;
-	*/
+	if (bReversing)
+	{
+		YawAdjust = WheelYaw*FMin(1, Vsize(Velocity)/400);
+		if ((AcTarget - Location) dot vector(Rotation) < 0)
+			YawAdjust = -YawAdjust;
+	}
 
 	ret = Super.ShouldTurnFor(AcTarget, YawAdjust, DeadZone);
 /*	
