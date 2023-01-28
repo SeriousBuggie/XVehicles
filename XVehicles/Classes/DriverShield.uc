@@ -104,6 +104,12 @@ simulated exec function XVJumpReleased()
 		PlayerPawn(Owner).bPressedJump = false;
 }
 
+simulated exec function VehicleExit()
+{
+	if (PlayerPawn(Owner) != None && DriverWeapon(PlayerPawn(Owner).Weapon) != None)
+		PlayerPawn(Owner).ThrowWeapon();
+}
+
 defaultproperties
 {
 	bRotatingPickup=False
