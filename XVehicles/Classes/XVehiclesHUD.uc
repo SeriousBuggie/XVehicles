@@ -16,6 +16,23 @@ static function SpawnHUD(Actor A)
 		A.Spawn(default.class);
 }
 
+simulated function PreBeginPlay()
+{
+	Super.PreBeginPlay();
+	
+	if (Level.NetMode == NM_Client)
+		SetTimer(1, true);
+}
+
+simulated function Timer()
+{
+	if (MyHUD == None || MyHUD.PlayerOwner == None)
+		return;
+	if (MyHUD.PlayerOwner.CollisionRadius == 0 && DriverWeapon(MyHUD.PlayerOwner.Weapon) == None)
+		MyHUD.PlayerOwner.SetCollisionSize(MyHUD.PlayerOwner.default.CollisionRadius, 
+			MyHUD.PlayerOwner.CollisionHeight);
+}
+
 simulated function Tick(float Delta)
 {
 	if (Level.NetMode != NM_DedicatedServer)
