@@ -130,10 +130,11 @@ simulated function FellToGround()
 simulated function UpdateDriverInput( float Delta )
 {
 	local vector Ac,NVeloc, X, Y, Z;
-	local float DesTurn,DeAcc,DeAccRat;
+	local float DesTurn,DesTurnVis,DeAcc,DeAccRat;
 	local rotator R, RA, RB;
 	local byte i;
 	local rotator OldWheeledRot;
+	local bool bDirectVis;
 
 	if (Region.Zone.ZoneGroundFriction + WheelsTraction > 14.0)	//Traction on but outside ice/snow areas
 	{
@@ -169,23 +170,26 @@ simulated function UpdateDriverInput( float Delta )
 		MoveSmooth((Ac >> RA) - (Ac >> RB));
 	}
 
+	bDirectVis = Driver == None || PlayerPawn(Driver) != None;
 	DesTurn = WheelMaxYaw*Turning*-1;
-	if (WheelYawVis != DesTurn)
+	if (bDirectVis)
+		DesTurnVis = DesTurn;
+	else
 	{
-		if (WheelYawVis < DesTurn)
-		{
-			WheelYawVis += WheelTurnSpeed*Delta;
-			if (WheelYawVis > DesTurn)
-				WheelYawVis = DesTurn;
-		}
-		else
-		{
-			WheelYawVis -= WheelTurnSpeed*Delta;
-			if (WheelYawVis < DesTurn)
-				WheelYawVis = DesTurn;
-		}
+		DesTurnVis = (rotator(MoveDest - Location).Yaw - Rotation.Yaw) << 16 >> 16;
+		if (Abs(DesTurnVis) > WheelMaxYaw)
+			DesTurnVis = WheelMaxYaw*DesTurnVis/Abs(DesTurnVis);
 	}
-	if (Driver == None || PlayerPawn(Driver) != None)
+	if (WheelYawVis != DesTurnVis)
+	{
+		if (WheelYawVis < DesTurnVis)
+			WheelYawVis += WheelTurnSpeed*Delta;
+		else
+			WheelYawVis -= WheelTurnSpeed*Delta;
+		if (Abs(WheelYawVis) > WheelMaxYaw)
+			WheelYawVis = WheelMaxYaw*WheelYawVis/Abs(WheelYawVis);
+	}
+	if (bDirectVis)
 		WheelYaw = WheelYawVis;
 	else 
 	{
