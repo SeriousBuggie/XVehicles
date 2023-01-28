@@ -40,8 +40,7 @@ event PreBeginPlay()
 	if (!class'VehiclesConfig'.default.bAllowTranslocator && DeathMatchPlus(Level.Game) != None)
 		DeathMatchPlus(Level.Game).bUseTranslocator = false;
 		
-	if (!class'VehiclesConfig'.default.bDisableFlagAnnouncer && CTFGame(Level.Game).MaxTeams == 2)
-		Spawn(class'FlagAnnouncer');
+	Spawn(class'FlagAnnouncer');
 		
 	class'XVehiclesHUD'.static.SpawnHUD(self);
 	
@@ -101,13 +100,13 @@ function Timer() {
 		return;
 	for (i = BotsCount - 1; i >= 0; i--)
 		if (Bots[i] != None && !Bots[i].bDeleteMe)
-			FixBot(Bots[i]);
+			FixBot(Bots[i], Tmr);
 		else if (i == BotsCount - 1)
 			BotsCount--;
 	Tmr++;
 }
 
-function FixBot(Bot Bot) {
+static function FixBot(Bot Bot, optional int Tmr) {
 	local CTFFlag MyFlag, FriendlyFlag;
 	local Vehicle Veh, Best;
 	local float Dist, BestDist;
@@ -136,7 +135,7 @@ function FixBot(Bot Bot) {
 		return;
 	}
 		
-	FriendlyFlag = CTFReplicationInfo(Level.Game.GameReplicationInfo).FlagList[Bot.PlayerReplicationInfo.Team];
+	FriendlyFlag = CTFReplicationInfo(Bot.Level.Game.GameReplicationInfo).FlagList[Bot.PlayerReplicationInfo.Team];
 	if (VSize(FriendlyFlag.HomeBase.Location - Bot.Location) < 800)
 		return;
 	

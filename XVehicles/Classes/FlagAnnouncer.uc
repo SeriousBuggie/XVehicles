@@ -9,7 +9,9 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch,
 	local CTFFlag CTFFlag, OtherFlag;
 	local Sound Sound;
 	local Pawn P;
-	local bool bExcludeTournamentPlayers;
+	local bool bExcludeTournamentPlayers, bPlaySound;
+	
+	bPlaySound = !class'VehiclesConfig'.default.bDisableFlagAnnouncer && CTFGame(Level.Game).MaxTeams == 2;
 	
 	if (Message == class'DeathMatchMessage' && Switch == 3 && RelatedPRI_1 != None && 
 		PlayerPawn(RelatedPRI_1.Owner) != None && PlayerPawn(RelatedPRI_1.Owner).bIsPlayer)
@@ -21,7 +23,7 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch,
 				Sound = Sound'YouAreOnRed';
 			if (TeamInfo.TeamIndex == 1)
 				Sound = Sound'YouAreOnBlue';
-			if (Sound != None)
+			if (bPlaySound && Sound != None)
 				PlayerPawn(RelatedPRI_1.Owner).ClientPlaySound(Sound);
 			return;
 		}
@@ -62,6 +64,8 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch,
 						Sound = Sound'Red_Flag_Taken';
 					if (TeamInfo.TeamIndex == 1)
 						Sound = Sound'Blue_Flag_Taken';
+					if (RelatedPRI_1 != None && Bot(RelatedPRI_1.Owner) != None)
+						class'XVehiclesCTF'.static.FixBot(Bot(RelatedPRI_1.Owner));
 					break;
 			}
 		CTFFlag = CTFFlag(OptionalObject);
@@ -118,7 +122,7 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch,
 					break;
 			}
 	}
-	if (Sound != None)
+	if (bPlaySound && Sound != None)
 		for (P = Level.PawnList; P != None; P = P.NextPawn)
 			if (P.bIsPlayer && P.IsA('PlayerPawn') && 
 			(!bExcludeTournamentPlayers || !P.IsA('TournamentPlayer')))
