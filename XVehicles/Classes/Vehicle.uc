@@ -1093,7 +1093,7 @@ function ChangeCollision(Pawn Other, bool bInside)
 			Bot.Land = None;
 			Bot.WaterStep = None;
 			Bot.bCollideWorld = True; // for paths work
-			Bot.SetCollisionSize(Other.default.CollisionRadius, Other.default.CollisionHeight);
+			Bot.SetCollisionSize(Bot.default.CollisionRadius, Bot.default.CollisionHeight);
 			if (Bot == Driver) {
 				BotDriverJumpZ = Bot.JumpZ;
 				Bot.JumpZ = 1;
