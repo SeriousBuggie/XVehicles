@@ -234,9 +234,15 @@ function NotifyNewDriver( Pawn NewDriver );
 function NotifyDriverLeft( Pawn OldDriver );
 function DropFrom(vector StartLocation)
 {
-	if( bPassengerGun )
+	local Bot Bot;
+	if (bPassengerGun)
 		VehicleOwner.PassengerLeave(SeatNumber);
 	else VehicleOwner.DriverLeft(False);
+	
+	if (VehicleOwner.Driver == None && !VehicleOwner.HasPassengers())
+		foreach VehicleOwner.RadiusActors(class'Bot', Bot, 800)
+			if (Bot.PlayerReplicationInfo.Team != VehicleOwner.CurrentTeam)
+				Bot.EnemyDropped = VehicleOwner.DWeapon; // enemy bots wanna steal vehicle
 }
 
 function Destroyed()
