@@ -416,7 +416,7 @@ function int ShouldAccelFor( vector AcTarget )
 	if( bStuck && StuckTimer<Level.TimeSeconds )
 	{
 		bReversing = True;
-		ReverseTimer = Level.TimeSeconds+2;
+		ReverseTimer = Level.TimeSeconds+1;
 		Return -ret;
 	}
 	Return ret;
