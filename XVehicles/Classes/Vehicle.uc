@@ -2297,7 +2297,7 @@ function vector GetExitOffset(Pawn Other)
 			else
 				return ExitOffset;
 		}
-		bIsMoveTarget = Goal == Other.MoveTarget.Location;
+		bIsMoveTarget = Other.MoveTarget != None && Goal == Other.MoveTarget.Location;
 		Extent.X = Other.CollisionRadius;
 		Extent.Y = Extent.X;
 		if (Other.Trace(HL, HN, Goal - vect(0,0,1)*(Other.CollisionHeight + 1), Goal, true, Extent) != None)
