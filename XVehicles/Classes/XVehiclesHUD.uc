@@ -16,8 +16,40 @@ static function SpawnHUD(Actor A)
 
 	foreach A.AllActors(default.Class, HUD)
 		break;
-	if (HUD == None)
-		default.UsedHUD = A.Spawn(default.Class);
+	if (HUD != None)
+		return;
+	default.UsedHUD = A.Spawn(default.Class);
+	if (default.UsedHUD != None)
+		A.Level.Game.BaseMutator.AddMutator(default.UsedHUD);
+}
+
+function Mutate(string MutateString, PlayerPawn Sender)
+{	
+	local Vehicle Veh, Best;
+	local float Dist, BestDist;
+	local byte bDuck;
+	if (Sender != None && Left(MutateString, 12) ~= "VehicleEnter")
+	{
+		foreach Sender.RadiusActors(class'Vehicle', Veh, Sender.CollisionRadius + 100)
+			if (Veh.CanEnter(Sender, true))
+			{
+				Dist = VSize(Veh.Location - Sender.Location);
+				if (Dist < BestDist || Best == None)
+				{
+					BestDist = Dist;
+					Best = Veh;
+				}
+			}
+		if (Best != None)
+		{
+			bDuck = Sender.bDuck;
+			Sender.bDuck = 1;
+			Best.Bump(Sender);
+			Sender.bDuck = bDuck;
+		}
+	}
+	
+	Super.Mutate(MutateString, Sender);
 }
 
 simulated function PreBeginPlay()
