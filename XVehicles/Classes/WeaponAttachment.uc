@@ -1094,7 +1094,8 @@ function bool FindEnemy()
 		return false;
 	For( P=Level.PawnList; P!=None; P=P.NextPawn )
 	{
-		if (P.Health <= 0 || (P.PlayerReplicationInfo != None && P.PlayerReplicationInfo.bIsSpectator) ||
+		if (P.Health <= 0 || FlockPawn(P) != None || FlockMasterPawn(P) != None || 
+			(P.PlayerReplicationInfo != None && P.PlayerReplicationInfo.bIsSpectator) ||
 			Bot.AttitudeTo(P) > ATTITUDE_Frenzy)
 			continue; // check not spectator and other stuff
 		Hit = TraceHit(Bot, P, HL, HN);
