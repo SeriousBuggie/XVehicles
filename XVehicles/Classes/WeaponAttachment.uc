@@ -1083,7 +1083,7 @@ function bool FindEnemy()
 	local Bot Bot;
 	local float Dist, BestDist, BestVehDist[2];
 	local Actor Hit, Best, BestVeh[2];
-	local vector HL, HN;
+	local vector HL, HN, Extent;
 	local name BotState;
 	local Vehicle Veh;
 	local int i;
@@ -1094,26 +1094,42 @@ function bool FindEnemy()
 	BotState = Bot.GetStateName();
 	if (BotState == 'RangedAttack' || BotState == 'FallingState' || BotState == 'TakeHit' || BotState == 'ImpactJumping')
 		return false;
-	For( P=Level.PawnList; P!=None; P=P.NextPawn )
+	if (OwnerVehicle.FastTrace(OwnerVehicle.MoveDest, OwnerVehicle.Location))
 	{
-		if (P.Health <= 0 || FlockPawn(P) != None || FlockMasterPawn(P) != None || 
-			(P.PlayerReplicationInfo != None && P.PlayerReplicationInfo.bIsSpectator) ||
-			Bot.AttitudeTo(P) > ATTITUDE_Frenzy)
-			continue; // check not spectator and other stuff
-		Hit = TraceHit(Bot, P, HL, HN);
-		if (Hit == Level)
-			continue;
-		if (Hit != P && (DriverWeapon(P.Weapon) == None || DriverWeapon(P.Weapon).VehicleOwner != Hit))
-			continue;
-		HL = P.Location - OwnerVehicle.Location;
-		// X dot X == VSize(X)*VSize(X)
-		Dist = HL dot HL;
-		if (Best == None || Dist < BestDist)
+		Extent.X = OwnerVehicle.CollisionRadius;
+		Extent.Y = Extent.X;
+		Extent.Z = OwnerVehicle.CollisionHeight;
+		foreach OwnerVehicle.TraceActors(class'Vehicle', Veh, HL, HN, OwnerVehicle.MoveDest, OwnerVehicle.Location, Extent)
+			// Other can be LevelInfo in v436
+			if (Veh.IsA('Vehicle') && Veh != OwnerVehicle && Veh.HealthTooLowFor(Bot) && 
+				Veh.Driver == None && !Veh.HasPassengers() && 
+				!(Level.TimeSeconds - Veh.LastFix <= 5 && OwnerVehicle.CurrentTeam == Veh.CurrentTeam))
+			{
+				Best = Veh;
+				break;
+			}
+	}		
+	if (Best == None)
+		for( P=Level.PawnList; P!=None; P=P.NextPawn )
 		{
-			Best = P;
-			BestDist = Dist;
+			if (P.Health <= 0 || FlockPawn(P) != None || FlockMasterPawn(P) != None || 
+				(P.PlayerReplicationInfo != None && P.PlayerReplicationInfo.bIsSpectator) ||
+				Bot.AttitudeTo(P) > ATTITUDE_Frenzy)
+				continue; // check not spectator and other stuff
+			Hit = TraceHit(Bot, P, HL, HN);
+			if (Hit == Level)
+				continue;
+			if (Hit != P && (DriverWeapon(P.Weapon) == None || DriverWeapon(P.Weapon).VehicleOwner != Hit))
+				continue;
+			HL = P.Location - OwnerVehicle.Location;
+			// X dot X == VSize(X)*VSize(X)
+			Dist = HL dot HL;
+			if (Best == None || Dist < BestDist)
+			{
+				Best = P;
+				BestDist = Dist;
+			}
 		}
-	}
 	if (Best == None && Bot.PlayerReplicationInfo != None)
 		Best = AttackVehicle(self, Bot, 80000);
 	if (Best == None)
