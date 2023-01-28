@@ -165,6 +165,21 @@ simulated function bool CheckOnGround()
 	return bIsOnGround;
 }
 
+function bool NeedStop(Pawn pDriver)
+{
+	local bool ret;
+	local vector Diff;
+	ret = Super.NeedStop(pDriver);
+	if (!ret && bOnGround)
+	{
+		Diff = (MoveDest - Location);
+		if (Normal(Diff).Z < -0.85 && Diff.Z < -CollisionHeight &&
+			Diff.Z > -(CollisionHeight + 1.2*HoveringHeight)) // 1.2 ~= 1/0.85
+			ret = true;
+	}
+	return ret;
+}
+
 // Return normal for acceleration direction.
 simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 {
