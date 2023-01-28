@@ -551,6 +551,9 @@ simulated function PostBeginPlay()
 	local rotator RotZeroRoll;
 
 	Super.PostBeginPlay();
+	
+	if (Level.NetMode != NM_Client)
+		class'XVehiclesHUD'.static.SpawnHUD(self);
 
 	FirstHealth = Health;
 	

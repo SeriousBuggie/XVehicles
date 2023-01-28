@@ -15,6 +15,8 @@ event PreBeginPlay()
 		return;
 		
 	Level.Game.BaseMutator.AddMutator(self);
+	
+	class'XVehiclesHUD'.static.SpawnHUD(self);
 }
 
 function Mutate(string MutateString, PlayerPawn Sender)

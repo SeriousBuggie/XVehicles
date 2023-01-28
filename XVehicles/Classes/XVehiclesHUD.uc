@@ -5,15 +5,19 @@ class XVehiclesHUD expands Mutator;
 
 var ChallengeHUD MyHUD;
 var Vehicle IdentifyTarget;
+var XVehiclesHUD UsedHUD;
 
 static function SpawnHUD(Actor A)
 {
 	local Actor HUD;
+	
+	if (default.UsedHUD != None && !default.UsedHUD.bDeleteMe && default.UsedHUD.Level == A.Level)
+		return;
 
 	foreach A.AllActors(default.Class, HUD)
 		break;
 	if (HUD == None)
-		A.Spawn(default.class);
+		default.UsedHUD = A.Spawn(default.Class);
 }
 
 simulated function PreBeginPlay()
