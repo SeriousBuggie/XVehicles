@@ -477,7 +477,8 @@ simulated function vector CalcVelocity( Actor Other )
 simulated event Touch( Actor Other )
 {
     // Accept only pawns
-    if( !bEnabled || Pawn(Other) == None || Other.Physics == PHYS_None  )
+    if( !bEnabled || Pawn(Other) == None || Other.Physics == PHYS_None || 
+    	FlockPawn(Other) != None || FlockMasterPawn(Other) != None )
         return;
         
 	if (Other.IsA('bbPlayer'))
