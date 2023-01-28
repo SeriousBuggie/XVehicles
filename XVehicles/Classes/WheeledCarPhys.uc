@@ -707,10 +707,10 @@ local byte i;
 
 defaultproperties
 {
-	Wheels(0)=(WheelOffset=(X=25.320000,Y=28.540001,Z=-23.000000),WheelClass=Class'XVehicles.VehicleWheel',WheelMesh=LodMesh'UnrealShare.WoodenBoxM',WheelType=TT_TurningWheel)
-	Wheels(1)=(WheelOffset=(X=25.320000,Y=-28.540001,Z=-23.000000),WheelClass=Class'XVehicles.VehicleWheel',WheelMesh=LodMesh'UnrealShare.WoodenBoxM',WheelType=TT_TurningWheel)
-	Wheels(2)=(WheelOffset=(X=-25.320000,Y=28.540001,Z=-23.000000),WheelClass=Class'XVehicles.VehicleWheel',WheelMesh=LodMesh'UnrealShare.WoodenBoxM')
-	Wheels(3)=(WheelOffset=(X=-25.320000,Y=-28.540001,Z=-23.000000),WheelClass=Class'XVehicles.VehicleWheel',WheelMesh=LodMesh'UnrealShare.WoodenBoxM')
+	Wheels(0)=(WheelOffset=(X=25.320000,Y=28.540001,Z=-23.000000),WheelClass=Class'VehicleWheel',WheelMesh=LodMesh'UnrealShare.WoodenBoxM',WheelType=TT_TurningWheel)
+	Wheels(1)=(WheelOffset=(X=25.320000,Y=-28.540001,Z=-23.000000),WheelClass=Class'VehicleWheel',WheelMesh=LodMesh'UnrealShare.WoodenBoxM',WheelType=TT_TurningWheel)
+	Wheels(2)=(WheelOffset=(X=-25.320000,Y=28.540001,Z=-23.000000),WheelClass=Class'VehicleWheel',WheelMesh=LodMesh'UnrealShare.WoodenBoxM')
+	Wheels(3)=(WheelOffset=(X=-25.320000,Y=-28.540001,Z=-23.000000),WheelClass=Class'VehicleWheel',WheelMesh=LodMesh'UnrealShare.WoodenBoxM')
 	MaxGroundSpeed=3000.000000
 	WheelMaxYaw=8000.000000
 	WheelTurnSpeed=12000.000000

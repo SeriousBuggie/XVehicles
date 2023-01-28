@@ -4538,8 +4538,8 @@ defaultproperties
 	VehicleGravityScale=1.000000
 	WAccelRate=250.000000
 	Health=100
-	AIClass=Class'XVehicles.VAIBehaviour'
-	DriverWeaponClass=Class'XVehicles.DriverWeapon'
+	AIClass=Class'VAIBehaviour'
+	DriverWeaponClass=Class'DriverWeapon'
 	bShouldRepVehYaw=True
 	VehicleName="Vehicle"
 	MsgVehicleDesc="Zoom out the HUD to read the help in the top right corner of the screen."
@@ -4641,28 +4641,28 @@ defaultproperties
 	FixSounds(1)=Sound'UnrealShare.Dispersion.number2'
 	FixSounds(2)=Sound'UnrealShare.Dispersion.number3'
 	FixSounds(3)=Sound'UnrealShare.Dispersion.number4'
-	DamageGFX(0)=(DmgFlamesClass=Class'XVehicles.VehDmgFire',DmgBlackSmkClass=Class'XVehicles.VehEngBlackSmoke',DmgLightSmkClass=Class'XVehicles.VehEngLightSmoke')
-	DamageGFX(1)=(DmgFlamesClass=Class'XVehicles.VehDmgFire',DmgBlackSmkClass=Class'XVehicles.VehEngBlackSmoke',DmgLightSmkClass=Class'XVehicles.VehEngLightSmoke')
-	DamageGFX(2)=(DmgFlamesClass=Class'XVehicles.VehDmgFire',DmgBlackSmkClass=Class'XVehicles.VehEngBlackSmoke',DmgLightSmkClass=Class'XVehicles.VehEngLightSmoke')
-	DamageGFX(3)=(DmgFlamesClass=Class'XVehicles.VehDmgFire',DmgBlackSmkClass=Class'XVehicles.VehEngBlackSmoke',DmgLightSmkClass=Class'XVehicles.VehEngLightSmoke')
+	DamageGFX(0)=(DmgFlamesClass=Class'VehDmgFire',DmgBlackSmkClass=Class'VehEngBlackSmoke',DmgLightSmkClass=Class'VehEngLightSmoke')
+	DamageGFX(1)=(DmgFlamesClass=Class'VehDmgFire',DmgBlackSmkClass=Class'VehEngBlackSmoke',DmgLightSmkClass=Class'VehEngLightSmoke')
+	DamageGFX(2)=(DmgFlamesClass=Class'VehDmgFire',DmgBlackSmkClass=Class'VehEngBlackSmoke',DmgLightSmkClass=Class'VehEngLightSmoke')
+	DamageGFX(3)=(DmgFlamesClass=Class'VehDmgFire',DmgBlackSmkClass=Class'VehEngBlackSmoke',DmgLightSmkClass=Class'VehEngLightSmoke')
 	WreckedTex=Texture'XVehicles.Misc.WreckedVeh'
 	DestroyedExplDmg=320
-	ExplosionGFX(0)=(ExplClass=Class'XVehicles.VehExplosionFX',ExplSize=1.000000)
-	ExplosionGFX(1)=(ExplClass=Class'XVehicles.VehExplosionFX',ExplSize=1.000000)
-	ExplosionGFX(2)=(ExplClass=Class'XVehicles.VehExplosionFX',ExplSize=1.000000)
-	ExplosionGFX(3)=(ExplClass=Class'XVehicles.VehExplosionFX',ExplSize=1.000000)
-	ExplosionGFX(4)=(ExplClass=Class'XVehicles.VehExplosionFX',ExplSize=1.000000)
-	ExplosionGFX(5)=(ExplClass=Class'XVehicles.VehExplosionFX',ExplSize=1.000000)
-	ExplosionGFX(6)=(ExplClass=Class'XVehicles.VehExplosionFX',ExplSize=1.000000)
-	ExplosionGFX(7)=(ExplClass=Class'XVehicles.VehExplosionFX',ExplSize=1.000000)
-	ExplosionGFX(8)=(ExplClass=Class'XVehicles.VehExplosionFX',ExplSize=1.000000)
-	ExplosionGFX(9)=(ExplClass=Class'XVehicles.VehExplosionFX',ExplSize=1.000000)
-	ExplosionGFX(10)=(ExplClass=Class'XVehicles.VehExplosionFX',ExplSize=1.000000)
-	ExplosionGFX(11)=(ExplClass=Class'XVehicles.VehExplosionFX',ExplSize=1.000000)
-	ExplosionGFX(12)=(ExplClass=Class'XVehicles.VehExplosionFX',ExplSize=1.000000)
-	ExplosionGFX(13)=(ExplClass=Class'XVehicles.VehExplosionFX',ExplSize=1.000000)
-	ExplosionGFX(14)=(ExplClass=Class'XVehicles.VehExplosionFX',ExplSize=1.000000)
-	ExplosionGFX(15)=(ExplClass=Class'XVehicles.VehExplosionFX',ExplSize=1.000000)
+	ExplosionGFX(0)=(ExplClass=Class'VehExplosionFX',ExplSize=1.000000)
+	ExplosionGFX(1)=(ExplClass=Class'VehExplosionFX',ExplSize=1.000000)
+	ExplosionGFX(2)=(ExplClass=Class'VehExplosionFX',ExplSize=1.000000)
+	ExplosionGFX(3)=(ExplClass=Class'VehExplosionFX',ExplSize=1.000000)
+	ExplosionGFX(4)=(ExplClass=Class'VehExplosionFX',ExplSize=1.000000)
+	ExplosionGFX(5)=(ExplClass=Class'VehExplosionFX',ExplSize=1.000000)
+	ExplosionGFX(6)=(ExplClass=Class'VehExplosionFX',ExplSize=1.000000)
+	ExplosionGFX(7)=(ExplClass=Class'VehExplosionFX',ExplSize=1.000000)
+	ExplosionGFX(8)=(ExplClass=Class'VehExplosionFX',ExplSize=1.000000)
+	ExplosionGFX(9)=(ExplClass=Class'VehExplosionFX',ExplSize=1.000000)
+	ExplosionGFX(10)=(ExplClass=Class'VehExplosionFX',ExplSize=1.000000)
+	ExplosionGFX(11)=(ExplClass=Class'VehExplosionFX',ExplSize=1.000000)
+	ExplosionGFX(12)=(ExplClass=Class'VehExplosionFX',ExplSize=1.000000)
+	ExplosionGFX(13)=(ExplClass=Class'VehExplosionFX',ExplSize=1.000000)
+	ExplosionGFX(14)=(ExplClass=Class'VehExplosionFX',ExplSize=1.000000)
+	ExplosionGFX(15)=(ExplClass=Class'VehExplosionFX',ExplSize=1.000000)
 	RndExplosionSnd(0)=Sound'XVehicles.Explosions.VehicleExplosion01'
 	RndExplosionSnd(1)=Sound'XVehicles.Explosions.VehicleExplosion02'
 	RndExplosionSnd(2)=Sound'XVehicles.Explosions.VehicleExplosion03'
