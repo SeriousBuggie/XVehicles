@@ -596,6 +596,8 @@ function FireTurret( byte Mode, optional bool bForceFire )
 	if( bPhysicalGunAimOnly || TR.Yaw>3500 || TR.Yaw<-3500 || TR.Pitch>3500 || TR.Pitch<-3500 ) {
 		if (OwnerVehicle.Trace(HL, HN, L + vector(PR)*40000, L, True) != None)
 		{
+			if ((HL - P) dot (P - L) <= 0)
+				HL = L + vector(PR)*(16 + vector(PR) dot (P - L));
 			R = rotator(HL - P);
 			Rdual = rotator(HL - Pdual);
 		}
