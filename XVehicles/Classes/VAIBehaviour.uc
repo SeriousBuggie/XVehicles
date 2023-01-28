@@ -112,7 +112,7 @@ function vector GetNextMoveTarget()
 	
 	local vector D;
 	local rotator Dir;
-	local bool bMovePawn;
+	local bool bMovePawn, bFlagBase, bJumpPad;
 	local Actor Hit;
 	
 	if (VehicleOwner.Driver.Target != None && Vehicle(VehicleOwner.Driver.Target) == None &&
@@ -289,10 +289,18 @@ function vector GetNextMoveTarget()
 			V = Pos[1]; // prevent stuck at pos 0
 		if (VSize(V - VehicleOwner.Location) < 100 && Vsize(V - Visible[best].Location) > 100)
 			V = Visible[best].Location;
-		if (FlagBase(Visible[best]) != None)
+		bFlagBase = FlagBase(Visible[best]) != None;
+		if (!bFlagBase)
+			bJumpPad = best + 1 < ArrayCount(VehicleOwner.Driver.RouteCache) && 
+				UTJumpPad(Visible[best]) != None &&
+				UTJumpPad(VehicleOwner.Driver.RouteCache[best + 1]) != None && 
+				string(VehicleOwner.Driver.RouteCache[best + 1].Tag) ~= UTJumpPad(Visible[best]).URL;
+		if (bFlagBase || bJumpPad)
 		{
-			V -= (Normal(VehicleOwner.ExitOffset)*(VehicleOwner.CollisionRadius + 10 - Visible[best].CollisionRadius/2)) >> VehicleOwner.Rotation;
-			Bot(VehicleOwner.Driver).AlternatePath = None; // hack for prevent bot run to it
+			S = (Normal(VehicleOwner.ExitOffset)*(VehicleOwner.CollisionRadius + 10 + Visible[best].CollisionRadius/2)) >> VehicleOwner.Rotation;
+			V -= S;
+			if (bFlagBase)
+				Bot(VehicleOwner.Driver).AlternatePath = None; // hack for prevent bot run to it
 		}
 		return V;
 	}

@@ -1185,12 +1185,13 @@ local vector ExitVect;
 			ChangeCollision(Driver, false);
 
 			ExitVect = GetExitOffset(Driver);
-			if ((Normal(Velocity) Dot Normal(ExitVect >> Rotation)) > 0.35)
+			if ((Normal(Velocity) Dot Normal(ExitVect >> Rotation)) > 0.35 && 
+				(Normal(Velocity) Dot Normal((ExitVect + vect(0,-2,0)*ExitVect.Y) >> Rotation)) <= 0.35)
 				ExitVect.Y = -ExitVect.Y;
-			if( !bForcedLeave && !Driver.Move(Location+(ExitVect >> Rotation) - Driver.Location) )
+			if (!Driver.Move(Location+(ExitVect >> Rotation) - Driver.Location) && !bForcedLeave)
 			{
 				ExitVect.Y = -ExitVect.Y;
-				if (!bForcedLeave && !Driver.Move(Location+(ExitVect >> Rotation) - Driver.Location))
+				if (!Driver.Move(Location+(ExitVect >> Rotation) - Driver.Location) && !bForcedLeave)
 				{
 //					Log("Failed exit Driver for" @ Driver);
 					ChangeCollision(Driver, true);
@@ -2282,10 +2283,11 @@ simulated function ReadDriverInput( PlayerPawn Other, float DeltaTime )
 
 function vector GetExitOffset(Pawn Other)
 {
-	local vector Goal;
+	local vector Goal, HL, HN, Extent;
+	local bool bIsMoveTarget;
 	if (Bot(Other) != None)
 	{
-		Goal = Other.Destination;
+		Goal = Other.Destination;		
 		if (Goal == Location)
 		{
 			if (Other.RouteCache[1] != None)
@@ -2295,8 +2297,24 @@ function vector GetExitOffset(Pawn Other)
 			else
 				return ExitOffset;
 		}
-			
-		return (Normal(Goal - Other.Location) << Rotation)*VSize(ExitOffset);
+		bIsMoveTarget = Goal == Other.MoveTarget.Location;
+		Extent.X = Other.CollisionRadius;
+		Extent.Y = Extent.X;
+		if (Other.Trace(HL, HN, Goal - vect(0,0,1)*(Other.CollisionHeight + 1), Goal, true, Extent) != None)
+			Goal = HL + vect(0,0,1)*Other.CollisionHeight;
+		/*
+		if ((!bCanFly || HoverCraftPhys(self) != None) && bIsMoveTarget && 
+			(UTJumpPad(Other.MoveTarget) != None || FlagBase(Other.MoveTarget) != None || 
+			(CTFFlag(Other.MoveTarget) != None && CTFFlag(Other.MoveTarget).bHome)))
+			return ExitOffset;
+		*/
+		Goal -= Location;
+		Goal = Normal(Goal)*VSize(ExitOffset) << Rotation;
+		if (!bIsMoveTarget)
+			return Goal;
+		if (Abs(Goal.X) >= Other.MoveTarget.CollisionRadius)
+			Goal.X = Goal.X*(Abs(Goal.X) - Other.MoveTarget.CollisionRadius)/Abs(Goal.X);
+		return Normal(Goal)*VSize(ExitOffset);
 	}
 	return ExitOffset;
 }
@@ -2472,6 +2490,11 @@ function bool NeedStop(Pawn pDriver)
 			(FlagBase(pDriver.MoveTarget).Team != pDriver.PlayerReplicationInfo.Team) == (pDriver.PlayerReplicationInfo.HasFlag == None))
 			return true;
 	}
+	if (UTJumpPad(pDriver.MoveTarget) != None && 
+		pDriver.MoveTarget == pDriver.RouteCache[0] &&
+		UTJumpPad(pDriver.RouteCache[1]) != None && 
+		string(pDriver.RouteCache[1].Tag) ~= UTJumpPad(pDriver.RouteCache[0]).URL)
+		return true;
 	return false;
 }
 
@@ -4408,12 +4431,13 @@ function PassengerLeave( byte Seat, optional bool bForcedLeave )
 			ChangeCollision(Passengers[Seat], false);
 
 			ExitVect = GetExitOffset(Passengers[Seat]);
-			if ((Normal(Velocity) Dot Normal(ExitVect >> Rotation)) > 0.35)
+			if ((Normal(Velocity) Dot Normal(ExitVect >> Rotation)) > 0.35 && 
+				(Normal(Velocity) Dot Normal((ExitVect + vect(0,-2,0)*ExitVect.Y) >> Rotation)) <= 0.35)
 				ExitVect.Y = -ExitVect.Y;
-			if (!bForcedLeave && !Passengers[Seat].SetLocation(Location+(ExitVect >> Rotation)))
+			if (!Passengers[Seat].SetLocation(Location+(ExitVect >> Rotation)) && !bForcedLeave)
 			{
 				ExitVect.Y = -ExitVect.Y;
-				if (!bForcedLeave && !Passengers[Seat].SetLocation(Location+(ExitVect >> Rotation)))
+				if (!Passengers[Seat].SetLocation(Location+(ExitVect >> Rotation)) && !bForcedLeave)
 				{
 					ChangeCollision(Passengers[Seat], true);
 					if (PlayerPawn(Passengers[Seat]) != None)
