@@ -39,8 +39,9 @@ event PreBeginPlay()
 		
 	if (!class'VehiclesConfig'.default.bAllowTranslocator && DeathMatchPlus(Level.Game) != None)
 		DeathMatchPlus(Level.Game).bUseTranslocator = false;
-		
-	Spawn(class'FlagAnnouncer');
+	
+	if (CTFGame(Level.Game) != None)
+		Spawn(class'FlagAnnouncer');
 		
 	class'XVehiclesHUD'.static.SpawnHUD(self);
 	
