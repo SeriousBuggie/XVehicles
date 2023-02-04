@@ -2147,7 +2147,7 @@ simulated function ResetPawn(Pawn Other, rotator R, Weapon Weap)
 	else
 		Radius = 0; 
 		
-	if (Other.CollisionRadius != Radius)
+	if (Other.CollisionRadius != Radius && Level.NetMode < NM_Client)
 		Other.SetCollisionSize(Radius, Other.CollisionHeight);
 
 	if (Other.Location != L)
@@ -2168,7 +2168,7 @@ simulated function ResetPawn(Pawn Other, rotator R, Weapon Weap)
 	}
 	else 
 		Other.SetRotation(Rotation);
-	if( (Level.NetMode<NM_Client || IsNetOwner(Other)))
+	if (Level.NetMode < NM_Client /*|| IsNetOwner(Other)*/)
 		ResetPhysics(Other);
 		
 	if (Other.IsInState('FallingState'))
