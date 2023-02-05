@@ -135,7 +135,9 @@ static function FixBot(Bot Bot, optional int Tmr) {
 		}
 		return;
 	}
-		
+
+	if (Bot.PlayerReplicationInfo.Team >= ArrayCount(CTFReplicationInfo(Bot.Level.Game.GameReplicationInfo).FlagList))
+		return;
 	FriendlyFlag = CTFReplicationInfo(Bot.Level.Game.GameReplicationInfo).FlagList[Bot.PlayerReplicationInfo.Team];
 	if (VSize(FriendlyFlag.HomeBase.Location - Bot.Location) < 800)
 		return;
