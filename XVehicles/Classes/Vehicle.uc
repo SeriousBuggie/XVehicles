@@ -4420,11 +4420,14 @@ function PassengerLeave( byte Seat, optional bool bForcedLeave )
 				Passengers[Seat].Velocity += Velocity; // inertial exit
 				Passengers[Seat].Weapon = Passengers[Seat].PendingWeapon;
 				Passengers[Seat].ChangedWeapon();
-				if (Passengers[Seat].Weapon != None)
-					Passengers[Seat].Weapon.BringUp();
-				if (Passengers[Seat].bDuck == 1 && bCanFly)
-					PreventEnter = Spawn(class'PreventEnter', Passengers[Seat]);
-				Passengers[Seat].SetCollision(True, True, True);
+				if (Passengers[Seat] != None)
+				{
+					if (Passengers[Seat].Weapon != None)
+						Passengers[Seat].Weapon.BringUp();
+					if (Passengers[Seat].bDuck == 1 && bCanFly)
+						PreventEnter = Spawn(class'PreventEnter', Passengers[Seat]);
+					Passengers[Seat].SetCollision(True, True, True);
+				}
 			}
 			if (PlayerPawn(Passengers[Seat]) != None)
 			{
