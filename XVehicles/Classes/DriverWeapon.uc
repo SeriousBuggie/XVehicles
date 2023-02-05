@@ -30,7 +30,8 @@ function PreBeginPlay()
 	VehicleOwner = Vehicle(Owner);
 	if (VehicleOwner == None)
 		Destroy();
-	VehicleOwner.InitInventory(self);
+	else
+		VehicleOwner.InitInventory(self);
 }
 
 function ChangeOwner(Actor NewOwner)
