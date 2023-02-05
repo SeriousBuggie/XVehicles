@@ -123,10 +123,13 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch,
 			}
 	}
 	if (bPlaySound && Sound != None)
+		Spawn(class'FlagAnnouncerSound').Init(Sound, bExcludeTournamentPlayers);
+	/*
 		for (P = Level.PawnList; P != None; P = P.NextPawn)
 			if (P.bIsPlayer && P.IsA('PlayerPawn') && 
 			(!bExcludeTournamentPlayers || !P.IsA('TournamentPlayer')))
 				PlayerPawn(P).ClientPlaySound(Sound);
+	*/
 }
 
 function ClientVoiceMessage(PlayerReplicationInfo Sender, PlayerReplicationInfo Recipient, name messagetype, byte messageID);
