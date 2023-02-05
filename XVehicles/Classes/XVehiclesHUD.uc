@@ -30,7 +30,7 @@ function Mutate(string MutateString, PlayerPawn Sender)
 	local byte bDuck;
 	Super.Mutate(MutateString, Sender);
 	
-	if (Sender != None && Left(MutateString, 12) ~= "VehicleEnterExit")
+	if (Sender != None && Left(MutateString, 16) ~= "VehicleEnterExit")
 	{
 		if (DriverWeapon(Sender.Weapon) == None)
 			MutateString = "VehicleEnter";
