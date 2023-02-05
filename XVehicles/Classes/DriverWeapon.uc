@@ -279,6 +279,17 @@ State ClientDown
 	simulated function AnimEnd() {}
 }
 
+State DownWeapon
+{
+ignores Fire, AltFire;
+
+Begin:
+	TweenDown();
+	FinishAnim();
+	if (Pawn(Owner) != None)
+		Pawn(Owner).ChangedWeapon();
+}
+
 defaultproperties
 {
 	bWarnTarget=True
