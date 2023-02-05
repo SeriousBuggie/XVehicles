@@ -12,5 +12,5 @@ event int SpecialCost(Pawn Seeker)
 defaultproperties
 {
 	bSpecialCost=True
-	Texture=Texture'Engine.S_Flag'
+	Texture=Texture'S_Flag'
 }
