@@ -356,9 +356,7 @@ replication
 	// Variables the server should send to the client.
 	reliable if (Role == ROLE_Authority)
 		Driver, bDriving, Health, bVehicleBlewUp, ReplicOverlayMat, bTeamLocked, CurrentTeam, Passengers,
-		bReadyToRun, Specials, DriverGun, VehicleState, ServerState, bHasPassengers, // new ones
-		// Functions server can call.
-		ClientSetTranslatorMsg;
+		bReadyToRun, Specials, DriverGun, VehicleState, ServerState, bHasPassengers; // new ones
 	reliable if (Role == ROLE_Authority && bNetOwner)
 		bCameraOnBehindView, MyCameraAct, WAccelRate;
 	// Functions client can call.
@@ -1034,9 +1032,9 @@ function DriverEnter( Pawn Other, optional int MyPitch, optional int MyYaw )
 		Other.DropDecoration();
 	if (DropFlag != DF_None)
 		TryDropFlag(Other);
-	if( PlayerPawn(Other)!=None )
+	if (PlayerPawn(Other) != None)
 	{
-		ClientSetTranslatorMsg();
+		PlayerPawn(Other).ClientMessage(VehicleName, 'Pickup');
 		if (MyYaw != 0)
 			R.Yaw = MyYaw;
 		else
@@ -2775,41 +2773,6 @@ simulated event SetInitialState()
 	if( InitialState!='' )
 		GotoState( InitialState );
 	else GotoState( 'Auto' );
-}
-simulated function ClientSetTranslatorMsg()
-{
-	local Inventory I;
-	local int Count;
-	local PlayerPawn PP;
-
-	ServerSetBehindView(bUseBehindView);
-	if (Level.NetMode == NM_DedicatedServer)
-		Return;
-	if (Level.NetMode == NM_Client)
-	{
-		foreach AllActors(Class'PlayerPawn', PP)
-		{
-			if (PP.Player != None && TournamentPlayer(PP) != None)
-				break;
-		}
-	}
-	else PP = PlayerPawn(Owner);
-	if (PP == None)
-		Return;
-	PP.bBehindView = False;
-	if (MyCameraAct != None)
-		PP.ViewTarget = MyCameraAct;
-	PP.ClientMessage(VehicleName, 'Pickup');
-	for (I = PP.Inventory; I != None && Count < 2000; I = I.Inventory)
-	{
-		if (Translator(I) != None)
-		{
-			PP.ClientMessage(MsgVehicleDesc);
-			Translator(I).NewMessage = TranslatorDescription;
-			Return;
-		}
-		Count++;
-	}
 }
 simulated function vector FixCameraPos(vector V, vector S)
 {
