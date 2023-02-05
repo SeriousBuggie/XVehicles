@@ -1042,6 +1042,7 @@ function DriverEnter( Pawn Other, optional int MyPitch, optional int MyYaw )
 		R.Pitch = MyPitch;
 		PlayerPawn(Other).ClientSetRotation(R);
 		PlayerPawn(Other).bBehindView = False;
+		PlayerPawn(Other).EndZoom();
 		Other.GoToState('PlayerFlying');
 	}
 	MyCameraAct.SetCamOwner(Other);
@@ -4359,6 +4360,7 @@ function PassengerEnter( Pawn Other, byte Seat, optional int MyPitch, optional i
 		R.Pitch = MyPitch;
 		PlayerPawn(Other).ClientSetRotation(R);
 		PlayerPawn(Other).bBehindView = False;
+		PlayerPawn(Other).EndZoom();
 		Other.GoToState('PlayerFlying');
 	}
 	if( PassengerSeats[Seat].PassengerCam==None )
