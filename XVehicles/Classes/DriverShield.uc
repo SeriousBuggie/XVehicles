@@ -106,8 +106,8 @@ simulated exec function XVJumpReleased()
 
 simulated exec function VehicleExit()
 {
-	if (PlayerPawn(Owner) != None && DriverWeapon(PlayerPawn(Owner).Weapon) != None)
-		PlayerPawn(Owner).ThrowWeapon();
+	if (PlayerPawn(Owner) != None)
+		PlayerPawn(Owner).ConsoleCommand("mutate VehicleExit");
 }
 
 defaultproperties

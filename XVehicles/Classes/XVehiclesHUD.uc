@@ -28,6 +28,16 @@ function Mutate(string MutateString, PlayerPawn Sender)
 	local Vehicle Veh, Best;
 	local float Dist, BestDist;
 	local byte bDuck;
+	Super.Mutate(MutateString, Sender);
+	
+	if (Sender != None && Left(MutateString, 12) ~= "VehicleEnterExit")
+	{
+		if (DriverWeapon(Sender.Weapon) == None)
+			MutateString = "VehicleEnter";
+		else
+			MutateString = "VehicleExit";
+	}
+	
 	if (Sender != None && Left(MutateString, 12) ~= "VehicleEnter")
 	{
 		foreach Sender.RadiusActors(class'Vehicle', Veh, Sender.CollisionRadius + 100)
@@ -47,9 +57,12 @@ function Mutate(string MutateString, PlayerPawn Sender)
 			Best.Bump(Sender);
 			Sender.bDuck = bDuck;
 		}
+	} 
+	else if (Sender != None && Left(MutateString, 11) ~= "VehicleExit")
+	{
+		if (DriverWeapon(Sender.Weapon) != None)
+			Sender.TossWeapon();
 	}
-	
-	Super.Mutate(MutateString, Sender);
 }
 
 simulated function PreBeginPlay()
