@@ -2963,7 +2963,7 @@ simulated function vector CalcPlayerAimPos( optional byte SeatN )
 	Start = AdjustCamTraceStart(Start, Aim, Cam);
 		
 	End = Start+vector(Aim)*40000;
-	if( Trace(HL,HN,End,Start,True)==None )
+	if( Trace(HL,HN,End,Start,True)==None || HL == Start )
 		return End;
 	else return HL;
 }
