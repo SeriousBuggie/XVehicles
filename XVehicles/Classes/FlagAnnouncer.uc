@@ -10,6 +10,7 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch,
 	local Sound Sound;
 	local Pawn P;
 	local bool bExcludeTournamentPlayers, bPlaySound;
+	local FlagAnnouncerSound SoundActor;
 	
 	bPlaySound = !class'VehiclesConfig'.default.bDisableFlagAnnouncer && CTFGame(Level.Game).MaxTeams == 2;
 	
@@ -123,13 +124,16 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch,
 			}
 	}
 	if (bPlaySound && Sound != None)
-		Spawn(class'FlagAnnouncerSound').Init(Sound, bExcludeTournamentPlayers);
-	/*
-		for (P = Level.PawnList; P != None; P = P.NextPawn)
-			if (P.bIsPlayer && P.IsA('PlayerPawn') && 
-			(!bExcludeTournamentPlayers || !P.IsA('TournamentPlayer')))
-				PlayerPawn(P).ClientPlaySound(Sound);
-	*/
+	{
+		SoundActor = Spawn(class'FlagAnnouncerSound');
+		if (SoundActor != None)
+			SoundActor.Init(Sound, bExcludeTournamentPlayers);
+		else
+			for (P = Level.PawnList; P != None; P = P.NextPawn)
+				if (P.bIsPlayer && P.IsA('PlayerPawn') && 
+					(!bExcludeTournamentPlayers || !P.IsA('TournamentPlayer')))
+					PlayerPawn(P).ClientPlaySound(Sound);
+	}
 }
 
 function ClientVoiceMessage(PlayerReplicationInfo Sender, PlayerReplicationInfo Recipient, name messagetype, byte messageID);
