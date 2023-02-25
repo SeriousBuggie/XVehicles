@@ -31,6 +31,9 @@ simulated function Tick(float Delta)
 defaultproperties
 {
 	bAlwaysRelevant=True
+	Physics=PHYS_None
 	RemoteRole=ROLE_SimulatedProxy
 	LifeSpan=5.000000
+	bCollideActors=False
+	bCollideWorld=False
 }
