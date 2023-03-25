@@ -578,7 +578,6 @@ simulated function InitKeysInfo()
 simulated function PostBeginPlay()
 {
 	local byte i;
-	local rotator RotZeroRoll;
 
 	Super.PostBeginPlay();
 	
@@ -655,10 +654,6 @@ simulated function PostBeginPlay()
 				DriverWeaponClass = Class'DriverWeapon';
 			DWeapon = SpawnWeapon(DriverWeaponClass);
 		}
-		RotZeroRoll = Rotation;
-		RotZeroRoll.Roll = 0;
-		if( MyCameraAct==None )
-			MyCameraAct = Spawn(Class'DriverCameraActor',Self,,,RotZeroRoll);
 		if( DriverGun==None && DriverWeapon.WeaponClass!=None )
 		{
 			DriverGun = WeaponAttachment(AddAttachment(DriverWeapon.WeaponClass));
@@ -672,7 +667,6 @@ simulated function PostBeginPlay()
 		}
 		else if (DriverWeapon.WeaponClass==None && !bMaster)
 			AddAttachment(Class'MasterAttach');
-		MyCameraAct.GunAttachM = DriverGun;
 
 		For( i=0; i<ArrayCount(PassengerSeats); i++ )
 		{
@@ -691,9 +685,6 @@ simulated function PostBeginPlay()
 				}
 			}
 		}
-		
-		if (DriverGun == None && DriverWeapon.WeaponClass == None)
-			MyCameraAct.GunAttachM = PassengerSeats[0].PGun;
 	//}
 	
 	ClientLastTime = -1;
@@ -1053,6 +1044,15 @@ function DriverEnter( Pawn Other, optional int MyPitch, optional int MyYaw )
 		PlayerPawn(Other).bBehindView = False;
 		PlayerPawn(Other).EndZoom();
 		Other.GoToState('PlayerFlying');
+	}
+	if (MyCameraAct == None)
+	{
+		R = Rotation;
+		R.Roll = 0;
+		MyCameraAct = Spawn(Class'DriverCameraActor', Self, , , R);
+		MyCameraAct.GunAttachM = DriverGun;
+		if (DriverGun == None && DriverWeapon.WeaponClass == None)
+			MyCameraAct.GunAttachM = PassengerSeats[0].PGun;
 	}
 	MyCameraAct.SetCamOwner(Other);
 	GoToState('VehicleDriving');
