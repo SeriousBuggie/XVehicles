@@ -292,6 +292,7 @@ var() EDropFlag DropFlag;
 
 var VehicleFlag VehicleFlag;
 var VehicleState VehicleState;
+var float VehicleStateNextCheck;
 
 var float WaitForDriver;
 
@@ -356,7 +357,7 @@ replication
 	// Variables the server should send to the client.
 	reliable if (Role == ROLE_Authority)
 		Driver, bDriving, Health, bVehicleBlewUp, ReplicOverlayMat, bTeamLocked, CurrentTeam, Passengers,
-		bReadyToRun, Specials, DriverGun, VehicleState, ServerState, bHasPassengers; // new ones
+		bReadyToRun, Specials, DriverGun, ServerState, bHasPassengers; // new ones
 	reliable if (Role == ROLE_Authority && bNetOwner)
 		bCameraOnBehindView, MyCameraAct, WAccelRate;
 	// Functions client can call.
@@ -588,6 +589,8 @@ simulated function PostBeginPlay()
 	}
 	//*****************************************
 	
+	ShowState();
+	
 	if (Level.NetMode == NM_Client)
 		return;
 
@@ -693,8 +696,6 @@ simulated function PostBeginPlay()
 		if (DriverGun == None && DriverWeapon.WeaponClass == None)
 			MyCameraAct.GunAttachM = PassengerSeats[0].PGun;
 	//}
-	
-	ShowState();
 	
 	ClientLastTime = -1;
 	ServerLastTime = -1;
@@ -906,29 +907,21 @@ function ShowFlagOnRoof()
 {
 	local int i;
 	local VehicleFlag Prev;
-	local GameReplicationInfo GRI;
 	local CTFReplicationInfo CTFRI;
 	
 	for (Prev = VehicleFlag; Prev != None; Prev = Prev.Next)
 		Prev.LastCheck = 0;
-		
-	if (Level.Game != None)
-		GRI = Level.Game.GameReplicationInfo;
 	
 	if (Driver != None)
-		CheckFlag(Driver, GRI);
+		CheckFlag(Driver);
 
 	for (i = 0; i < ArrayCount(Passengers); i++)
 		if (Passengers[i] != None)
-			CheckFlag(Passengers[i], GRI);
+			CheckFlag(Passengers[i]);
 			
-	if (GRI == None)
-		foreach AllActors(class'GameReplicationInfo', GRI)
-			break;
-			
-	if (CTFReplicationInfo(GRI) != None)
+	if (Level.Game != None && CTFReplicationInfo(Level.Game.GameReplicationInfo) != None)
 	{
-		CTFRI = CTFReplicationInfo(GRI);
+		CTFRI = CTFReplicationInfo(Level.Game.GameReplicationInfo);
 		for (i = 0; i < ArrayCount(CTFRI.FlagList); i++)
 			if (IsGoodFlag(CTFRI.FlagList[i]) && 
 				CTFRI.FlagList[i].Holder != None &&
@@ -945,9 +938,7 @@ function ShowFlagOnRoof()
 			Prev.Pos = i++;
 }
 
-function CheckFlag(Pawn Pawn, out GameReplicationInfo GRI) {
-	if (GRI == None && PlayerPawn(Pawn) != None)
-		GRI = PlayerPawn(Pawn).GameReplicationInfo;
+function CheckFlag(Pawn Pawn) {
 	if (Pawn.PlayerReplicationInfo != None && 
 		IsGoodFlag(Pawn.PlayerReplicationInfo.HasFlag, Pawn))
 		AddFlag(Pawn.PlayerReplicationInfo.HasFlag);
@@ -975,12 +966,24 @@ function AddFlag(Decoration HasFlag)
 	}
 }
 
-function ShowState()
+simulated function ShowState(optional bool bFromTick)
 {
 	local int i;
 	local bool bUsed;
 	
-	ShowFlagOnRoof();
+	bUsed = Driver != None || bHasPassengers;
+				
+	if ((!bFromTick && (bUsed || VehicleFlag != None)) ||
+		(VehicleFlag != None && VehicleFlag.LastCheck < Level.TimeSeconds - 1))
+		ShowFlagOnRoof();
+	
+	if (Level.NetMode == NM_DedicatedServer)
+	{
+		VehicleStateNextCheck = Level.TimeSeconds + 3600;
+		return;
+	}
+	
+	VehicleStateNextCheck = Level.TimeSeconds + 0.2;
 	
 	if (class'VehiclesConfig'.default.bHideState)
 	{
@@ -992,13 +995,6 @@ function ShowState()
 	
 	if (VehicleState == None)
 		VehicleState = Spawn(class'VehicleState', self);
-		
-	if (Driver != None)
-		bUsed = true;
-	else
-		for (i=0; i<Arraycount(Passengers); i++)
-			if (Passengers[i] != None)
-				bUsed = true;
 	
 	VehicleState.SetState(CurrentTeam, bTeamLocked, bUsed);
 }
@@ -1792,9 +1788,10 @@ simulated function Tick( float Delta )
 
 	if (AttachmentList == None)
 		AttachmentsTick(Delta);
-		
-	if (VehicleFlag != None && VehicleFlag.LastCheck < Level.TimeSeconds - 1)
-		ShowState();
+
+	if ((VehicleStateNextCheck < Level.TimeSeconds) ||
+		(VehicleFlag != None && VehicleFlag.LastCheck < Level.TimeSeconds - 1))
+		ShowState(true);
 }
 
 simulated function SavedMoveXV GetFreeMove()
