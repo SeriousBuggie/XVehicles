@@ -223,6 +223,7 @@ enum ESignalLights
 };
 var ESignalLights SignalLights;
 var ESignalLights SignalLightsRepl;
+var bool SignalLightsCreated;
 var VehicleLightsOv VLov;
 var bool bHeadLightInUse;
 struct VHeadL
@@ -391,8 +392,36 @@ function ActivateSpecial( byte SpecialN);	//SpecialN: 7 = Key 9
 simulated function SetSignalLights(ESignalLights InSignalLights)
 {
 	local int i;
-	if (bUseSignalLights && SignalLights != InSignalLights)
+	if (bUseSignalLights && SignalLights != InSignalLights && Level.NetMode != NM_DedicatedServer)
 	{
+		if (!SignalLightsCreated && (Self.IsA('WheeledCarPhys') || Self.IsA('TreadCraftPhys')))
+		{
+			For (i = 0; i < ArrayCount(StopLights); i++)
+			{
+				if (StopLights[i].VLightTex != None)
+				{
+					StopLights[i].VLC = Spawn(Class'VehicleLightsCor', Self);
+					StopLights[i].VLC.POffSet = StopLights[i].VLightOffset;
+					StopLights[i].VLC.Texture = StopLights[i].VLightTex;
+					StopLights[i].VLC.SpriteProjForward = StopLights[i].VSpriteProj;
+					StopLights[i].VLC.DrawScale = StopLights[i].VLightScale;
+				}
+			}
+	
+			For (i = 0; i < ArrayCount(BackwardsLights); i++)
+			{
+				if (BackwardsLights[i].VLightTex != None)
+				{
+					BackwardsLights[i].VLC = Spawn(Class'VehicleLightsCor', Self);
+					BackwardsLights[i].VLC.POffSet = BackwardsLights[i].VLightOffset;
+					BackwardsLights[i].VLC.Texture = BackwardsLights[i].VLightTex;
+					BackwardsLights[i].VLC.SpriteProjForward = BackwardsLights[i].VSpriteProj;
+					BackwardsLights[i].VLC.DrawScale = BackwardsLights[i].VLightScale;
+				}
+			}
+			SignalLightsCreated = true;
+		}
+	
 		if (SignalLights == SL_Stop || InSignalLights == SL_Stop)
 			for (i = 0; i < ArrayCount(StopLights); i++)
 				if (StopLights[i].VLC != None)
@@ -592,39 +621,6 @@ simulated function PostBeginPlay()
 	//*****************************************
 	
 	ShowState();
-	
-	if (Level.NetMode != NM_DedicatedServer)
-	{
-		//*****************************************
-		//Signal Lights
-		//*****************************************
-		if (bUseSignalLights && (Self.IsA('WheeledCarPhys') || Self.IsA('TreadCraftPhys')))
-		{
-			For (i = 0; i < ArrayCount(StopLights); i++)
-			{
-				if (StopLights[i].VLightTex != None)
-				{
-					StopLights[i].VLC = Spawn(Class'VehicleLightsCor', Self);
-					StopLights[i].VLC.POffSet = StopLights[i].VLightOffset;
-					StopLights[i].VLC.Texture = StopLights[i].VLightTex;
-					StopLights[i].VLC.SpriteProjForward = StopLights[i].VSpriteProj;
-					StopLights[i].VLC.DrawScale = StopLights[i].VLightScale;
-				}
-			}
-	
-			For (i = 0; i < ArrayCount(BackwardsLights); i++)
-			{
-				if (BackwardsLights[i].VLightTex != None)
-				{
-					BackwardsLights[i].VLC = Spawn(Class'VehicleLightsCor', Self);
-					BackwardsLights[i].VLC.POffSet = BackwardsLights[i].VLightOffset;
-					BackwardsLights[i].VLC.Texture = BackwardsLights[i].VLightTex;
-					BackwardsLights[i].VLC.SpriteProjForward = BackwardsLights[i].VSpriteProj;
-					BackwardsLights[i].VLC.DrawScale = BackwardsLights[i].VLightScale;
-				}
-			}
-		}
-	}
 	
 	if (Level.NetMode == NM_Client)
 		return;
