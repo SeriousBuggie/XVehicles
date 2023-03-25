@@ -476,23 +476,23 @@ local byte i;
 		{
 			if (HeadLights[i].VLightTex != None)
 			{
-			HeadLights[i].VLC = Spawn(Class'VehicleLightsCor', Self);
-			HeadLights[i].VLC.POffSet = HeadLights[i].VLightOffset;
-			HeadLights[i].VLC.Texture = HeadLights[i].VLightTex;
-			HeadLights[i].VLC.SpriteProjForward = HeadLights[i].VSpriteProj;
-			HeadLights[i].VLC.DrawScale = HeadLights[i].VLightScale;
-			HeadLights[i].VLC.bHidden = false;
-
-			if (HeadLights[i].VHeadLight.bHaveSpotLight)
-			{
-				HeadLights[i].VHeadLight.HSpot = Spawn(Class'HeadSpotLight', Self);
-				HeadLights[i].VHeadLight.HSpot.POffSet = HeadLights[i].VLightOffset;
-				HeadLights[i].VHeadLight.HSpot.LightBrightness = HeadLights[i].VHeadLight.HeadLightIntensity;
-				HeadLights[i].VHeadLight.HSpot.LightHue = HeadLights[i].VHeadLight.HLightHue;
-				HeadLights[i].VHeadLight.HSpot.LightSaturation = HeadLights[i].VHeadLight.HLightSat;
-				HeadLights[i].VHeadLight.HSpot.LightCone = HeadLights[i].VHeadLight.HeadCone;
-				HeadLights[i].VHeadLight.HSpot.LightRadius = HeadLights[i].VHeadLight.HeadDistance;
-			}
+				HeadLights[i].VLC = Spawn(Class'VehicleLightsCor', Self);
+				HeadLights[i].VLC.POffSet = HeadLights[i].VLightOffset;
+				HeadLights[i].VLC.Texture = HeadLights[i].VLightTex;
+				HeadLights[i].VLC.SpriteProjForward = HeadLights[i].VSpriteProj;
+				HeadLights[i].VLC.DrawScale = HeadLights[i].VLightScale;
+				HeadLights[i].VLC.bHidden = false;
+	
+				if (HeadLights[i].VHeadLight.bHaveSpotLight)
+				{
+					HeadLights[i].VHeadLight.HSpot = Spawn(Class'HeadSpotLight', Self);
+					HeadLights[i].VHeadLight.HSpot.POffSet = HeadLights[i].VLightOffset;
+					HeadLights[i].VHeadLight.HSpot.LightBrightness = HeadLights[i].VHeadLight.HeadLightIntensity;
+					HeadLights[i].VHeadLight.HSpot.LightHue = HeadLights[i].VHeadLight.HLightHue;
+					HeadLights[i].VHeadLight.HSpot.LightSaturation = HeadLights[i].VHeadLight.HLightSat;
+					HeadLights[i].VHeadLight.HSpot.LightCone = HeadLights[i].VHeadLight.HeadCone;
+					HeadLights[i].VHeadLight.HSpot.LightRadius = HeadLights[i].VHeadLight.HeadDistance;
+				}
 			}
 		}
 	}
