@@ -37,6 +37,7 @@ defaultproperties
 {
 	bStatic=False
 	bNoDelete=False
+	bAlwaysRelevant=True
 	bTrailerSameRotation=True
 	bTrailerPrePivot=True
 	Physics=PHYS_Trailer
