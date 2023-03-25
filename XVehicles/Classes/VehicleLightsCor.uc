@@ -11,28 +11,19 @@ replication
 		POffSet;
 }
 
-function PostBeginPlay()
-{
-	SetTimer(0.2,True);
-}
-
-function Timer()
-{
-	If (Owner == None)
-		Destroy();
-}
-
 simulated function Tick(float Delta)
 {
 	local Vehicle Veh;
 	Veh = Vehicle(Owner);
-	if (Veh!=None)
+	if (Veh != None)
 	{
 		if (Veh.bSlopedPhys && Veh.GVT!=None)
 			PrePivot = Veh.GVT.PrePivot + (POffSet >> Veh.Rotation);
 		else
 			PrePivot = (POffSet >> Veh.Rotation);
 	}
+	else if (Role == ROLE_Authority)
+		Destroy();
 }
 
 defaultproperties
