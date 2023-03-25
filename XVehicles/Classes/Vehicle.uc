@@ -902,33 +902,33 @@ simulated function bool IsNetOwned()
 	return false;
 }
 
-function bool IsGoodFlag(Decoration Flag, optional Pawn Holder)
-{
-	return Flag != None && !Flag.IsA('PureFlag') && !Flag.IsA('WarmupFlag') &&
-		(Holder == None || CTFFlag(Flag) == None || CTFFlag(Flag).Holder == Holder);
-}
-
 function ShowFlagOnRoof()
 {
 	local int i;
 	local VehicleFlag Prev;
+	local GameReplicationInfo GRI;
 	local CTFReplicationInfo CTFRI;
 	
 	for (Prev = VehicleFlag; Prev != None; Prev = Prev.Next)
 		Prev.LastCheck = 0;
+		
+	if (Level.Game != None)
+		GRI = Level.Game.GameReplicationInfo;
 	
-	if (Driver != None && Driver.PlayerReplicationInfo != None && 
-		IsGoodFlag(Driver.PlayerReplicationInfo.HasFlag, Driver))
-		AddFlag(Driver.PlayerReplicationInfo.HasFlag);
+	if (Driver != None)
+		CheckFlag(Driver, GRI);
 
 	for (i = 0; i < ArrayCount(Passengers); i++)
-		if (Passengers[i] != None && Passengers[i].PlayerReplicationInfo != None && 
-			IsGoodFlag(Passengers[i].PlayerReplicationInfo.HasFlag, Passengers[i]))
-			AddFlag(Passengers[i].PlayerReplicationInfo.HasFlag);
+		if (Passengers[i] != None)
+			CheckFlag(Passengers[i], GRI);
 			
-	if (Level != None && Level.Game != None && CTFReplicationInfo(Level.Game.GameReplicationInfo) != None)
+	if (GRI == None)
+		foreach AllActors(class'GameReplicationInfo', GRI)
+			break;
+			
+	if (CTFReplicationInfo(GRI) != None)
 	{
-		CTFRI = CTFReplicationInfo(Level.Game.GameReplicationInfo);
+		CTFRI = CTFReplicationInfo(GRI);
 		for (i = 0; i < ArrayCount(CTFRI.FlagList); i++)
 			if (IsGoodFlag(CTFRI.FlagList[i]) && 
 				CTFRI.FlagList[i].Holder != None &&
@@ -943,6 +943,20 @@ function ShowFlagOnRoof()
 			Prev.Destroy();
 		else
 			Prev.Pos = i++;
+}
+
+function CheckFlag(Pawn Pawn, out GameReplicationInfo GRI) {
+	if (GRI == None && PlayerPawn(Pawn) != None)
+		GRI = PlayerPawn(Pawn).GameReplicationInfo;
+	if (Pawn.PlayerReplicationInfo != None && 
+		IsGoodFlag(Pawn.PlayerReplicationInfo.HasFlag, Pawn))
+		AddFlag(Pawn.PlayerReplicationInfo.HasFlag);
+}
+
+function bool IsGoodFlag(Decoration Flag, optional Pawn Holder)
+{
+	return Flag != None && !Flag.IsA('PureFlag') && !Flag.IsA('WarmupFlag') &&
+		(Holder == None || CTFFlag(Flag) == None || CTFFlag(Flag).Holder == Holder);
 }
 
 function AddFlag(Decoration HasFlag)
