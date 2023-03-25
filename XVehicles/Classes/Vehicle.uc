@@ -222,6 +222,7 @@ enum ESignalLights
 	SL_Backwards,
 };
 var ESignalLights SignalLights;
+var ESignalLights SignalLightsRepl;
 var VehicleLightsOv VLov;
 var bool bHeadLightInUse;
 struct VHeadL
@@ -357,7 +358,7 @@ replication
 	// Variables the server should send to the client.
 	reliable if (Role == ROLE_Authority)
 		Driver, bDriving, Health, bVehicleBlewUp, ReplicOverlayMat, bTeamLocked, CurrentTeam, Passengers,
-		bReadyToRun, Specials, DriverGun, ServerState, bHasPassengers; // new ones
+		bReadyToRun, Specials, DriverGun, ServerState, bHasPassengers, SignalLightsRepl; // new ones
 	reliable if (Role == ROLE_Authority && bNetOwner)
 		bCameraOnBehindView, MyCameraAct, WAccelRate;
 	// Functions client can call.
@@ -387,7 +388,7 @@ local float rrad;
 
 function ActivateSpecial( byte SpecialN);	//SpecialN: 7 = Key 9
 
-function SetSignalLights(ESignalLights InSignalLights)
+simulated function SetSignalLights(ESignalLights InSignalLights)
 {
 	local int i;
 	if (bUseSignalLights && SignalLights != InSignalLights)
@@ -400,9 +401,10 @@ function SetSignalLights(ESignalLights InSignalLights)
 			for (i = 0; i < ArrayCount(BackwardsLights); i++)
 				if (BackwardsLights[i].VLC != None)
 					BackwardsLights[i].VLC.bHidden = SignalLights == SL_Backwards;
-				
-		SignalLights = InSignalLights;
 	}
+	
+	SignalLights = InSignalLights;
+	SignalLightsRepl = SignalLights;
 }
 
 function SwitchVehicleLights()
@@ -591,6 +593,39 @@ simulated function PostBeginPlay()
 	
 	ShowState();
 	
+	if (Level.NetMode != NM_DedicatedServer)
+	{
+		//*****************************************
+		//Signal Lights
+		//*****************************************
+		if (bUseSignalLights && (Self.IsA('WheeledCarPhys') || Self.IsA('TreadCraftPhys')))
+		{
+			For (i = 0; i < ArrayCount(StopLights); i++)
+			{
+				if (StopLights[i].VLightTex != None)
+				{
+					StopLights[i].VLC = Spawn(Class'VehicleLightsCor', Self);
+					StopLights[i].VLC.POffSet = StopLights[i].VLightOffset;
+					StopLights[i].VLC.Texture = StopLights[i].VLightTex;
+					StopLights[i].VLC.SpriteProjForward = StopLights[i].VSpriteProj;
+					StopLights[i].VLC.DrawScale = StopLights[i].VLightScale;
+				}
+			}
+	
+			For (i = 0; i < ArrayCount(BackwardsLights); i++)
+			{
+				if (BackwardsLights[i].VLightTex != None)
+				{
+					BackwardsLights[i].VLC = Spawn(Class'VehicleLightsCor', Self);
+					BackwardsLights[i].VLC.POffSet = BackwardsLights[i].VLightOffset;
+					BackwardsLights[i].VLC.Texture = BackwardsLights[i].VLightTex;
+					BackwardsLights[i].VLC.SpriteProjForward = BackwardsLights[i].VSpriteProj;
+					BackwardsLights[i].VLC.DrawScale = BackwardsLights[i].VLightScale;
+				}
+			}
+		}
+	}
+	
 	if (Level.NetMode == NM_Client)
 		return;
 
@@ -599,38 +634,6 @@ simulated function PostBeginPlay()
 
 	if (!bReadyToRun && (Self.IsA('WheeledCarPhys') || Self.IsA('TreadCraftPhys')))
 		SetPhysics(PHYS_Falling);
-
-
-	//*****************************************
-	//Signal Lights
-	//*****************************************
-	if (bUseSignalLights && (Self.IsA('WheeledCarPhys') || Self.IsA('TreadCraftPhys')))
-	{
-		For (i=0; i<ArrayCount(StopLights); i++)
-		{
-			if (StopLights[i].VLightTex != None)
-			{
-			StopLights[i].VLC = Spawn(Class'VehicleLightsCor', Self);
-			StopLights[i].VLC.POffSet = StopLights[i].VLightOffset;
-			StopLights[i].VLC.Texture = StopLights[i].VLightTex;
-			StopLights[i].VLC.SpriteProjForward = StopLights[i].VSpriteProj;
-			StopLights[i].VLC.DrawScale = StopLights[i].VLightScale;
-			}
-		}
-
-		For (i=0; i<ArrayCount(BackwardsLights); i++)
-		{
-			if (BackwardsLights[i].VLightTex != None)
-			{
-			BackwardsLights[i].VLC = Spawn(Class'VehicleLightsCor', Self);
-			BackwardsLights[i].VLC.POffSet = BackwardsLights[i].VLightOffset;
-			BackwardsLights[i].VLC.Texture = BackwardsLights[i].VLightTex;
-			BackwardsLights[i].VLC.SpriteProjForward = BackwardsLights[i].VSpriteProj;
-			BackwardsLights[i].VLC.DrawScale = BackwardsLights[i].VLightScale;
-			}
-		}
-	}
-
 
 	if (!bHaveGroundWaterFX)
 		VehFoot = Spawn(Class'VehWaterAttach',Self);
@@ -1792,6 +1795,9 @@ simulated function Tick( float Delta )
 	if ((VehicleStateNextCheck < Level.TimeSeconds) ||
 		(VehicleFlag != None && VehicleFlag.LastCheck < Level.TimeSeconds - 1))
 		ShowState(true);
+		
+	if (SignalLights != SignalLightsRepl)
+		SetSignalLights(SignalLightsRepl);
 }
 
 simulated function SavedMoveXV GetFreeMove()
