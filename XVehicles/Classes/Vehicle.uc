@@ -226,6 +226,7 @@ var ESignalLights SignalLightsRepl;
 var bool SignalLightsCreated;
 var VehicleLightsOv VLov;
 var bool bHeadLightInUse;
+var bool bHeadLightInUseRepl;
 struct VHeadL
 {
 	var() bool bHaveSpotLight;
@@ -359,7 +360,7 @@ replication
 	// Variables the server should send to the client.
 	reliable if (Role == ROLE_Authority)
 		Driver, bDriving, Health, bVehicleBlewUp, ReplicOverlayMat, bTeamLocked, CurrentTeam, Passengers,
-		bReadyToRun, Specials, DriverGun, ServerState, bHasPassengers, SignalLightsRepl; // new ones
+		bReadyToRun, Specials, DriverGun, ServerState, bHasPassengers, SignalLightsRepl, bHeadLightInUseRepl; // new ones
 	reliable if (Role == ROLE_Authority && bNetOwner)
 		bCameraOnBehindView, MyCameraAct, WAccelRate;
 	// Functions client can call.
@@ -438,52 +439,63 @@ simulated function SetSignalLights(ESignalLights InSignalLights)
 
 function SwitchVehicleLights()
 {
-local byte i;
+	local byte i;
 
 	if (!bHeadLightInUse && bUseVehicleLights)
-	{
-		bHeadLightInUse = True;
-		
-		if (HeadLightOn!=None)
+		UpdateVehicleLights(true);
+	else if (bUseVehicleLights)
+		UpdateVehicleLights(false);
+}
+
+simulated function UpdateVehicleLights(bool bInHeadLightInUse)
+{
+	local byte i;
+
+	if (bInHeadLightInUse && !bHeadLightInUse)
+	{	
+		if (HeadLightOn != None && Level.NetMode != NM_Client)
 			PlaySound(HeadLightOn);
 
-		For (i = 0; i < ArrayCount(LightsOverlayer); i++)
-			if (LightsOverlayer[i] != None)
-			{
-				VLov = Spawn(Class'VehicleLightsOv', Self);
-				break;
-			}
-
-		if (VLov != None)
+		if (Level.NetMode != NM_DedicatedServer)
 		{
-			if (LightsOverlayer[8] != None)
-				VLov.Texture = LightsOverlayer[8];
-			else
-				VLov.Texture = Texture'TransInvis';
-			VLov.Mesh = Mesh;
-			VLov.DrawScale = DrawScale;
-			
 			For (i = 0; i < ArrayCount(LightsOverlayer); i++)
-			{
 				if (LightsOverlayer[i] != None)
-					VLov.MultiSkins[i] = LightsOverlayer[i];
+				{
+					VLov = Spawn(Class'VehicleLightsOv', Self);
+					break;
+				}
+	
+			if (VLov != None)
+			{
+				if (LightsOverlayer[8] != None)
+					VLov.Texture = LightsOverlayer[8];
 				else
-					VLov.MultiSkins[i] = Texture'TransInvis';
+					VLov.Texture = Texture'TransInvis';
+				VLov.Mesh = Mesh;
+				VLov.DrawScale = DrawScale;
+				
+				For (i = 0; i < ArrayCount(MultiSkins); i++)
+					if (LightsOverlayer[i] != None)
+						VLov.MultiSkins[i] = LightsOverlayer[i];
+					else
+						VLov.MultiSkins[i] = Texture'TransInvis';
 			}
 		}
 
-		For (i=0; i<ArrayCount(HeadLights); i++)
-		{
+		For (i = 0; i < ArrayCount(HeadLights); i++)
 			if (HeadLights[i].VLightTex != None)
 			{
-				HeadLights[i].VLC = Spawn(Class'VehicleLightsCor', Self);
-				HeadLights[i].VLC.POffSet = HeadLights[i].VLightOffset;
-				HeadLights[i].VLC.Texture = HeadLights[i].VLightTex;
-				HeadLights[i].VLC.SpriteProjForward = HeadLights[i].VSpriteProj;
-				HeadLights[i].VLC.DrawScale = HeadLights[i].VLightScale;
-				HeadLights[i].VLC.bHidden = false;
+				if (Level.NetMode != NM_DedicatedServer)
+				{
+					HeadLights[i].VLC = Spawn(Class'VehicleLightsCor', Self);
+					HeadLights[i].VLC.POffSet = HeadLights[i].VLightOffset;
+					HeadLights[i].VLC.Texture = HeadLights[i].VLightTex;
+					HeadLights[i].VLC.SpriteProjForward = HeadLights[i].VSpriteProj;
+					HeadLights[i].VLC.DrawScale = HeadLights[i].VLightScale;
+					HeadLights[i].VLC.bHidden = false;
+				}
 	
-				if (HeadLights[i].VHeadLight.bHaveSpotLight)
+				if (HeadLights[i].VHeadLight.bHaveSpotLight && Level.NetMode != NM_Client)
 				{
 					HeadLights[i].VHeadLight.HSpot = Spawn(Class'HeadSpotLight', Self);
 					HeadLights[i].VHeadLight.HSpot.POffSet = HeadLights[i].VLightOffset;
@@ -494,27 +506,27 @@ local byte i;
 					HeadLights[i].VHeadLight.HSpot.LightRadius = HeadLights[i].VHeadLight.HeadDistance;
 				}
 			}
-		}
 	}
-	else if (bUseVehicleLights)
-	{
-		bHeadLightInUse = False;
-		
-		if (HeadLightOff!=None)
+	else if (!bInHeadLightInUse && bHeadLightInUse)
+	{	
+		if (HeadLightOff != None && Level.NetMode != NM_Client)
 			PlaySound(HeadLightOff);
 		
-		if (VLov!=None)
+		if (VLov != None && Level.NetMode != NM_DedicatedServer)
 			VLov.Destroy();
 
-		For (i=0; i<ArrayCount(HeadLights); i++)
+		For (i = 0; i < ArrayCount(HeadLights); i++)
 		{
-			if (HeadLights[i].VLC != None)
+			if (HeadLights[i].VLC != None && Level.NetMode != NM_DedicatedServer)
 				HeadLights[i].VLC.Destroy();
 			
-			if (HeadLights[i].VHeadLight.HSpot != None)
+			if (HeadLights[i].VHeadLight.HSpot != None && Level.NetMode != NM_Client)
 				HeadLights[i].VHeadLight.HSpot.Destroy();
 		}
 	}
+	
+	bHeadLightInUse = bInHeadLightInUse;
+	bHeadLightInUseRepl = bInHeadLightInUse;
 }
 
 simulated function InitKeysInfo()
@@ -1794,6 +1806,9 @@ simulated function Tick( float Delta )
 		
 	if (SignalLights != SignalLightsRepl)
 		SetSignalLights(SignalLightsRepl);
+	if (bHeadLightInUse != bHeadLightInUseRepl)
+		UpdateVehicleLights(bHeadLightInUseRepl);
+		
 }
 
 simulated function SavedMoveXV GetFreeMove()

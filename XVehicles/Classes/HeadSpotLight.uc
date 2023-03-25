@@ -3,12 +3,13 @@ Class HeadSpotLight extends Light;
 
 var bool bReady;
 var vector POffSet;
+var byte LightConeRepl;
 
 replication
 {
 	// Variables the server should send to the client.
-	reliable if( Role==ROLE_Authority )
-		POffSet;
+	reliable if (Role == ROLE_Authority)
+		POffSet, LightConeRepl;
 }
 
 function PostBeginPlay()
@@ -24,17 +25,22 @@ function Timer()
 
 simulated function Tick(float Delta)
 {
-	if (Vehicle(Owner)!=None)
+	if (Vehicle(Owner) != None)
 	{
-		if (Vehicle(Owner).bSlopedPhys && Vehicle(Owner).GVT!=None)
+		if (Vehicle(Owner).bSlopedPhys && Vehicle(Owner).GVT != None)
 			PrePivot = Vehicle(Owner).GVT.PrePivot + (POffSet >> Vehicle(Owner).Rotation);
 		else
 			PrePivot = (POffSet >> Vehicle(Owner).Rotation);
 	}
+	if (Role == ROLE_Authority)
+		LightConeRepl = LightCone;
+	else
+		LightCone = LightConeRepl;
 }
 
 defaultproperties
 {
+	LightConeRepl=128
 	bStatic=False
 	bNoDelete=False
 	bAlwaysRelevant=True
