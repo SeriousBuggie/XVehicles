@@ -586,7 +586,7 @@ simulated function PostBeginPlay()
 
 	FirstHealth = Health;
 	
-	if ( Level.NetMode != NM_DedicatedServer )
+	if (Level.NetMode != NM_DedicatedServer && !bSlopedPhys)
 		Shadow = Spawn(class'VehicleShadow', self);
 		
 	BotDriverJumpZ = 1.0;
