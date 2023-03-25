@@ -9,6 +9,8 @@ simulated function PostBeginPlay()
 	
 	if (Level.NetMode != NM_DedicatedServer)
 		FixOffset();
+	else
+		Disable('Tick');
 }
 
 simulated function PostNetBeginPlay()

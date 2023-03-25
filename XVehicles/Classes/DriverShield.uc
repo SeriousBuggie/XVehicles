@@ -14,6 +14,8 @@ function PreBeginPlay()
 {
 	Super.PreBeginPlay();
 	Disable('Touch');
+	if (Level.NetMode == NM_DedicatedServer)
+		Disable('Tick');
 }
 
 function Touch(Actor Other);
@@ -87,6 +89,7 @@ simulated function BindKeys()
 		return;
 		
 	bKeysSet = true;
+	Disable('Tick');
 		
 	for (i = 0; i < 256; i++)
 	{

@@ -71,6 +71,9 @@ simulated function PreBeginPlay()
 	
 	if (Level.NetMode == NM_Client)
 		SetTimer(1, true);
+		
+	if (Level.NetMode == NM_DedicatedServer)
+		Disable('Tick');
 }
 
 simulated function Timer()
