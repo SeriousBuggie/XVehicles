@@ -32,11 +32,8 @@ simulated event Update(Actor L)
 		return;
 	}
 
-	if ( !Level.bHighDetailMode )
-		return;
-
-	SetTimer(0.08, false);
-	if ( OldOwnerLocation == Owner.Location )
+	//SetTimer(0.08, false); // not need if call in tick
+	if (!Level.bHighDetailMode || OldOwnerLocation == Owner.Location)
 		return;
 
 	OldOwnerLocation = Owner.Location;
