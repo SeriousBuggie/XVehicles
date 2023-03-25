@@ -63,6 +63,7 @@ event PreBeginPlay()
 	}
 	
 	class'VehiclesConfig'.default.bPulseAltHeal = bPulseAltHeal;
+	class'VehiclesConfig'.static.Update(self);
 	
 	if (bShowFlagBase)
 		foreach AllActors(class'FlagBase', FB)

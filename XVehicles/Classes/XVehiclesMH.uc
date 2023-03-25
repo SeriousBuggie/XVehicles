@@ -55,7 +55,8 @@ Function SetShield()
 	}
 	
 	class'VehiclesConfig'.default.bHideState = true;
-	class'VehiclesConfig'.default.bDisableTeamSpawn = true;	
+	class'VehiclesConfig'.default.bDisableTeamSpawn = true;
+	class'VehiclesConfig'.static.Update(self);
 	
 	SetPropertyText("DynClass", "Class'JSDXLPlasma'");
 	if (Class<Projectile>(DynClass) != None)
