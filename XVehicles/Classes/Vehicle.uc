@@ -3819,7 +3819,7 @@ function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 	local byte shldset, shldtkn;
 //	Log(self @ Level.TimeSeconds @ "TakeDamage" @ Damage @ InstigatedBy @ hitlocation @ momentum @ damageType @ InstigatedBy.DamageScaling);
 
-	if (!bVehicleBlewUp)
+	if (!bVehicleBlewUp && !(Level.Game != None && Level.Game.bGameEnded))
 	{
 		if (bDeleteMe || Level.NetMode == NM_Client)
 			Return;
