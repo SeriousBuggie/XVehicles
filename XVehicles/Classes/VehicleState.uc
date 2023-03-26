@@ -39,9 +39,7 @@ simulated function FixOffset()
 }
 
 simulated function Tick(float Delta)
-{
-	Super.Tick(Delta);
-	
+{	
 	if (Level.NetMode != NM_DedicatedServer)
 		FixOffset();
 }

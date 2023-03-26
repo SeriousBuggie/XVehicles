@@ -18,11 +18,6 @@ simulated function PostBeginPlay()
 
 simulated event Tick(Float Delta)
 {
-	Update(None);
-}
-
-simulated event Update(Actor L)
-{
 	local Actor HitActor;
 	local Vector HitNormal,HitLocation, ShadowStart, ShadowDir;
 	

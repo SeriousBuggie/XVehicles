@@ -2,11 +2,6 @@ Class TreadsTrailer extends Effects;
 
 var vector PrePivotRel;
 
-function PostBeginPlay()
-{
-	SetTimer(0.2,True);
-}
-
 function Tick(float Delta)
 {
 	if (Vehicle(Owner) != None)
@@ -16,12 +11,7 @@ function Tick(float Delta)
 		else
 			PrePivot = (PrePivotRel >> Owner.Rotation);
 	}
-}
-
-function Timer()
-{
-
-	If (Owner == None)
+	else if (Owner == None)
 		Destroy();
 }
 
