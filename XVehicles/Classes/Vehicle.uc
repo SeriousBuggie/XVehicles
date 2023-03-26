@@ -1046,7 +1046,8 @@ function DriverEnter( Pawn Other, optional int MyPitch, optional int MyYaw )
 		TryDropFlag(Other);
 	if (PlayerPawn(Other) != None)
 	{
-		PlayerPawn(Other).ClientMessage(VehicleName, 'Pickup');
+		//PlayerPawn(Other).ClientMessage(VehicleName, 'Pickup');
+		PlayerPawn(Other).ReceiveLocalizedMessage(class'EnterMessagePlus', 1, None, None, Self);
 		if (MyYaw != 0)
 			R.Yaw = MyYaw;
 		else
@@ -4377,9 +4378,10 @@ function PassengerEnter( Pawn Other, byte Seat, optional int MyPitch, optional i
 		Other.DropDecoration();
 	if (DropFlag == DF_All)
 		TryDropFlag(Other);
-	if( PlayerPawn(Other)!=None )
+	if (PlayerPawn(Other) != None)
 	{
-		Other.ClientMessage(PassengerSeats[Seat].SeatName,'Pickup');
+		//Other.ClientMessage(PassengerSeats[Seat].SeatName,'Pickup');
+		Other.ReceiveLocalizedMessage(class'EnterMessagePlus', Seat + 2, None, None, Self);
 		if (MyYaw != 0)
 			R.Yaw = MyYaw;
 		else if( PassengerSeats[Seat].PGun!=None )
@@ -4391,7 +4393,7 @@ function PassengerEnter( Pawn Other, byte Seat, optional int MyPitch, optional i
 		PlayerPawn(Other).EndZoom();
 		Other.GoToState('PlayerFlying');
 	}
-	if( PassengerSeats[Seat].PassengerCam==None )
+	if (PassengerSeats[Seat].PassengerCam == None)
 	{
 		PassengerSeats[Seat].PassengerCam = Spawn(Class'PassengerCameraA',Other,,,RotRollZero);
 		PassengerSeats[Seat].PassengerCam.VehicleOwner = Self;
