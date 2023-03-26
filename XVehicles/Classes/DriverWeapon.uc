@@ -174,6 +174,8 @@ simulated function Tick(float Delta)
 		}
 		OldOwner = Owner;
 	}
+	else if (Level.NetMode == NM_DedicatedServer)
+		Disable('Tick');
 }
 
 simulated function Timer()
