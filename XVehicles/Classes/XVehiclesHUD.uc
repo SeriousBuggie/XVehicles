@@ -35,8 +35,6 @@ function Mutate(string MutateString, PlayerPawn Sender)
 	local Vehicle Veh, Best;
 	local float Dist, BestDist;
 	local byte bDuck;
-	local int Team;
-	local Sound Sound;
 	Super.Mutate(MutateString, Sender);
 	
 	if (Sender == None)
@@ -87,15 +85,30 @@ function Mutate(string MutateString, PlayerPawn Sender)
 			return;
 		Sender.OldMessageTime = Level.TimeSeconds;
 		Sender.TeamSay("Taxi!");
-		Team = -1;
-		if (Level.Game.bTeamGame && Sender.PlayerReplicationInfo != None)
-			Team = Sender.PlayerReplicationInfo.Team;
-		if (Sender.isA('TournamentMale'))
-			Sound = Sound'TaxiMale';
-		else
-			Sound = Sound'TaxiFemale';
-		SendVoiceMessage(Sound, Team);
+		SendVoiceMessage(GetGenderSound(Sound'TaxiMale', Sound'TaxiFemale', Sender), GetTeam(Sender));
 	}
+	else if (Left(MutateString, 15) ~= "SayGetInVehicle")
+	{
+		if (Sender.isA('Spectator') || Level.TimeSeconds - Sender.OldMessageTime < 2.5)
+			return;
+		Sender.OldMessageTime = Level.TimeSeconds;
+		Sender.TeamSay("GetInVehicle!");
+		SendVoiceMessage(GetGenderSound(Sound'GetInVehicleMale', Sound'GetInVehicleFemale', Sender), GetTeam(Sender));
+	}
+}
+
+function Sound GetGenderSound(Sound SoundMale, Sound SoundFemale, PlayerPawn Sender)
+{
+	if (Sender.isA('TournamentMale'))
+		return SoundMale;
+	return SoundFemale;
+}
+
+function int GetTeam(PlayerPawn Sender)
+{
+	if (Level.Game.bTeamGame && Sender.PlayerReplicationInfo != None)
+		return Sender.PlayerReplicationInfo.Team;
+	return -1;
 }
 
 function SendVoiceMessage(Sound Sound, int Team)
