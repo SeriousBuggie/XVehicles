@@ -10,6 +10,7 @@ static function string GetString(
 	optional Object OptionalObject
 	)
 {
+	local string key;
 	if (OptionalObject != None)
 	{
 		if (Switch >= 2)
@@ -17,7 +18,12 @@ static function string GetString(
 		else if (Switch == 1)
 			return Vehicle(OptionalObject).VehicleName;
 		else
-			return "Hold 'Crouch' key to enter this" @ Vehicle(OptionalObject).VehicleName;
+		{
+			key = Class'KeyBindObject'.Static.FindKeyBinding("Duck", Actor(OptionalObject));
+			if (key != "")
+				key = "(" $ key $ ") ";
+			return "Hold 'Crouch' key " $ key $ "to enter this" @ Vehicle(OptionalObject).VehicleName;
+		}
 	}
 }
 
