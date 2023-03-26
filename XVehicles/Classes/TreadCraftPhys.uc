@@ -446,7 +446,8 @@ simulated function UpdateDriverInput( float Delta )
 						OldAccelD = -OldAccelD;
 				}
 
-				SetSignalLights(SL_Stop);
+				if (SignalLights != SL_Stop)
+					SetSignalLights(SL_Stop);
 			}
 
 			Return;
@@ -456,9 +457,15 @@ simulated function UpdateDriverInput( float Delta )
 			if (FMax(Region.Zone.ZoneGroundFriction,TreadsTraction) > 4.0)
 			{
 				if (Accel == -1)
-					SetSignalLights(SL_Backwards);
+				{
+					if (SignalLights != SL_Backwards)
+						SetSignalLights(SL_Backwards);
+				}
 				else
-					SetSignalLights(SL_None);
+				{
+					if (SignalLights != SL_None)
+						SetSignalLights(SL_None);
+				}
 			}
 
 			OldAccelD = Accel;
@@ -507,7 +514,8 @@ simulated function UpdateDriverInput( float Delta )
 					OldAccelD = -OldAccelD;
 			}
 			
-			SetSignalLights(SL_None);
+			if (SignalLights != SL_None)
+				SetSignalLights(SL_None);
 		}
 		Return;
 	}
@@ -650,16 +658,23 @@ function vector GetVirtualSpeedOnIce( float Delta )
 
 			VelFriction-=Normal(VelFriction)*DeAccRat;
 
-			SetSignalLights(SL_Stop);
+			if (SignalLights != SL_Stop)
+				SetSignalLights(SL_Stop);
 	
 			return VelFriction;
 		}
 		else
 		{
 			if (Accel == -1)
-				SetSignalLights(SL_Backwards);
+			{
+				if (SignalLights != SL_Backwards)
+					SetSignalLights(SL_Backwards);
+			}
 			else
-				SetSignalLights(SL_None);
+			{
+				if (SignalLights != SL_None)
+					SetSignalLights(SL_None);
+			}
 
 			VirtOldAccel = Accel;
 		}
@@ -672,7 +687,8 @@ function vector GetVirtualSpeedOnIce( float Delta )
 			DeAccRat = DeAcc;
 		VelFriction-=Normal(VelFriction)*DeAccRat;
 
-		SetSignalLights(SL_None);
+		if (SignalLights != SL_None)
+			SetSignalLights(SL_None);
 
 		Return VelFriction;
 	}
