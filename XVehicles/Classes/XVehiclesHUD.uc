@@ -23,6 +23,13 @@ static function SpawnHUD(Actor A)
 		A.Level.Game.BaseMutator.AddMutator(default.UsedHUD);
 }
 
+function Vehicle GetVehicle(PlayerPawn Sender)
+{
+	if (Sender != None && DriverWeapon(Sender.Weapon) != None)
+		return DriverWeapon(Sender.Weapon).VehicleOwner;
+	return None;
+}
+
 function Mutate(string MutateString, PlayerPawn Sender)
 {	
 	local Vehicle Veh, Best;
@@ -62,6 +69,12 @@ function Mutate(string MutateString, PlayerPawn Sender)
 	{
 		if (DriverWeapon(Sender.Weapon) != None)
 			Sender.TossWeapon();
+	}
+	else if (Sender != None && Left(MutateString, 11) ~= "VehicleHonk")
+	{
+		Veh = GetVehicle(Sender);
+		if (Veh != None)
+			Veh.Honk();
 	}
 }
 

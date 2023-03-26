@@ -177,6 +177,7 @@ var(Sounds) sound HornSnd;
 var() bool bDriverHorn, bHornPrimaryOnly;
 var() float HornTimeInterval;
 var float NextHornTime;
+var float NextHonkTime;
 var int WallHitDir;	//Special variable to fix a little visual physical bug
 var vector OldHN;
 var float ArcGroundTime;
@@ -805,6 +806,17 @@ function FireWeapon( bool bAltFire )
 
 	if( DriverGun!=None )
 		DriverGun.FireTurret(i);
+}
+
+function Honk()
+{
+	if (NextHonkTime > Level.TimeSeconds)
+		return;
+	NextHonkTime = Level.TimeSeconds + 2;
+	if (Instigator != None)
+		MakeNoise(5);
+
+	PlaySound(Sound'Horn', SLOT_Misc, 2, , 1600);
 }
 
 // Return normal for acceleration direction.

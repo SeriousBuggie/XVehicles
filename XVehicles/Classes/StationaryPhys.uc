@@ -3,6 +3,7 @@ Class StationaryPhys extends Vehicle;
 
 const MaxZoomInRate = 10.8; // Hardcoded in PlayerPawn as (90.0 - 88.0*0.9)
 
+function Honk();
 simulated singular function HitWall( vector HitNormal, Actor Wall );
 simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 {
