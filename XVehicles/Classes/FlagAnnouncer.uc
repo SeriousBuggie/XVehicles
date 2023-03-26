@@ -127,7 +127,7 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch,
 	{
 		SoundActor = Spawn(class'FlagAnnouncerSound');
 		if (SoundActor != None)
-			SoundActor.Init(Sound, bExcludeTournamentPlayers);
+			SoundActor.Init(Sound, bExcludeTournamentPlayers, -1);
 		else
 			for (P = Level.PawnList; P != None; P = P.NextPawn)
 				if (P.bIsPlayer && P.IsA('PlayerPawn') && 

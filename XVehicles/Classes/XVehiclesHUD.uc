@@ -35,6 +35,8 @@ function Mutate(string MutateString, PlayerPawn Sender)
 	local Vehicle Veh, Best;
 	local float Dist, BestDist;
 	local byte bDuck;
+	local int Team;
+	local Sound Sound;
 	Super.Mutate(MutateString, Sender);
 	
 	if (Sender == None)
@@ -79,6 +81,35 @@ function Mutate(string MutateString, PlayerPawn Sender)
 		if (Veh != None)
 			Veh.Honk();
 	}
+	else if (Left(MutateString, 7) ~= "SayTaxi")
+	{
+		if (Sender.isA('Spectator') || Level.TimeSeconds - Sender.OldMessageTime < 2.5)
+			return;
+		Sender.OldMessageTime = Level.TimeSeconds;
+		Sender.TeamSay("Taxi!");
+		Team = -1;
+		if (Level.Game.bTeamGame && Sender.PlayerReplicationInfo != None)
+			Team = Sender.PlayerReplicationInfo.Team;
+		if (Sender.isA('TournamentMale'))
+			Sound = Sound'TaxiMale';
+		else
+			Sound = Sound'TaxiFemale';
+		SendVoiceMessage(Sound, Team);
+	}
+}
+
+function SendVoiceMessage(Sound Sound, int Team)
+{
+	local FlagAnnouncerSound SoundActor;
+	local Pawn P;
+	SoundActor = Spawn(class'FlagAnnouncerSound');
+	if (SoundActor != None)
+		SoundActor.Init(Sound, false, Team);
+	else
+		for (P = Level.PawnList; P != None; P = P.NextPawn)
+			if (P.bIsPlayer && P.IsA('PlayerPawn') && 
+				(Team == -1 || (P.PlayerReplicationInfo != None && P.PlayerReplicationInfo.Team == Team)))
+				PlayerPawn(P).ClientPlaySound(Sound);
 }
 
 simulated function PreBeginPlay()
