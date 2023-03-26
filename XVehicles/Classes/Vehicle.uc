@@ -3202,7 +3202,10 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 	else
 	{
 		// draw info most important info
-		str = "Main keys: <ThrowWeapon> = exit";
+		str = Class'KeyBindObject'.Static.FindKeyBinding("ThrowWeapon", self);
+		if (str == "")
+			str = "ThrowWeapon";
+		str = "Main keys: <" $ str $ "> = exit";
 		if (Seat > 0)
 			str = str $ ", <1> = change seat";
 		else if (PassengerSeats[0].bIsAvailable)
