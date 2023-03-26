@@ -34,26 +34,27 @@ simulated function AnimEnd()
 	}
 }
 
-simulated function Tick( float Delta )
+simulated function Tick(float Delta)
 {
-	if( OwnerVehicle==None )
+	if (OwnerVehicle == None)
 		Return;
-	//if( OwnerVehicle.AttachmentList==Self )
-	if (bMasterPart && OwnerVehicle!=None)
+	//if (OwnerVehicle.AttachmentList == Self)
+	if (bMasterPart && OwnerVehicle != None)
 		OwnerVehicle.AttachmentsTick(Delta);
-	if( Level.NetMode!=NM_DedicatedServer && !class'VehiclesConfig'.default.bDisableTeamSpawn)
+	if (Level.NetMode != NM_DedicatedServer && !class'VehiclesConfig'.default.bDisableTeamSpawn)
 	{
 		if( OwnerVehicle.OverlayMat!=None )
 		{
-			if( OverlayMActor==None )
+			if (OverlayMActor == None)
 				OverlayMActor = Spawn(Class'MatOverlayFX',Self);
 			OverlayMActor.Texture = OwnerVehicle.OverlayMat;
-			if( OwnerVehicle.OverlayTime>=1 )
+			if (OwnerVehicle.OverlayTime >= 1)
 				OverlayMActor.ScaleGlow = 1;
-			else OverlayMActor.ScaleGlow = (OwnerVehicle.OverlayTime/1);
+			else
+				OverlayMActor.ScaleGlow = OwnerVehicle.OverlayTime/1;
 			OverlayMActor.AmbientGlow = OverlayMActor.ScaleGlow * 255;
 		}
-		else if( OverlayMActor!=None )
+		else if (OverlayMActor != None)
 		{
 			OverlayMActor.Destroy();
 			OverlayMActor = None;
