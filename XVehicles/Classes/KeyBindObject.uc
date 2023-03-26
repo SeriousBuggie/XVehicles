@@ -1,13 +1,27 @@
 Class KeyBindObject extends Object;
 
-var string KeyNames[255], Aliases[ArrayCount(KeyNames)];
+var string KeyNames[255], Aliases[ArrayCount(KeyNames)], Cache[20];
 var bool bKeysInit;
+var LevelInfo Level;
+var int CachePos;
 
-static function string FindKeyBinding( string KBName, Actor Other )
+static function string FindKeyBinding(string KBName, Actor Other)
 {
 	local PlayerPawn PL;
 	local int i, k, m, j;
 	local string Alias, ch;
+	
+	if (default.Level != Other.Level)
+	{
+		default.CachePos = 0;
+		default.bKeysInit = false;
+	}
+	
+	for (j = 0; j < default.CachePos; j += 2)
+		if (Default.Cache[j] ~= KBName)
+			return Default.Cache[j + 1];
+	
+	default.Level = Other.Level;
 
 	PL = Class'VActor'.Static.FindNetOwner(Other);
 	if (!Default.bKeysInit)
@@ -40,6 +54,12 @@ static function string FindKeyBinding( string KBName, Actor Other )
 				ch = Mid(Alias, m, 1);
 				if (ch != "|" && ch != "")
 					continue;
+					
+				if (default.CachePos < ArrayCount(Default.Cache))
+				{
+					Default.Cache[default.CachePos++] = KBName;
+					Default.Cache[default.CachePos++] = Default.KeyNames[i];
+				}
 					
 				Return Default.KeyNames[i];
 			}
