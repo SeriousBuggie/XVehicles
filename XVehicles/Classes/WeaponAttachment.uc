@@ -172,8 +172,10 @@ local byte i;
 	bHasPitchPart = (TurretPitchActor!=None);
 	if( bHasPitchPart)
 	{
-		if (Level.NetMode!=NM_Client)
-			PitchPart = Spawn(TurretPitchActor,Self);
+		if (Level.NetMode != NM_Client)
+			PitchPart = Spawn(TurretPitchActor, Self);
+		if (Level.NetMode == NM_DedicatedServer)
+			PitchPart.Disable('Tick');
 
 		if (!bAltFireZooms)
 			ZAimOffset = (WeapSettings[0].FireStartOffset.Z + WeapSettings[1].FireStartOffset.Z)/2 + PitchActorOffset.Z;
