@@ -104,8 +104,8 @@ defaultproperties
 	TreadPan(13)=Texture'XTreadVeh.Treads.BTread14'
 	TreadPan(14)=Texture'XTreadVeh.Treads.BTread15'
 	TreadPan(15)=Texture'XTreadVeh.Treads.BTread16'
-	Treads(0)=(MovPerTreadCycle=19.375000,TreadMesh=LodMesh'XTreadVeh.TankTreadAMir',TreadSkinN=1,TreadOffset=(X=-12.500000,Y=-98.125000,Z=-20.000000),bHaveAnimTWheels=True,WheelFramesN=17,WheelAnimSet="WheelsMove",WheelSize=20.625000,TrackWidth=52.000000,TrackFrontOffset=(X=128.000000),TrackBackOffset=(X=-128.000000))
-	Treads(1)=(MovPerTreadCycle=19.375000,TreadMesh=LodMesh'XTreadVeh.TankTreadA',TreadSkinN=1,TreadOffset=(X=-12.500000,Y=98.125000,Z=-20.000000),bHaveAnimTWheels=True,WheelFramesN=17,WheelAnimSet="WheelsMove",WheelSize=20.625000,TrackWidth=52.000000,TrackFrontOffset=(X=128.000000),TrackBackOffset=(X=-128.000000))
+	Treads(0)=(MovPerTreadCycle=19.375000,TreadMesh=LodMesh'XTreadVeh.TankTreadAMir',TreadSkinN=1,TreadOffset=(X=-12.500000,Y=-98.125000,Z=-43.000000),bHaveAnimTWheels=True,WheelFramesN=17,WheelAnimSet="WheelsMove",WheelSize=20.625000,TrackWidth=52.000000,TrackFrontOffset=(X=128.000000),TrackBackOffset=(X=-128.000000))
+	Treads(1)=(MovPerTreadCycle=19.375000,TreadMesh=LodMesh'XTreadVeh.TankTreadA',TreadSkinN=1,TreadOffset=(X=-12.500000,Y=98.125000,Z=-43.000000),bHaveAnimTWheels=True,WheelFramesN=17,WheelAnimSet="WheelsMove",WheelSize=20.625000,TrackWidth=52.000000,TrackFrontOffset=(X=128.000000),TrackBackOffset=(X=-128.000000))
 	bEngDynSndPitch=True
 	MinEngPitch=32
 	MaxEngPitch=96
@@ -122,8 +122,8 @@ defaultproperties
 	EndSound=Sound'XTreadVeh.TankGKOne.TankGKOneOff'
 	EngineSound=Sound'XTreadVeh.TankGKOne.TankGKOneEng'
 	bDriverWOffset=True
-	DriverWeapon=(WeaponClass=Class'XTreadVeh.TankGKOneTurret',WeaponOffset=(X=-63.750000,Z=71.875000))
-	PassengerSeats(0)=(PassengerWeapon=Class'XTreadVeh.TankMGRot',PassengerWOffset=(X=-63.750000,Z=98.750000),CameraOffset=(Z=37.500000),CamBehindviewOffset=(X=-82.500000,Z=17.500000),bIsAvailable=True,SeatName="Machine Gun")
+	DriverWeapon=(WeaponClass=Class'XTreadVeh.TankGKOneTurret',WeaponOffset=(X=-63.750000,Z=48.875000))
+	PassengerSeats(0)=(PassengerWeapon=Class'XTreadVeh.TankMGRot',PassengerWOffset=(X=-63.750000,Z=75.750000),CameraOffset=(Z=37.500000),CamBehindviewOffset=(X=-82.500000,Z=17.500000),bIsAvailable=True,SeatName="Machine Gun")
 	VehicleKeyInfoStr="Tank GK-1 keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to turn|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%PrevWeapon%, %NextWeapon%, %SwitchToBestWeapon% to change camera|%ThrowWeapon% to exit the vehicle"
 	bSlopedPhys=True
 	FrontWide=(X=103.750000,Y=98.125000,Z=-10.000000)
@@ -148,6 +148,6 @@ defaultproperties
 	SoundRadius=70
 	SoundVolume=100
 	CollisionRadius=132.500000
-	CollisionHeight=52.000000
+	CollisionHeight=75.000000
 	Mass=4800.000000
 }

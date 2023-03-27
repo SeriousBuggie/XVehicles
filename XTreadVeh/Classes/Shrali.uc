@@ -105,8 +105,8 @@ defaultproperties
 	TreadPan(13)=Texture'XTreadVeh.Treads.ATread14'
 	TreadPan(14)=Texture'XTreadVeh.Treads.ATread15'
 	TreadPan(15)=Texture'XTreadVeh.Treads.ATread16'
-	Treads(0)=(MovPerTreadCycle=45.000000,TreadMesh=LodMesh'XTreadVeh.TankTreadNB',TreadSkinN=1,TreadOffset=(Y=167.500000,Z=-80.000000),TrackWidth=112.000000,TrackFrontOffset=(X=256.000000),TrackBackOffset=(X=-256.000000))
-	Treads(1)=(MovPerTreadCycle=45.000000,TreadMesh=LodMesh'XTreadVeh.TankTreadNBMir',TreadSkinN=1,TreadOffset=(Y=-167.500000,Z=-80.000000),TrackWidth=112.000000,TrackFrontOffset=(X=256.000000),TrackBackOffset=(X=-256.000000))
+	Treads(0)=(MovPerTreadCycle=45.000000,TreadMesh=LodMesh'XTreadVeh.TankTreadNB',TreadSkinN=1,TreadOffset=(Y=167.500000,Z=-71.000000),TrackWidth=112.000000,TrackFrontOffset=(X=256.000000),TrackBackOffset=(X=-256.000000))
+	Treads(1)=(MovPerTreadCycle=45.000000,TreadMesh=LodMesh'XTreadVeh.TankTreadNBMir',TreadSkinN=1,TreadOffset=(Y=-167.500000,Z=-71.000000),TrackWidth=112.000000,TrackFrontOffset=(X=256.000000),TrackBackOffset=(X=-256.000000))
 	bEngDynSndPitch=True
 	MinEngPitch=24
 	MaxEngPitch=80
@@ -124,8 +124,8 @@ defaultproperties
 	EndSound=Sound'XTreadVeh.Shrali.ShraliEnd'
 	EngineSound=Sound'XTreadVeh.Shrali.ShraliEng'
 	bDriverWOffset=True
-	DriverWeapon=(WeaponClass=Class'XTreadVeh.ShraliTurret',WeaponOffset=(X=-208.125000,Z=55.625000))
-	PassengerSeats(0)=(PassengerWeapon=Class'XTreadVeh.ShraliIonRotSup',PassengerWOffset=(X=150.000000,Z=-16.250000),CameraOffset=(Z=37.500000),CamBehindviewOffset=(X=-168.750000,Z=80.000000),bIsAvailable=True,SeatName="Shrali Gunner")
+	DriverWeapon=(WeaponClass=Class'XTreadVeh.ShraliTurret',WeaponOffset=(X=-208.125000,Z=64.625000))
+	PassengerSeats(0)=(PassengerWeapon=Class'XTreadVeh.ShraliIonRotSup',PassengerWOffset=(X=150.000000,Z=-7.250000),CameraOffset=(Z=37.500000),CamBehindviewOffset=(X=-168.750000,Z=80.000000),bIsAvailable=True,SeatName="Shrali Gunner")
 	VehicleKeyInfoStr="Shrali keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to turn|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%PrevWeapon%, %NextWeapon%, %SwitchToBestWeapon% to change camera|%ThrowWeapon% to exit the vehicle"
 	bSlopedPhys=True
 	FrontWide=(X=260.000000,Y=167.500000,Z=-10.000000)
@@ -154,6 +154,6 @@ defaultproperties
 	SoundRadius=80
 	SoundVolume=125
 	CollisionRadius=231.000000
-	CollisionHeight=138.000000
+	CollisionHeight=129.000000
 	Mass=7600.000000
 }
