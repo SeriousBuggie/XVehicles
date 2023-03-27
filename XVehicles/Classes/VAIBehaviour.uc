@@ -25,13 +25,16 @@ function float GetVehAIRating( Pawn Seeker )
 	local float ret;
 //	log(VehicleOwner @ "GetVehAIRating1" @ Seeker);
 	if (VehicleOwner.Driver == None && Level.TimeSeconds - VehicleOwner.LastFix <= 5 && 
-		Seeker.PlayerReplicationInfo != None && Seeker.PlayerReplicationInfo.Team == VehicleOwner.CurrentTeam)
+		Seeker.PlayerReplicationInfo != None && Seeker.PlayerReplicationInfo.Team == VehicleOwner.CurrentTeam &&
+		Seeker.PlayerReplicationInfo.HasFlag == None)
 		return -1; // prevent take it if someone heal it
 //	log(VehicleOwner @ "GetVehAIRating2" @ Seeker @ VehicleOwner.LastDriver @ Level.TimeSeconds - VehicleOwner.LastDriverTime);
 	if (VehicleOwner.LastDriver == Seeker && Level.TimeSeconds - VehicleOwner.LastDriverTime < 1)
 		return -1; // for avoid bot loops exit/enter
 //	log(VehicleOwner @ "GetVehAIRating3" @ Seeker);
 	if (VehicleOwner.HealthTooLowFor(Seeker) || VehicleOwner.NeedStop(Seeker) || !VehicleOwner.CrewFit(Seeker))
+		return -1;
+	if (VehicleOwner.Driver != None && !VehicleOwner.HasFreePassengerSeat())
 		return -1;
 //	log(VehicleOwner @ "GetVehAIRating4" @ Seeker);
 	ret = VehicleOwner.AIRating*VehicleOwner.Health/VehicleOwner.Default.Health;
