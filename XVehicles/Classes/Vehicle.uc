@@ -2258,7 +2258,8 @@ simulated function UpdatePassengerPos()
 			{
 				if ((Passengers[i].PlayerReplicationInfo.HasFlag != None && PlayerPawn(Driver) == None) ||
 					(Driver == None && WaitForDriver < Level.TimeSeconds) || 
-					(Bot(Driver) != None && Bot(Driver).Orders == 'Follow' && Bot(Driver).OrderObject == Passengers[i]))
+					(Bot(Driver) != None && Bot(Driver).Orders == 'Follow' && Bot(Driver).OrderObject == Passengers[i] &&
+					Driver.PlayerReplicationInfo.HasFlag == None))
 					ChangeSeat(0, true, i); // become driver
 				else if (CTFFlag(Passengers[i].MoveTarget) != None && 
 					Passengers[i].PlayerReplicationInfo.HasFlag == None)
