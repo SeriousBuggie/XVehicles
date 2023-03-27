@@ -1194,14 +1194,46 @@ static function Vehicle AttackVehicle(WeaponAttachment Weap, Bot Bot, float MaxD
 	else
 		return BestVeh[1];
 }
+
+function Actor GetVehicle(Actor Sender)
+{
+	if (Pawn(Sender) != None && DriverWeapon(Pawn(Sender).Weapon) != None)
+		return DriverWeapon(Pawn(Sender).Weapon).VehicleOwner;
+	return Sender;
+}
+
+function bool CorrectPos(out vector EnemyLocation, int Z)
+{
+	local vector Shift;
+	Shift.Z = Z;
+	if (!FastTrace(EnemyLocation + Shift))
+		return false;
+	EnemyLocation += Shift;
+	return true;
+}
+
 function bool SeeEnemy(Actor Enemy)
 {
-	local vector P, Dir;
+	local vector P, Dir, EnemyLocation;
 	local float VProj, V1, V;
 	local rotator R;
-	if (Enemy == None || (Pawn(Enemy) != None && Pawn(Enemy).Health <= 0) || !WeaponController.LineOfSightTo(Enemy))
+	local bool bFastTrace;
+	if (Enemy == None || (Pawn(Enemy) != None && Pawn(Enemy).Health <= 0))
 		return false;
-	RepAimPos = Enemy.Location;
+	Enemy = GetVehicle(Enemy);
+	bFastTrace = FastTrace(EnemyLocation);
+	if (!bFastTrace && !WeaponController.LineOfSightTo(Enemy))
+		return false;
+	EnemyLocation = Enemy.Location;
+	if (!bFastTrace)
+	{
+		if (CorrectPos(EnemyLocation, 0.5*Enemy.CollisionHeight) || 
+			CorrectPos(EnemyLocation, -0.5*Enemy.CollisionHeight) ||
+			CorrectPos(EnemyLocation, 1.0*Enemy.CollisionHeight) ||
+			CorrectPos(EnemyLocation, -1.0*Enemy.CollisionHeight))
+			; // do nothing, already corrected inside calls
+	}
+	RepAimPos = EnemyLocation;
 
 	if (bPhysicalGunAimOnly && WeapSettings[0].ProjectileClass != None)
 	{
@@ -1221,7 +1253,7 @@ function bool SeeEnemy(Actor Enemy)
 		
 			P += (WeapSettings[0].FireStartOffset >> R);
 			
-			Dir = Enemy.Location - P;
+			Dir = EnemyLocation - P;
 			
 			VProj = Fmax(1, WeapSettings[0].ProjectileClass.default.Speed);
 			V1 = Normal(Dir) dot Enemy.Velocity;		
@@ -1231,7 +1263,7 @@ function bool SeeEnemy(Actor Enemy)
 			{
 				RepAimPos += Enemy.Velocity * VSize(Dir)/(Sqrt(V) - V1);
 				if ( !FastTrace(RepAimPos))
-					RepAimPos = 0.5 * (RepAimPos + Enemy.Location);
+					RepAimPos = 0.5 * (RepAimPos + EnemyLocation);
 			}
 		}
 	}
@@ -1241,7 +1273,7 @@ function bool SeeEnemy(Actor Enemy)
 }
 simulated function bool AimingIsOK()
 {
-local rotator TurRo;
+	local rotator TurRo;
 
 	TurRo.Yaw = TurretYaw;
 	TurRo.Pitch = TurretPitch;
