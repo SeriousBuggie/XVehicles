@@ -93,6 +93,8 @@ struct PassengersType
 	var PassengerCameraA PassengerCam;
 };
 var() PassengersType PassengerSeats[8];
+var float BaseEyeHeight[9];
+var float SightRadius[9];
 
 struct OverlayMatDispRep
 {
@@ -1028,6 +1030,7 @@ function AddShield(Pawn Other)
 function DriverEnter( Pawn Other, optional int MyPitch, optional int MyYaw )
 {
 	local rotator R;
+	local WeaponAttachment WA;
 	bHadADriver = True;
 	bTeamLocked = False;
 	Driver = Other;
@@ -1037,14 +1040,18 @@ function DriverEnter( Pawn Other, optional int MyPitch, optional int MyYaw )
 	PlaySound(StartSound,SLOT_Misc);
 	AmbientSound = EngineSound;
 	ChangeCollision(Other, true);
-	if( DriverGun!=None )
+	if (DriverGun != None)
+	{
 		DriverGun.WeaponController = Other;
+		WA = DriverGun;
+	}
 	else if (Passengers[0] == None && PassengerSeats[0].PGun != None)
 	{
 		PassengerSeats[0].PGun.WeaponController = Other;
 		PassengerSeats[0].PGun.SetOwner(Other);
+		WA = PassengerSeats[0].PGun;
 	}
-	if( DWeapon==None )
+	if (DWeapon == None)
 		DWeapon = SpawnWeapon(DriverWeaponClass);
 	DWeapon.NotifyNewDriver(Other);
 	DWeapon.ChangeOwner(Other);
@@ -1084,6 +1091,12 @@ function DriverEnter( Pawn Other, optional int MyPitch, optional int MyYaw )
 	CheckForEmpty();
 	ShowState();
 	Other.ClearPaths();
+	
+	BaseEyeHeight[0] = Other.BaseEyeHeight;
+	if (WA != None)	
+		Other.BaseEyeHeight = WA.GetBaseEyeHeight();
+	SightRadius[0] = Other.SightRadius;
+	Other.SightRadius = 64000;
 }
 
 function DebugDump(coerce string Place) {
@@ -1279,7 +1292,12 @@ local vector ExitVect;
 	else
 		WaitForDriver = Level.TimeSeconds + 10;
 	if (Driver != None)
+	{
 		Driver.ClearPaths();
+		
+		Driver.BaseEyeHeight = BaseEyeHeight[0];
+		Driver.SightRadius = SightRadius[0];
+	}
 	Driver = None;
 	//SetOwner(None); Set to none 1 sec later to avoid unwanted functions errors.
 	if (!bDeleteMe && Health > 0)
@@ -4402,7 +4420,7 @@ function PassengerEnter( Pawn Other, byte Seat, optional int MyPitch, optional i
 		Other.ReceiveLocalizedMessage(class'EnterMessagePlus', Seat + 2, None, None, Self);
 		if (MyYaw != 0)
 			R.Yaw = MyYaw;
-		else if( PassengerSeats[Seat].PGun!=None )
+		else if (PassengerSeats[Seat].PGun != None)
 			R.Yaw = PassengerSeats[Seat].PGun.TurretYaw;
 		else R.Yaw = VehicleYaw;
 		R.Pitch = MyPitch;
@@ -4424,6 +4442,12 @@ function PassengerEnter( Pawn Other, byte Seat, optional int MyPitch, optional i
 	bHasPassengers = true;
 	CheckForEmpty();
 	ShowState();
+	
+	BaseEyeHeight[Seat + 1] = Other.BaseEyeHeight;
+	if (PassengerSeats[Seat].PGun != None)	
+		Other.BaseEyeHeight = PassengerSeats[Seat].PGun.GetBaseEyeHeight();
+	SightRadius[Seat + 1] = Other.SightRadius;
+	Other.SightRadius = 64000;
 }
 function PassengerLeave( byte Seat, optional bool bForcedLeave )
 {
@@ -4500,6 +4524,11 @@ function PassengerLeave( byte Seat, optional bool bForcedLeave )
 	}
 	if (PassengerSeats[Seat].PassengerCam != None && PassengerSeats[Seat].PassengerCam.Owner != None )
 		PassengerSeats[Seat].PassengerCam.SetCamOwner(None);
+	if (Passengers[Seat] != None)
+	{
+		Passengers[Seat].BaseEyeHeight = BaseEyeHeight[Seat + 1];
+		Passengers[Seat].SightRadius = SightRadius[Seat + 1];
+	}
 	Passengers[Seat] = None;
 
 	HasPassengers();

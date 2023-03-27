@@ -1202,11 +1202,11 @@ function Actor GetVehicle(Actor Sender)
 	return Sender;
 }
 
-function bool CorrectPos(out vector EnemyLocation, int Z)
+function bool CorrectPos(out vector EnemyLocation, vector FireLocation, int Z)
 {
 	local vector Shift;
 	Shift.Z = Z;
-	if (!FastTrace(EnemyLocation + Shift))
+	if (!FastTrace(EnemyLocation + Shift, FireLocation))
 		return false;
 	EnemyLocation += Shift;
 	return true;
@@ -1214,23 +1214,27 @@ function bool CorrectPos(out vector EnemyLocation, int Z)
 
 function bool SeeEnemy(Actor Enemy)
 {
-	local vector P, Dir, EnemyLocation;
-	local float VProj, V1, V;
+	local vector P, Dir, EnemyLocation, FireLocation;
+	local float VProj, V1, V, SightRadius, BaseEyeHeight;
 	local rotator R;
-	local bool bFastTrace;
+	local bool bFastTrace, bCanSee;
 	if (Enemy == None || (Pawn(Enemy) != None && Pawn(Enemy).Health <= 0))
 		return false;
 	Enemy = GetVehicle(Enemy);
-	bFastTrace = FastTrace(EnemyLocation);
-	if (!bFastTrace && !WeaponController.LineOfSightTo(Enemy))
+	FireLocation = Location;
+	FireLocation.Z += ZAimOffset;
+	
+	bCanSee = WeaponController.CanSee(Enemy) || WeaponController.LineOfSightTo(Enemy);
+	
+	if (!bCanSee)
 		return false;
 	EnemyLocation = Enemy.Location;
-	if (!bFastTrace)
+	if (!FastTrace(EnemyLocation, FireLocation))
 	{
-		if (CorrectPos(EnemyLocation, 0.5*Enemy.CollisionHeight) || 
-			CorrectPos(EnemyLocation, -0.5*Enemy.CollisionHeight) ||
-			CorrectPos(EnemyLocation, 1.0*Enemy.CollisionHeight) ||
-			CorrectPos(EnemyLocation, -1.0*Enemy.CollisionHeight))
+		if (CorrectPos(EnemyLocation, FireLocation, 0.5*Enemy.CollisionHeight) || 
+			CorrectPos(EnemyLocation, FireLocation, -0.5*Enemy.CollisionHeight) ||
+			CorrectPos(EnemyLocation, FireLocation, 1.0*Enemy.CollisionHeight) ||
+			CorrectPos(EnemyLocation, FireLocation, -1.0*Enemy.CollisionHeight))
 			; // do nothing, already corrected inside calls
 	}
 	RepAimPos = EnemyLocation;
@@ -1271,6 +1275,12 @@ function bool SeeEnemy(Actor Enemy)
 
 	return true;
 }
+
+function float GetBaseEyeHeight() {
+	return Location.Z + ZAimOffset - OwnerVehicle.Location.Z - OwnerVehicle.CollisionHeight + 
+		class'TournamentPlayer'.default.CollisionHeight;
+}
+
 simulated function bool AimingIsOK()
 {
 	local rotator TurRo;
