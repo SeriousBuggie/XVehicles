@@ -45,7 +45,7 @@ local Effects s;
 
 defaultproperties
 {
-	PartSpawnClass=Class'XTreadVeh.BigStonesPart'
+	PartSpawnClass=Class'BigStonesPart'
 	PartSeq="Grow"
 	PartSeqMin=0.100000
 	PartSeqMax=0.500000

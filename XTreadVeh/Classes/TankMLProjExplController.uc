@@ -70,7 +70,7 @@ local Effects s;
 defaultproperties
 {
 	AscendSpeed=4000.000000
-	PartSpawnClass=Class'XTreadVeh.IncadescentPart'
+	PartSpawnClass=Class'IncadescentPart'
 	PartSeq="Grow"
 	PartSeqMin=0.100000
 	PartSeqMax=0.500000

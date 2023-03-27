@@ -5,7 +5,7 @@ class EnergyTurretWeap expands MinigunTurretWeap;
 
 defaultproperties
 {
-	TraceActor=Class'XStatVeh.LaserBeam'
+	TraceActor=Class'LaserBeam'
 	LaserTexture=3
 	PitchRange=(Max=17000,Min=-7500)
 	TurretPitchActor=Class'XStatVeh.EnergyTurretGun'
