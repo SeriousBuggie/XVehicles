@@ -1,5 +1,5 @@
-﻿//Energy line particles (each actor has 12 particles, with 6 possible textures)
-// It has explosion and implosion animations, as 30є and 60є spirals, clockwise and anti-clockwise
+//Energy line particles (each actor has 12 particles, with 6 possible textures)
+// It has explosion and implosion animations, as 30e and 60e spirals, clockwise and anti-clockwise
 // For effects like "energy gathering" of weapons
 // With this actor, instead of spawning 36 particles, you have to just spawn 3 (36/12 = 3), boosting the performance a lot :)
 //*************************************************************************************
@@ -16,14 +16,14 @@ class EnLnPartics expands Effects;
 #exec MESH SEQUENCE MESH=EnLnPartics SEQ=Still STARTFRAME=0 NUMFRAMES=1
 #exec MESH SEQUENCE MESH=EnLnPartics SEQ=Impl00 STARTFRAME=0 NUMFRAMES=2 RATE=1.0	//Straight implode
 #exec MESH SEQUENCE MESH=EnLnPartics SEQ=Expl00 STARTFRAME=1 NUMFRAMES=2 RATE=1.0	//Straight explode
-#exec MESH SEQUENCE MESH=EnLnPartics SEQ=ImplP30 STARTFRAME=3 NUMFRAMES=2 RATE=1.0	//Positive spiral 30є implode
-#exec MESH SEQUENCE MESH=EnLnPartics SEQ=ExplP30 STARTFRAME=4 NUMFRAMES=2 RATE=1.0	//Positive spiral 30є explode
-#exec MESH SEQUENCE MESH=EnLnPartics SEQ=ImplN30 STARTFRAME=6 NUMFRAMES=2 RATE=1.0	//Negative spiral 30є implode
-#exec MESH SEQUENCE MESH=EnLnPartics SEQ=ExplN30 STARTFRAME=7 NUMFRAMES=2 RATE=1.0	//Negative spiral 30є explode
-#exec MESH SEQUENCE MESH=EnLnPartics SEQ=ImplP60 STARTFRAME=9 NUMFRAMES=2 RATE=1.0	//Positive spiral 60є implode
-#exec MESH SEQUENCE MESH=EnLnPartics SEQ=ExplP60 STARTFRAME=10 NUMFRAMES=2 RATE=1.0	//Positive spiral 60є explode
-#exec MESH SEQUENCE MESH=EnLnPartics SEQ=ImplN30 STARTFRAME=12 NUMFRAMES=2 RATE=1.0	//Negative spiral 60є implode
-#exec MESH SEQUENCE MESH=EnLnPartics SEQ=ExplN30 STARTFRAME=13 NUMFRAMES=2 RATE=1.0	//Negative spiral 60є explode
+#exec MESH SEQUENCE MESH=EnLnPartics SEQ=ImplP30 STARTFRAME=3 NUMFRAMES=2 RATE=1.0	//Positive spiral 30e implode
+#exec MESH SEQUENCE MESH=EnLnPartics SEQ=ExplP30 STARTFRAME=4 NUMFRAMES=2 RATE=1.0	//Positive spiral 30e explode
+#exec MESH SEQUENCE MESH=EnLnPartics SEQ=ImplN30 STARTFRAME=6 NUMFRAMES=2 RATE=1.0	//Negative spiral 30e implode
+#exec MESH SEQUENCE MESH=EnLnPartics SEQ=ExplN30 STARTFRAME=7 NUMFRAMES=2 RATE=1.0	//Negative spiral 30e explode
+#exec MESH SEQUENCE MESH=EnLnPartics SEQ=ImplP60 STARTFRAME=9 NUMFRAMES=2 RATE=1.0	//Positive spiral 60e implode
+#exec MESH SEQUENCE MESH=EnLnPartics SEQ=ExplP60 STARTFRAME=10 NUMFRAMES=2 RATE=1.0	//Positive spiral 60e explode
+#exec MESH SEQUENCE MESH=EnLnPartics SEQ=ImplN30 STARTFRAME=12 NUMFRAMES=2 RATE=1.0	//Negative spiral 60e implode
+#exec MESH SEQUENCE MESH=EnLnPartics SEQ=ExplN30 STARTFRAME=13 NUMFRAMES=2 RATE=1.0	//Negative spiral 60e explode
 
 //Energy Line Particles animation
 #exec MESHMAP NEW MESHMAP=EnLnPartics MESH=EnLnPartics
@@ -42,7 +42,7 @@ class EnLnPartics expands Effects;
 
 
 var() float FXSpeed, ProgressiveFXSpeed;	//10 = 1s
-var() byte RollRate;	// x4096 (22,5є/s) --> 60є settings :: x2048 (11,25є/s) --> 30є settings
+var() byte RollRate;	// x4096 (22,5e/s) --> 60e settings :: x2048 (11,25e/s) --> 30e settings
 var() bool bExtInitialized;	//Effect started only externally
 var float LifeTime;
 var name eAnimList[10];
