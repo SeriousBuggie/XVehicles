@@ -20,7 +20,10 @@ static function SpawnHUD(Actor A)
 		return;
 	default.UsedHUD = A.Spawn(default.Class);
 	if (default.UsedHUD != None)
+	{
 		A.Level.Game.BaseMutator.AddMutator(default.UsedHUD);
+		A.Level.Game.RegisterMessageMutator(default.UsedHUD);
+	}
 }
 
 function Vehicle GetVehicle(PlayerPawn Sender)
@@ -79,32 +82,38 @@ function Mutate(string MutateString, PlayerPawn Sender)
 		if (Veh != None)
 			Veh.Honk();
 	}
-	else if (Left(MutateString, 7) ~= "SayTaxi")
-	{
-		if (Sender.isA('Spectator') || Level.TimeSeconds - Sender.OldMessageTime < 2.5)
-			return;
-		Sender.OldMessageTime = Level.TimeSeconds;
-		Sender.TeamSay("Taxi!");
-		SendVoiceMessage(GetGenderSound(Sound'TaxiMale', Sound'TaxiFemale', Sender), GetTeam(Sender));
-	}
-	else if (Left(MutateString, 15) ~= "SayGetInVehicle")
-	{
-		if (Sender.isA('Spectator') || Level.TimeSeconds - Sender.OldMessageTime < 2.5)
-			return;
-		Sender.OldMessageTime = Level.TimeSeconds;
-		Sender.TeamSay("GetInVehicle!");
-		SendVoiceMessage(GetGenderSound(Sound'GetInVehicleMale', Sound'GetInVehicleFemale', Sender), GetTeam(Sender));
-	}
 }
 
-function Sound GetGenderSound(Sound SoundMale, Sound SoundFemale, PlayerPawn Sender)
+function function bool MutatorTeamMessage(Actor Sender, Pawn Receiver, PlayerReplicationInfo PRI, 
+	coerce string S, name Type, optional bool bBeep)
+{
+	if (Receiver != None && Sender == Receiver && !Receiver.isA('Spectator') && 
+		Level.TimeSeconds - Receiver.OldMessageTime >= 2.5 &&
+		(!Level.Game.bTeamGame || Type == 'TeamSay'))
+	{
+		if (S ~= "Taxi!")
+		{
+			Receiver.OldMessageTime = Level.TimeSeconds;
+			SendVoiceMessage(GetGenderSound(Sound'TaxiMale', Sound'TaxiFemale', Receiver), GetTeam(Receiver));
+		}
+		else if (S ~= "Get in the vehicle!")
+		{
+			Receiver.OldMessageTime = Level.TimeSeconds;
+			SendVoiceMessage(GetGenderSound(Sound'GetInVehicleMale', Sound'GetInVehicleFemale', Receiver), GetTeam(Receiver));
+		}
+	}
+
+	return Super.MutatorTeamMessage(Sender, Receiver, PRI, S, Type, bBeep);
+}
+
+function Sound GetGenderSound(Sound SoundMale, Sound SoundFemale, Pawn Sender)
 {
 	if (Sender.isA('TournamentMale'))
 		return SoundMale;
 	return SoundFemale;
 }
 
-function int GetTeam(PlayerPawn Sender)
+function int GetTeam(Pawn Sender)
 {
 	if (Level.Game.bTeamGame && Sender.PlayerReplicationInfo != None)
 		return Sender.PlayerReplicationInfo.Team;
