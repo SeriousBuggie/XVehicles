@@ -224,7 +224,7 @@ simulated function UpdateTreads(float Delta)
 			if (TLinSpeed > 10 || TLinSpeed < -10)	//Bug fix on stopped tracks moving on big slopes
 				Treads[i].TPanCount += (TLinSpeed*Delta);
 			CycleStep = Treads[i].MovPerTreadCycle/16;
-	
+
 			if (Treads[i].TPanCount > CycleStep)
 			{
 				PanSkip = Int(Treads[i].TPanCount/CycleStep);
@@ -626,14 +626,13 @@ simulated function int GetIcedMovementDir()
 		Return 1;
 	else Return -1;
 }
-function vector GetVirtualSpeedOnIce( float Delta )
+simulated function vector GetVirtualSpeedOnIce( float Delta )
 {
 	local vector Ac;
 	local float DeAcc,DeAccRat;
 	local rotator R;
 	local bool bTurnR;
 	local byte i;
-
 
 	if( !bOnGround )
 	{
