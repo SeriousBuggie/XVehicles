@@ -183,9 +183,9 @@ simulated function UpdateDriverInput( float Delta )
 	if (WheelYawVis != DesTurnVis)
 	{
 		if (WheelYawVis < DesTurnVis)
-			WheelYawVis += WheelTurnSpeed*Delta;
+			WheelYawVis += FMin(WheelTurnSpeed*Delta, DesTurnVis - WheelYawVis);
 		else
-			WheelYawVis -= WheelTurnSpeed*Delta;
+			WheelYawVis -= FMin(WheelTurnSpeed*Delta, WheelYawVis - DesTurnVis);
 		if (Abs(WheelYawVis) > WheelMaxYaw)
 			WheelYawVis = WheelMaxYaw*WheelYawVis/Abs(WheelYawVis);
 	}
@@ -200,7 +200,7 @@ simulated function UpdateDriverInput( float Delta )
 		else
 			WheelYaw = DesTurn;
 	}
-	
+
 	if (Level.NetMode == NM_Client && !IsNetOwner(Owner))
 		Return;
 	
