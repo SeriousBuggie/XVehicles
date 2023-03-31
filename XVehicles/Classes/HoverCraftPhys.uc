@@ -325,11 +325,11 @@ simulated function UpdateDriverInput( float Delta )
 	{
 		if (PlayerPawn(Driver) == None)
 		{
-			if (Driver.Target != None)
-				HL = Driver.Target.Location;
-			else 
-				HL = Location+Velocity*100;
-			VehicleYaw = CalcTurnSpeed(VehicleTurnSpeed*Delta, VehicleYaw, rotator(HL - Location).Yaw);
+			if (Driver.Target != None && FastTrace(Driver.Target.Location))
+				X = Driver.Target.Location - Location;
+			else
+				X = Velocity;
+			VehicleYaw = CalcTurnSpeed(VehicleTurnSpeed*Delta, VehicleYaw, rotator(X).Yaw);
 		}
 		else
 			VehicleYaw = CalcTurnSpeed(VehicleTurnSpeed*Delta, VehicleYaw, Driver.ViewRotation.Yaw);
