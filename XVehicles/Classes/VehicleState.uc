@@ -89,7 +89,7 @@ defaultproperties
 	bNetTemporary=False
 	bTrailerPrePivot=True
 	Physics=PHYS_Trailer
-	RemoteRole=ROLE_SimulatedProxy
+	RemoteRole=ROLE_None
 	DrawType=DT_Sprite
 	Style=STY_Translucent
 	Sprite=Texture'Botpack.Translocator.Tranglow'
