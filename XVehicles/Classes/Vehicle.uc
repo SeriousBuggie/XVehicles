@@ -1263,6 +1263,7 @@ local vector ExitVect;
 			}
 			if (PlayerPawn(Driver) != None)
 			{
+				//log(Level.TimeSeconds @ "ViewTarget1" @ PlayerPawn(Driver) @ PlayerPawn(Driver).ViewTarget @ None, self.name);
 				PlayerPawn(Driver).ViewTarget = None;
 				PlayerPawn(Driver).EndZoom();
 				Driver.ClientSetLocation(Driver.Location, Rotation);
@@ -4503,6 +4504,7 @@ function PassengerLeave( byte Seat, optional bool bForcedLeave )
 			}
 			if (PlayerPawn(Passengers[Seat]) != None)
 			{
+				//log(Level.TimeSeconds @ "ViewTarget2" @ PlayerPawn(Passengers[Seat]) @ PlayerPawn(Passengers[Seat]).ViewTarget @ None, self.name);
 				PlayerPawn(Passengers[Seat]).ViewTarget = None;
 				PlayerPawn(Passengers[Seat]).EndZoom();
 				Passengers[Seat].ClientSetLocation(Passengers[Seat].Location, Rotation);
