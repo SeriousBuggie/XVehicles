@@ -818,7 +818,7 @@ function Honk()
 	if (Instigator != None)
 		MakeNoise(5);
 
-	PlaySound(Sound'Horn', SLOT_Misc, 2, , 1600);
+	PlaySound(Sound'Horn', SLOT_Misc, 2, , 3000);
 }
 
 // Return normal for acceleration direction.
