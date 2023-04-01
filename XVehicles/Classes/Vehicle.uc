@@ -356,6 +356,8 @@ var(Shielding) bool bProtectAgainst;	//If true, shield will 'protect against' Sh
 var(Shielding) name ShieldType[16];
 var(Shielding) float ShieldLevel;
 
+var bool bReplicated;
+
 const SmallDrawScale = 0.0001;
 
 replication
@@ -363,7 +365,8 @@ replication
 	// Variables the server should send to the client.
 	reliable if (Role == ROLE_Authority)
 		Driver, bDriving, Health, bVehicleBlewUp, ReplicOverlayMat, bTeamLocked, CurrentTeam, Passengers,
-		bReadyToRun, Specials, DriverGun, ServerState, bHasPassengers, SignalLightsRepl, bHeadLightInUseRepl; // new ones
+		bReadyToRun, Specials, DriverGun, ServerState, bHasPassengers, SignalLightsRepl, bHeadLightInUseRepl, // new ones
+		bReplicated;
 	reliable if (Role == ROLE_Authority && bNetOwner)
 		bCameraOnBehindView, MyCameraAct, WAccelRate;
 	// Functions client can call.
@@ -595,6 +598,8 @@ simulated function PostBeginPlay()
 	local byte i;
 
 	Super.PostBeginPlay();
+	
+	bReplicated = Role == ROLE_Authority;
 	
 	if (Level.NetMode != NM_Client)
 		class'XVehiclesHUD'.static.SpawnHUD(self);
@@ -998,6 +1003,9 @@ simulated function ShowState(optional bool bFromTick)
 		VehicleStateNextCheck = Level.TimeSeconds + 3600;
 		return;
 	}
+	
+	if (!bReplicated)
+		return;
 	
 	VehicleStateNextCheck = Level.TimeSeconds + 0.2;
 	
