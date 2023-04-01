@@ -111,7 +111,7 @@ function function bool MutatorTeamMessage(Actor Sender, Pawn Receiver, PlayerRep
 
 function Sound GetGenderSound(Sound SoundMale, Sound SoundFemale, Pawn Sender)
 {
-	if (Sender.isA('TournamentMale'))
+	if (Sender.isA('TournamentMale') || Sender.isA('bbTournamentMale'))
 		return SoundMale;
 	return SoundFemale;
 }
