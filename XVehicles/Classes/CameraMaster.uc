@@ -63,7 +63,6 @@ function ProcessPlayerPawn(PlayerPawn Player)
 	Pending = Left(Pending, i - 1) $ Mid(Pending, i + Len(Check));
 
 	Player.SetPropertyText("bLockOn", "False"); // udemo playback hack
-	//log(Level.TimeSeconds @ "ViewTarget" @ Player @ Player.ViewTarget @ Camera, self.name);
 	Player.ViewTarget = Camera;
 	Player.bHiddenEd = Player.bBehindView;
 	Player.bBehindView = false;

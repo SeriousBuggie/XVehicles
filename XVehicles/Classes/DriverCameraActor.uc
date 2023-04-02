@@ -116,15 +116,9 @@ simulated function Tick( float Delta )
 	if( PP != None && Level.NetMode!=NM_Client && !VehicleOwner.bVehicleBlewUp )
 	{
 		if( PP.ViewTarget==None && (bPasengerCam || VehicleOwner.bDriving) ) // In case player typed 'ViewSelf'
-		{
-			//log(Level.TimeSeconds @ "ViewTarget1" @ PP @ PP.ViewTarget @ Self, self.name);
 			PP.ViewTarget = Self;
-		}
 		else if( !bPasengerCam && PP.ViewTarget==Self && !VehicleOwner.bDriving )
-		{
-			//log(Level.TimeSeconds @ "ViewTarget2" @ PP @ PP.ViewTarget @ None, self.name);
 			PP.ViewTarget = None;
-		}
 		else if( bPasengerCam && PP.bBehindView && PP.ViewTarget==Self )
 			PP.bBehindView = False;
 	}
@@ -160,7 +154,6 @@ simulated function SetCamOwner(Actor NewOwner)
 	{
 		if (PlayerPawn(CamOwner) != None)
 		{
-			//log(Level.TimeSeconds @ "ViewTarget3" @ PlayerPawn(CamOwner) @ PlayerPawn(CamOwner).ViewTarget @ None, self.name);
 			PlayerPawn(CamOwner).ViewTarget = None;
 			PlayerPawn(CamOwner).bBehindView = false;
 		}
@@ -170,7 +163,6 @@ simulated function SetCamOwner(Actor NewOwner)
 		SetOwner(NewOwner);
 	if (PlayerPawn(NewOwner) != None)
 	{
-		//log(Level.TimeSeconds @ "ViewTarget4" @ PlayerPawn(NewOwner) @ PlayerPawn(NewOwner).ViewTarget @ self, self.name);
 		PlayerPawn(NewOwner).ViewTarget = self;
 		PlayerPawn(NewOwner).bHiddenEd = PlayerPawn(NewOwner).bBehindView;
 		PlayerPawn(NewOwner).bBehindView = false;
@@ -202,7 +194,6 @@ simulated function ChangePlayerCam(PlayerPawn Player, Actor IfView, Actor ThenVi
 	if (Player != None && Player != ThenView && Player.ViewTarget == IfView)
 	{
 		Player.SetPropertyText("bLockOn", "False"); // udemo playback hack
-		//log(Level.TimeSeconds @ "ViewTarget5" @ Player @ Player.ViewTarget @ ThenView, self.name);
 		Player.ViewTarget = ThenView;
 		if (DriverCameraActor(ThenView) != None)
 		{
@@ -245,4 +236,6 @@ defaultproperties
 	Texture=None
 	CollisionRadius=0.000000
 	CollisionHeight=0.000000
+	NetPriority=1.500000
+	NetUpdateFrequency=100.000000
 }

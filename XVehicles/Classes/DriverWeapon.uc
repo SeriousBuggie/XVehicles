@@ -279,6 +279,7 @@ simulated function AnimEnd() {}
 State ClientDown
 {		
 	simulated function AnimEnd() {}
+	simulated function BeginState() {}
 }
 
 State DownWeapon
@@ -317,4 +318,6 @@ defaultproperties
 	CollisionHeight=24.000000
 	bFixedRotationDir=False
 	RotationRate=(Pitch=0,Yaw=0)
+	NetPriority=2.000000
+	NetUpdateFrequency=100.000000
 }
