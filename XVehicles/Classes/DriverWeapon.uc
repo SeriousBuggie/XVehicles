@@ -88,6 +88,9 @@ simulated function PostBeginPlay()
 	
 	if (Role == ROLE_Authority /*|| class'VActor'.static.IsDemoPlayback(Level)*/)
 		setTimer(1, true);
+		
+	if (!class'VActor'.static.IsDemoPlayback(Level))
+		Disable('Tick');
 }
 event TravelPostAccept()
 {
@@ -145,16 +148,16 @@ simulated function SetName()
 	}
 }
 
+// Tick enabled only in demo playback. See PostBeginPlay
 simulated function Tick(float Delta)
 {
 	local DriverCameraActor Camera;
 	local DriverWeapon OtherWeapon;
 	local Actor ViewTarget;
 	
-	if (Level.NetMode == NM_Client && OldOwner != Owner)
+	if (OldOwner != Owner)
 	{
-		if (VehicleOwner != None && class'VActor'.static.IsDemoPlayback(Level) && 
-			(Pawn(OldOwner) != None || Pawn(Owner) != None))
+		if (VehicleOwner != None && (Pawn(OldOwner) != None || Pawn(Owner) != None))
 		{
 			Camera = VehicleOwner.GetCam(self);
 			if (Camera != None)
@@ -174,8 +177,6 @@ simulated function Tick(float Delta)
 		}
 		OldOwner = Owner;
 	}
-	else if (Level.NetMode == NM_DedicatedServer)
-		Disable('Tick');
 }
 
 simulated function Timer()
