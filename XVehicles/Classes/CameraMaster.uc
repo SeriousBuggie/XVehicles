@@ -7,7 +7,8 @@ var int used;
 
 static simulated function Init(Actor Instigator)
 {
-	if (default.Master != None && !default.Master.bDeleteMe)
+	if (default.Master != None && !default.Master.bDeleteMe &&
+		default.Master.Level == Instigator.Level)
 		return;
 		
 	default.Master = Instigator.Spawn(class'CameraMaster');
@@ -71,4 +72,5 @@ function ProcessPlayerPawn(PlayerPawn Player)
 defaultproperties
 {
 	Pending="("
+	RemoteRole=ROLE_None
 }
