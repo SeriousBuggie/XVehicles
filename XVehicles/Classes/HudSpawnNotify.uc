@@ -7,9 +7,19 @@ var XVehiclesHUD HUDMutator;
 
 event Actor SpawnNotification(Actor A)
 {
+	local Mutator M;
 	if (ChallengeHUD(A) != None)
 	{
-		ChallengeHUD(A).HUDMutator = HUDMutator;
+		M = ChallengeHUD(A).HUDMutator;
+		if (M == None)
+			ChallengeHUD(A).HUDMutator = HUDMutator;
+		else
+		{
+			while (M != HUDMutator && M.NextHUDMutator != None)
+				M = M.NextHUDMutator;
+			if (M != HUDMutator)
+				M.NextHUDMutator = HUDMutator;
+		}
 		HUDMutator.FoundHuds++;
 	}
 	return A;
