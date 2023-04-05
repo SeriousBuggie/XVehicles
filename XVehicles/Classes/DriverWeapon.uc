@@ -4,6 +4,7 @@ var Vehicle VehicleOwner;
 var DriverWNotifier MyNotifier;
 var bool bPassengerGun;
 var byte SeatNumber;
+var bool bDemoplay;
 
 var Actor OldOwner;
 
@@ -89,7 +90,8 @@ simulated function PostBeginPlay()
 	if (Role == ROLE_Authority /*|| class'VActor'.static.IsDemoPlayback(Level)*/)
 		setTimer(1, true);
 		
-	if (!class'VActor'.static.IsDemoPlayback(Level))
+	bDemoplay = class'VActor'.static.IsDemoPlayback(Level);
+	if (!bDemoplay)
 		Disable('Tick');
 }
 event TravelPostAccept()
@@ -155,7 +157,9 @@ simulated function Tick(float Delta)
 	local DriverWeapon OtherWeapon;
 	local Actor ViewTarget;
 	
-	if (OldOwner != Owner)
+	if (!bDemoplay)
+		Disable('Tick');
+	else if (OldOwner != Owner)
 	{
 		if (VehicleOwner != None && (Pawn(OldOwner) != None || Pawn(Owner) != None))
 		{
