@@ -285,6 +285,10 @@ State ClientDown
 {		
 	simulated function AnimEnd() {}
 	simulated function BeginState() {}
+	simulated function Tick(float Delta)
+	{
+		Global.Tick(Delta);
+	}
 }
 
 State DownWeapon
