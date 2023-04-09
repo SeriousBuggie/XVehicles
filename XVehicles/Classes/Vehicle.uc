@@ -3131,6 +3131,17 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 		VehicleState.bHidden = true;
 		VehicleState.Mass = Level.TimeSeconds + 1;
 	}
+	
+	if (class'XVehiclesHUD'.default.EnterCount <= 3 && 
+		!IsDemoPlayback(Level) && class'XVehiclesHUD'.default.UsedHUD != None)
+	{
+		if (class'XVehiclesHUD'.default.UsedHUD.EnterLast <= Level.TimeSeconds)
+		{
+			class'XVehiclesHUD'.default.EnterCount++;
+			class'XVehiclesHUD'.static.StaticSaveConfig();
+		}
+		class'XVehiclesHUD'.default.UsedHUD.EnterLast = Level.TimeSeconds + 1;
+	}
 
 	if( bRenderVehicleOnFP && Seat==0 && !bCameraOnBehindView )
 	{

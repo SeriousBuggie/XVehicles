@@ -1,7 +1,7 @@
 //=============================================================================
 // XVehiclesHUD.
 //=============================================================================
-class XVehiclesHUD expands Mutator;
+class XVehiclesHUD expands Mutator config(User);
 
 var ChallengeHUD MyHUD;
 var Vehicle IdentifyTarget;
@@ -9,6 +9,9 @@ var XVehiclesHUD UsedHUD;
 
 var int FoundHuds;
 var bool bGoodHud;
+
+var config int EnterCount;
+var float EnterLast;
 
 static function SpawnHUD(Actor A)
 {
