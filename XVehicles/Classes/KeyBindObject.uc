@@ -9,7 +9,7 @@ static function string FindKeyBinding(string KBName, Actor Other)
 {
 	local PlayerPawn PL;
 	local int i, k, m, j;
-	local string Alias, ch;
+	local string Alias, ch, KBNameCaps;
 	
 	if (default.Level != Other.Level)
 	{
@@ -23,9 +23,9 @@ static function string FindKeyBinding(string KBName, Actor Other)
 	
 	default.Level = Other.Level;
 
-	PL = Class'VActor'.Static.FindNetOwner(Other);
 	if (!Default.bKeysInit)
 	{
+		PL = Class'VActor'.Static.FindNetOwner(Other);
 		Default.bKeysInit = True;
 		for (i = 0; i < ArrayCount(Default.KeyNames); i++)
 		{
@@ -34,16 +34,16 @@ static function string FindKeyBinding(string KBName, Actor Other)
 				Default.Aliases[i] = Caps(PL.ConsoleCommand("KEYBINDING " $ Default.KeyNames[i]));
 		}
 	}
-	KBName = Caps(KBName);
+	KBNameCaps = Caps(KBName);
 	for (i = 0; i < ArrayCount(Default.KeyNames); i++)
 	{
-		m = InStr(Default.Aliases[i], KBName);
+		m = InStr(Default.Aliases[i], KBNameCaps);
 		if (m >= 0)
 		{
 			Alias = Default.Aliases[i];
-			for (k = m; k >= m; k = InStr(Mid(Alias, m), KBName) + m)
+			for (k = m; k >= m; k = InStr(Mid(Alias, m), KBNameCaps) + m)
 			{
-				m = k + Len(KBName);
+				m = k + Len(KBNameCaps);
 				j = k - 1;
 				while (j >= 0 && Mid(Alias, j, 1) == " ")
 					j--;
@@ -57,7 +57,7 @@ static function string FindKeyBinding(string KBName, Actor Other)
 					
 				if (default.CachePos < ArrayCount(Default.Cache))
 				{
-					Default.Cache[default.CachePos++] = KBName;
+					Default.Cache[default.CachePos++] = KBNameCaps;
 					Default.Cache[default.CachePos++] = Default.KeyNames[i];
 				}
 					
@@ -65,6 +65,20 @@ static function string FindKeyBinding(string KBName, Actor Other)
 			}
 		}
 	}
+	
+	if (KBName ~= "ThrowWeapon")
+	{
+		for (i = 0; i < ArrayCount(Default.KeyNames); i++)
+			if ((Default.KeyNames[i] != "B" || Default.KeyNames[i] != "G") &&
+				Default.Aliases[i] == "")
+			{
+				PL = Class'VActor'.Static.FindNetOwner(Other);
+				PL.ConsoleCommand("Set Input" @ Default.KeyNames[i] @ KBName);
+				Default.Aliases[i] = KBName;
+				Return Default.KeyNames[i];
+			}
+	}
+	
 	Return "";
 }
 
