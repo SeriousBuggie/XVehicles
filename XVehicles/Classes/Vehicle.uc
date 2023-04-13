@@ -3877,6 +3877,7 @@ function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 	local byte i;
 	local bool bHadPass;
 	local byte shldset, shldtkn;
+	local Pawn StubPawn;
 //	Log(self @ Level.TimeSeconds @ "TakeDamage" @ Damage @ InstigatedBy @ hitlocation @ momentum @ damageType @ InstigatedBy.DamageScaling);
 
 	if (!bVehicleBlewUp && !(Level.Game != None && Level.Game.bGameEnded))
@@ -3892,23 +3893,34 @@ function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 			FixDamage(Damage, instigatedBy, hitlocation, momentum, damageType);
 			return;
 		}
-		else if( Driver==None )
+		else if(Driver == None)
 		{
-			For( i=0; i<Arraycount(Passengers); i++ )
+			For (i = 0; i < Arraycount(Passengers); i++)
 			{
-				if( Passengers[i]!=None )
+				if (Passengers[i] != None)
 				{
 					bHadPass = True;
-					Damage = Level.Game.ReduceDamage(Damage,DamageType,Passengers[i],instigatedBy);
+					Damage = Level.Game.ReduceDamage(Damage, DamageType, Passengers[i], instigatedBy);
 					Break;
 				}
 			}
-			if( !bTakeAlwaysDamage && !bHadPass && instigatedBy!=None && instigatedBy.PlayerReplicationInfo!=None && CurrentTeam==instigatedBy.PlayerReplicationInfo.Team )
+			if (!bTakeAlwaysDamage && !bHadPass && instigatedBy != None && 
+				instigatedBy.PlayerReplicationInfo != None && CurrentTeam == instigatedBy.PlayerReplicationInfo.Team)
 				Damage = 0;
+			else
+			{
+				StubPawn = Spawn(class'HorseFly');
+				if (StubPawn != None)
+				{
+					Damage = Level.Game.ReduceDamage(Damage, DamageType, StubPawn, instigatedBy);
+					StubPawn.Destroy();
+				}
+			}
 		}
-		else if( Driver.ReducedDamageType=='All' ) // God mode on!
+		else if (Driver.ReducedDamageType == 'All') // God mode on!
 			Damage = 0;
-		else Damage = Level.Game.ReduceDamage(Damage,DamageType,Driver, instigatedBy);
+		else
+			Damage = Level.Game.ReduceDamage(Damage, DamageType, Driver, instigatedBy);
 		if (instigatedBy != None)
 		{
 			if( Driver!=None )
