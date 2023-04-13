@@ -46,6 +46,7 @@ function Created()
 		"22. In order for the bot with the flag to get out of the vehicle to capture the flag - change seats to the second place or get out of the vehicle." $ EOL $
 		"23. Mantas hover over water surfaces. This also works most often with lava, acid, and other liquids." $ EOL $
 		"23. In water, the vehicle is damaged, but not quickly, so it can sometimes be used to overcome small water obstacles." $ EOL $
+		"24. If you bind 'Crouch' and 'Enter Vehicle' to the same key, you will be able to enter the vehicle almost instantly with the ability to use hold to do this." $ EOL $
 		"" $ EOL $
 		"Keybinds:" $ EOL $
 		"Duck - Crouch" $ EOL $
