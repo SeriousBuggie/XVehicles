@@ -5,6 +5,10 @@ More info: https://ut99.org/viewtopic.php?f=34&t=14936
 
 Discord: https://discord.gg/NVaNRXUvUU
 
+ModDB: https://www.moddb.com/mods/xvehicles
+
+YouTube: https://www.youtube.com/@xvehicles
+
 This repo only for track maked changes in XVehicles code.
 Almost for internal usage.
 
