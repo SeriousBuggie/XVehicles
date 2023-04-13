@@ -5,12 +5,28 @@ class XVGTabHelp expands XVGTabPage;
 
 var UWindowDynamicTextArea TextArea;
 var() color TextColor;
+var() string Buttons[6], URL[ArrayCount(Buttons)];
 
 function Created()
 {
 	local string EOL;
 	local ChallengeHUD HUD;
+	local UWindowSmallButton Button;
+	local int i, ButtonTop, ButtonHeight, ButtonLeft, ButtonWidth;
+	
 	Super.Created();
+	
+	ButtonHeight = 15;
+	ButtonTop = WinHeight - 6 - 5 - ButtonHeight;	
+	ButtonLeft = 10;
+	ButtonWidth = (WinWidth - ButtonLeft)/ArrayCount(Buttons) - ButtonLeft;
+	
+	for (i = 0; i < ArrayCount(Buttons); i++)
+	{
+		Button = UWindowSmallButton(CreateControl(class'UWindowSmallButton', ButtonLeft, ButtonTop, ButtonWidth, ButtonHeight));
+		Button.SetText(Buttons[i]);
+		ButtonLeft += Button.WinWidth + 10;
+	}
 	
 	EOL = "\\n";
 
@@ -19,7 +35,7 @@ function Created()
 	UWindowHTMLTextArea(TextArea).SetHTML("");
 */
 
-	TextArea = UWindowDynamicTextArea(CreateControl(class'UWindowDynamicTextArea', 0, 0, WinWidth - 3, WinHeight - 6, Self));
+	TextArea = UWindowDynamicTextArea(CreateControl(class'UWindowDynamicTextArea', 0, 0, WinWidth - 3, ButtonTop - 5, Self));
 	TextArea.AddText(
 		"Tips:" $ EOL $
 		"1. Only ground vehicles can carry the flag. Manta or Heli cannot." $ EOL $
@@ -74,6 +90,21 @@ function Created()
 		TextArea.SetAbsoluteFont(HUD.MyFonts.GetMediumFont(WinWidth));
 }
 
+function Notify(UWindowDialogControl C, byte E)
+{
+	local string Text;
+	local int i;
+	
+	if (E == DE_Click && UWindowSmallButton(C) != None)
+	{
+		Text = UWindowSmallButton(C).Text;
+		for (i = 0; i < ArrayCount(Buttons); i++)
+			if (Buttons[i] == Text)
+				GetPlayerOwner().ConsoleCommand("START " $ URL[i]);
+	}
+	Super.Notify(C,E);
+}
+
 function Paint(Canvas C, float MouseX, float MouseY)
 {
 	Super.Paint(C, MouseX, MouseY);
@@ -88,4 +119,16 @@ function Paint(Canvas C, float MouseX, float MouseY)
 defaultproperties
 {
 	TextColor=(R=128,G=255,B=255)
+	Buttons(0)="Discord"
+	Buttons(1)="Forum"
+	Buttons(2)="ModDB"
+	Buttons(3)="GitHub"
+	Buttons(4)="YouTube"
+	Buttons(5)="Tutorial video"
+	URL(0)="https://discord.gg/NVaNRXUvUU"
+	URL(1)="https://ut99.org/viewtopic.php?f=34&t=14936"
+	URL(2)="https://www.moddb.com/mods/xvehicles"
+	URL(3)="https://github.com/SeriousBuggie/XVehicles"
+	URL(4)="https://www.youtube.com/@xvehicles"
+	URL(5)="https://www.youtube.com/watch?v=_yygKab2fbQ"
 }
