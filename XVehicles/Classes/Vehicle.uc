@@ -3043,7 +3043,7 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 	local byte i, o;
 	Local Pawn CamOwner;
 	local ChallengeHud HUD;
-	local string str;
+	local string str, exit;
 	local WeaponAttachment Gun;
 	local texture CrosshairTex;
 	local color CrossColor;
@@ -3131,17 +3131,6 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 		VehicleState.bHidden = true;
 		VehicleState.Mass = Level.TimeSeconds + 1;
 	}
-	
-	if (class'XVehiclesHUD'.default.EnterCount <= 3 && 
-		!IsDemoPlayback(Level) && class'XVehiclesHUD'.default.UsedHUD != None)
-	{
-		if (class'XVehiclesHUD'.default.UsedHUD.EnterLast <= Level.TimeSeconds)
-		{
-			class'XVehiclesHUD'.default.EnterCount++;
-			class'XVehiclesHUD'.static.StaticSaveConfig();
-		}
-		class'XVehiclesHUD'.default.UsedHUD.EnterLast = Level.TimeSeconds + 1;
-	}
 
 	if( bRenderVehicleOnFP && Seat==0 && !bCameraOnBehindView )
 	{
@@ -3205,7 +3194,7 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 	if( Seat>0 && Driver!=None && Driver.PlayerReplicationInfo!=None )
 	{
 		C.SetPos(0,C.ClipY*2/3);
-		C.DrawText(" Driver -"@Driver.PlayerReplicationInfo.PlayerName);
+		C.DrawText(" Driver -" @ Driver.PlayerReplicationInfo.PlayerName);
 		o = 1;
 	}
 	else o = 0;
@@ -3214,7 +3203,7 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 		if( Passengers[i]!=None && Passengers[i].PlayerReplicationInfo!=None && (i+1)!=Seat )
 		{
 			C.SetPos(0,C.ClipY*2/3-YL*o);
-			C.DrawText(""@PassengerSeats[i].SeatName@"-"@Passengers[i].PlayerReplicationInfo.PlayerName);
+			C.DrawText("" @ PassengerSeats[i].SeatName @ "-" @ Passengers[i].PlayerReplicationInfo.PlayerName);
 			o++;
 		}
 	}
@@ -3225,12 +3214,12 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 			InitKeysInfo();
 		C.Font = class'FontInfo'.Static.GetStaticAReallySmallFont(C.ClipX);
 		XS = 4;
-		For( i=0; i<NumKeysInfo; i++ )
+		For (i = 0; i < NumKeysInfo; i++)
 		{
 			if( KeysInfo[i]!="" )
 			{
-				C.TextSize(KeysInfo[i],XL,YL);
-				C.SetPos(C.ClipX-XL-4,XS);
+				C.TextSize(KeysInfo[i], XL, YL);
+				C.SetPos(C.ClipX - XL - 4, XS);
 				C.DrawText(KeysInfo[i]);
 				XS+=YL;
 			}
@@ -3246,7 +3235,7 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 		C.Style = ERenderStyle.STY_Normal;
 		C.DrawColor = class'ChallengeHUD'.default.CyanColor * HUD.TutIconBlink;
 		C.SetPos(4, C.ClipY - 96 * HUD.Scale);
-		C.DrawText( HUD.LiveFeed $ CamOwner.PlayerReplicationInfo.PlayerName, true );
+		C.DrawText(HUD.LiveFeed $ CamOwner.PlayerReplicationInfo.PlayerName, true);
 		C.bCenter = false;
 		C.DrawColor = HUD.WhiteColor;
 		C.Style = HUD.Style;
@@ -3254,18 +3243,35 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 	else
 	{
 		// draw info most important info
-		str = Class'KeyBindObject'.Static.FindKeyBinding("ThrowWeapon", self);
-		if (str == "")
-			str = "ThrowWeapon";
-		str = "Main keys: <" $ str $ "> = exit";
+		exit = Class'KeyBindObject'.Static.FindKeyBinding("ThrowWeapon", self);
+		if (exit == "")
+			exit = "ThrowWeapon";
+		str = "Main keys: <" $ exit $ "> = exit";
 		if (Seat > 0)
 			str = str $ ", <1> = change seat";
 		else if (PassengerSeats[0].bIsAvailable)
 			str = str $ ", <2> = change seat";
-		C.Font = class'FontInfo'.Static.GetStaticSmallFont( C.ClipX );
+		C.Font = class'FontInfo'.Static.GetStaticSmallFont(C.ClipX);
 		C.TextSize(str, XL, YL);
 		C.SetPos((C.ClipX - XL)/2, class'PickupMessagePlus'.static.GetOffset(0, YL, C.ClipY) + YL);
 		C.DrawText(str);
+		
+		if (class'XVehiclesHUD'.default.EnterCount <= 3 && 
+			!IsDemoPlayback(Level) && class'XVehiclesHUD'.default.UsedHUD != None)
+		{
+			if (class'XVehiclesHUD'.default.UsedHUD.EnterLast <= Level.TimeSeconds)
+			{
+				class'XVehiclesHUD'.default.EnterCount++;
+				class'XVehiclesHUD'.static.StaticSaveConfig();
+			}
+			class'XVehiclesHUD'.default.UsedHUD.EnterLast = Level.TimeSeconds + 1;
+			
+			exit = "<" $ exit $ "> = exit key";
+			C.Font = class'FontInfo'.Static.GetStaticMediumFont(C.ClipX);
+			C.TextSize(exit, XL, YL);
+			C.SetPos((C.ClipX - XL)/2, class'CriticalEventPlus'.static.GetOffset(0, YL, C.ClipY) + YL);
+			C.DrawText(exit);
+		}
 	}
 	
 	if( AttachmentList!=None )
