@@ -88,6 +88,27 @@ function Mutate(string MutateString, PlayerPawn Sender)
 		if (Veh != None)
 			Veh.Honk();
 	}
+	else if (Left(MutateString, 9) ~= "XVOpenGUI")
+	{
+		OpenGUI(Sender);
+	}
+}
+
+function OpenGUI(PlayerPawn Sender)
+{
+	local XVGWRI XVGWRI;
+
+	foreach AllActors(Class'XVGWRI', XVGWRI)
+		if (Sender == XVGWRI.Owner)
+			return;
+
+	XVGWRI = Sender.Spawn(Class'XVGWRI', Sender);
+
+	if (XVGWRI == None)
+	{
+		Log("Failed spawn XVGWRI for" @ Sender.GetHumanName(), Class.Name);
+		return;
+	}
 }
 
 function function bool MutatorTeamMessage(Actor Sender, Pawn Receiver, PlayerReplicationInfo PRI, 
@@ -108,6 +129,8 @@ function function bool MutatorTeamMessage(Actor Sender, Pawn Receiver, PlayerRep
 			SendVoiceMessage(GetGenderSound(Sound'GetInVehicleMale', Sound'GetInVehicleFemale', Receiver), GetTeam(Receiver));
 		}
 	}
+	if (PlayerPawn(Receiver) != None && Sender == Receiver && S ~= "!XV")
+		OpenGUI(PlayerPawn(Receiver));
 
 	return Super.MutatorTeamMessage(Sender, Receiver, PRI, S, Type, bBeep);
 }
