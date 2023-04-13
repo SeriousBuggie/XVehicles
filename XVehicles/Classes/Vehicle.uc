@@ -3264,7 +3264,7 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 				class'XVehiclesHUD'.default.EnterCount++;
 				class'XVehiclesHUD'.static.StaticSaveConfig();
 			}
-			class'XVehiclesHUD'.default.UsedHUD.EnterLast = Level.TimeSeconds + 1;
+			class'XVehiclesHUD'.default.UsedHUD.EnterLast = Level.TimeSeconds + 3;
 			
 			exit = "<" $ exit $ "> = exit key";
 			C.Font = class'FontInfo'.Static.GetStaticMediumFont(C.ClipX);
