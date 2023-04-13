@@ -3251,6 +3251,8 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 			str = str $ ", <1> = change seat";
 		else if (PassengerSeats[0].bIsAvailable)
 			str = str $ ", <2> = change seat";
+		if (StationaryPhys(self) != None)
+			str = str $ ", <Back/Forward> = change zoom";
 		C.Font = class'FontInfo'.Static.GetStaticSmallFont(C.ClipX);
 		C.TextSize(str, XL, YL);
 		C.SetPos((C.ClipX - XL)/2, class'PickupMessagePlus'.static.GetOffset(0, YL, C.ClipY) + YL);
