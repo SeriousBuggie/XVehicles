@@ -22,7 +22,8 @@ static function string GetString(
 			key = Class'KeyBindObject'.Static.FindKeyBinding("Duck", Actor(OptionalObject));
 			if (key != "")
 				key = "(" $ key $ ") ";
-			return "Hold 'Crouch' key " $ key $ "to enter this" @ Vehicle(OptionalObject).VehicleName;
+			return "Hold 'Crouch' key " $ key $ "to enter this" @ Vehicle(OptionalObject).VehicleName $ 
+				". Say !XV in chat to customize it or learn more.";
 		}
 	}
 }
