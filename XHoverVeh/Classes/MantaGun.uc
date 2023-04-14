@@ -5,11 +5,25 @@ class MantaGun expands xHoverVehWeapon;
 
 function FireTurret( byte Mode, optional bool bForceFire )
 {
+	local vector HL, HN;
+	local Class<MantaPlasma> ProjCls;
+	
 	if (Mode == 1)
 	{
-		if (PLayerPawn(WeaponController) != None)
+		if (PlayerPawn(WeaponController) != None)
 			return;
 		Mode = 0;
+	}
+	if (PlayerPawn(WeaponController) == None)
+	{ // detect self-damage
+		ProjCls = Class<MantaPlasma>(WeapSettings[Mode].ProjectileClass);
+		if (ProjCls != None && VSize(RepAimPos - OwnerVehicle.Location) > OwnerVehicle.CollisionRadius + 
+			ProjCls.Default.DamageRadius*2)
+		{
+			HL = Location + vector(Rotation)*1.1*(OwnerVehicle.CollisionRadius + ProjCls.Default.DamageRadius);
+			if (!OwnerVehicle.FastTrace(HL, Location) || OwnerVehicle.Trace(HL, HN, HL, Location, true) != None)
+				return;
+		}
 	}
 	Super.FireTurret(Mode);
 }
@@ -25,7 +39,7 @@ function float GetProjSpeed(byte Mode, vector P, rotator R)
 	if (ProjCls != None && ProjCls.default.AccelerationMagnitude != 0 && Speed < ProjCls.default.MaxSpeed)
 	{
 		HL = P + vector(R)*40000;
-		Trace(HL, HN, HL, P, true);
+		OwnerVehicle.Trace(HL, HN, HL, P, true);
 		S = VSize(HL - P);
 		Vm = ProjCls.default.MaxSpeed;
 		V0 = Speed;
