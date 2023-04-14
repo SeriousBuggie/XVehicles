@@ -135,6 +135,20 @@ function function bool MutatorTeamMessage(Actor Sender, Pawn Receiver, PlayerRep
 	return Super.MutatorTeamMessage(Sender, Receiver, PRI, S, Type, bBeep);
 }
 
+function bool MutatorBroadcastMessage(Actor Sender, Pawn Receiver, out coerce string Msg, optional bool bBeep, out optional name Type)
+{
+	local int i;
+	local string S;
+	if ((Type == '' || Type == 'Event') && Sender == Receiver && Spectator(Receiver) != None)
+	{
+		i = InStr(Msg, ":");
+		S = Mid(Msg, i + 1);
+		if (S ~= "!XV")
+			OpenGUI(PlayerPawn(Receiver));
+	}
+	return Super.MutatorBroadcastMessage(Sender, Receiver, Msg, bBeep, Type);
+}
+
 function Sound GetGenderSound(Sound SoundMale, Sound SoundFemale, Pawn Sender)
 {
 	if (Sender.isA('TournamentMale') || Sender.isA('bbTournamentMale'))
