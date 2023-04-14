@@ -60,12 +60,13 @@ function float GetVehAIRating( Pawn Seeker )
 function vector AdjustLocation(Actor NP, optional bool bInMid)
 {
 	local vector ret, HL, HN, pos, V;
-	local float offset;
+	local float offset, k;
 	ret = NP.Location;	
 	if (VehicleOwner.bCanFly && NavigationPoint(NP) != None && 
 		!NP.FastTrace(NP.Location - vect(0,0,1)*2*VehicleOwner.CollisionHeight) &&
 		(VSize(NP.Location - VehicleOwner.Location) > 2*AirFlyScale*VehicleOwner.CollisionRadius || 
-		bInMid || PathNode(NP) != None || NP.isA('AirPath')))
+		bInMid || PathNode(NP) != None || InventorySpot(NP) != None || PlayerStart(NP) != None || 
+		Spawnpoint(NP) != None || NP.Class.Name == 'NavigationPoint' || NP.isA('AirPath')))
 	{
 		offset = VehicleOwner.CollisionHeight*(AirFlyScale + 1);
 		pos = ret + offset*vect(0,0,1);
@@ -74,7 +75,11 @@ function vector AdjustLocation(Actor NP, optional bool bInMid)
 		V.Z = 1;
 		if (VehicleOwner.Trace(HL, HN, pos, NP.Location, true, V) != None)
 		{
-			offset = VSize(HL - ret) - VehicleOwner.CollisionHeight*2;
+			if (HoverCraftPhys(VehicleOwner) != None)
+				k = 1;
+			else
+				k = 2;
+			offset = VSize(HL - ret) - VehicleOwner.CollisionHeight*k;
 			if (offset > 0)
 				ret += offset*vect(0,0,1);
 		}
