@@ -388,7 +388,7 @@ simulated function int GetIcedMovementDir()
 
 function int ShouldAccelFor( vector AcTarget )
 {
-	local bool bStuck;
+	local bool bStuck, bStuckSide;
 	local vector X,Y,Z;
 	local float Res;
 	local int ret;
@@ -400,12 +400,12 @@ function int ShouldAccelFor( vector AcTarget )
 	if ((AcTarget - Location) dot vector(Rotation) < 0)
 		ret = -1;
 
-	if( bReversing )
+	if (bReversing)
 	{
-		if( ReverseTimer<Level.TimeSeconds )
+		if (ReverseTimer < Level.TimeSeconds)
 		{
 			bReversing = False;
-			StuckTimer = Level.TimeSeconds+3;
+			StuckTimer = Level.TimeSeconds + 3;
 			Return ret;
 		}
 		Return -ret;
@@ -414,21 +414,26 @@ function int ShouldAccelFor( vector AcTarget )
 	bStuck = (Velocity dot Velocity) < MaxGroundSpeed*MaxGroundSpeed/25 /* 5*5 */;
 	if (!bStuck)
 	{
-		GetAxes(Rotation,X,Y,Z);
-		Res = Normal(AcTarget-Location) dot X;
+		GetAxes(Rotation, X, Y, Z);
+		Res = Normal(AcTarget - Location) dot X;
 //		Log("ShouldAccelFor" @ res);
-		bStuck = Abs(Res) < 0.7; // direction not in forward/backward way
+		bStuckSide = Abs(Res) < 0.7; // direction not in forward/backward way
+		bStuck = bStuckSide;
 	}
-	if( bWasStuckOnW!=bStuck )
+	if (bWasStuckOnW != bStuck)
 	{
 		bWasStuckOnW = bStuck;
-		if( bStuck )
-			StuckTimer = Level.TimeSeconds+2;
+		if (bStuck)
+		{
+			StuckTimer = Level.TimeSeconds + 2;
+			if (bStuckSide && VSize(MoveDest - Location) < 800)
+				StuckTimer -= 1;
+		}
 	}
-	if( bStuck && StuckTimer<Level.TimeSeconds )
+	if (bStuck && StuckTimer < Level.TimeSeconds)
 	{
 		bReversing = True;
-		ReverseTimer = Level.TimeSeconds+1;
+		ReverseTimer = Level.TimeSeconds + 1;
 		Return -ret;
 	}
 	Return ret;
