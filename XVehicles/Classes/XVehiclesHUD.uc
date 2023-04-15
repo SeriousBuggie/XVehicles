@@ -14,15 +14,13 @@ var config int EnterCount;
 var float EnterLast;
 
 static function SpawnHUD(Actor A)
-{
-	local Actor HUD;
-	
+{	
 	if (default.UsedHUD != None && !default.UsedHUD.bDeleteMe && default.UsedHUD.Level == A.Level)
 		return;
 
-	foreach A.AllActors(default.Class, HUD)
+	foreach A.AllActors(class'XVehiclesHUD', default.UsedHUD)
 		break;
-	if (HUD != None)
+	if (default.UsedHUD != None)
 		return;
 	default.UsedHUD = A.Spawn(default.Class);
 	if (default.UsedHUD != None)
@@ -186,6 +184,9 @@ simulated function PreBeginPlay()
 		
 	if (Level.NetMode == NM_DedicatedServer)
 		Disable('Tick');
+
+	if (Level.NetMode == NM_Client && default.UsedHUD == None)
+		default.UsedHUD = self;
 }
 
 simulated function Timer()
