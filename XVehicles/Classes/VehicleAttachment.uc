@@ -7,12 +7,15 @@ var VehicleAttachment NextAttachment;
 var() bool bAutoDestroyWithVehicle;
 var bool bMasterPart;
 var() byte PartMass;	// 0-Light, 1-Medium weight, 3-Heavy
+var vector LocationRep;
 
 replication
 {
 	// Variables the server should send to the client.
-	unreliable if( Role==ROLE_Authority )
+	unreliable if (Role == ROLE_Authority)
 		OwnerVehicle;
+	unreliable if (Role == ROLE_Authority && AmbientSound != None && !bNetOwner)
+		LocationRep;
 }
 
 simulated function Detach(Actor Other)
@@ -37,7 +40,16 @@ simulated function AnimEnd()
 simulated function Tick(float Delta)
 {
 	if (OwnerVehicle == None)
-		Return;
+	{
+		if (Level.NetMode == NM_Client && LocationRep != default.LocationRep)
+		{
+			SetLocation(LocationRep);
+			LocationRep = default.LocationRep;
+		}
+		return;
+	}
+	if (Level.NetMode != NM_Client && AmbientSound != None)
+		LocationRep = Location;
 	//if (OwnerVehicle.AttachmentList == Self)
 	if (bMasterPart && OwnerVehicle != None)
 		OwnerVehicle.AttachmentsTick(Delta);
