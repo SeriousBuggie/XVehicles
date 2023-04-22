@@ -2262,25 +2262,26 @@ simulated function UpdatePassengerPos()
 	local rotator R;
 	local bool bForceExit;
 
-	For( i=0; i<Arraycount(Passengers); i++ )
+	For (i = 0; i < Arraycount(Passengers); i++)
 	{
-		if( Passengers[i]!=None )
+		if (Passengers[i] != None)
 		{
-			bForceExit = Passengers[i].bDeleteMe || Passengers[i].Health<=0;
-			if( bForceExit || HealthTooLowFor(Passengers[i]) || !CrewFit(Passengers[i]))
+			if (Level.NetMode < NM_Client)
 			{
-				if( Level.NetMode<NM_Client )
-					PassengerLeave(i,bForceExit);
-				Continue;
+				bForceExit = Passengers[i].bDeleteMe || Passengers[i].Health <= 0;
+				if (bForceExit || HealthTooLowFor(Passengers[i]) || !CrewFit(Passengers[i]))
+				{
+					PassengerLeave(i, bForceExit);
+					Continue;
+				}
 			}
 			
 			R = Rotation;
-			if( Level.NetMode<NM_Client )
-				if( PassengerSeats[i].PGun!=None )
+			if (Level.NetMode < NM_Client && PassengerSeats[i].PGun != None)
 					R.Yaw = PassengerSeats[i].PGun.TurretYaw;
 			ResetPawn(Passengers[i], R, PassengerSeats[i].PHGun);
 			
-			if (Bot(Passengers[i]) != None)
+			if (Level.NetMode < NM_Client && Bot(Passengers[i]) != None)
 			{
 				if ((Passengers[i].PlayerReplicationInfo.HasFlag != None && PlayerPawn(Driver) == None) ||
 					(Driver == None && WaitForDriver < Level.TimeSeconds) || 
@@ -2289,7 +2290,7 @@ simulated function UpdatePassengerPos()
 					ChangeSeat(0, true, i); // become driver
 				else if (CTFFlag(Passengers[i].MoveTarget) != None && 
 					Passengers[i].PlayerReplicationInfo.HasFlag == None)
-					PassengerLeave(i,false);
+					PassengerLeave(i, false);
 			}
 		}
 	}
