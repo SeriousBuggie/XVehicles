@@ -140,7 +140,7 @@ static function FixBot(Bot Bot, optional int Tmr) {
 	if (Bot.PlayerReplicationInfo.Team >= ArrayCount(CTFReplicationInfo(Bot.Level.Game.GameReplicationInfo).FlagList))
 		return;
 	FriendlyFlag = CTFReplicationInfo(Bot.Level.Game.GameReplicationInfo).FlagList[Bot.PlayerReplicationInfo.Team];
-	if (VSize(FriendlyFlag.HomeBase.Location - Bot.Location) < 800)
+	if (FriendlyFlag == None || VSize(FriendlyFlag.HomeBase.Location - Bot.Location) < 800)
 		return;
 	
 	foreach Bot.RadiusActors(class'Vehicle', Veh, 600)
