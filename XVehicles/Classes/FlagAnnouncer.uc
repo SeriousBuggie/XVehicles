@@ -66,7 +66,7 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch,
 					if (TeamInfo.TeamIndex == 1)
 						Sound = Sound'Blue_Flag_Taken';
 					if (RelatedPRI_1 != None && Bot(RelatedPRI_1.Owner) != None)
-						class'XVehiclesCTF'.static.FixBot(Bot(RelatedPRI_1.Owner));
+						class'XVehiclesCTF'.static.FixBot(Bot(RelatedPRI_1.Owner), -1);
 					break;
 			}
 		CTFFlag = CTFFlag(OptionalObject);

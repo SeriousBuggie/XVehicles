@@ -112,7 +112,6 @@ static function FixBot(Bot Bot, optional int Tmr) {
 	local CTFFlag MyFlag, FriendlyFlag;
 	local Vehicle Veh, Best;
 	local float Dist, BestDist;
-	
 	if (DriverWeapon(Bot.Weapon) != None || Bot.PlayerReplicationInfo == None)
 		return;
 	if (Vehicle(Bot.MoveTarget) != None)
@@ -136,15 +135,16 @@ static function FixBot(Bot Bot, optional int Tmr) {
 		}
 		return;
 	}
-
 	if (Bot.PlayerReplicationInfo.Team >= ArrayCount(CTFReplicationInfo(Bot.Level.Game.GameReplicationInfo).FlagList))
 		return;
 	FriendlyFlag = CTFReplicationInfo(Bot.Level.Game.GameReplicationInfo).FlagList[Bot.PlayerReplicationInfo.Team];
 	if (FriendlyFlag == None || VSize(FriendlyFlag.HomeBase.Location - Bot.Location) < 800)
 		return;
 	
-	foreach Bot.RadiusActors(class'Vehicle', Veh, 600)
+	foreach Bot.RadiusActors(class'Vehicle', Veh, 700)
 	{
+		if (Tmr == -1 && Veh.LastDriver == Bot)
+			Veh.LastDriver = None;
 		Dist = Veh.BotDesireability2(Bot);
 		if (Dist > 0)
 		{
@@ -157,7 +157,10 @@ static function FixBot(Bot Bot, optional int Tmr) {
 		}
 	}
 	if (Best != None)
+	{
 		Bot.MoveTarget = Best;
+		Bot.MoveTimer = 1.1*VSize(Best.Location - Bot.Location)/Bot.GroundSpeed;
+	}
 }
 
 
