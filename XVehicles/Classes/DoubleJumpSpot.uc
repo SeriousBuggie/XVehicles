@@ -10,19 +10,20 @@ event int SpecialCost(Pawn Seeker)
 	if (Url == "")
 		return ExtraCost;
 
-	if ( Seeker != None && DriverWeapon(Seeker.Weapon) != None)
+	if (Seeker != None && DriverWeapon(Seeker.Weapon) != None)
 		return 100000;
 	
-	if (!allow())
-		return 100000000;
+	if (default.Allowed == 0 || Allowed != 0)
+		check();
 		
 	return ExtraCost;
 }
 
-function bool allow() {
+function check() {
 	local Mutator M;
 	local Inventory Inv;
 	local string str;
+	
 	if (default.Allowed == 0) { // try detect it
 		default.Allowed = -1; // not found		
 
@@ -53,7 +54,59 @@ function bool allow() {
 		}
 		Log("Try detect DoubleJump:" @ default.Allowed, Class.Name);
 	}
-	return default.Allowed > 0;
+	fix();
+}
+
+function bool fix()
+{
+	local DoubleJumpSpot NP;
+	local int i, j, flags, dist;
+	local Actor Start, End;
+	
+	foreach AllActors(class'DoubleJumpSpot', NP) {
+		NP.Allowed = 0;
+		if (default.Allowed < 0)
+		{
+			NP.SetCollision(false, false, false);
+			NP.Disable('Touch');
+			for (i = 0; i < ArrayCount(NP.upstreamPaths); i++)
+				if (NP.upstreamPaths[i] == -1)
+					break;
+				else {
+					NP.describeSpec(NP.upstreamPaths[i], Start, End, flags, dist);
+					if (flags == 32 && DoubleJumpSpot(Start) != None && DoubleJumpSpot(End) != None)
+					{
+						for (j = i-- + 1; j < ArrayCount(NP.upstreamPaths); j++)
+							NP.upstreamPaths[j - 1] = NP.upstreamPaths[j];
+						NP.upstreamPaths[j - 1] = -1;
+					}
+				}
+			for (i = 0; i < ArrayCount(NP.Paths); i++)
+				if (NP.Paths[i] == -1)
+					break;
+				else {
+					NP.describeSpec(NP.Paths[i], Start, End, flags, dist);
+					if (flags == 32 && DoubleJumpSpot(Start) != None && DoubleJumpSpot(End) != None)
+					{
+						for (j = i-- + 1; j < ArrayCount(NP.Paths); j++)
+							NP.Paths[j - 1] = NP.Paths[j];
+						NP.Paths[j - 1] = -1;
+					}
+				}
+			for (i = 0; i < ArrayCount(NP.PrunedPaths); i++)
+				if (NP.PrunedPaths[i] == -1)
+					break;
+				else {
+					NP.describeSpec(NP.PrunedPaths[i], Start, End, flags, dist);
+					if (flags == 32 && DoubleJumpSpot(Start) != None && DoubleJumpSpot(End) != None)
+					{
+						for (j = i-- + 1; j < ArrayCount(NP.PrunedPaths); j++)
+							NP.PrunedPaths[j - 1] = NP.PrunedPaths[j];
+						NP.PrunedPaths[j - 1] = -1;
+					}
+				}
+			}
+	}
 }
 
 simulated function bool Accept( actor Incoming, Actor Source )
