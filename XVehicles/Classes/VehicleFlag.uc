@@ -52,6 +52,8 @@ simulated function Tick(float Delta)
 	local rotator r;
 	local bool bNetOwner;
 	local int i;
+	local vector X, Y, Z;
+	
 	Super.Tick(Delta);
 	
 	FixOffset();
@@ -60,7 +62,12 @@ simulated function Tick(float Delta)
 		SetLocation(Owner.Location - (vect(10,0,0)*Pos >> Owner.Rotation));
 		r = Owner.Rotation;
 		if (VSize(Owner.Velocity) > 0)
-			r.Yaw = rotator(Owner.Velocity).Yaw;
+		{
+			GetAxes(Owner.Rotation, X, Y, Z);
+			X = Normal(Owner.Velocity - Z*(Z dot Owner.Velocity));
+			Y = Z cross X;
+			r = OrthoRotation(X, Y, Z);
+		}
 		r.Yaw += 32768;
 		r.Pitch = -r.Pitch;
 		r.Roll = -r.Roll;
