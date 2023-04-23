@@ -177,6 +177,9 @@ function SendVoiceMessage(Sound Sound, int Team)
 
 simulated function PreBeginPlay()
 {
+	local ChallengeHUD HUD;
+	local HUDSpawnNotify N;
+	
 	Super.PreBeginPlay();
 	
 	if (Level.NetMode == NM_Client)
@@ -187,6 +190,11 @@ simulated function PreBeginPlay()
 
 	if (Level.NetMode == NM_Client && default.UsedHUD == None)
 		default.UsedHUD = self;
+		
+	N = Spawn(class'HudSpawnNotify');
+	N.HUDMutator = self;
+	foreach AllActors(class'ChallengeHUD', HUD)
+		N.SpawnNotification(HUD);
 }
 
 simulated function Timer()
@@ -202,44 +210,31 @@ simulated function Tick(float Delta)
 {
 	if (Level.NetMode != NM_DedicatedServer)
 	{
-		if (!bHUDMutator || MyHUD == None)
-			RegisterHUDMutator();
+		if (MyHUD == None)
+			FindHUD();
 		if (!bGoodHud)
 			CheckHUD();
 	}
 }
 
-simulated function RegisterHUDMutator()
+simulated function FindHUD()
 {
 	local PlayerPawn P;
 	local ChallengeHUD HUD;
 
-	ForEach AllActors(class'PlayerPawn', P)
+	foreach AllActors(class'PlayerPawn', P)
 		if (ChallengeHUD(P.myHUD) != None)
 			break;
 	if (P != None)
 		MyHUD = ChallengeHUD(P.myHUD);
 	else
-		ForEach AllActors(class'ChallengeHUD', MyHUD)
+		foreach AllActors(class'ChallengeHUD', MyHUD)
 			break;
-	
-	if (MyHUD != None)
-	{
-		NextHUDMutator = MyHUD.HUDMutator;
-		MyHUD.HUDMutator = Self;
-	
-		if (!bHUDMutator)
-		{
-			Spawn(class'HudSpawnNotify').HUDMutator = self;
-			ForEach AllActors(class'ChallengeHUD', HUD)
-				if (HUD.HUDMutator == None)
-				{
-					HUD.HUDMutator = self;
-					FoundHuds++;
-				}
-		}
-		bHUDMutator = True;
-	}
+}
+
+simulated function RegisterHUDMutator()
+{
+	bHUDMutator = True;
 }
 
 simulated function CheckHUD()
@@ -426,6 +421,7 @@ simulated function bool TraceIdentify(canvas Canvas)
 
 defaultproperties
 {
+	bHUDMutator=True
 	bAlwaysRelevant=True
 	RemoteRole=ROLE_SimulatedProxy
 }
