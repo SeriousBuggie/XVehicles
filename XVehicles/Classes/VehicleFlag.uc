@@ -59,6 +59,8 @@ simulated function Tick(float Delta)
 	if (Owner != None) {
 		SetLocation(Owner.Location - (vect(10,0,0)*Pos >> Owner.Rotation));
 		r = Owner.Rotation;
+		if (VSize(Owner.Velocity) > 0)
+			r.Yaw = rotator(Owner.Velocity).Yaw;
 		r.Yaw += 32768;
 		r.Pitch = -r.Pitch;
 		r.Roll = -r.Roll;
