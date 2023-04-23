@@ -62,6 +62,7 @@ function bool fix()
 	local DoubleJumpSpot NP;
 	local int i, j, flags, dist;
 	local Actor Start, End;
+	const R_SPECIAL = 32;
 	
 	foreach AllActors(class'DoubleJumpSpot', NP) {
 		NP.Allowed = 0;
@@ -74,7 +75,7 @@ function bool fix()
 					break;
 				else {
 					NP.describeSpec(NP.upstreamPaths[i], Start, End, flags, dist);
-					if (flags == 32 && DoubleJumpSpot(Start) != None && DoubleJumpSpot(End) != None)
+					if (flags == R_SPECIAL && DoubleJumpSpot(Start) != None && DoubleJumpSpot(End) != None)
 					{
 						for (j = i-- + 1; j < ArrayCount(NP.upstreamPaths); j++)
 							NP.upstreamPaths[j - 1] = NP.upstreamPaths[j];
@@ -86,7 +87,7 @@ function bool fix()
 					break;
 				else {
 					NP.describeSpec(NP.Paths[i], Start, End, flags, dist);
-					if (flags == 32 && DoubleJumpSpot(Start) != None && DoubleJumpSpot(End) != None)
+					if (flags == R_SPECIAL && DoubleJumpSpot(Start) != None && DoubleJumpSpot(End) != None)
 					{
 						for (j = i-- + 1; j < ArrayCount(NP.Paths); j++)
 							NP.Paths[j - 1] = NP.Paths[j];
@@ -98,7 +99,7 @@ function bool fix()
 					break;
 				else {
 					NP.describeSpec(NP.PrunedPaths[i], Start, End, flags, dist);
-					if (flags == 32 && DoubleJumpSpot(Start) != None && DoubleJumpSpot(End) != None)
+					if (flags == R_SPECIAL && DoubleJumpSpot(Start) != None && DoubleJumpSpot(End) != None)
 					{
 						for (j = i-- + 1; j < ArrayCount(NP.PrunedPaths); j++)
 							NP.PrunedPaths[j - 1] = NP.PrunedPaths[j];
