@@ -13,7 +13,7 @@ function Created()
 	bSizable = False;
 
 	SetSizePos();
-	WindowTitle = "XVehicles v56";
+	WindowTitle = "XVehicles v57";
 }
 
 function ResolutionChanged(float W, float H)
