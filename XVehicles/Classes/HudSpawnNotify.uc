@@ -12,13 +12,13 @@ event Actor SpawnNotification(Actor A)
 	{
 		M = ChallengeHUD(A).HUDMutator;
 		if (M == None)
-			ChallengeHUD(A).HUDMutator = HUDMutator;
+			ChallengeHUD(A).HUDMutator = Spawn(class'XVHUDProxy', HUDMutator);
 		else
 		{
-			while (M != HUDMutator && M.NextHUDMutator != None)
+			while (XVHUDProxy(M) == None && M.NextHUDMutator != None)
 				M = M.NextHUDMutator;
-			if (M != HUDMutator)
-				M.NextHUDMutator = HUDMutator;
+			if (XVHUDProxy(M) == None)
+				M.NextHUDMutator = Spawn(class'XVHUDProxy', HUDMutator);
 		}
 		HUDMutator.FoundHuds++;
 	}

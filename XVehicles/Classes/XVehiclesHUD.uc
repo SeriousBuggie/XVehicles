@@ -9,6 +9,7 @@ var XVehiclesHUD UsedHUD;
 
 var int FoundHuds;
 var bool bGoodHud;
+var float LastRender;
 
 var config int EnterCount;
 var float EnterLast;
@@ -263,6 +264,10 @@ simulated function PostRender(canvas Canvas)
 {
 	if (NextHUDMutator != None)
 		NextHUDMutator.PostRender(Canvas);
+		
+	if (LastRender == Level.TimeSeconds)
+		return;
+	LastRender = Level.TimeSeconds;
 		
 	if (FoundHuds > 0 && Canvas != None && Canvas.Viewport != None &&
 		Canvas.Viewport.Actor != None && ChallengeHUD(Canvas.Viewport.Actor.MyHUD) != None &&
