@@ -473,7 +473,7 @@ function int ShouldTurnFor( vector AcTarget, optional float YawAdjust, optional 
 		Return ret;
 }
 
-function vector GetVirtualSpeedOnIce(float Delta)
+simulated function vector GetVirtualSpeedOnIce(float Delta)
 {
 local float DeAcc,DeAccRat;
 local vector Ac;
