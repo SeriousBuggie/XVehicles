@@ -4,8 +4,8 @@
 class FlagAnnouncer expands MessagingSpectator;
 
 function PostBeginPlay() {	
-	PlayerReplicationInfo.Destroy();
-	PlayerReplicationInfo = None;
+	PlayerReplicationInfo.RemoteRole = ROLE_None;
+	PlayerReplicationInfo.bAlwaysRelevant = false;
 }
 
 event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch, optional PlayerReplicationInfo RelatedPRI_1, optional PlayerReplicationInfo RelatedPRI_2, optional Object OptionalObject )
