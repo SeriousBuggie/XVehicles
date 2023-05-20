@@ -6,18 +6,20 @@ class FlagAnnouncerSound expands Projectile;
 var Sound PlaySound;
 var bool bExcludeTournamentPlayers;
 var int Team;
+var bool bAnnouncer;
 
 replication
 {
 	reliable if (Role == ROLE_Authority)
-		PlaySound, bExcludeTournamentPlayers, Team;
+		PlaySound, bExcludeTournamentPlayers, Team, bAnnouncer;
 }
 
-function Init(Sound InPlaySound, bool InExcludeTournamentPlayers, int InTeam)
+function Init(Sound InPlaySound, bool InExcludeTournamentPlayers, int InTeam, bool InAnnouncer)
 {
 	PlaySound = InPlaySound;
 	bExcludeTournamentPlayers = InExcludeTournamentPlayers;
 	Team = InTeam;
+	bAnnouncer = InAnnouncer;
 }
 
 simulated function Tick(float Delta)
@@ -27,7 +29,7 @@ simulated function Tick(float Delta)
 		foreach AllActors(class'PlayerPawn', P)
 			if (P.bIsPlayer && (!bExcludeTournamentPlayers || !P.IsA('TournamentPlayer')) && 
 				(Team == -1 || (P.PlayerReplicationInfo != None && P.PlayerReplicationInfo.Team == Team)))
-				P.ClientPlaySound(PlaySound);
+				P.ClientPlaySound(PlaySound, , bAnnouncer);
 	Disable('Tick');
 }
 

@@ -31,7 +31,7 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch,
 			if (TeamInfo.TeamIndex == 1)
 				Sound = Sound'YouAreOnBlue';
 			if (bPlaySound && Sound != None)
-				PlayerPawn(RelatedPRI_1.Owner).ClientPlaySound(Sound);
+				PlayerPawn(RelatedPRI_1.Owner).ClientPlaySound(Sound, , true);
 			return;
 		}
 	}
@@ -133,12 +133,12 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch,
 	{
 		SoundActor = Spawn(class'FlagAnnouncerSound');
 		if (SoundActor != None)
-			SoundActor.Init(Sound, bExcludeTournamentPlayers, -1);
+			SoundActor.Init(Sound, bExcludeTournamentPlayers, -1, true);
 		else
 			for (P = Level.PawnList; P != None; P = P.NextPawn)
 				if (P.bIsPlayer && P.IsA('PlayerPawn') && 
 					(!bExcludeTournamentPlayers || !P.IsA('TournamentPlayer')))
-					PlayerPawn(P).ClientPlaySound(Sound);
+					PlayerPawn(P).ClientPlaySound(Sound, , true);
 	}
 }
 

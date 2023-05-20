@@ -2756,7 +2756,7 @@ Ignores FireWeapon,ReadDriverInput,ReadBotInput,DriverLeft;
 			SetOverlayMat(TeamOverlays[CurrentTeam],0.5);
 			PlaySound(Sound'CarAlarm01',SLOT_None,2,,2000);
 			if( PlayerPawn(Other)!=None )
-				PlayerPawn(Other).ClientPlaySound(Sound'Hijacked');
+				PlayerPawn(Other).ClientPlaySound(Sound'Hijacked', , true);
 		}
 		DriverEnter(Pawn(Other));
 	}

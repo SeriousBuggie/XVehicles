@@ -168,7 +168,7 @@ function SendVoiceMessage(Sound Sound, int Team)
 	local Pawn P;
 	SoundActor = Spawn(class'FlagAnnouncerSound');
 	if (SoundActor != None)
-		SoundActor.Init(Sound, false, Team);
+		SoundActor.Init(Sound, false, Team, false);
 	else
 		for (P = Level.PawnList; P != None; P = P.NextPawn)
 			if (P.bIsPlayer && P.IsA('PlayerPawn') && 
