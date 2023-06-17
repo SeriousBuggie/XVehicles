@@ -59,7 +59,7 @@ defaultproperties
 	AnimSequence="Expand"
 	DrawType=DT_Mesh
 	Style=STY_Translucent
-	Mesh=LodMesh'XVehicles.WaterTrail'
+	Mesh=LodMesh'WaterTrail'
 	ScaleGlow=1.750000
 	bUnlit=True
 	bBounce=True

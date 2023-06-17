@@ -154,7 +154,7 @@ defaultproperties
 	LifeSpan=10.000000
 	DrawType=DT_Mesh
 	Style=STY_Translucent
-	Mesh=LodMesh'XVehicles.EnLnPartics'
+	Mesh=LodMesh'EnLnPartics'
 	ScaleGlow=2.000000
 	bUnlit=True
 }

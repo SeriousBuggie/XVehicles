@@ -45,5 +45,5 @@ function Close(optional bool bByParent)
 
 defaultproperties
 {
-	ClientClass=Class'XVehicles.XVGTabWindow'
+	ClientClass=Class'XVGTabWindow'
 }

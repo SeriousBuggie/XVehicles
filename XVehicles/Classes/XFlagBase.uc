@@ -11,6 +11,6 @@ defaultproperties
 	bNetTemporary=True
 	RemoteRole=ROLE_SimulatedProxy
 	DrawType=DT_Mesh
-	Mesh=LodMesh'XVehicles.ut2FlagBase'
+	Mesh=LodMesh'ut2FlagBase'
 	bGameRelevant=True
 }

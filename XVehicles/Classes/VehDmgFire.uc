@@ -71,7 +71,7 @@ defaultproperties
 	DrawType=DT_Mesh
 	Style=STY_Translucent
 	Texture=Texture'UFire.FireB01'
-	Mesh=LodMesh'XVehicles.VehDmgFire'
+	Mesh=LodMesh'VehDmgFire'
 	DrawScale=0.480000
 	ScaleGlow=1.500000
 	bUnlit=True
