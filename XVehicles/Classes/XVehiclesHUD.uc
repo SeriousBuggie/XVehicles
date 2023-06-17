@@ -150,9 +150,9 @@ function bool MutatorBroadcastMessage(Actor Sender, Pawn Receiver, out coerce st
 
 function Sound GetGenderSound(Sound SoundMale, Sound SoundFemale, Pawn Sender)
 {
-	if (Sender.isA('TournamentMale') || Sender.isA('bbTournamentMale'))
-		return SoundMale;
-	return SoundFemale;
+	if (Sender.bIsFemale)
+		return SoundFemale;
+	return SoundMale;
 }
 
 function int GetTeam(Pawn Sender)
