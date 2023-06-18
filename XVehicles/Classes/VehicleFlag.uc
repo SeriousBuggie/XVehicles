@@ -73,7 +73,11 @@ simulated function Tick(float Delta)
 		r.Roll = -r.Roll;
 		SetRotation(r);
 	}
-	if (Vehicle(Owner) != None && Vehicle(Owner).IsNetOwned())
+	if (Vehicle(Owner) != None && (Vehicle(Owner).IsNetOwned() || 
+		(class'VActor'.Default.StaticPP != None && class'VActor'.Default.StaticPP.Actor != None && 
+		class'VActor'.Default.StaticPP.Actor.ViewTarget != None &&
+		class'VActor'.Default.StaticPP.Actor.ViewTarget.Owner == Owner &&
+		!class'VActor'.Default.StaticPP.Actor.bBehindView)))
 		Style = STY_Translucent;
 	else
 		Style = STY_Normal;
