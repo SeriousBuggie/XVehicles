@@ -1393,8 +1393,8 @@ simulated function ClientUpdateState(float Delta)
 	local VehState ClientState;
 	local bool bNeedUpdateYaw;
 	
-	if (Default.StaticPP != None)
-		LocalPlayer = Default.StaticPP.Actor;
+	if (class'VActor'.Default.StaticPP != None)
+		LocalPlayer = class'VActor'.Default.StaticPP.Actor;
 	else
 		LocalPlayer = FindNetOwner(self);
 
