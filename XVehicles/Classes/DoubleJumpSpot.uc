@@ -187,6 +187,20 @@ simulated function PostTouch( Actor Other )
 
 function Actor SpecialHandling(Pawn Other)
 {
+	local DoubleJumpSpot DJS;
+	local vector Dist2D;
+	foreach Other.RadiusActors(class'DoubleJumpSpot', DJS, 0)
+		if (DJS != self && DJS.URL != "" && string(Tag) ~= DJS.URL && 
+			Abs(DJS.Location.Z - Other.Location.Z) < DJS.CollisionHeight + Other.CollisionHeight)
+		{
+			Dist2D = DJS.Location - Other.Location;
+			Dist2D.Z = 0;
+			if (VSize(Dist2D) < DJS.CollisionRadius + Other.CollisionRadius)
+			{ Log("Make fix" @ self @ DJS);
+				DJS.Touch(Other);
+				return DJS;
+			}
+		}
 	return self;
 }
 
