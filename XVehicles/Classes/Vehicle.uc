@@ -1305,6 +1305,8 @@ local vector ExitVect;
 		
 		Driver.BaseEyeHeight = BaseEyeHeight[0];
 		Driver.SightRadius = SightRadius[0];
+		if (Bot(Driver) != None)
+			Bot(Driver).WhatToDoNext('', '');
 	}
 	Driver = None;
 	//SetOwner(None); Set to none 1 sec later to avoid unwanted functions errors.
@@ -4568,6 +4570,9 @@ function PassengerLeave( byte Seat, optional bool bForcedLeave )
 	{
 		Passengers[Seat].BaseEyeHeight = BaseEyeHeight[Seat + 1];
 		Passengers[Seat].SightRadius = SightRadius[Seat + 1];
+		
+		if (Bot(Passengers[Seat]) != None)
+			Bot(Passengers[Seat]).WhatToDoNext('', '');
 	}
 	Passengers[Seat] = None;
 
