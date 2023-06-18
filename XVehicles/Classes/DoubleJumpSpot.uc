@@ -196,7 +196,7 @@ function Actor SpecialHandling(Pawn Other)
 			Dist2D = DJS.Location - Other.Location;
 			Dist2D.Z = 0;
 			if (VSize(Dist2D) < DJS.CollisionRadius + Other.CollisionRadius)
-			{ Log("Make fix" @ self @ DJS);
+			{
 				DJS.Touch(Other);
 				return DJS;
 			}
