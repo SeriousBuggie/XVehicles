@@ -1079,6 +1079,14 @@ function Actor TraceHit(Bot Bot, Actor A, out vector HL, out vector HN)
 	if (!Bot.FastTrace(HL, HN)) return Level;
 	return OwnerVehicle.Trace(HL, HN, HL, HN, true);
 }
+function bool IsVisible(Pawn Who, Pawn ForWho) {
+	local int i;
+	if (DriverWeapon(Who.Weapon) != None)
+		return true;
+	// from APawn::LineOfSightTo
+	i = Min(5000, 5000*(16.0 + Who.Visibility)*0.015);	
+	return i == 5000 || VSize(Who.Location - ForWho.Location) <= i;
+}
 function bool FindEnemy()
 {
 	local Pawn P;
@@ -1091,12 +1099,24 @@ function bool FindEnemy()
 	local int i;
 	
 	Bot = Bot(WeaponController);
-	if (Bot == None || Bot.Enemy != None || NextTimeRangedAttack > Level.TimeSeconds)
+	if (Bot == None || NextTimeRangedAttack > Level.TimeSeconds)
 		return false;
+	if (Bot.Enemy != None) {
+		// from APawn::LineOfSightTo
+		i = Min(5000, 5000*(16.0 + Bot.Enemy.Visibility)*0.015);
+		if (VSize(Bot.Enemy.Location - Bot.Location) <= i)
+			return false; // let's engine handle this
+		if (i == 5000 || DriverWeapon(Bot.Enemy.Weapon) != None) {
+			Hit = TraceHit(Bot, Bot.Enemy, HL, HN);
+			if (Hit != Level && (Hit == Bot.Enemy || 
+				(DriverWeapon(Bot.Enemy.Weapon) != None && DriverWeapon(Bot.Enemy.Weapon).VehicleOwner == Hit)))
+				Best = Bot.Enemy;
+		}
+	}
 	BotState = Bot.GetStateName();
 	if (BotState == 'RangedAttack' || BotState == 'FallingState' || BotState == 'TakeHit' || BotState == 'ImpactJumping')
 		return false;
-	if (OwnerVehicle.FastTrace(OwnerVehicle.MoveDest, OwnerVehicle.Location))
+	if (Best == None && OwnerVehicle.FastTrace(OwnerVehicle.MoveDest, OwnerVehicle.Location))
 	{
 		Extent.X = OwnerVehicle.CollisionRadius;
 		Extent.Y = Extent.X;
@@ -1116,7 +1136,7 @@ function bool FindEnemy()
 		{
 			if (P.Health <= 0 || FlockPawn(P) != None || FlockMasterPawn(P) != None || 
 				(P.PlayerReplicationInfo != None && P.PlayerReplicationInfo.bIsSpectator) ||
-				Bot.AttitudeTo(P) > ATTITUDE_Frenzy)
+				Bot.AttitudeTo(P) > ATTITUDE_Frenzy || !IsVisible(P, Bot))
 				continue; // check not spectator and other stuff
 			Hit = TraceHit(Bot, P, HL, HN);
 			if (Hit == Level)
