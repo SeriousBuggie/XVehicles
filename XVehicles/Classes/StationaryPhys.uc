@@ -46,6 +46,8 @@ simulated function bool CheckOnGround()
 function ReadBotInput( float Delta )
 {
 	MoveDest = Location + (vect(10000,0,0) >> Rotation);
+	if (Driver != None && Driver.IsInState('Hunting'))
+		Driver.GotoState('Attacking');
 }
 
 function bool HealthTooLowFor(Pawn Other)
