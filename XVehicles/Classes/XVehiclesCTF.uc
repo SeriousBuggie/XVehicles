@@ -112,6 +112,8 @@ static function FixBot(Bot Bot, optional int Tmr) {
 	local CTFFlag MyFlag, FriendlyFlag;
 	local Vehicle Veh, Best;
 	local float Dist, BestDist;
+	if (class'VehiclesConfig'.default.bPulseAltHeal && PulseGun(Bot.Weapon) != None)
+		TryHeal(Bot);
 	if (DriverWeapon(Bot.Weapon) != None || Bot.PlayerReplicationInfo == None)
 		return;
 	if (Vehicle(Bot.MoveTarget) != None)
@@ -163,6 +165,51 @@ static function FixBot(Bot Bot, optional int Tmr) {
 	}
 }
 
+static function TryHeal(Bot Bot)
+{
+	Local Pawn P;
+	Local Inventory Inv;
+	local name BotState;
+	local Vehicle Actor;
+	local Weapon BotWeapon;
+	
+	if (FixGun(Bot.Weapon) != None) // use own heal code
+		return;
+	if (Bot.PlayerReplicationInfo == None ||
+		(Bot.Enemy != None && Bot.Enemy != Bot) ||
+		CTFFlag(Bot.Target) != None || Bot.PlayerReplicationInfo.HasFlag != None)
+		return;
+	BotState = Bot.GetStateName();
+	if (BotState == 'RangedAttack' || BotState == 'FallingState' || BotState == 'TakeHit' || BotState == 'ImpactJumping')
+		return;	
+
+	for (P = Bot.Level.PawnList; P != None; P = P.nextPawn)
+		if (P.Weapon != None && P.Weapon.isA('DriverWeapon') && 
+			P.PlayerReplicationInfo != None && P.PlayerReplicationInfo.Team == Bot.PlayerReplicationInfo.Team)
+		{
+			Actor = DriverWeapon(P.Weapon).VehicleOwner;
+			if (Actor == None || Actor.Health >= Actor.FirstHealth ||
+				VSize(Actor.Location - Bot.Location) - Actor.CollisionRadius > 710 || !Bot.LineOfSightTo(Actor))
+				continue;
+			BotWeapon = Bot.Weapon;
+			Bot.Enemy = Bot; // weird hack
+			if (!Bot.SwitchToBestWeapon() || Bot.Weapon != BotWeapon || Bot.Weapon != Bot.PendingWeapon)
+			{
+				P = None;
+				break;
+			}
+			Bot.Target = Actor;
+			Bot.bComboPaused = true;
+			Bot.SpecialPause = 1.0; // calculate exact time for heal
+//			log(Bot.Level.TimeSeconds @ Bot @ "set to heal" @ Actor @ P @ BotState @ Bot.NextState @ Bot.NextLabel);
+			Bot.NextState = BotState;
+			Bot.NextLabel = 'Begin';
+			Bot.GotoState('RangedAttack');
+			break;
+		}
+	if (P == None && Bot.Enemy == Bot)
+		Bot.Enemy = None; // reset hack
+}
 
 /*
 function Tick(float delta)
