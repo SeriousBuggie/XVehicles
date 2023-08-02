@@ -1239,7 +1239,7 @@ local vector ExitVect;
 			ChangeCollision(Driver, false);
 
 			ExitVect = GetExitOffset(Driver);
-			if ((Normal(Velocity) Dot Normal(ExitVect >> Rotation)) > 0.35 && 
+			if (Bot(Driver) == None && (Normal(Velocity) Dot Normal(ExitVect >> Rotation)) > 0.35 && 
 				(Normal(Velocity) Dot Normal((ExitVect + vect(0,-2,0)*ExitVect.Y) >> Rotation)) <= 0.35)
 				ExitVect.Y = -ExitVect.Y;
 			if (!Driver.Move(Location+(ExitVect >> Rotation) - Driver.Location) && !bForcedLeave)
@@ -4513,7 +4513,7 @@ function PassengerLeave( byte Seat, optional bool bForcedLeave )
 			ChangeCollision(Passengers[Seat], false);
 
 			ExitVect = GetExitOffset(Passengers[Seat]);
-			if ((Normal(Velocity) Dot Normal(ExitVect >> Rotation)) > 0.35 && 
+			if (Bot(Passengers[Seat]) == None && (Normal(Velocity) Dot Normal(ExitVect >> Rotation)) > 0.35 && 
 				(Normal(Velocity) Dot Normal((ExitVect + vect(0,-2,0)*ExitVect.Y) >> Rotation)) <= 0.35)
 				ExitVect.Y = -ExitVect.Y;
 			if (!Passengers[Seat].SetLocation(Location+(ExitVect >> Rotation)) && !bForcedLeave)
