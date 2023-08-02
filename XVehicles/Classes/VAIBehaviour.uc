@@ -255,7 +255,7 @@ function vector GetNextMoveTarget()
 //		V = Normal(VehicleOwner.Velocity);
 		V = vector(VehicleOwner.Rotation);
 			
-		BestDist = V dot Normal(Pos[best] - VehicleOwner.Driver.Location);
+		BestDist = Abs(V dot Normal(Pos[best] - VehicleOwner.Driver.Location));
 		
 //		dbg = "";
 		for (i = best + 1; i < ArrayCount(Visible); i++)
@@ -265,7 +265,7 @@ function vector GetNextMoveTarget()
 				dbg = dbg @ ".";
 				continue;
 			}
-			Dist = V dot Normal(Pos[i] - VehicleOwner.Driver.Location);
+			Dist = Abs(V dot Normal(Pos[i] - VehicleOwner.Driver.Location));
 			if (VehicleOwner.bCanFly)
 				Dist = i + 10; // Dist before always be in range [0; 1]
 //			dbg = dbg @ "+";
