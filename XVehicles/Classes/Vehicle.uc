@@ -2557,7 +2557,10 @@ function bool NeedStop(Pawn pDriver)
 		if (CTFFlag(pDriver.MoveTarget) != None && pDriver.PlayerReplicationInfo.HasFlag != pDriver.MoveTarget)
 			return true;
 		if (FlagBase(pDriver.MoveTarget) != None &&
-			(FlagBase(pDriver.MoveTarget).Team != pDriver.PlayerReplicationInfo.Team) == (pDriver.PlayerReplicationInfo.HasFlag == None))
+			(FlagBase(pDriver.MoveTarget).Team != pDriver.PlayerReplicationInfo.Team) == (pDriver.PlayerReplicationInfo.HasFlag == None) &&
+			(CTFReplicationInfo(Level.Game.GameReplicationInfo) == None ||
+			CTFReplicationInfo(Level.Game.GameReplicationInfo).FlagList[FlagBase(pDriver.MoveTarget).Team] == None ||
+			CTFReplicationInfo(Level.Game.GameReplicationInfo).FlagList[FlagBase(pDriver.MoveTarget).Team].bHome))
 			return true;
 	}
 	if (UTJumpPad(pDriver.MoveTarget) != None && 
