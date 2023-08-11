@@ -1176,16 +1176,21 @@ static function Vehicle AttackVehicle(WeaponAttachment Weap, Bot Bot, float MaxD
 {
 	local Vehicle Veh, BestVeh[2];
 	local float Dist, BestDist, BestVehDist[2];
-	local int i;
+	local int i, VehTeam;
 	local vector HL, HN;
 	
 	foreach Bot.RadiusActors(class'Vehicle', Veh, MaxDistance)
 		if (Weap == None || Veh != Weap.OwnerVehicle)
 		{
-			if (Veh.CurrentTeam != Bot.PlayerReplicationInfo.Team && !Veh.HealthTooLowFor(None))
+			if (Veh.CurrentTeam == Bot.PlayerReplicationInfo.Team && 
+				(Veh.Driver != None || Veh.bHasPassengers || Veh.Level.TimeSeconds - Veh.LastFix > 15))
+				continue;
+			VehTeam = Veh.CurrentTeam;
+			if (Veh.MyFactory != None)
+				VehTeam = Veh.MyFactory.TeamNum;
+			if (VehTeam != Bot.PlayerReplicationInfo.Team && !Veh.HealthTooLowFor(None))
 				i = 0;
-			else if (Veh.CurrentTeam == Bot.PlayerReplicationInfo.Team && Veh.HealthTooLowFor(None) && 
-				Veh.Driver == None && !Veh.bHasPassengers && Veh.Level.TimeSeconds - Veh.LastFix > 15)
+			else if (VehTeam == Bot.PlayerReplicationInfo.Team && Veh.HealthTooLowFor(None))
 				i = 1;
 			else
 				continue;
