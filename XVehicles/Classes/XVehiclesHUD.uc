@@ -313,18 +313,21 @@ simulated function DrawFixProgress(Canvas Canvas, Vehicle Vehicle)
 	local float XL, YL, X, Y;
 	local string Str;
 	local Texture Tex;
+	local Pawn PlayerOwner;
 	
 	const XOffset = 3;
 	const YOffset = 2;
 	
-	if (MyHUD.PlayerOwner != None && 
-		(FixGun(MyHUD.PlayerOwner.Weapon) != None ||
-		(class'VehiclesConfig'.default.bPulseAltHeal && PulseGun(MyHUD.PlayerOwner.Weapon) != None)) &&
-		//MyHUD.PlayerOwner.bAltFire != 0 // not work in demoplay
-		MyHUD.PlayerOwner.Weapon.AmbientSound == MyHUD.PlayerOwner.Weapon.AltFireSound &&
+	PlayerOwner = MyHUD.PlayerOwner;
+	if (Spectator(PlayerOwner) != None)
+		PlayerOwner = Pawn(Spectator(PlayerOwner).ViewTarget);
+	
+	if (PlayerOwner != None && (FixGun(PlayerOwner.Weapon) != None ||
+		(class'VehiclesConfig'.default.bPulseAltHeal && PulseGun(PlayerOwner.Weapon) != None)) &&
+		//PlayerOwner.bAltFire != 0 // not work in demoplay
+		PlayerOwner.Weapon.AmbientSound == PlayerOwner.Weapon.AltFireSound &&
 		((MyHUD.PlayerOwner.GameReplicationInfo != None && !MyHUD.PlayerOwner.GameReplicationInfo.bTeamGame) ||
-		(MyHUD.PlayerOwner.PlayerReplicationInfo != None && 
-		MyHUD.PlayerOwner.PlayerReplicationInfo.Team == Vehicle.CurrentTeam)))
+		(PlayerOwner.PlayerReplicationInfo != None && PlayerOwner.PlayerReplicationInfo.Team == Vehicle.CurrentTeam)))
 	{
 		Y = 100.0f*Vehicle.Health/Vehicle.FirstHealth;
 		Str = string(Y);
