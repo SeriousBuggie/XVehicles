@@ -16,7 +16,7 @@ defaultproperties
 {
 	AnimSequence="Still"
 	Texture=Texture'XStatVeh.Skins.CybotMetal'
-	Mesh=LodMesh'XStatVeh.CybSentinelGun'
+	Mesh=LodMesh'CybSentinelGun'
 	DrawScale=5.000000
 	MultiSkins(2)=Texture'XVehicles.Skins.CybotCoreRed'
 }

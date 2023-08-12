@@ -8,8 +8,8 @@ class CybProjB expands CybProj;
 
 defaultproperties
 {
-	TeamExplFX=Class'XChopVeh.CybProjExplBlue'
-	TrailClass1=Class'XChopVeh.CybProjCorB'
+	TeamExplFX=Class'CybProjExplBlue'
+	TrailClass1=Class'CybProjCorB'
 	MultiSkins(1)=Texture'XChopVeh.Coronas.CybProjTrailBlue'
 	LightHue=170
 	LightSaturation=255

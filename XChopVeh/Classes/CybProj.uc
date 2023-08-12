@@ -53,8 +53,8 @@ simulated function ProcessTouch(Actor Other, vector HitLocation)
 
 defaultproperties
 {
-	TeamExplFX=Class'XChopVeh.CybProjExplRed'
-	TrailClass1=Class'XChopVeh.CybProjCor'
+	TeamExplFX=Class'CybProjExplRed'
+	TrailClass1=Class'CybProjCor'
 	bWaterHitFX=True
 	WaterSpeedScale=1.000000
 	WaterSplashType=2
@@ -70,9 +70,9 @@ defaultproperties
 	Damage=25.000000
 	MomentumTransfer=25500
 	MyDamageType="CybotLaser"
-	ExplosionDecal=Class'XChopVeh.CybProjDecal'
+	ExplosionDecal=Class'CybProjDecal'
 	Style=STY_Translucent
-	Mesh=LodMesh'XChopVeh.CybProj'
+	Mesh=LodMesh'CybProj'
 	DrawScale=8.000000
 	ScaleGlow=2.500000
 	bUnlit=True

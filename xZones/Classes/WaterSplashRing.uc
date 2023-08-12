@@ -27,7 +27,7 @@ defaultproperties
 	LifeSpan=1.250000
 	DrawType=DT_Mesh
 	Style=STY_Translucent
-	Mesh=LodMesh'xZones.WaterSplashRing'
+	Mesh=LodMesh'WaterSplashRing'
 	DrawScale=3.000000
 	ScaleGlow=1.800000
 	bUnlit=True

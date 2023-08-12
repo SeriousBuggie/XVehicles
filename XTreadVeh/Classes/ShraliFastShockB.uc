@@ -21,7 +21,7 @@ simulated function Tick( float DeltaTime)
 defaultproperties
 {
 	LifeSpan=0.750000
-	Mesh=LodMesh'XTreadVeh.ShraliFastShockB'
+	Mesh=LodMesh'ShraliFastShockB'
 	DrawScale=5.625000
 	ScaleGlow=1.500000
 	LightType=LT_Steady

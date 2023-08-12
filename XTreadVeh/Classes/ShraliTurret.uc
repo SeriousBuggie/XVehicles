@@ -60,19 +60,19 @@ defaultproperties
 	RotatingSpeed=20000.000000
 	PitchRange=(Max=4500,Min=-1700)
 	bAltFireZooms=True
-	TurretPitchActor=Class'XTreadVeh.ShraliCannon'
+	TurretPitchActor=Class'ShraliCannon'
 	PitchActorOffset=(X=30.625000,Y=0.000000,Z=40.625000)
-	WeapSettings(0)=(ProjectileClass=Class'XTreadVeh.ShraliProj',FireStartOffset=(X=510.000000),RefireRate=1.000000,FireSound=Sound'XTreadVeh.Shrali.ShraliFire',FireSndRange=68,FireSndVolume=200,FireDelay=6.000000,FireDelaySnd=Sound'XTreadVeh.Shrali.ShraliLoading',FireDelaySndRange=56,FireDelaySndVolume=200)
+	WeapSettings(0)=(ProjectileClass=Class'ShraliProj',FireStartOffset=(X=510.000000),RefireRate=1.000000,FireSound=Sound'XTreadVeh.Shrali.ShraliFire',FireSndRange=68,FireSndVolume=200,FireDelay=6.000000,FireDelaySnd=Sound'XTreadVeh.Shrali.ShraliLoading',FireDelaySndRange=56,FireDelaySndVolume=200)
 	bPhysicalGunAimOnly=True
 	bUseEnergyFX=True
-	EnergyPartsA(0)=(bHaveThisEnPartc=True,EnLnClass=Class'XTreadVeh.EnLnPartRedA',EnLnLocOffSet=(X=510.000000),RepeatDelay=0.200000,RepeatTimes=120,bProgressive=True)
-	EnergyPartsA(1)=(bHaveThisEnPartc=True,EnLnClass=Class'XTreadVeh.EnLnPartRedB',EnLnLocOffSet=(X=510.000000),RepeatDelay=0.200000,RepeatTimes=120,bProgressive=True)
-	EnergyPartsA(2)=(bHaveThisEnPartc=True,EnLnClass=Class'XTreadVeh.EnLnPartRedC',EnLnLocOffSet=(X=510.000000),RepeatDelay=0.200000,RepeatTimes=120,bProgressive=True)
-	EnergyPartsA(3)=(bHaveThisEnPartc=True,EnLnClass=Class'XTreadVeh.EnLnPartRedD',EnLnLocOffSet=(X=510.000000),RepeatDelay=0.200000,RepeatTimes=120,bProgressive=True)
+	EnergyPartsA(0)=(bHaveThisEnPartc=True,EnLnClass=Class'EnLnPartRedA',EnLnLocOffSet=(X=510.000000),RepeatDelay=0.200000,RepeatTimes=120,bProgressive=True)
+	EnergyPartsA(1)=(bHaveThisEnPartc=True,EnLnClass=Class'EnLnPartRedB',EnLnLocOffSet=(X=510.000000),RepeatDelay=0.200000,RepeatTimes=120,bProgressive=True)
+	EnergyPartsA(2)=(bHaveThisEnPartc=True,EnLnClass=Class'EnLnPartRedC',EnLnLocOffSet=(X=510.000000),RepeatDelay=0.200000,RepeatTimes=120,bProgressive=True)
+	EnergyPartsA(3)=(bHaveThisEnPartc=True,EnLnClass=Class'EnLnPartRedD',EnLnLocOffSet=(X=510.000000),RepeatDelay=0.200000,RepeatTimes=120,bProgressive=True)
 	FiringShaking(0)=(bShakeEnabled=True,bShakeByStep=True,ShakeStart=SHK_DuringFire,ShakeRadius=780.000000,shaketime=5.800000,ShakeVertMag=100.000000,ShakeRollMag=75.000000,StepInterval=0.200000)
 	FiringShaking(1)=(bShakeEnabled=True,ShakeStart=SHK_OnFire,ShakeRadius=1000.000000,shaketime=0.300000,ShakeVertMag=475.000000,ShakeRollMag=2050.000000)
 	PartMass=1
-	Mesh=LodMesh'XTreadVeh.ShraliTurret'
+	Mesh=LodMesh'ShraliTurret'
 	SoundRadius=150
 	SoundVolume=255
 	CollisionRadius=128.000000

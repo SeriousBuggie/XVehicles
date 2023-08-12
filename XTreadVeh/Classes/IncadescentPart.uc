@@ -77,7 +77,7 @@ defaultproperties
 	DrawType=DT_Mesh
 	Style=STY_Translucent
 	Texture=Texture'XTreadVeh.Effects.Incandescent01'
-	Mesh=LodMesh'XTreadVeh.IncadescentPart'
+	Mesh=LodMesh'IncadescentPart'
 	DrawScale=0.500000
 	ScaleGlow=2.800000
 	bUnlit=True

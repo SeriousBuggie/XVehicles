@@ -106,10 +106,10 @@ function MyTimer()
 defaultproperties
 {
 	WeaponDescription="Classification: Fix RiflenPrimary Fire: Medium sized, fast moving plasma balls are fired at a fast rate of fire.nSecondary Fire: A bolt of blue lightning is expelled for 100 meters, which will fix vehicles.nTechniques: Firing and keeping the secondary fire's beam on a vehicle will fix them in seconds."
-	AmmoName=Class'FixGun.FixAmmo'
+	AmmoName=Class'FixAmmo'
 	PickupAmmoCount=200
-	ProjectileClass=Class'FixGun.FixSphere'
-	AltProjectileClass=Class'FixGun.StarterFixBolt'
+	ProjectileClass=Class'FixSphere'
+	AltProjectileClass=Class'StarterFixBolt'
 	AIRating=1.000000
 	MessageNoAmmo=" has no ammo."
 	NameColor=(R=0,G=0,B=255,A=0)

@@ -65,7 +65,7 @@ defaultproperties
 	DrawType=DT_Mesh
 	Style=STY_Translucent
 	Texture=Texture'xZones.Particles.WSplsh'
-	Mesh=LodMesh'xZones.BalWaterSplash00'
+	Mesh=LodMesh'BalWaterSplash00'
 	DrawScale=0.077500
 	ScaleGlow=1.500000
 	SpriteProjForward=0.000000

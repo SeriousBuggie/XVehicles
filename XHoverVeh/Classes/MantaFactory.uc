@@ -5,9 +5,9 @@ class MantaFactory expands VehicleFactory;
 
 defaultproperties
 {
-	VehicleClass=Class'XHoverVeh.XManta'
+	VehicleClass=Class'XManta'
 	Texture=Texture'XHoverVeh.pics.fan1'
-	Mesh=Mesh'XHoverVeh.Manta'
+	Mesh=Mesh'Manta'
 	AmbientGlow=127
 	MultiSkins(1)=Texture'XHoverVeh.pics.fan1'
 	MultiSkins(2)=Texture'XHoverVeh.pics.fan1'

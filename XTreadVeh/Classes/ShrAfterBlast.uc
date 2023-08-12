@@ -37,7 +37,7 @@ defaultproperties
 	LifeSpan=0.750000
 	DrawType=DT_Mesh
 	Style=STY_Translucent
-	Mesh=LodMesh'XTreadVeh.ShrAfterBlast'
+	Mesh=LodMesh'ShrAfterBlast'
 	DrawScale=6.250000
 	ScaleGlow=1.500000
 	bUnlit=True

@@ -62,7 +62,7 @@ defaultproperties
 	DrawType=DT_Mesh
 	Style=STY_Translucent
 	Texture=Texture'XTreadVeh.Effects.ShraliMuz01'
-	Mesh=LodMesh'XTreadVeh.ShraliCanMuzA'
+	Mesh=LodMesh'ShraliCanMuzA'
 	DrawScale=2.800000
 	ScaleGlow=5.000000
 	bUnlit=True

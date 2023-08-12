@@ -5,8 +5,8 @@ class TankMLFactory expands VehicleFactory;
 
 defaultproperties
 {
-	VehicleClass=Class'XTreadVeh.TankML'
-	Mesh=LodMesh'XTreadVeh.TankML'
+	VehicleClass=Class'TankML'
+	Mesh=LodMesh'TankML'
 	CollisionRadius=125.000000
 	CollisionHeight=69.000000
 }

@@ -41,7 +41,7 @@ defaultproperties
 	RemoteRole=ROLE_SimulatedProxy
 	DrawType=DT_Mesh
 	Style=STY_Translucent
-	Mesh=LodMesh'XTreadVeh.ShraliProjSpirHead'
+	Mesh=LodMesh'ShraliProjSpirHead'
 	DrawScale=1.500000
 	ScaleGlow=1.600000
 	bUnlit=True

@@ -50,6 +50,6 @@ defaultproperties
 	RemoteRole=ROLE_None
 	DrawType=DT_Mesh
 	Texture=Texture'XWheelVeh.Skins.DarkMetalShine'
-	Mesh=LodMesh'XWheelVeh.JSDXIceWheelSup'
+	Mesh=LodMesh'JSDXIceWheelSup'
 	bMeshEnviroMap=True
 }

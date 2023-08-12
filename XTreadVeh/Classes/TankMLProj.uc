@@ -125,12 +125,12 @@ defaultproperties
 	Damage=1500.000000
 	MomentumTransfer=100000
 	MyDamageType="MegaBurned"
-	ExplosionDecal=Class'XTreadVeh.TankMLMark'
+	ExplosionDecal=Class'TankMLMark'
 	RemoteRole=ROLE_SimulatedProxy
 	AmbientSound=Sound'XTreadVeh.TankMLLoop.TankMLProjAmb'
 	Style=STY_Translucent
 	Texture=Texture'XVehicles.Misc.TransInvis'
-	Mesh=LodMesh'XTreadVeh.TankMLProj'
+	Mesh=LodMesh'TankMLProj'
 	DrawScale=0.750000
 	ScaleGlow=1.500000
 	bUnlit=True

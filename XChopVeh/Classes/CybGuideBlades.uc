@@ -14,7 +14,7 @@ defaultproperties
 	bTrailerSameRotation=True
 	Physics=PHYS_Trailer
 	AnimSequence="Still"
-	Mesh=LodMesh'XChopVeh.CybHeliGuideBlades'
+	Mesh=LodMesh'CybHeliGuideBlades'
 	DrawScale=8.000000
 	PrePivot=(X=0.000000,Y=0.000000,Z=-30.000000)
 }

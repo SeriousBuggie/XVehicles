@@ -27,7 +27,7 @@ defaultproperties
 	LifeSpan=0.500000
 	DrawType=DT_Mesh
 	Style=STY_Translucent
-	Mesh=LodMesh'XTreadVeh.ShraliFastShock'
+	Mesh=LodMesh'ShraliFastShock'
 	DrawScale=8.600000
 	ScaleGlow=1.800000
 	bUnlit=True

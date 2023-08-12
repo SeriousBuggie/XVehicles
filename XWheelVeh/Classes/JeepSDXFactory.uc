@@ -5,8 +5,8 @@ class JeepSDXFactory expands VehicleFactory;
 
 defaultproperties
 {
-	VehicleClass=Class'XWheelVeh.JeepSDX'
-	Mesh=LodMesh'XWheelVeh.JeepSDX'
+	VehicleClass=Class'JeepSDX'
+	Mesh=LodMesh'JeepSDX'
 	CollisionRadius=80.000000
 	CollisionHeight=60.000000
 }

@@ -59,11 +59,11 @@ defaultproperties
 	Damage=750.000000
 	MomentumTransfer=50000
 	MyDamageType="KrahtEnergy"
-	ExplosionDecal=Class'XTreadVeh.KrahtBlastMark'
+	ExplosionDecal=Class'KrahtBlastMark'
 	RemoteRole=ROLE_SimulatedProxy
 	AmbientSound=Sound'XTreadVeh.Kraht.KrahtProjAmb'
 	Style=STY_Translucent
-	Mesh=LodMesh'XTreadVeh.KrahtProj'
+	Mesh=LodMesh'KrahtProj'
 	DrawScale=6.500000
 	ScaleGlow=1.750000
 	bUnlit=True

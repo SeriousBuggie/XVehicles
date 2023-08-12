@@ -5,8 +5,8 @@ class KrahtFactory expands VehicleFactory;
 
 defaultproperties
 {
-	VehicleClass=Class'XTreadVeh.Kraht'
-	Mesh=LodMesh'XTreadVeh.Kraht'
+	VehicleClass=Class'Kraht'
+	Mesh=LodMesh'Kraht'
 	CollisionRadius=115.000000
 	CollisionHeight=60.000000
 }

@@ -116,7 +116,7 @@ defaultproperties
 	BulletHitSounds(3)=Sound'XChopVeh.Hit.CybWreckMetalHit'
 	BulletHitSounds(4)=Sound'XChopVeh.Damage.CybSndArmorDmg1'
 	BulletHitSounds(5)=Sound'XChopVeh.Damage.CybSndArmorDmg2'
-	DriverWeapon=(WeaponClass=Class'XChopVeh.CybBlades',WeaponOffset=(X=0.000000))
+	DriverWeapon=(WeaponClass=Class'CybBlades',WeaponOffset=(X=0.000000))
 	VehicleKeyInfoStr="Cybot Helico keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to strafe|%Jump%, %Duck% to move up/down|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%ThrowWeapon% to exit the vehicle"
 	WDeAccelRate=200.000000
 	DropFlag=DF_All
@@ -129,7 +129,7 @@ defaultproperties
 	bEnableShield=True
 	ShieldLevel=0.600000
 	AnimSequence="Still"
-	Mesh=LodMesh'XChopVeh.CybHeli'
+	Mesh=LodMesh'CybHeli'
 	DrawScale=8.000000
 	PrePivot=(X=0.000000,Y=0.000000,Z=-26.000000)
 	AmbientGlow=17

@@ -31,7 +31,7 @@ defaultproperties
 	LifeSpan=1.000000
 	DrawType=DT_Mesh
 	Style=STY_Translucent
-	Mesh=LodMesh'XJumpPad.JPadEmitGrid'
+	Mesh=LodMesh'JPadEmitGrid'
 	ScaleGlow=1.750000
 	bUnlit=True
 }

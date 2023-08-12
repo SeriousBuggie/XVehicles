@@ -90,7 +90,7 @@ defaultproperties
 	LifeSpan=0.350000
 	DrawType=DT_Mesh
 	Style=STY_Translucent
-	Mesh=LodMesh'XTreadVeh.SpiralBeam'
+	Mesh=LodMesh'SpiralBeam'
 	ScaleGlow=1.800000
 	bUnlit=True
 	LightType=LT_Steady

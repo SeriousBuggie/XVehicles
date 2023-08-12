@@ -63,7 +63,7 @@ defaultproperties
 	DrawType=DT_Mesh
 	Style=STY_Translucent
 	Texture=Texture'XVehicles.Misc.TransInvis'
-	Mesh=LodMesh'XTreadVeh.TankMLMuzzFX'
+	Mesh=LodMesh'TankMLMuzzFX'
 	DrawScale=1.500000
 	ScaleGlow=1.500000
 	bUnlit=True

@@ -5,10 +5,10 @@ class MinigunTurretFactory expands VehicleFactory;
 
 defaultproperties
 {
-	VehicleClass=Class'XStatVeh.MinigunTurret'
+	VehicleClass=Class'MinigunTurret'
 	AnimSequence="UnTransform"
 	Texture=Texture'XStatVeh.Skins.CybotMetal'
-	Mesh=LodMesh'XStatVeh.CybSentinelGun'
+	Mesh=LodMesh'CybSentinelGun'
 	DrawScale=5.000000
 	PrePivot=(X=0.000000,Y=0.000000,Z=3.000000)
 	AmbientGlow=17

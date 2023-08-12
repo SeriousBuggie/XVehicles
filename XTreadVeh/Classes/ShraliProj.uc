@@ -121,7 +121,7 @@ defaultproperties
 	Damage=3800.000000
 	MomentumTransfer=300000
 	MyDamageType="NaliEnergy"
-	ExplosionDecal=Class'XTreadVeh.ShraliProjDecal'
+	ExplosionDecal=Class'ShraliProjDecal'
 	bNetTemporary=False
 	RemoteRole=ROLE_SimulatedProxy
 	AmbientSound=Sound'XTreadVeh.Shrali.ShraliProjLoop'

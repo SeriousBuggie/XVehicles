@@ -391,7 +391,7 @@ defaultproperties
 	PickupSound=Sound'XWeaponLocker.WeaponLocker.WeaponLocker'
 	bNoDelete=True
 	RemoteRole=ROLE_DumbProxy
-	Mesh=Mesh'XWeaponLocker.WeaponLocker'
+	Mesh=Mesh'WeaponLocker'
 	AmbientGlow=127
 	bNoSmooth=False
 	bGameRelevant=True

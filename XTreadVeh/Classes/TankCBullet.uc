@@ -82,10 +82,10 @@ defaultproperties
 	Damage=300.000000
 	MomentumTransfer=100000
 	MyDamageType="TankBlast"
-	ExplosionDecal=Class'XTreadVeh.TankCBlastMark'
+	ExplosionDecal=Class'TankCBlastMark'
 	RemoteRole=ROLE_SimulatedProxy
 	AmbientSound=Sound'XTreadVeh.TankGKOne.TCBulletFly'
-	Mesh=LodMesh'XTreadVeh.TankCBullet'
+	Mesh=LodMesh'TankCBullet'
 	DrawScale=0.500000
 	SoundRadius=80
 	SoundVolume=60

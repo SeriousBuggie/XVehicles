@@ -20,6 +20,6 @@ defaultproperties
 {
 	FinalDrawScale=0.750000
 	InitSpeedMult=1.300000
-	Mesh=LodMesh'xZones.BalWaterSplash01'
+	Mesh=LodMesh'BalWaterSplash01'
 	DrawScale=0.155000
 }

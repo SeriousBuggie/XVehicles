@@ -88,7 +88,7 @@ defaultproperties
 	StartSound=Sound'XHoverVeh.Manta.HoverBikeStart01'
 	EndSound=Sound'XHoverVeh.Manta.HoverBikeStop01'
 	EngineSound=Sound'XHoverVeh.Manta.HoverBikeEng02'
-	DriverWeapon=(WeaponClass=Class'XHoverVeh.MantaGun',WeaponOffset=(X=0.000000))
+	DriverWeapon=(WeaponClass=Class'MantaGun',WeaponOffset=(X=0.000000))
 	WDeAccelRate=1500.000000
 	HeadLights(0)=(VLightOffset=(X=85.000000,Y=11.000000,Z=-2.000000),VLightTex=Texture'XHoverVeh.pics.FlashFlare1',VLightScale=0.500000)
 	HeadLights(1)=(VLightOffset=(X=85.000000,Y=-11.000000,Z=-2.000000),VLightTex=Texture'XHoverVeh.pics.FlashFlare1',VLightScale=0.500000)
@@ -104,7 +104,7 @@ defaultproperties
 	ShieldLevel=0.650000
 	LODBias=1.000000
 	Texture=Texture'XHoverVeh.pics.fan1'
-	Mesh=Mesh'XHoverVeh.Manta'
+	Mesh=Mesh'Manta'
 	MultiSkins(1)=Texture'XHoverVeh.pics.fan1'
 	MultiSkins(2)=Texture'XHoverVeh.pics.fan1'
 	SoundRadius=255

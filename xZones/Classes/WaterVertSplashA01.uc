@@ -20,6 +20,6 @@ defaultproperties
 {
 	FinalDrawScale=0.500000
 	InitSpdMult=0.875000
-	Mesh=LodMesh'xZones.WaterVertSplashA01'
+	Mesh=LodMesh'WaterVertSplashA01'
 	DrawScale=0.125000
 }

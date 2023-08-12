@@ -19,5 +19,5 @@ class ShraliIonGun expands xTreadVehAttach;
 
 defaultproperties
 {
-	Mesh=LodMesh'XTreadVeh.ShraliIonGun'
+	Mesh=LodMesh'ShraliIonGun'
 }

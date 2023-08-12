@@ -18,7 +18,7 @@ defaultproperties
 	LifeSpan=0.300000
 	DrawType=DT_Mesh
 	Style=STY_Translucent
-	Mesh=LodMesh'XTreadVeh.EnLnPartRedA'
+	Mesh=LodMesh'EnLnPartRedA'
 	DrawScale=2.000000
 	bUnlit=True
 	MultiSkins(1)=Texture'XTreadVeh.Effects.RedIonEnFX'

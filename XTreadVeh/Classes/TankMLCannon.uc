@@ -20,5 +20,5 @@ class TankMLCannon expands xTreadVehAttach;
 
 defaultproperties
 {
-	Mesh=LodMesh'XTreadVeh.TankMLCannon'
+	Mesh=LodMesh'TankMLCannon'
 }

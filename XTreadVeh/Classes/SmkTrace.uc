@@ -75,7 +75,7 @@ defaultproperties
 	DrawType=DT_Mesh
 	Style=STY_Translucent
 	Texture=Texture'USmoke.SmkA01'
-	Mesh=LodMesh'XTreadVeh.SmkTrace'
+	Mesh=LodMesh'SmkTrace'
 	DrawScale=0.440000
 	bUnlit=True
 	bParticles=True

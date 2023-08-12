@@ -47,7 +47,7 @@ defaultproperties
 	LifeSpan=0.125000
 	DrawType=DT_Mesh
 	Style=STY_Translucent
-	Mesh=LodMesh'XTreadVeh.EnLinesLineRed'
+	Mesh=LodMesh'EnLinesLineRed'
 	ScaleGlow=2.500000
 	bUnlit=True
 	bRandomFrame=True

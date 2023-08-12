@@ -19,5 +19,5 @@ class KrahtCannon expands xTreadVehAttach;
 
 defaultproperties
 {
-	Mesh=LodMesh'XTreadVeh.KrahtCannon'
+	Mesh=LodMesh'KrahtCannon'
 }

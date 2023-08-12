@@ -92,7 +92,7 @@ defaultproperties
 	DrawType=DT_Mesh
 	Style=STY_Masked
 	Texture=Texture'XTreadVeh.Effects.DustPart01'
-	Mesh=LodMesh'XTreadVeh.DustParticles'
+	Mesh=LodMesh'DustParticles'
 	bParticles=True
 	bRandomFrame=True
 	MultiSkins(0)=Texture'XTreadVeh.Effects.DustPart01'

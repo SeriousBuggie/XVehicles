@@ -2,9 +2,9 @@ class CybotHelicoFactory expands VehicleFactory;
 
 defaultproperties
 {
-	VehicleClass=Class'XChopVeh.CybotHelico'
+	VehicleClass=Class'CybotHelico'
 	AnimSequence="BothFire"
-	Mesh=LodMesh'XChopVeh.CybHeli'
+	Mesh=LodMesh'CybHeli'
 	DrawScale=8.000000
 	PrePivot=(X=0.000000,Y=0.000000,Z=-26.000000)
 	MultiSkins(1)=Texture'XVehicles.Skins.CybotSk'

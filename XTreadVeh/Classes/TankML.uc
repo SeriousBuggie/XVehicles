@@ -159,8 +159,8 @@ defaultproperties
 	TreadPan(13)=Texture'XTreadVeh.TreadsC.CTread14'
 	TreadPan(14)=Texture'XTreadVeh.TreadsC.CTread15'
 	TreadPan(15)=Texture'XTreadVeh.TreadsC.CTread16'
-	Treads(0)=(MovPerTreadCycle=19.375000,TreadMesh=LodMesh'XTreadVeh.TankTreadBMir',TreadSkinN=1,TreadOffset=(X=-5.000000,Y=-94.500000,Z=-36.000000),bHaveAnimTWheels=True,WheelFramesN=17,WheelAnimSet="WheelsMove",WheelSize=20.625000,TrackWidth=52.000000,TrackFrontOffset=(X=128.000000),TrackBackOffset=(X=-128.000000))
-	Treads(1)=(MovPerTreadCycle=19.375000,TreadMesh=LodMesh'XTreadVeh.TankTreadB',TreadSkinN=1,TreadOffset=(X=-5.000000,Y=94.500000,Z=-36.000000),bHaveAnimTWheels=True,WheelFramesN=17,WheelAnimSet="WheelsMove",WheelSize=20.625000,TrackWidth=52.000000,TrackFrontOffset=(X=128.000000),TrackBackOffset=(X=-128.000000))
+	Treads(0)=(MovPerTreadCycle=19.375000,TreadMesh=LodMesh'TankTreadBMir',TreadSkinN=1,TreadOffset=(X=-5.000000,Y=-94.500000,Z=-36.000000),bHaveAnimTWheels=True,WheelFramesN=17,WheelAnimSet="WheelsMove",WheelSize=20.625000,TrackWidth=52.000000,TrackFrontOffset=(X=128.000000),TrackBackOffset=(X=-128.000000))
+	Treads(1)=(MovPerTreadCycle=19.375000,TreadMesh=LodMesh'TankTreadB',TreadSkinN=1,TreadOffset=(X=-5.000000,Y=94.500000,Z=-36.000000),bHaveAnimTWheels=True,WheelFramesN=17,WheelAnimSet="WheelsMove",WheelSize=20.625000,TrackWidth=52.000000,TrackFrontOffset=(X=128.000000),TrackBackOffset=(X=-128.000000))
 	bEngDynSndPitch=True
 	MinEngPitch=32
 	MaxEngPitch=96
@@ -177,7 +177,7 @@ defaultproperties
 	EndSound=Sound'XTreadVeh.TankML.TankMLEnd'
 	EngineSound=Sound'XTreadVeh.TankML.TankMLEng'
 	bDriverWOffset=True
-	DriverWeapon=(WeaponClass=Class'XTreadVeh.TankMLTurret',WeaponOffset=(X=-68.000000,Z=43.000000))
+	DriverWeapon=(WeaponClass=Class'TankMLTurret',WeaponOffset=(X=-68.000000,Z=43.000000))
 	VehicleKeyInfoStr="Tank ML-102 keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to turn|%Fire% to fire, %AltFire% to alt fire|%PrevWeapon%, %NextWeapon%, %SwitchToBestWeapon% to change camera|%ThrowWeapon% to exit the vehicle"
 	bSlopedPhys=True
 	FrontWide=(X=111.250000,Y=90.000000,Z=-5.000000)
@@ -199,7 +199,7 @@ defaultproperties
 	WreckPartColRadius=128.000000
 	bEnableShield=True
 	ShieldLevel=0.800000
-	Mesh=LodMesh'XTreadVeh.TankML'
+	Mesh=LodMesh'TankML'
 	SoundRadius=70
 	SoundVolume=100
 	CollisionRadius=125.000000

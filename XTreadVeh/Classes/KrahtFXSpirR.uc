@@ -59,7 +59,7 @@ defaultproperties
 	LifeSpan=0.750000
 	DrawType=DT_Mesh
 	Style=STY_Translucent
-	Mesh=LodMesh'XTreadVeh.KrahtFXSpirR'
+	Mesh=LodMesh'KrahtFXSpirR'
 	DrawScale=0.450000
 	ScaleGlow=1.500000
 	bUnlit=True

@@ -106,7 +106,7 @@ defaultproperties
 	DrawType=DT_Mesh
 	Style=STY_Masked
 	Texture=Texture'XTreadVeh.Effects.BigRock01'
-	Mesh=LodMesh'XTreadVeh.BigStonesPart'
+	Mesh=LodMesh'BigStonesPart'
 	DrawScale=1.065000
 	ScaleGlow=0.825000
 	bParticles=True

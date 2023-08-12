@@ -30,7 +30,7 @@ defaultproperties
 	DrawType=DT_Mesh
 	Style=STY_Translucent
 	Texture=Texture'USmoke.SmkB01'
-	Mesh=LodMesh'XTreadVeh.SmkRing'
+	Mesh=LodMesh'SmkRing'
 	DrawScale=8.000000
 	ScaleGlow=2.000000
 	bParticles=True

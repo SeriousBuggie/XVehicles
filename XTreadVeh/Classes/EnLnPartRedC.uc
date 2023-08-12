@@ -40,7 +40,7 @@ defaultproperties
 	FXSpeed=50.000000
 	ProgressiveFXSpeed=25.000000
 	bExtInitialized=True
-	Mesh=LodMesh'XTreadVeh.EnLnPartRedC'
+	Mesh=LodMesh'EnLnPartRedC'
 	DrawScale=2.500000
 	ScaleGlow=1.400000
 }
