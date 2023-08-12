@@ -128,6 +128,9 @@ var() bool bAutoSize;
 
 var vector Velocity;
 
+var AmbushPoint AmbushSpot;
+var bool AmbushSpot_Taken;
+
 // ---------------- swJumpPad source --------------------------------
 
 enum EAngleMode
@@ -466,9 +469,11 @@ simulated function vector CalcVelocity( Actor Other )
     // AI hints
     if( B != None )
     {
+    	PreserveAmbushSpot(B);
         B.bJumpOffPawn = true;
         B.SetFall();
         B.DesiredRotation = rotator(targetrange);
+        RestoreAmbushSpot(B);
     }        
     
     return vel;
@@ -674,6 +679,22 @@ event int SpecialCost(Pawn Seeker)
 	return ExtraCost;
 }
 
+// EndState Roaming clear it, so we preserve it, for avoid pick another one
+function PreserveAmbushSpot(Bot Bot) {
+	if (Bot.IsInState('Roaming') && Bot.AmbushSpot != None) {
+		AmbushSpot = Bot.AmbushSpot;
+		AmbushSpot_Taken = AmbushSpot.taken;
+	} else
+		AmbushSpot = None;
+}
+
+function RestoreAmbushSpot(Bot Bot) {
+	if (AmbushSpot != None) {
+		Bot.AmbushSpot = AmbushSpot;
+		AmbushSpot.taken = AmbushSpot_Taken;
+	}
+}
+
 defaultproperties
 {
 	ParticlesColor=PCLR_Yellow
@@ -696,7 +717,7 @@ defaultproperties
 	bHidden=False
 	bDirectional=False
 	DrawType=DT_Mesh
-	Mesh=LodMesh'XJumpPad.XJumpPad'
+	Mesh=LodMesh'XJumpPad'
 	CollisionRadius=48.000000
 	CollisionHeight=8.000000
 }
