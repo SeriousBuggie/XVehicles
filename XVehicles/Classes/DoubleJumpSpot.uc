@@ -5,6 +5,12 @@ class DoubleJumpSpot expands Teleporter;
 
 var int Allowed;
 
+function PreBeginPlay()
+{
+	default.Allowed = 0;
+	Super.PreBeginPlay();
+}
+
 event int SpecialCost(Pawn Seeker)
 {
 	if (Url == "")
