@@ -17,6 +17,8 @@ var int BotsCount;
 
 var int Tmr;
 
+var DefensePointCache DPC;
+
 event PreBeginPlay()
 {
 	local Actor A;
@@ -81,12 +83,16 @@ event PreBeginPlay()
 		
 	if (Spawn(class'BotSpawnNotify', self) != None)
 		SetTimer(0.1, true);
+		
+	DPC = Spawn(class'DefensePointCache');
 }
 
 function AddBot(Bot Bot) {
 	local int i;
 	if (Bot == None)
 		return;
+	if (DPC.Count > 0)
+		Bot.Spawn(class'PLITracker', Bot).DPC = DPC;
 	for (i = 0; i < ArrayCount(Bots); i++)
 		if (Bots[i] == None || Bots[i].bDeleteMe) {
 			Bots[i] = Bot;
