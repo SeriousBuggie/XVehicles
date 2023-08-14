@@ -5,6 +5,9 @@ class DoubleJumpSpot expands Teleporter;
 
 var int Allowed;
 
+var AmbushPoint AmbushSpot;
+var bool AmbushSpot_Taken;
+
 function PreBeginPlay()
 {
 	default.Allowed = 0;
@@ -160,6 +163,7 @@ simulated function PostTouch( Actor Other )
 		(i < ArrayCount(B.RouteCache) - 1 && B.RouteCache[i + 1] == self))
 		return;
 		
+	PreserveAmbushSpot(B);
 	B.bJumpOffPawn = true;
 	B.SetFall();
 	B.SetPhysics(PHYS_Falling);
@@ -189,6 +193,7 @@ simulated function PostTouch( Actor Other )
 		B.bFire = 0;
 		B.bAltFire = 0;
 	}
+	RestoreAmbushSpot(B);
 }
 
 function Actor SpecialHandling(Pawn Other)
@@ -208,6 +213,22 @@ function Actor SpecialHandling(Pawn Other)
 			}
 		}
 	return self;
+}
+
+// EndState Roaming clear it, so we preserve it, for avoid pick another one
+function PreserveAmbushSpot(Bot Bot) {
+	if (Bot.IsInState('Roaming') && Bot.AmbushSpot != None) {
+		AmbushSpot = Bot.AmbushSpot;
+		AmbushSpot_Taken = AmbushSpot.taken;
+	} else
+		AmbushSpot = None;
+}
+
+function RestoreAmbushSpot(Bot Bot) {
+	if (AmbushSpot != None) {
+		Bot.AmbushSpot = AmbushSpot;
+		AmbushSpot.taken = AmbushSpot_Taken;
+	}
 }
 
 defaultproperties
