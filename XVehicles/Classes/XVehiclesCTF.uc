@@ -139,18 +139,22 @@ static function FixBot(Bot Bot, optional int Tmr) {
 			Best = class'WeaponAttachment'.static.AttackVehicle(None, Bot, 3000);
 			if (Best != None)
 				class'WeaponAttachment'.static.RangedAttack(Bot, Best, 1.0);
+			return;
 		}
-		return;
+		if (Bot.Enemy != None)
+			return;
 	}
-	if (Bot.PlayerReplicationInfo.Team >= ArrayCount(CTFReplicationInfo(Bot.Level.Game.GameReplicationInfo).FlagList))
-		return;
-	FriendlyFlag = CTFReplicationInfo(Bot.Level.Game.GameReplicationInfo).FlagList[Bot.PlayerReplicationInfo.Team];
-	if (FriendlyFlag == None || VSize(FriendlyFlag.HomeBase.Location - Bot.Location) < 800)
-		return;
-	
+	else
+	{
+		if (Bot.PlayerReplicationInfo.Team >= ArrayCount(CTFReplicationInfo(Bot.Level.Game.GameReplicationInfo).FlagList))
+			return;
+		FriendlyFlag = CTFReplicationInfo(Bot.Level.Game.GameReplicationInfo).FlagList[Bot.PlayerReplicationInfo.Team];
+		if (FriendlyFlag == None || VSize(FriendlyFlag.HomeBase.Location - Bot.Location) < 800)
+			return;
+	}
 	foreach Bot.RadiusActors(class'Vehicle', Veh, 700)
 	{
-		if (Tmr == -1 && Veh.LastDriver == Bot)
+		if (MyFlag != None && Tmr == -1 && Veh.LastDriver == Bot)
 			Veh.LastDriver = None;
 		Dist = Veh.BotDesireability2(Bot);
 		if (Dist > 0)
