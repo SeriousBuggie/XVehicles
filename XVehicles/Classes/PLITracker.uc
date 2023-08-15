@@ -29,8 +29,14 @@ Begin:
 
 event float BotDesireability(pawn Bot)
 {
-	if (Bot(Bot) != None && Bot(Bot).AmbushSpot == None)
-		DPC.Update(Bot(Bot));
+	local XVehiclesCTF XCTF;
+	if (Bot == Owner && Bot(Bot) != None) {
+		if (Bot(Bot).AmbushSpot == None)
+			DPC.Update(Bot(Bot));
+		XCTF = XVehiclesCTF(DPC.Owner);
+		if (XCTF != None)
+			XCTF.FixBot(Bot(Bot), XCTF.Tmr);
+	}
 
 	return -MaxDesireability;
 }

@@ -84,15 +84,14 @@ event PreBeginPlay()
 	if (Spawn(class'BotSpawnNotify', self) != None)
 		SetTimer(0.1, true);
 		
-	DPC = Spawn(class'DefensePointCache');
+	DPC = Spawn(class'DefensePointCache', self);
 }
 
 function AddBot(Bot Bot) {
 	local int i;
 	if (Bot == None)
 		return;
-	if (DPC.Count > 0)
-		Bot.Spawn(class'PLITracker', Bot).DPC = DPC;
+	Bot.Spawn(class'PLITracker', Bot).DPC = DPC;
 	for (i = 0; i < ArrayCount(Bots); i++)
 		if (Bots[i] == None || Bots[i].bDeleteMe) {
 			Bots[i] = Bot;
