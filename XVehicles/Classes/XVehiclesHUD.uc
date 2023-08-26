@@ -321,7 +321,7 @@ simulated function DrawFixProgress(Canvas Canvas, Vehicle Vehicle)
 	PlayerOwner = MyHUD.PlayerOwner;
 	if (Spectator(PlayerOwner) != None)
 		PlayerOwner = Pawn(Spectator(PlayerOwner).ViewTarget);
-	
+
 	if (PlayerOwner != None && (FixGun(PlayerOwner.Weapon) != None ||
 		(class'VehiclesConfig'.default.bPulseAltHeal && PulseGun(PlayerOwner.Weapon) != None)) &&
 		//PlayerOwner.bAltFire != 0 // not work in demoplay

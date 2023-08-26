@@ -3,7 +3,7 @@
 //=============================================================================
 class PLITracker expands Inventory;
 
-var DefensePointCache DPC;
+var AlternatePath LastAlternatePath;
 
 function BecomePickup();
 function BecomeItem();
@@ -27,15 +27,18 @@ Begin:
 	goto 'Begin';
 }
 
-event float BotDesireability(pawn Bot)
+event float BotDesireability(pawn InPawn)
 {
-	local XVehiclesCTF XCTF;
-	if (Bot == Owner && Bot(Bot) != None) {
-		if (Bot(Bot).AmbushSpot == None)
-			DPC.Update(Bot(Bot));
-		XCTF = XVehiclesCTF(DPC.Owner);
+	local Mutator XCTF;
+	local Bot Bot;
+	Bot = Bot(InPawn);
+	if (Bot == Owner && Bot != None) {
+		if (AlternatePathNode(Bot.MoveTarget) != None && Bot.MoveTarget == LastAlternatePath)
+			AlternatePathNode(Bot.MoveTarget).CheckNext(Bot);
+		XCTF = class'BotSpawnNotify'.default.XVehiclesCTF;
 		if (XCTF != None)
-			XCTF.FixBot(Bot(Bot), XCTF.Tmr);
+			XCTF.KillCredit(self);
+		LastAlternatePath = Bot.AlternatePath;
 	}
 
 	return -MaxDesireability;

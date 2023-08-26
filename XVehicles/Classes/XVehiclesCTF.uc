@@ -28,6 +28,7 @@ event PreBeginPlay()
 	local FlagBase FB;
 	Local XFlagBase xFB;
 	Local vector HL, HN, dir;
+	local BotSpawnNotify BSN;
 	
 	Super.PreBeginPlay();
 	
@@ -81,17 +82,34 @@ event PreBeginPlay()
 			}
 		}
 		
-	if (Spawn(class'BotSpawnNotify', self) != None)
+	foreach AllActors(class'BotSpawnNotify', BSN)
+		break;
+	if (BSN == None)
+		BSN = Spawn(class'BotSpawnNotify');
+	if (BSN != None)
 		SetTimer(0.1, true);
+	class'BotSpawnNotify'.default.XVehiclesCTF = self;
 		
 	DPC = Spawn(class'DefensePointCache', self);
+}
+
+event KillCredit(Actor Other) {
+	local Bot Bot;
+	Bot = Bot(Other);
+	if (Bot != None)
+		AddBot(Bot);
+	else if (PLITracker(Other) != None) {
+		Bot = Bot(Other.Owner);
+		if (Bot.AmbushSpot == None)
+			DPC.Update(Bot);
+		FixBot(Bot, Tmr);
+	}
 }
 
 function AddBot(Bot Bot) {
 	local int i;
 	if (Bot == None)
 		return;
-	Bot.Spawn(class'PLITracker', Bot).DPC = DPC;
 	for (i = 0; i < ArrayCount(Bots); i++)
 		if (Bots[i] == None || Bots[i].bDeleteMe) {
 			Bots[i] = Bot;
