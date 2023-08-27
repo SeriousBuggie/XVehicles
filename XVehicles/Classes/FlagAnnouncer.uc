@@ -17,6 +17,7 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch,
 	local Pawn P;
 	local bool bExcludeTournamentPlayers, bPlaySound;
 	local FlagAnnouncerSound SoundActor;
+	local Vehicle Veh;
 	
 	bPlaySound = !class'VehiclesConfig'.default.bDisableFlagAnnouncer && CTFGame(Level.Game).MaxTeams == 2;
 	
@@ -38,6 +39,10 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch,
 	
 	if (Message == class'CTFMessage')
 	{
+		if (RelatedPRI_1 != None && Bot(RelatedPRI_1.Owner) != None)
+			foreach RelatedPRI_1.Owner.RadiusActors(class'Vehicle', Veh, 700)
+				if (Veh.LastDriver == RelatedPRI_1.Owner)
+					Veh.LastDriver = None;
 		TeamInfo = TeamInfo(OptionalObject);
 		if (TeamInfo != None)		
 			switch(Switch)
@@ -76,7 +81,7 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch,
 					break;
 			}
 		CTFFlag = CTFFlag(OptionalObject);
-		if (CTFFlag != None)		
+		if (CTFFlag != None)
 			switch(Switch)
 			{
 				case 0:
