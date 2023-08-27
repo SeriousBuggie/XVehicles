@@ -1,14 +1,5 @@
 class JTDXLPlasma expands JSDXLPlasma;
 
-simulated function ProcessTouch (Actor Other, Vector HitLocation)
-{
-	if (Other != Owner && (!Other.IsA('Projectile') || Other.CollisionRadius > 0))
-	{
-		Explode(HitLocation, vect(0,0,1));
-		Other.TakeDamage(Damage, Instigator, HitLocation, Normal(Other.Location - Location)*MomentumTransfer, MyDamageType);
-	}
-}
-
 function BlowUp(vector HitLocation)
 {
     //HurtRadius(Damage, DamageRadius, MyDamageType, MomentumTransfer, HitLocation);

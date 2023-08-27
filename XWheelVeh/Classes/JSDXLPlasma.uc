@@ -6,12 +6,13 @@ simulated function PostBeginPlay()
 	Velocity = Speed * vector(Rotation);
 }
 
-simulated function ProcessTouch (Actor Other, Vector HitLocation)
+simulated function ProcessTouch(Actor Other, Vector HitLocation)
 {
 	if (Other != Owner && (!Other.IsA('Projectile') || Other.CollisionRadius > 0))
 	{
 		Explode(HitLocation, vect(0,0,1));
-		Other.TakeDamage(Damage, Instigator, HitLocation, Normal(Other.Location - Location)*MomentumTransfer, MyDamageType);
+		if (Level.NetMode != NM_Client)
+			Other.TakeDamage(Damage, Instigator, HitLocation, Normal(Other.Location - Location)*MomentumTransfer, MyDamageType);
 	}
 }
 
