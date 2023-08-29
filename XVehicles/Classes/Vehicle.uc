@@ -1041,6 +1041,7 @@ function DriverEnter( Pawn Other, optional int MyPitch, optional int MyYaw )
 	local WeaponAttachment WA;
 	bHadADriver = True;
 	bTeamLocked = False;
+	bHasMoveTarget = False;
 	Driver = Other;
 	//log("DriverEnter" @ Driver);
 	SetOwner(Other);
