@@ -1260,6 +1260,8 @@ local vector ExitVect;
 			}
 			if (Driver != None)
 			{
+				if (Bot(Driver) != None)
+					Bot(Driver).EnemyDropped = None; // Prevent dumb moves
 				Driver.MoveTimer = -1; // time to refresh paths
 				Driver.Velocity += Velocity; // inertial exit
 				Driver.Weapon = Driver.PendingWeapon;
@@ -2457,11 +2459,11 @@ function ReadBotInput( float Delta )
 			DriverLeft(False, "NeedStop stuck");
 		if (Driver == None && Bot != None)
 		{
-//			Bot.EnemyDropped = DWeapon; // bot must want return back, after take flag
+			Bot.EnemyDropped = None; // prevent dumb moves
 			if (!HasPassengers())
 				foreach RadiusActors(class'Bot', Bot, 800)
 					if (Bot.PlayerReplicationInfo.Team != CurrentTeam)
-						Bot.EnemyDropped = DWeapon; // enemy bots wanna steal vehicle too
+						Bot.EnemyDropped = DWeapon; // enemy bots wanna steal vehicle
 		}
 	}
 	if (Driver == None)
