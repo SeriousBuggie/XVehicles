@@ -135,6 +135,9 @@ simulated function UpdateDriverInput( float Delta )
 	local byte i;
 	local rotator OldWheeledRot;
 	local bool bDirectVis;
+	
+	if (Driver == None)
+		bWasStuckOnW = false;
 
 	if (Region.Zone.ZoneGroundFriction + WheelsTraction > 14.0)	//Traction on but outside ice/snow areas
 	{
