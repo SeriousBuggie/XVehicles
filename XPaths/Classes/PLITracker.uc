@@ -36,7 +36,7 @@ event float BotDesireability(pawn InPawn)
 		if (AlternatePathNode(Bot.MoveTarget) != None && Bot.MoveTarget == LastAlternatePath)
 			AlternatePathNode(Bot.MoveTarget).CheckNext(Bot);
 		XCTF = class'BotSpawnNotify'.default.XVehiclesCTF;
-		if (XCTF != None && !Bot.IsInState('TacticalMove'))
+		if (XCTF != None && !Bot.IsInState('TacticalMove') && !Bot.IsInState('Hunting'))
 			XCTF.KillCredit(self);
 		LastAlternatePath = Bot.AlternatePath;
 	}
