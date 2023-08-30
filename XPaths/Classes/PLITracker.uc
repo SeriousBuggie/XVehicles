@@ -32,11 +32,11 @@ event float BotDesireability(pawn InPawn)
 	local Mutator XCTF;
 	local Bot Bot;
 	Bot = Bot(InPawn);
-	if (Bot == Owner && Bot != None && !Bot.IsInState('TacticalMove')) {
+	if (Bot == Owner && Bot != None) {
 		if (AlternatePathNode(Bot.MoveTarget) != None && Bot.MoveTarget == LastAlternatePath)
 			AlternatePathNode(Bot.MoveTarget).CheckNext(Bot);
 		XCTF = class'BotSpawnNotify'.default.XVehiclesCTF;
-		if (XCTF != None)
+		if (XCTF != None && !Bot.IsInState('TacticalMove'))
 			XCTF.KillCredit(self);
 		LastAlternatePath = Bot.AlternatePath;
 	}
