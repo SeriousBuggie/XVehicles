@@ -148,7 +148,7 @@ simulated function PostTouch( Actor Other )
 	if (B == None || B.MoveTarget != self || URL == "")
 		return;
 		
-	foreach AllActors(class'DoubleJumpSpot', Dest)
+	foreach AllActors(class'XPaths.DoubleJumpSpot', Dest)
 		if (string(Dest.tag) ~= URL && Dest != Self)
 			break;
 		
@@ -200,7 +200,7 @@ function Actor SpecialHandling(Pawn Other)
 {
 	local DoubleJumpSpot DJS;
 	local vector Dist2D;
-	foreach Other.RadiusActors(class'DoubleJumpSpot', DJS, 0)
+	foreach Other.RadiusActors(class'XPaths.DoubleJumpSpot', DJS, Other.CollisionRadius)
 		if (DJS != self && DJS.URL != "" && string(Tag) ~= DJS.URL && 
 			Abs(DJS.Location.Z - Other.Location.Z) < DJS.CollisionHeight + Other.CollisionHeight)
 		{
