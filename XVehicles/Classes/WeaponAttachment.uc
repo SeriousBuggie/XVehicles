@@ -1056,6 +1056,8 @@ function rotator GetBotInput( float Delta )
 		if ((WeaponController.bFire > 0 || WeaponController.bAltFire > 0) &&
 			!WeaponController.IsInState('RangedAttack'))
 			WeaponController.StopFiring();
+		if (VSize(Location - RepAimPos) < 2000)
+			RepAimPos = GetLastVisiblePathPoint();
 		if (OwnerVehicle.bCanFly)
 		{
 			S = RepAimPos;
@@ -1068,6 +1070,15 @@ function rotator GetBotInput( float Delta )
 		}
 	}
 	Return GetAimForPos(RepAimPos);
+}
+function vector GetLastVisiblePathPoint()
+{
+	local int i;
+	for (i = ArrayCount(WeaponController.RouteCache) - 1; i >= 0; i--)
+		if (WeaponController.RouteCache[i] != None && 
+			FastTrace(WeaponController.RouteCache[i].Location))
+			return WeaponController.RouteCache[i].Location;
+	return RepAimPos;
 }
 function Actor TraceHit(Bot Bot, Actor A, out vector HL, out vector HN)
 {
