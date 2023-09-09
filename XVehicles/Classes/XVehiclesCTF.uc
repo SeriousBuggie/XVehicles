@@ -178,7 +178,7 @@ static function FixBot(Bot Bot, optional int Tmr) {
 		if (Dist > 0)
 		{
 			Dist *= VSize(Veh.Location - Bot.Location);
-			if ((Best == None || BestDist > Dist) && Bot.pointReachable(Veh.Location))
+			if ((Best == None || BestDist > Dist) && Bot.actorReachable(Veh))
 			{
 				Best = Veh;
 				BestDist = Dist;
