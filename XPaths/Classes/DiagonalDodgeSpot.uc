@@ -123,4 +123,5 @@ function RestoreAmbushSpot(Bot Bot) {
 
 defaultproperties
 {
+	bAlwaysAccel=True
 }
