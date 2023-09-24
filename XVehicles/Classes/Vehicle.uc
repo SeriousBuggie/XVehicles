@@ -715,6 +715,9 @@ simulated function PostBeginPlay()
 	SetPropertyText("ClassPureHitSound", "Class'PureHitSound'");
 	if (ClassPureHitSound == None)
 		SetPropertyText("ClassPureHitSound", "Class'NN_HitSound'");
+		
+	if (Level.NetMode < NM_Client) // NM_StandAlone included for demorec support
+		ServerPackState(0);
 }
 
 function InitInventory(Inventory Inv)
@@ -1550,7 +1553,7 @@ simulated function Tick( float Delta )
 	local bool bSlopedG, bIsNetOwner;
 	local float f;
 	local SavedMoveXV NewMove;
-	
+
 	if (Pawn(Base) != None)
 		SetBase(None);
 	
