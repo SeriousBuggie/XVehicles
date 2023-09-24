@@ -241,14 +241,14 @@ defaultproperties
 	FixSounds(1)=Sound'UnrealShare.Dispersion.number2'
 	FixSounds(2)=Sound'UnrealShare.Dispersion.number3'
 	FixSounds(3)=Sound'UnrealShare.Dispersion.number4'
-	SpriteAnim(0)=FireTexture'UnrealShare.EffectASMD.fireeffectASMD'
-	SpriteAnim(1)=FireTexture'UnrealShare.EffectASMD.fireeffectASMD'
-	SpriteAnim(2)=FireTexture'UnrealShare.EffectASMD.fireeffectASMD'
-	SpriteAnim(3)=FireTexture'UnrealShare.EffectASMD.fireeffectASMD'
-	SpriteAnim(4)=FireTexture'UnrealShare.EffectASMD.fireeffectASMD'
+	SpriteAnim(0)=FireTexture'GreatFire2.cblightn1'
+	SpriteAnim(1)=FireTexture'GreatFire2.cblightn1'
+	SpriteAnim(2)=FireTexture'GreatFire2.cblightn1'
+	SpriteAnim(3)=FireTexture'GreatFire2.cblightn1'
+	SpriteAnim(4)=FireTexture'GreatFire2.cblightn1'
 	BeamSize=80.000000
 	ExplosionDecal=Class'FixScorch'
 	LifeSpan=0.000000
-	Texture=FireTexture'UnrealShare.EffectASMD.fireeffectASMD'
-	Skin=FireTexture'UnrealShare.EffectASMD.fireeffectASMD'
+	Texture=FireTexture'GreatFire2.cblightn1'
+	Skin=FireTexture'GreatFire2.cblightn1'
 }
