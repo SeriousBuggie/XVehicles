@@ -92,7 +92,9 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch,
 							CTFGame(Level.Game).Teams[0] != None &&
 							CTFGame(Level.Game).Teams[1] != None)
 						{
-							if (CTFGame(Level.Game).Teams[1].Score == CTFGame(Level.Game).Teams[0].Score + 1)
+							if (CTFGame(Level.Game).Teams[1].Score == CTFGame(Level.Game).Teams[0].Score)
+								Sound = Sound'Blue_Team_tied_for_the_lead';
+							else if (CTFGame(Level.Game).Teams[1].Score == CTFGame(Level.Game).Teams[0].Score + 1)
 								Sound = Sound'Blue_Team_takes_the_lead';
 							else if (CTFGame(Level.Game).Teams[1].Score > CTFGame(Level.Game).Teams[0].Score)
 								Sound = Sound'Blue_Team_increases_their_lead';
@@ -112,7 +114,9 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch,
 							CTFGame(Level.Game).Teams[0] != None &&
 							CTFGame(Level.Game).Teams[1] != None)
 						{
-							if (CTFGame(Level.Game).Teams[0].Score == CTFGame(Level.Game).Teams[1].Score + 1)
+							if (CTFGame(Level.Game).Teams[0].Score == CTFGame(Level.Game).Teams[1].Score)
+								Sound = Sound'Red_Team_tied_for_the_lead';
+							else if (CTFGame(Level.Game).Teams[0].Score == CTFGame(Level.Game).Teams[1].Score + 1)
 								Sound = Sound'Red_Team_takes_the_lead';
 							else if (CTFGame(Level.Game).Teams[0].Score > CTFGame(Level.Game).Teams[1].Score)
 								Sound = Sound'Red_Team_increases_their_lead';
