@@ -9,12 +9,12 @@ var float AirFlyScale;
 const AimError = 0.001;
 const bDebug = false;
 
-function bool HasFlag(Actor Other)
+static function bool HasFlag(Actor Other)
 {
 	return Pawn(Other) != None && Pawn(Other).PlayerReplicationInfo != None && Pawn(Other).PlayerReplicationInfo.HasFlag != None;
 }
 
-function bool InVehicle(Actor Other)
+static function bool InVehicle(Actor Other)
 {
 	return Pawn(Other) != None && DriverWeapon(Pawn(Other).Weapon) != None;
 }
@@ -47,12 +47,19 @@ function float GetVehAIRating( Pawn Seeker )
 				return -1;
 			if (VehicleOwner.DropFlag == VehicleOwner.EDropFlag.DF_Driver && VehicleOwner.Driver == None)
 				return -1;
-			ret *= 10;
+			ret *= 100;
 		}
-		else if (HasFlag(Seeker.Enemy) || HasFlag(Seeker.FaceTarget) ||
-			InVehicle(Seeker.Enemy) || InVehicle(Seeker.FaceTarget))
-			ret *= 10;
-		ret *= VehicleOwner.GetVehAIRatingScale();
+		else 
+		{
+			// stop use second seat, if this take gun from non-human driver
+			if (VehicleOwner.DriverGun == None &&
+				VehicleOwner.Driver != None && PlayerPawn(VehicleOwner.Driver) == None)
+				return 0.0001;
+			if (HasFlag(Seeker.Enemy) || HasFlag(Seeker.FaceTarget) ||
+				InVehicle(Seeker.Enemy) || InVehicle(Seeker.FaceTarget))
+				ret *= 10;
+		}
+		ret *= VehicleOwner.GetVehAIRatingScale(Seeker);
 	}
 //	log("GetVehAIRating 2" @ ret);
 	return ret;

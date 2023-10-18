@@ -833,12 +833,12 @@ simulated function AttachmentsTick( float Delta )
 	Super.TakeDamage(Damage, instigatedBy, hitlocation, momentum, damageType);
 }*/
 
-function float GetVehAIRatingScale()
+function float GetVehAIRatingScale(Pawn Seeker)
 {
 	// force use second seat more for all tanks
 	if (Driver != None)
 		return 10;
-	return Super.GetVehAIRatingScale();
+	return Super.GetVehAIRatingScale(Seeker);
 }
 
 defaultproperties

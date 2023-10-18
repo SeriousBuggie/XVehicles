@@ -4660,7 +4660,7 @@ simulated function bool PreTeleport( Teleporter InTeleporter )
 	return false; // allow
 }
 
-function float GetVehAIRatingScale()
+function float GetVehAIRatingScale(Pawn Seeker)
 {
 	return 1;
 }
