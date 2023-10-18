@@ -23,6 +23,7 @@ static function bool InVehicle(Actor Other)
 function float GetVehAIRating( Pawn Seeker )
 {
 	local float ret;
+	local bool bLockedAndLoaded;
 //	log(VehicleOwner @ "GetVehAIRating1" @ Seeker);
 	if (VehicleOwner.Driver == None && Level.TimeSeconds - VehicleOwner.LastFix <= 5 && 
 		Seeker.PlayerReplicationInfo != None && Seeker.PlayerReplicationInfo.Team == VehicleOwner.CurrentTeam &&
@@ -57,6 +58,9 @@ function float GetVehAIRating( Pawn Seeker )
 				return 0.0001;
 			if (HasFlag(Seeker.Enemy) || HasFlag(Seeker.FaceTarget) ||
 				InVehicle(Seeker.Enemy) || InVehicle(Seeker.FaceTarget))
+				ret *= 10;
+			bLockedAndLoaded = ((Seeker.Weapon != None) && (Seeker.Weapon.AIRating > 0.4) && (Seeker.Health > 60));
+			if (bLockedAndLoaded)
 				ret *= 10;
 		}
 		ret *= VehicleOwner.GetVehAIRatingScale(Seeker);
