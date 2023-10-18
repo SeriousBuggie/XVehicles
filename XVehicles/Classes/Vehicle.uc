@@ -4660,6 +4660,11 @@ simulated function bool PreTeleport( Teleporter InTeleporter )
 	return false; // allow
 }
 
+function float GetVehAIRatingScale()
+{
+	return 1;
+}
+
 defaultproperties
 {
 	AIRating=1.000000

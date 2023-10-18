@@ -52,6 +52,7 @@ function float GetVehAIRating( Pawn Seeker )
 		else if (HasFlag(Seeker.Enemy) || HasFlag(Seeker.FaceTarget) ||
 			InVehicle(Seeker.Enemy) || InVehicle(Seeker.FaceTarget))
 			ret *= 10;
+		ret *= VehicleOwner.GetVehAIRatingScale();
 	}
 //	log("GetVehAIRating 2" @ ret);
 	return ret;
