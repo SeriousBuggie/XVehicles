@@ -599,10 +599,10 @@ simulated function AttachmentsTick( float Delta )
 				WheelsPitch-=GetIcedMovementDir()*VSize(GetVirtualSpeedOnIce(Delta))*200.f*Delta;
 		}
 
-		While( WheelsPitch>UU_360_DEGREES )
-			WheelsPitch-=UU_360_DEGREES;
-		While( WheelsPitch>UU_360_NEGDEGREES )
-			WheelsPitch-=UU_360_NEGDEGREES;
+		if (WheelsPitch < -65535)
+			WheelsPitch = -((-WheelsPitch) & 65535);
+		else if (WheelsPitch > 65535)
+			WheelsPitch = WheelsPitch & 65535;
 		BaseLoc = Location;
 		if (bSlopedPhys && GVT != None)
 			BaseLoc += GVT.PrePivot;
