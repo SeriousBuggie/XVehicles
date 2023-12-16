@@ -556,7 +556,7 @@ simulated function AttachmentsTick( float Delta )
 {
 	local byte i,bSet[3];
 	local rotator R,SR[3];
-	local Quat WQ,VehQ;
+	local Quat VehQ;
 	local byte PitchDif;
 	local float EngP;
 
@@ -618,9 +618,7 @@ simulated function AttachmentsTick( float Delta )
 				else if( MyWheels[i].TurnType==2 )
 					R.Yaw-=WheelYawVis;
 				R.Pitch = WheelsPitch;
-				WQ = RtoQ(R);
-				WQ = WQ Qmulti VehQ;
-				SR[MyWheels[i].TurnType] = QtoR(WQ);
+				SR[MyWheels[i].TurnType] = QtoR(RtoQ(R) Qmulti VehQ);
 			}
 			MyWheels[i].SetRotation(SR[MyWheels[i].TurnType]);
 
