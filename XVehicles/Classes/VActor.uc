@@ -4,9 +4,15 @@ Class VActor extends Actor
 	Abstract
 	Config(XVehicles);
 
+/*
 struct Quat // Quaternion
 {
 	var float X,Y,Z,W;
+};
+*/
+struct Quat extends Vector // Quaternion
+{
+	var float W;
 };
 
 const URotToRadian=0.000095873799;
@@ -90,11 +96,11 @@ simulated static final function Quat RtoQ( rotator Rot )
 {
 	local Quat Q, Z;
 //	local Quat Y;
-	local float Angle, YW, YY;
+	local float Angle, YW, YY, QW, QX;
 	
 	Angle = Rot.Roll*URotToRadianHalf;
-	Q.W = cos(Angle);
-	Q.X = sin(Angle);
+	QW = cos(Angle);
+	QX = sin(Angle);
 	
 	Angle = Rot.Pitch*URotToRadianHalf;
 	/*
@@ -104,10 +110,10 @@ simulated static final function Quat RtoQ( rotator Rot )
 	*/
 	YW = cos(Angle);
 	YY = sin(Angle);
-	Q.Y = YY*Q.W;
-	Q.Z = -Q.X*YY;
-	Q.W *= YW;
-	Q.X *= YW;
+	Q.Y = YY*QW;
+	Q.Z = -QX*YY;
+	Q.W = QW*YW;
+	Q.X = QX*YW;
 	
 	Angle = Rot.Yaw*URotToRadianHalf;
 	Z.W = cos(Angle);
@@ -242,14 +248,8 @@ simulated static final operator(16) quat Qmulti ( quat Q1 , quat Q2 )
 	local vector V1,V2,Vp;
 	local quat Qp;
 
-	//V1 = eVect(Q1.X,Q1.Y,Q1.Z ); Old code, lets save some resouces by calling lesser UScript functions.
-	//V2 = eVect(Q2.X,Q2.Y,Q2.Z );
-	V1.X = Q1.X;
-	V1.Y = Q1.Y;
-	V1.Z = Q1.Z;
-	V2.X = Q2.X;
-	V2.Y = Q2.Y;
-	V2.Z = Q2.Z;
+	V1 = Q1;
+	V2 = Q2;
 	Qp.W = Q1.W * Q2.W - (V1 dot V2);
 	Vp = (Q1.W * V2) + (Q2.W * V1) - (V1 cross V2);
 	Qp.X = Vp.X;
