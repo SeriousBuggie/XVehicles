@@ -59,8 +59,10 @@ simulated function Tick(float Delta)
 simulated function SetIronBars()
 {
 	local int i;
+	if (Specials[7].bSpeOn == (IronBars[0] != None))
+		return;
 
-	if (Specials[7].bSpeOn && IronBars[0] == None)
+	if (IronBars[0] == None)
 	{
 		For( i=0; i<4; i++ )
 		{
@@ -72,7 +74,7 @@ simulated function SetIronBars()
 		Velocity = VelFriction;
 		WheelsTraction = 8.0;
 	}
-	else if (!Specials[7].bSpeOn && IronBars[0] != None)
+	else
 	{
 		For( i=0; i<4; i++ )
 		{
