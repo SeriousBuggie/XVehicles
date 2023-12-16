@@ -114,7 +114,10 @@ auto state ClientActive
 	}
 	
 	simulated function AnimEnd() {}
-	simulated function BeginState() {}
+	simulated function BeginState()
+	{
+		Mesh = PlayerViewMesh;
+	}
 }
 
 state Idle
