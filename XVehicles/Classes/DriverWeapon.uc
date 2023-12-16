@@ -114,6 +114,7 @@ auto state ClientActive
 	}
 	
 	simulated function AnimEnd() {}
+	simulated function BeginState() {}
 }
 
 state Idle
@@ -305,6 +306,7 @@ Begin:
 defaultproperties
 {
 	bWarnTarget=True
+	bWeaponUp=True
 	AIRating=1.000000
 	bRotatingPickup=False
 	PickupMessage="You got a vehicle"
