@@ -10,6 +10,7 @@ struct Quat // Quaternion
 };
 
 const URotToRadian=0.000095873799;
+const URotToRadianHalf=0.0000479368995;
 const RADIANS_TO_UU = 10430.37835047045272f;
 const UU_90_DEGREES = 16384.0f;
 const UU_360_DEGREES = 65536.0f;
@@ -85,23 +86,35 @@ simulated static function bool StIsNetOwner( Actor Other )
 
 //==============================================================================
 // Quaternion math functions:
-static final postoperator float URotations( float URots )
-{
-	return URots * URottoRadian;
-}
-
 simulated static final function Quat RtoQ( rotator Rot )
 {
-	local Quat Y,Z,Qt;
-  
-	Qt = QuatFromAxisAndAngle( Vect(1,0,0), Rot.Roll URotations );
-	Y = QuatFromAxisAndAngle( Vect(0,1,0), Rot.Pitch URotations );
-	Z = QuatFromAxisAndAngle( Vect(0,0,1), Rot.Yaw URotations );
-
-	Qt = Qt Qmulti Y;
-	Qt = Qt Qmulti Z;
-
-	return Qt;
+	local Quat Q, Z;
+//	local Quat Y;
+	local float Angle, YW, YY;
+	
+	Angle = Rot.Roll*URotToRadianHalf;
+	Q.W = cos(Angle);
+	Q.X = sin(Angle);
+	
+	Angle = Rot.Pitch*URotToRadianHalf;
+	/*
+	Y.W = cos(Angle);
+	Y.Y = sin(Angle);	
+	Q = Q Qmulti Y;
+	*/
+	YW = cos(Angle);
+	YY = sin(Angle);
+	Q.Y = YY*Q.W;
+	Q.Z = -Q.X*YY;
+	Q.W *= YW;
+	Q.X *= YW;
+	
+	Angle = Rot.Yaw*URotToRadianHalf;
+	Z.W = cos(Angle);
+	Z.Z = sin(Angle);	
+	Q = Q Qmulti Z;
+	
+	return Q;
 }
 simulated static final function rotator QtoR( quat Q )
 {
@@ -138,18 +151,6 @@ simulated static final function rotator QtoR( quat Q )
 		result.roll     = atan2( 2.0f*(x*y-w*z), 1.0f-2.0f*(x*x+z*z) ) * RADIANS_TO_UU;
 	}
 	return Normalize( result );
-}
-static final function quat QuatNormalize( quat q )
-{
-	local float mag;
-
-	mag = ( q.x*q.x ) + ( q.y*q.y ) + ( q.z*q.z ) + ( q.w*q.w );
-	q.x = q.x / mag;
-	q.y = q.y / mag;
-	q.z = q.z / mag;
-	q.w = q.w / mag;
-
-	return q;
 }
 static final function quat QuatSlerp( quat u, quat v, float f )
 {
@@ -238,25 +239,6 @@ final static function float ATan2(float Y,float X)
 		tempang+=pi*2.0;
   
 	return tempang;
-}
-simulated static final function quat QuatFromAxisAndAngle( vector Axis , float Theta )
-{
-	// Theta must be given in radians
-	// Axis need not be normalised
-	local quat Q ;
-	local float L ;
-	Axis = Normal( Axis );
-	Q.W = cos( Theta / 2 ) ;
-	Q.X = Axis.X * sin( Theta / 2 ) ;
-	Q.Y = Axis.Y * sin( Theta / 2 ) ;
-	Q.Z = Axis.Z * sin( Theta / 2 ) ;
-	// NORMALISE
-	L = Sqrt( Q.W**2 + Q.X ** 2 + Q.Y ** 2 + Q.Z**2 ) ;
-	Q.W /= L ;
-	Q.X /= L ;
-	Q.Y /= L ;
-	Q.Z /= L ;
-	return Q ;
 }
 simulated static final operator(16) quat Qmulti ( quat Q1 , quat Q2 )
 {
