@@ -557,8 +557,9 @@ simulated function AttachmentsTick( float Delta )
 	local byte i,bSet[3];
 	local rotator R,SR[3];
 	local Quat VehQ;
-	local byte PitchDif;
+	local byte PitchDif, TurnType;
 	local float EngP;
+	local vector BaseLoc;
 
 	//Water zone variables
 	local byte rec;
@@ -602,25 +603,26 @@ simulated function AttachmentsTick( float Delta )
 			WheelsPitch-=UU_360_DEGREES;
 		While( WheelsPitch>UU_360_NEGDEGREES )
 			WheelsPitch-=UU_360_NEGDEGREES;
+		BaseLoc = Location;
+		if (bSlopedPhys && GVT != None)
+			BaseLoc += GVT.PrePivot;
 		For( i=0; i<NumWheels; i++ )
 		{
-			if (bSlopedPhys && GVT!=None)
-				MyWheels[i].SetLocation(GVT.PrePivot + Location +(MyWheels[i].WheelOffset >> Rotation)*DrawScale);
-			else
-				MyWheels[i].SetLocation(Location+(MyWheels[i].WheelOffset >> Rotation)*DrawScale);
+			MyWheels[i].SetLocation(BaseLoc + (MyWheels[i].WheelOffset >> Rotation)*DrawScale);
 
-			if( bSet[MyWheels[i].TurnType]==0 )
+			TurnType = MyWheels[i].TurnType;
+			if (bSet[TurnType] == 0)
 			{
-				bSet[MyWheels[i].TurnType] = 1;
+				bSet[TurnType] = 1;
 				R = MyWheels[i].WheelRot;
-				if( MyWheels[i].TurnType==1 )
-					R.Yaw+=WheelYawVis;
-				else if( MyWheels[i].TurnType==2 )
-					R.Yaw-=WheelYawVis;
+				if (TurnType == 1)
+					R.Yaw += WheelYawVis;
+				else if (TurnType == 2)
+					R.Yaw -= WheelYawVis;
 				R.Pitch = WheelsPitch;
-				SR[MyWheels[i].TurnType] = QtoR(RtoQ(R) Qmulti VehQ);
+				SR[TurnType] = QtoR(RtoQ(R) Qmulti VehQ);
 			}
-			MyWheels[i].SetRotation(SR[MyWheels[i].TurnType]);
+			MyWheels[i].SetRotation(SR[TurnType]);
 
 
 			//********************************************************************************
