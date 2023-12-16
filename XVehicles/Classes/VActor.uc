@@ -129,26 +129,23 @@ simulated static final function rotator QtoR( quat Q )
         
 	// It is invalid to pass values outside
 	// of the range -1,1 to asin()... so don't.
-	if ( s < 1.0f )
+	if ( s >= 1.0f )
 	{
-		if ( -1.0f < s )
-		{
-			result.yaw      = atan2( 2.0f*(x*y+w*z), 1.0f-2.0f*(y*y+z*z) ) * RADIANS_TO_UU;
-			result.pitch    = asin( s ) * RADIANS_TO_UU;
-			result.roll     = atan2( 2.0f*(y*z+w*x), 1.0f-2.0f*(x*x+y*y) ) * RADIANS_TO_UU;
-		}
-		else
-		{
-			result.yaw      = 0;
-			result.pitch    = -UU_90_DEGREES;
-			result.roll     = -atan2( 2.0f*(x*y-w*z), 1.0f-2.0f*(x*x+z*z) ) * RADIANS_TO_UU;
-		}
+		result.yaw      = 0;
+		result.pitch    = UU_90_DEGREES;
+		result.roll     = atan2( 2.0f*(x*y-w*z), 1.0f-2.0f*(Square(x) + Square(z)) ) * RADIANS_TO_UU;
+	}
+	else if ( -1.0f < s )
+	{
+		result.yaw      = atan2( 2.0f*(x*y+w*z), 1.0f-2.0f*(Square(y) + Square(z)) ) * RADIANS_TO_UU;
+		result.pitch    = asin( s ) * RADIANS_TO_UU;
+		result.roll     = atan2( 2.0f*(y*z+w*x), 1.0f-2.0f*(Square(x) + Square(y)) ) * RADIANS_TO_UU;
 	}
 	else
 	{
 		result.yaw      = 0;
-		result.pitch    = UU_90_DEGREES;
-		result.roll     = atan2( 2.0f*(x*y-w*z), 1.0f-2.0f*(x*x+z*z) ) * RADIANS_TO_UU;
+		result.pitch    = -UU_90_DEGREES;
+		result.roll     = -atan2( 2.0f*(x*y-w*z), 1.0f-2.0f*(Square(x) + Square(z)) ) * RADIANS_TO_UU;
 	}
 	return Normalize( result );
 }
