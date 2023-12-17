@@ -560,8 +560,11 @@ simulated function AttachmentsTick( float Delta )
 	local byte PitchDif, TurnType;
 	local float EngP;
 	local vector BaseLoc;
+	local VehicleWheel MyWheel;
+	local bool LocSame;
 
 	//Water zone variables
+	local VehWaterAttach VWaterTi;
 	local byte rec;
 	local byte FootSndVol, FootSndPitch;
 	local sound FootAmbSnd;
@@ -606,15 +609,17 @@ simulated function AttachmentsTick( float Delta )
 		BaseLoc = Location;
 		if (bSlopedPhys && GVT != None)
 			BaseLoc += GVT.PrePivot;
+		LocSame = Location == OldLocation;
 		For( i=0; i<NumWheels; i++ )
 		{
-			MyWheels[i].SetLocation(BaseLoc + (MyWheels[i].WheelOffset >> Rotation)*DrawScale);
+			MyWheel = MyWheels[i];
+			MyWheel.SetLocation(BaseLoc + (MyWheel.WheelOffset >> Rotation)*DrawScale);
 
-			TurnType = MyWheels[i].TurnType;
+			TurnType = MyWheel.TurnType;
 			if (bSet[TurnType] == 0)
 			{
 				bSet[TurnType] = 1;
-				R = MyWheels[i].WheelRot;
+				R = MyWheel.WheelRot;
 				if (TurnType == 1)
 					R.Yaw += WheelYawVis;
 				else if (TurnType == 2)
@@ -622,21 +627,23 @@ simulated function AttachmentsTick( float Delta )
 				R.Pitch = WheelsPitch;
 				SR[TurnType] = QtoR(RtoQ(R) Qmulti VehQ);
 			}
-			MyWheels[i].SetRotation(SR[TurnType]);
-
+			MyWheel.SetRotation(SR[TurnType]);
 
 			//********************************************************************************
 			//Water Trail FX points update
 			//********************************************************************************
-			if (bHaveGroundWaterFX && bSlopedPhys && VWaterT[i] != None && (Location != OldLocation ||
+			VWaterTi = VWaterT[i];
+			if (VWaterTi == None)
+				continue;
+			if (bHaveGroundWaterFX && bSlopedPhys && (!LocSame ||
 				(FootVehZone[i] != None && VSize(FootVehZone[i].ZoneVelocity) > 150 )))
 			{
-				VWaterT[i].SetLocation(MyWheels[i].Location);
-				VWaterT[i].Move(MyWheels[i].CollisionHeight*vect(0,0,-1));
+				VWaterTi.SetLocation(MyWheel.Location);
+				VWaterTi.Move(MyWheel.CollisionHeight*vect(0,0,-1));
 
-				if (VWaterT[i].Region.Zone.bWaterZone && !Region.Zone.bWaterZone)
+				if (VWaterTi.Region.Zone.bWaterZone && !Region.Zone.bWaterZone)
 				{
-					FootVehZone[i] = VWaterT[i].Region.Zone;
+					FootVehZone[i] = VWaterTi.Region.Zone;
 					rec = 0;
 					
 					if (VSize(FootVehZone[i].ZoneVelocity) > 150)
@@ -644,43 +651,43 @@ simulated function AttachmentsTick( float Delta )
 					else
 						FootZoneSpeed = 0;
 
-					FootSndVol = Min(Max(8,VWaterT[i].WaveSize*3),255) * ((VSize(Location - OldLocation)/Delta + FootZoneSpeed)/ RefMaxWaterSpeed);
+					FootSndVol = Min(Max(8,VWaterTi.WaveSize*3),255) * ((VSize(Location - OldLocation)/Delta + FootZoneSpeed)/ RefMaxWaterSpeed);
 					FootSndPitch = 32 + ((VSize(Location - OldLocation)/Delta + FootZoneSpeed)/ RefMaxWaterSpeed) * 96;
-					FootAmbSnd = VWaterT[i].Region.Zone.AmbientSound;
+					FootAmbSnd = VWaterTi.Region.Zone.AmbientSound;
 
-					if (VWaterT[i].SoundPitch != FootSndPitch)
-						VWaterT[i].SoundPitch = FootSndPitch;
-					if (VWaterT[i].AmbientSound != FootAmbSnd)
-						VWaterT[i].AmbientSound = FootAmbSnd;
-					if (VWaterT[i].SoundVolume != FootSndVol)
-						VWaterT[i].SoundVolume = FootSndVol;
+					if (VWaterTi.SoundPitch != FootSndPitch)
+						VWaterTi.SoundPitch = FootSndPitch;
+					if (VWaterTi.AmbientSound != FootAmbSnd)
+						VWaterTi.AmbientSound = FootAmbSnd;
+					if (VWaterTi.SoundVolume != FootSndVol)
+						VWaterTi.SoundVolume = FootSndVol;
 						
 
-					while (VWaterT[i].Region.Zone.bWaterZone && !Region.Zone.bWaterZone && rec < 20)
+					while (VWaterTi.Region.Zone.bWaterZone && !Region.Zone.bWaterZone && rec < 20)
 					{
-						VWaterT[i].OldWaterZone = VWaterT[i].Region.Zone;
-						VWaterT[i].Move(vect(0,0,8));
+						VWaterTi.OldWaterZone = VWaterTi.Region.Zone;
+						VWaterTi.Move(vect(0,0,8));
 						rec++;
 					}
 
 					if ((Velocity dot vector(Rotation)) > 0)
-						VWaterT[i].WaveLenght += VSize(Location - OldLocation);
+						VWaterTi.WaveLenght += VSize(Location - OldLocation);
 					else
-						VWaterT[i].WaveLenght -= VSize(Location - OldLocation);
+						VWaterTi.WaveLenght -= VSize(Location - OldLocation);
 
 				}
 				else
 				{
-					if (VWaterT[i].OldWaterZone != None)
-						VWaterT[i].OldWaterZone = None;
-					if (VWaterT[i].AmbientSound != None)
-						VWaterT[i].AmbientSound = None;
+					if (VWaterTi.OldWaterZone != None)
+						VWaterTi.OldWaterZone = None;
+					if (VWaterTi.AmbientSound != None)
+						VWaterTi.AmbientSound = None;
 
 					FootVehZone[i] = None;
 				}
 			}
-			else if (FootVehZone[i] != None && Location == OldLocation && VWaterT[i] != None && VWaterT[i].AmbientSound != None)
-				VWaterT[i].AmbientSound = None;
+			else if (VWaterTi.AmbientSound != None && FootVehZone[i] != None && LocSame)
+				VWaterTi.AmbientSound = None;
 				
 			//********************************************************************************
 		}
