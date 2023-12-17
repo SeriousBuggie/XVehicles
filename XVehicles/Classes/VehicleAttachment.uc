@@ -51,7 +51,7 @@ simulated function Tick(float Delta)
 	if (Level.NetMode != NM_Client && AmbientSound != None)
 		LocationRep = Location;
 	//if (OwnerVehicle.AttachmentList == Self)
-	if (bMasterPart && OwnerVehicle != None)
+	if (bMasterPart)
 		OwnerVehicle.AttachmentsTick(Delta);
 	if (Level.NetMode != NM_DedicatedServer && !class'VehiclesConfig'.default.bDisableTeamSpawn)
 	{
