@@ -43,6 +43,8 @@ simulated event Tick(Float Delta)
 		ShadowDir = -OwnerVehicle.FloorNormal;
 	else
 		ShadowDir = vect(0,0,-1);
+	if (FastTrace(ShadowStart + 300*ShadowDir, ShadowStart))
+		return;
 	HitActor = Trace(HitLocation, HitNormal, ShadowStart + 300*ShadowDir, ShadowStart, false);
 
 	if ( HitActor == None )
