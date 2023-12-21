@@ -54,11 +54,11 @@ function CheckNext(Bot Bot) {
 		for (i = 0; i < MaxNode; i++) {
 			if (NextNode[i].Point == None)
 				continue;
-			if (Weight <= Goal) {
+			Weight += CurrentWeight[i];
+			if (Weight > Goal) {
 				Bot.AlternatePath = NextNode[i].Point;
 				break;
 			}
-			Weight += CurrentWeight[i];
 		}
 	}
 }
