@@ -109,9 +109,9 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 	
 	// X dot X == VSize(X)*VSize(X)
 	if (FMax(Region.Zone.ZoneGroundFriction,WheelsTraction) > 4.0 || (Velocity dot Velocity) < 10000 /* 100*100 */)
-		R.Yaw = VehicleYaw+(WheelYaw/2);
+		R.Yaw = VehicleYaw+(WheelYaw/2)*GetMovementDir();
 	else
-		R.Yaw = VehicleYaw-(WheelYaw/2);
+		R.Yaw = VehicleYaw-(WheelYaw/2)*GetMovementDir();
 	Return SetUpNewMVelocity(vector(R)*InAccel,ActualFloorNormal,0);
 }
 
