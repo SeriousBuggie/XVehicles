@@ -180,6 +180,8 @@ simulated function UpdateDriverInput( float Delta )
 	else
 	{
 		DesTurnVis = (rotator(MoveDest - Location).Yaw - Rotation.Yaw) << 16 >> 16;
+		if (Abs(DesTurnVis) > 16384)
+			DesTurnVis = 32768*DesTurnVis/Abs(DesTurnVis) - DesTurnVis;
 		if (Abs(DesTurnVis) > WheelMaxYaw)
 			DesTurnVis = WheelMaxYaw*DesTurnVis/Abs(DesTurnVis);
 	}
