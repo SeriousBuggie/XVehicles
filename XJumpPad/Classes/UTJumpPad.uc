@@ -131,6 +131,8 @@ var vector Velocity;
 var AmbushPoint AmbushSpot;
 var bool AmbushSpot_Taken;
 
+var bool bUsed;
+
 // ---------------- swJumpPad source --------------------------------
 
 enum EAngleMode
@@ -220,6 +222,7 @@ simulated function PostBeginPlay()
                 JumpTarget = A;
 
 		Velocity = CalcVelocity(self);
+		bUsed = true;
 	}
 	
 	if (!bHidden && bAutoSize)
@@ -673,7 +676,7 @@ local rotator R;
 
 event int SpecialCost(Pawn Seeker)
 {
-	if (!bHidden && !bDisabled && Seeker != None && Seeker.Weapon != None && Seeker.Weapon.isA('DriverWeapon'))
+	if (bUsed && !bDisabled && Seeker != None && Seeker.Weapon != None && Seeker.Weapon.isA('DriverWeapon'))
 		return 100000;
 		
 	return ExtraCost;
