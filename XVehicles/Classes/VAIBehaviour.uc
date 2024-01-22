@@ -124,7 +124,7 @@ function vector GetNextMoveTarget()
 {
 	local int i, best;
 	local float Z, Dist, BestDist, Closest, HeightDiff;
-	Local vector V, S, T, T2, NextT, HitLocation, HitNormal;
+	Local vector V, dV, S, T, T2, NextT, HitLocation, HitNormal;
 	local string dbg;
 	local NavigationPoint Visible[ArrayCount(VehicleOwner.Driver.RouteCache)], NP;
 	local vector Pos[ArrayCount(VehicleOwner.Driver.RouteCache)];
@@ -187,14 +187,18 @@ function vector GetNextMoveTarget()
 			if (!VehicleOwner.bCanFly)
 				T2.Z += Z;
 			
-			Hit = VehicleOwner.Trace(HitLocation, HitNormal, T2, S, true, V);
+			if (i == 0)
+				dV = vect(0, 0, 0);
+			else
+				dV = vect(20, 20, 0);
+			Hit = VehicleOwner.Trace(HitLocation, HitNormal, T2, S, true, V + dV);
 			if (Hit != None && VSize(HitLocation - T2) >= VehicleOwner.CollisionRadius)
 			{
 				if (bDebug) Log(i @ "!Trace" @ VehicleOwner.CollisionRadius @ VSize(HitLocation - T2) @ T @ NP @ Hit);
 //				if (i == 0) Log(i @ NP @ HitLocation @ HitNormal);
 //				dbg = dbg @ "-";
 				if (T2.Z < S.Z && T2.Z + VehicleOwner.CollisionHeight > S.Z && 
-					(VehicleOwner.Trace(HitLocation, HitNormal, T2 + vect(0,0,1)*(S.Z - T2.Z), S, true, V) == None ||
+					(VehicleOwner.Trace(HitLocation, HitNormal, T2 + vect(0,0,1)*(S.Z - T2.Z), S, true, V + dV) == None ||
 					VSize(HitLocation - T2) < VehicleOwner.CollisionRadius))
 					; // skip it
 				else
