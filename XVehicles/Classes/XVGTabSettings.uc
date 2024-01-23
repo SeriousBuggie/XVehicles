@@ -5,6 +5,9 @@ class XVGTabSettings expands XVGTabPage;
 
 const BindCount = 9;
 
+var() localized string HeadText;
+var() localized string ClearText;
+
 var() string AliasNames[BindCount];
 var() localized string LabelList[BindCount];
 var() localized string HelpText[BindCount];
@@ -34,9 +37,15 @@ function Created()
 	
 	ButtonTop = 25;
 	
-	Heading = UMenuLabelControl(CreateControl(class'UMenuLabelControl', LabelLeft - 10, ButtonTop + 3, LabelWidth, 1));
-	Heading.SetText("Keybinds:");
+	Heading = UMenuLabelControl(CreateControl(class'UMenuLabelControl', LabelLeft - 10, ButtonTop + 3, LabelWidth + ButtonWidth, 1));
+	Heading.SetText(HeadText);
 	Heading.SetFont(F_Bold);
+	
+	ButtonTop += 15;
+	
+	Heading = UMenuLabelControl(CreateControl(class'UMenuLabelControl', LabelLeft - 10, ButtonTop + 3, LabelWidth + ButtonWidth, 1));
+	Heading.SetText(ClearText);
+	Heading.SetFont(F_Normal);
 	
 	ButtonTop += 30;
 	
@@ -106,26 +115,30 @@ function ProcessMenuKey(int KeyNo, string KeyName)
 	local string CurrBind;
 	local PlayerPawn PP;
 	local int i, pos;
+	local bool bClear;
 	
-	if (KeyName == "" || KeyName ~= "Escape"
-		|| (KeyNo >= 0x70 && KeyNo <= 0x79) // function keys
-		|| (KeyNo >= 0x30 && KeyNo <= 0x39)) // number keys
+	bClear = (KeyNo >= 0x70 && KeyNo <= 0x79) // function keys
+		|| (KeyNo >= 0x30 && KeyNo <= 0x39); // number keys
+	if (KeyName == "" || KeyName ~= "Escape")
 		return;
 	
 	PP = GetPlayerOwner();
 	
-	if (SelectedButton.Text == KeyName && PP.ConsoleCommand("KEYBINDING" @ KeyName) ~= AliasNames[Selection])
+	if (!bClear && SelectedButton.Text == KeyName && PP.ConsoleCommand("KEYBINDING" @ KeyName) ~= AliasNames[Selection])
 		return;
 		
 	if (SelectedButton.Text != "")
 		PP.ConsoleCommand("SET INPUT" @ SelectedButton.Text @ 
 			RemoveBind(PP.ConsoleCommand("KEYBINDING" @ SelectedButton.Text), AliasNames[Selection]));
-		
-	CurrBind = PP.ConsoleCommand("KEYBINDING" @ KeyName);
-	if (CurrBind != "")
-		CurrBind = CurrBind $ "|";
-	CurrBind = CurrBind $ AliasNames[Selection];
-	PP.ConsoleCommand("SET INPUT" @ KeyName @ CurrBind);
+			
+	if (!bClear)
+	{		
+		CurrBind = PP.ConsoleCommand("KEYBINDING" @ KeyName);
+		if (CurrBind != "")
+			CurrBind = CurrBind $ "|";
+		CurrBind = CurrBind $ AliasNames[Selection];
+		PP.ConsoleCommand("SET INPUT" @ KeyName @ CurrBind);
+	}
 
 	class'KeyBindObject'.static.Refresh(PP);
 	for (i = 0; i < BindCount; i++)
@@ -223,6 +236,8 @@ function Notify(UWindowDialogControl C, byte E)
 
 defaultproperties
 {
+	HeadText="Keybinds:"
+	ClearText="To reset bind - press <0> while input is active."
 	AliasNames(0)="Duck"
 	AliasNames(1)="ThrowWeapon"
 	AliasNames(2)="mutate VehicleEnter"
