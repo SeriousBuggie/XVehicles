@@ -104,12 +104,21 @@ function Destroyed()
 
 function VehicleFlag SetFlag(Decoration InFlag)
 {
-	Local Texture Tex;
+	Local Texture Tex, Check;
+	local int i;
 	MyFlag = InFlag;
 	
 	Tex = Texture'JpflagB';
 	if (MyFlag.Mesh == Mesh'pflag' || MyFlag.Mesh == Mesh)
+	{
+		for (i = 0; i < ArrayCount(MultiSkins); i++)
+			MultiSkins[i] = MyFlag.MultiSkins[i];
 		Tex = MyFlag.Skin;
+		Check = MyFlag.MultiSkins[0];
+		if (Check != None && Check != Texture'JpflagB' && Check != Texture'JpflagR' &&
+			(Tex == None || Tex == Texture'JpflagB' || Tex == Texture'JpflagR'))
+			Tex = Check;
+	}
 	else if (CTFFlag(MyFlag) != None && CTFFlag(MyFlag).Team == 0)
 		Tex = Texture'JpflagR';
 		
