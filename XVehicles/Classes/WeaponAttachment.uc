@@ -1194,7 +1194,7 @@ static function Vehicle AttackVehicle(WeaponAttachment Weap, Bot Bot, float MaxD
 		if (Weap == None || Veh != Weap.OwnerVehicle)
 		{
 			if (Veh.CurrentTeam == Bot.PlayerReplicationInfo.Team && 
-				(Veh.Driver != None || Veh.bHasPassengers || Veh.Level.TimeSeconds - Veh.LastFix > 15))
+				(Veh.Driver != None || Veh.bHasPassengers || Veh.Level.TimeSeconds - Veh.LastFix < 15))
 				continue;
 			VehTeam = Veh.CurrentTeam;
 			if (Veh.MyFactory != None)
