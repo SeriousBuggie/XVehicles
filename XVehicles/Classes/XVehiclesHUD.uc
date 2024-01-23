@@ -87,6 +87,11 @@ function Mutate(string MutateString, PlayerPawn Sender)
 		if (Veh != None)
 			Veh.Honk();
 	}
+	else if (Left(MutateString, 13) ~= "VehicleCamera")
+	{
+		if (DriverWeapon(Sender.Weapon) != None)
+			DriverWeapon(Sender.Weapon).ChangeCamera();
+	}
 	else if (Left(MutateString, 9) ~= "XVOpenGUI")
 	{
 		OpenGUI(Sender);

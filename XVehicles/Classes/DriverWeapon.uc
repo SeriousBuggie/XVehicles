@@ -99,6 +99,14 @@ event TravelPostAccept()
 	Destroy();
 }
 
+function ChangeCamera()
+{
+	if( bPassengerGun )
+		VehicleOwner.PassengerChangeBackView(SeatNumber);
+	else
+		VehicleOwner.ChangeBackView();
+}
+
 auto state ClientActive
 {
 	ignores BringUp, Finish;
@@ -106,10 +114,6 @@ auto state ClientActive
 	function bool PutDown()
 	{
 		bChangeWeapon = true;
-		if( bPassengerGun )
-			VehicleOwner.PassengerChangeBackView(SeatNumber);
-		else
-			VehicleOwner.ChangeBackView();
 		return true;
 	}
 	
@@ -127,10 +131,6 @@ ignores BringUp,Finish;
 	function bool PutDown()
 	{
 		bChangeWeapon = true;
-		if( bPassengerGun )
-			VehicleOwner.PassengerChangeBackView(SeatNumber);
-		else
-			VehicleOwner.ChangeBackView();
 		return true;
 	}
 	

@@ -71,6 +71,7 @@ function Created()
 		"mutate VehicleExit - Exit Vehicle" $ EOL $
 		"mutate VehicleEnterExit - Enter/Exit Vehicle" $ EOL $
 		"mutate VehicleHonk - Honk" $ EOL $
+		"mutate VehicleCamera - Change the camera position" $ EOL $
 		"mutate XVOpenGUI - Show this dialog box" $ EOL $
 		"TeamSay Taxi! - Say Taxi!" $ EOL $
 		"TeamSay Get in the vehicle! - Say Get in the vehicle!" $ EOL $

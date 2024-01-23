@@ -3,7 +3,7 @@
 //=============================================================================
 class XVGTabSettings expands XVGTabPage;
 
-const BindCount = 8;
+const BindCount = 9;
 
 var() string AliasNames[BindCount];
 var() localized string LabelList[BindCount];
@@ -229,22 +229,25 @@ defaultproperties
 	AliasNames(3)="mutate VehicleExit"
 	AliasNames(4)="mutate VehicleEnterExit"
 	AliasNames(5)="mutate VehicleHonk"
-	AliasNames(6)="TeamSay Taxi!"
-	AliasNames(7)="TeamSay Get in the vehicle!"
+	AliasNames(6)="mutate VehicleCamera"
+	AliasNames(7)="TeamSay Taxi!"
+	AliasNames(8)="TeamSay Get in the vehicle!"
 	LabelList(0)="Crouch"
 	LabelList(1)="Throw Weapon"
 	LabelList(2)="Enter Vehicle"
 	LabelList(3)="Exit Vehicle"
 	LabelList(4)="Enter/Exit Vehicle"
 	LabelList(5)="Honk"
-	LabelList(6)="Say Taxi!"
-	LabelList(7)="Say Get In Vehicle!"
+	LabelList(6)="Camera"
+	LabelList(7)="Say Taxi!"
+	LabelList(8)="Say Get In Vehicle!"
 	HelpText(0)="Allow enter to the vehicle"
 	HelpText(1)="Exit from the vehicle"
 	HelpText(2)="Enter to the vehicle without crouch, can't be hold"
 	HelpText(3)="Exit from the vehicle"
 	HelpText(4)="Enter or Exit from the vehicle"
 	HelpText(5)="Honk if you inside the vehicle, except stationary turrets"
-	HelpText(6)="Chat + voice command for your temmates"
+	HelpText(6)="Change the camera position for the vehicle"
 	HelpText(7)="Chat + voice command for your temmates"
+	HelpText(8)="Chat + voice command for your temmates"
 }
