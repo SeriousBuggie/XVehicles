@@ -87,6 +87,8 @@ simulated static function bool IsGoodTarget(Pawn Instigator, Actor Other)
 		return false;
 	if (Pawn(Other) != None && DriverWeapon(Pawn(Other).Weapon) != None)
 		Other = DriverWeapon(Pawn(Other).Weapon).VehicleOwner;
+	if (Vehicle(Other) == None && Vehicle(Other.Base) != None)
+		Other = Vehicle(Other.Base);
 	if (Vehicle(Other) == None || !Vehicle(Other).bCanFly)
 		return false;
 	if (Instigator == None || Instigator.PlayerReplicationInfo == None || 
