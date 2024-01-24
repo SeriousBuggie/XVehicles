@@ -53,6 +53,8 @@ simulated function Tick(float Delta)
 {
 	Super.Tick(Delta);
 	
+	HandleIronBars();
+	
 	SetIronBars();
 }
 
@@ -86,6 +88,17 @@ simulated function SetIronBars()
 		VelFriction = Velocity;
 		WheelsTraction = 0.1;
 	}
+}
+
+function HandleIronBars() 
+{
+	if (Bot(Driver) == None)
+		return;
+		
+	if (Region.Zone.ZoneGroundFriction + WheelsTraction > 14.0 && Specials[7].bSpeOn) // need turn off for prevent damage
+		ActivateSpecial(7);
+	else if (Region.Zone.ZoneGroundFriction <= 4.0 && !Specials[7].bSpeOn)
+		ActivateSpecial(7);
 }
 
 function ActivateSpecial( byte SpecialN)
