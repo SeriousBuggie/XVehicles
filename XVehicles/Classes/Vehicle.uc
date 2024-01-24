@@ -1557,7 +1557,8 @@ simulated function Tick( float Delta )
 	if (Pawn(Base) != None)
 		SetBase(None);
 	
-	if (IsInState('EmptyVehicle') && ResetTimer != Default.ResetTimer && Level.TimeSeconds > ResetTimer)
+	if (IsInState('EmptyVehicle') && ResetTimer != Default.ResetTimer && 
+		Level.TimeSeconds > ResetTimer && Level.TimeSeconds > LastFix + 5)
 		Destroy();
 	
 	if (bLastTeleport)
