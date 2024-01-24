@@ -249,6 +249,7 @@ struct VHLights
 };
 var(VehicleLights) VHLights HeadLights[8];
 var(VehicleLights) sound HeadLightOn, HeadLightOff;
+var float HeadLightAccum;
 
 //Specials
 struct VSpecials
@@ -445,8 +446,6 @@ simulated function SetSignalLights(ESignalLights InSignalLights)
 
 function SwitchVehicleLights()
 {
-	local byte i;
-
 	if (!bHeadLightInUse && bUseVehicleLights)
 		UpdateVehicleLights(true);
 	else if (bUseVehicleLights)
@@ -2548,6 +2547,18 @@ function ReadBotInput( float Delta )
 	Turning = ShouldTurnFor(MoveDest);
 	Rising = ShouldRiseFor(MoveDest);
 	Accel = ShouldAccelFor(MoveDest);
+	
+	if (bUseVehicleLights)
+	{
+		HeadLightAccum += Delta;
+		if (HeadLightAccum >= 1.0)
+		{
+			HeadLightAccum = 0;
+			// once per 15 seconds, try randomly switch light on or off
+			if (FRand()*32767.0 < 2184.46 && FRand() < 0.5)
+				SwitchVehicleLights();
+		}
+	}
 	
 //	if (Accel == 0) log(self @ "Move" @ v @ Turning @ Accel @ (Normal(MoveDest-Location) dot vector(Rotation)));
 }
