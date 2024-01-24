@@ -2626,6 +2626,7 @@ function bool AboutToCrash(out int Accel)
 				(Normal(Vehicle(A).Velocity) dot Normal(Velocity)) > 0.5 &&
 				VSize(Vehicle(A).Velocity) > VSize(Velocity) - 490)
 				return false; // not slow down when follow teammate vehicle
+			Honk(); // make signal here, for notify other driver :)
 		}
 //		Log("Detect crash into" @ A @ HitLocation @ HitNormal);
 		Accel = ret*-1; // brake via reverse
