@@ -28,6 +28,11 @@ function Destroyed()
 	if (GetVehicle() != None)
 		OldOwner = Pawn(Owner);
 
+	if (OldOwner != None && CloudZone(Region.Zone) != None)
+		OldOwner = None;
+	if (OldOwner != None && CloudZone(OldOwner.Region.Zone) != None)
+		OldOwner = None;
+
 	Super.Destroyed();
 	
 	if (OldOwner != None)
