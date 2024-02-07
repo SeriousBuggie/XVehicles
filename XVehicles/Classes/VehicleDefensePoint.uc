@@ -54,6 +54,7 @@ event int SpecialCost(Pawn Seeker)
 
 defaultproperties
 {
+	ExtraCost=2000
 	bSpecialCost=True
 	bStatic=False
 	bNoDelete=True
