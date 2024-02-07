@@ -1136,6 +1136,12 @@ function ChangeCollision(Pawn Other, bool bInside)
 		Other.SetCollision(False,False,False); // after move be set to true
 		Other.bCollideWorld = True;
 		Other.SetCollisionSize(Other.default.CollisionRadius, Other.default.CollisionHeight);
+		if (Other.Region.Zone == None)
+			; // skip
+		else if (Other.Region.Zone.bPainZone)
+			Other.PainTime = 0.01;
+		else if (Other.Region.Zone.bWaterZone)
+			Other.PainTime = Other.UnderWaterTime;
 	}
 	Bot = Bot(Other);
 	if (Bot != None)
