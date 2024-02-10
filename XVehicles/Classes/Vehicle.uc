@@ -3904,6 +3904,12 @@ function FixDamage(int Damage, Pawn EventInstigator, vector HitLocation, vector 
 	}
 }
 
+function bool IsSameTeam(Pawn Pawn)
+{
+	return Level.Game.bTeamGame && Pawn != none && Pawn.PlayerReplicationInfo != None && 
+		Pawn.PlayerReplicationInfo.Team == CurrentTeam;
+}
+
 function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 						Vector momentum, name damageType)
 {
@@ -3920,13 +3926,12 @@ function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 		if (damageType == 'jolted' && Damage > 100)
 			Damage *= 0.05; // reduce instagib damage
 		if (instigatedBy != None && damageType == 'zapped' && class'VehiclesConfig'.default.bPulseAltHeal &&
-			(!Level.Game.bTeamGame ||
-			(instigatedBy.PlayerReplicationInfo != None && instigatedBy.PlayerReplicationInfo.Team == CurrentTeam)))
+			(!Level.Game.bTeamGame || IsSameTeam(instigatedBy)))
 		{
 			FixDamage(Damage, instigatedBy, hitlocation, momentum, damageType);
 			return;
 		}
-		else if(Driver == None)
+		else if (Driver == None)
 		{
 			For (i = 0; i < Arraycount(Passengers); i++)
 			{
@@ -3934,11 +3939,12 @@ function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 				{
 					bHadPass = True;
 					Damage = Level.Game.ReduceDamage(Damage, DamageType, Passengers[i], instigatedBy);
+					if (Damage > 0 && IsSameTeam(instigatedBy))
+						Damage = 0;
 					Break;
 				}
 			}
-			if (!bTakeAlwaysDamage && !bHadPass && instigatedBy != None && 
-				instigatedBy.PlayerReplicationInfo != None && CurrentTeam == instigatedBy.PlayerReplicationInfo.Team)
+			if (!bTakeAlwaysDamage && !bHadPass && IsSameTeam(instigatedBy))
 				Damage = 0;
 			else
 			{
@@ -3953,7 +3959,11 @@ function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 		else if (Driver.ReducedDamageType == 'All') // God mode on!
 			Damage = 0;
 		else
+		{
 			Damage = Level.Game.ReduceDamage(Damage, DamageType, Driver, instigatedBy);
+			if (Damage > 0 && IsSameTeam(instigatedBy))
+				Damage = 0;
+		}
 		if (instigatedBy != None)
 		{
 			if( Driver!=None )
