@@ -30,7 +30,10 @@ simulated function ReadDriverInput( PlayerPawn Other, float DeltaTime )
 		}
 	}
 }
-simulated function UpdateDriverInput( float Delta );
+simulated function UpdateDriverInput( float Delta )
+{
+	Velocity = vect(0,0,0);
+}
 simulated function ServerPerformMove( int InRise, int InTurn, int InAccel );
 
 // Nothing here to constantly replicate.
