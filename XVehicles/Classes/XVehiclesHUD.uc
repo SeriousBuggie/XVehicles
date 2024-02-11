@@ -4,6 +4,7 @@
 class XVehiclesHUD expands Mutator config(User);
 
 var ChallengeHUD MyHUD;
+var ChallengeHUD OrigHUD;
 var Vehicle IdentifyTarget;
 var XVehiclesHUD UsedHUD;
 
@@ -236,6 +237,7 @@ simulated function FindHUD()
 	else
 		foreach AllActors(class'ChallengeHUD', MyHUD)
 			break;
+	OrigHUD = MyHUD;
 }
 
 simulated function RegisterHUDMutator()
@@ -276,8 +278,13 @@ simulated function PostRender(canvas Canvas)
 		
 	if (FoundHuds > 0 && Canvas != None && Canvas.Viewport != None &&
 		Canvas.Viewport.Actor != None && ChallengeHUD(Canvas.Viewport.Actor.MyHUD) != None &&
-		Canvas.Viewport.Actor.MyHUD != MyHUD)
+		Canvas.Viewport.Actor.MyHUD != OrigHUD)
+	{
 		MyHUD = ChallengeHUD(Canvas.Viewport.Actor.myHUD);
+		OrigHUD = MyHUD;
+		bGoodHud = false;
+		CheckHUD();
+	}
 	if (MyHUD == None || MyHUD.PawnOwner == None)
 		return;
 	if (MyHUD.PawnOwner == MyHUD.PlayerOwner)
