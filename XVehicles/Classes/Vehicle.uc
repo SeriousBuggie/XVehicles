@@ -3985,12 +3985,12 @@ function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 	
 		if (bEnableShield)
 		{
-			For (i=0; i<16; i++)
+			For(i = 0; i < ArrayCount(ShieldType); i++)
 			{
 				if (ShieldType[i] != '')
 				{
 					shldset++;
-					if (ShieldType[i] != '' && bProtectAgainst && ShieldType[i] == damageType)
+					if (bProtectAgainst && ShieldType[i] == damageType)
 						Damage -= (Damage*ShieldLevel);
 					else if (!bProtectAgainst && ShieldType[i] != damageType)
 						shldtkn++;

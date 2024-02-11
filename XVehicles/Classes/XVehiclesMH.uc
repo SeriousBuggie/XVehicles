@@ -91,35 +91,32 @@ Function SetShield()
 
 function SetupVehicleClass(Class<vehicle> cl)
 {
+	local int i;
 	if (cl == None)
 		return;
 	cl.Default.bEnableShield = true;
-	cl.Default.bProtectAgainst = true;
+	cl.Default.bProtectAgainst = false;
 
 	cl.Default.ShieldLevel = 0.9;
 	
-	cl.Default.ShieldType[0] = 'Decapitated';
-	cl.Default.ShieldType[1] = 'shot';
-	cl.Default.ShieldType[2] = 'RipperAltDeath';
-	cl.Default.ShieldType[3] = 'RocketDeath';
-	cl.Default.ShieldType[4] = 'Jolted';
-	cl.Default.ShieldType[5] = 'Shredded';
-	cl.Default.ShieldType[6] = 'Corroded';
-	cl.Default.ShieldType[7] = 'GrenadeDeath';
-	cl.Default.ShieldType[8] = 'Mortared';
-	cl.Default.ShieldType[9] = 'Burned';
-	cl.Default.ShieldType[10] = 'Exploded';
-	cl.Default.ShieldType[11] = 'hacked';
-	cl.Default.ShieldType[12] = 'stomped';
-	cl.Default.ShieldType[13] = 'crushed';
-	cl.Default.ShieldType[14] = 'zapped';
-	cl.Default.ShieldType[15] = 'stung';
-	
-	cl.Default.ArmorType[0].ArmorLevel = 0.9;
-	cl.Default.ArmorType[0].ProtectionType = 'Frozen';
-	
-	cl.Default.ArmorType[1].ArmorLevel = 0.9;
-	cl.Default.ArmorType[1].ProtectionType = 'RedeemerDeath';	
+	// ignore list
+	cl.Default.ShieldType[i++] = 'InitialDamage'; // on spawn
+	cl.Default.ShieldType[i++] = 'BumpWall'; // fall and hit walls
+	cl.Default.ShieldType[i++] = 'drowned'; // in water
+	cl.Default.ShieldType[i++] = 'FuckedUp'; // kill by killing zone
+	cl.Default.ShieldType[i++] = 'crushed'; // hit by vehicle
+	// damage from xvehicles
+	cl.Default.ShieldType[i++] = 'KrahtEnergy';
+	cl.Default.ShieldType[i++] = 'NaliEnergy';
+	cl.Default.ShieldType[i++] = 'TankBlast';
+	cl.Default.ShieldType[i++] = 'MegaBurned';
+	cl.Default.ShieldType[i++] = 'Energy';
+	cl.Default.ShieldType[i++] = 'CybotLaser';
+	cl.Default.ShieldType[i++] = 'cutted';
+	cl.Default.ShieldType[i++] = 'MantaPlasma';
+	cl.Default.ShieldType[i++] = 'RedIonize';
+	cl.Default.ShieldType[i++] = 'Ballistic';
+	cl.Default.ShieldType[i++] = 'Laser';
 }
 
 defaultproperties
