@@ -1,0 +1,6 @@
+[Public]
+Object=(Name=FixGun.FixGunMutator,Class=Class,MetaClass=Engine.Mutator,Description="FixGunMutator,Spawn FixGun inside any XVehicle")
+Object=(Name=XVehicles.XVehiclesHUD,Class=Class,MetaClass=Engine.Mutator,Description="XVehiclesHUD,XVehciles HUD helper")
+Object=(Name=XVehicles.XVehiclesMH,Class=Class,MetaClass=Engine.Mutator,Description="XVehiclesMH,MH rules for XVehicles")
+Object=(Name=XVehicles.XVehiclesCTF,Class=Class,MetaClass=Engine.Mutator,Description="XVehiclesCTF,CTF rules for XVehicles")
+Object=(Name=XVehicles.XVehiclesSummon,Class=Class,MetaClass=Engine.Mutator,Description="XVehiclesSummon,Summon XVehicles at any place for debug")
