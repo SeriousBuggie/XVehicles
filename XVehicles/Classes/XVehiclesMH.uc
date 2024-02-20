@@ -104,7 +104,7 @@ function SetupVehicleClass(Class<vehicle> cl)
 	cl.Default.ShieldType[i++] = 'BumpWall'; // fall and hit walls
 	cl.Default.ShieldType[i++] = 'drowned'; // in water
 	cl.Default.ShieldType[i++] = 'FuckedUp'; // kill by killing zone
-	cl.Default.ShieldType[i++] = 'crushed'; // hit by vehicle
+//	cl.Default.ShieldType[i++] = 'crushed'; // hit by vehicle, but also can be titan rocks, so disabled
 	// damage from xvehicles
 	cl.Default.ShieldType[i++] = 'KrahtEnergy';
 	cl.Default.ShieldType[i++] = 'NaliEnergy';
