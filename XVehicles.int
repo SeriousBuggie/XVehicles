@@ -6,3 +6,5 @@ Object=(Name=XVehicles.XVehiclesCTF,Class=Class,MetaClass=Engine.Mutator,Descrip
 Object=(Name=XVehicles.XVehiclesSummon,Class=Class,MetaClass=Engine.Mutator,Description="XVehiclesSummon,Summon XVehicles at any place for debug")
 Object=(Name=XVehicles.VehicleCTFGame,Class=Class,MetaClass=Botpack.TournamentGameInfo)
 Preferences=(Caption="Vehicle Capture the Flag",Parent="Game Types",Class=XVehicles.VehicleCTFGame,Immediate=True)
+Object=(Name=XVMH.VehicleMonsterHunt,Class=Class,MetaClass=Botpack.TournamentGameInfo)
+Preferences=(Caption="Vehicle MonsterHunt",Parent="Game Types",Class=XVMH.VehicleMonsterHunt,Immediate=True)
