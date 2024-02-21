@@ -2861,10 +2861,15 @@ State VehicleDriving
 			if (CanAddPassenger(PP, fr))
 				Bump(PP);
 	}
-	function Touch( Actor Other )
+	function Touch(Actor Other)
 	{
-		if( Triggers(Other)!=None && Driver!=None )
+		if (Triggers(Other) != None && Driver != None)
 			Other.Touch(Driver);
+	}
+	function UnTouch(Actor Other)
+	{
+		if (Triggers(Other) != None && Driver != None)
+			Other.UnTouch(Driver);
 	}
 }
 
