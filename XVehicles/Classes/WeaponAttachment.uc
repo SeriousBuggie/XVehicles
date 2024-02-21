@@ -450,9 +450,20 @@ simulated function DelayFX(byte Mode);	//Called at the same time as ActivateDela
 function Projectile FixProj(Projectile Proj)
 {
 	local vector HitLocation, HitNormal, TraceEnd, TraceStart;
+	local Actor Target;
+	local Pawn Instig;
 	if (Proj != None && Proj.Trace(HitLocation, HitNormal, Proj.Location, Location, false) != None)
 	{
 		Proj.SetLocation(HitLocation);
+	}
+	// mark proj targeted to vehicle
+	if (Proj != None)
+	{
+		Instig = WeaponController;
+		if (Instig == None)
+			Instig = Proj.Instigator;
+		if (Instig != None && Vehicle(Instig.Target) != None)
+			Proj.Tag = Instig.Target.Name;
 	}
 	return Proj;
 }
@@ -1189,6 +1200,7 @@ static function Vehicle AttackVehicle(WeaponAttachment Weap, Bot Bot, float MaxD
 	local float Dist, BestDist, BestVehDist[2];
 	local int i, VehTeam;
 	local vector HL, HN;
+	local Pawn StubPawn;
 	
 	foreach Bot.RadiusActors(class'Vehicle', Veh, MaxDistance)
 		if (Weap == None || Veh != Weap.OwnerVehicle)
@@ -1199,9 +1211,9 @@ static function Vehicle AttackVehicle(WeaponAttachment Weap, Bot Bot, float MaxD
 			VehTeam = Veh.CurrentTeam;
 			if (Veh.MyFactory != None)
 				VehTeam = Veh.MyFactory.TeamNum;
-			if (VehTeam != Bot.PlayerReplicationInfo.Team && !Veh.HealthTooLowFor(None))
+			if (VehTeam != Bot.PlayerReplicationInfo.Team && !class'VehDmgTracker'.static.HealthTooLow(Veh, StubPawn, false))
 				i = 0;
-			else if (VehTeam == Bot.PlayerReplicationInfo.Team && Veh.HealthTooLowFor(None))
+			else if (VehTeam == Bot.PlayerReplicationInfo.Team && class'VehDmgTracker'.static.HealthTooLow(Veh, StubPawn, true))
 				i = 1;
 			else
 				continue;
@@ -1225,10 +1237,14 @@ static function Vehicle AttackVehicle(WeaponAttachment Weap, Bot Bot, float MaxD
 				BestVehDist[i] = Dist;
 			}
 		}
+	if (StubPawn != None)
+		StubPawn.Destroy();
 	if (BestVeh[0] != None)
-		return BestVeh[0];
-	else
-		return BestVeh[1];
+		i = 0;
+	else 
+		i = 1;
+	Bot.Spawn(class'VehDmgTracker').Init(Bot, BestVeh[i], i == 1);
+	return BestVeh[i];
 }
 
 function Actor GetVehicle(Actor Sender)
