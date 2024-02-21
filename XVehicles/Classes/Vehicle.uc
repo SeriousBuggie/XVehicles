@@ -1276,7 +1276,7 @@ local vector ExitVect;
 				Driver.ChangedWeapon();
 				if( Driver.Weapon != None && Driver.Weapon.Owner != None )
 					Driver.Weapon.BringUp();
-				if (Driver.bDuck == 1 && bCanFly)
+				if (PlayerPawn(Driver) != None && Driver.bDuck == 1 && bCanFly)
 					PreventEnter = Spawn(class'PreventEnter', Driver);
 				Driver.SetCollision(True,True,True);
 			}
