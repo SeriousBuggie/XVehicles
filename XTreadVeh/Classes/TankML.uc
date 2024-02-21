@@ -178,7 +178,7 @@ defaultproperties
 	EngineSound=Sound'XTreadVeh.TankML.TankMLEng'
 	bDriverWOffset=True
 	DriverWeapon=(WeaponClass=Class'TankMLTurret',WeaponOffset=(X=-68.000000,Z=43.000000))
-	VehicleKeyInfoStr="Tank ML-102 keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to turn|%Fire% to fire, %AltFire% to alt fire|%PrevWeapon%, %NextWeapon%, %SwitchToBestWeapon% to change camera|%ThrowWeapon% to exit the vehicle"
+	VehicleKeyInfoStr="Tank ML-102 keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to turn|%Fire% to fire, %AltFire% to alt fire|%mutate VehicleCamera% to change camera|%ThrowWeapon% to exit the vehicle"
 	bSlopedPhys=True
 	FrontWide=(X=111.250000,Y=90.000000,Z=-5.000000)
 	BackWide=(X=-131.250000,Y=90.000000,Z=-5.000000)

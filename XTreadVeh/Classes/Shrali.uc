@@ -126,7 +126,7 @@ defaultproperties
 	bDriverWOffset=True
 	DriverWeapon=(WeaponClass=Class'ShraliTurret',WeaponOffset=(X=-208.125000,Z=64.625000))
 	PassengerSeats(0)=(PassengerWeapon=Class'ShraliIonRotSup',PassengerWOffset=(X=150.000000,Z=-7.250000),CameraOffset=(Z=37.500000),CamBehindviewOffset=(X=-168.750000,Z=80.000000),bIsAvailable=True,SeatName="Shrali Gunner")
-	VehicleKeyInfoStr="Shrali keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to turn|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%PrevWeapon%, %NextWeapon%, %SwitchToBestWeapon% to change camera|%ThrowWeapon% to exit the vehicle"
+	VehicleKeyInfoStr="Shrali keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to turn|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%mutate VehicleCamera% to change camera|%ThrowWeapon% to exit the vehicle"
 	bSlopedPhys=True
 	FrontWide=(X=260.000000,Y=167.500000,Z=-10.000000)
 	BackWide=(X=-260.000000,Y=167.500000,Z=-10.000000)

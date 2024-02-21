@@ -120,7 +120,7 @@ defaultproperties
 	EngineSound=Sound'XTreadVeh.Kraht.KrahtEng'
 	bDriverWOffset=True
 	DriverWeapon=(WeaponClass=Class'KrahtTurret',WeaponOffset=(X=-38.500000,Z=41.250000))
-	VehicleKeyInfoStr="Kraht keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to turn|%Fire% to fire, %AltFire% to alt fire|%PrevWeapon%, %NextWeapon%, %SwitchToBestWeapon% to change camera|%ThrowWeapon% to exit the vehicle"
+	VehicleKeyInfoStr="Kraht keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to turn|%Fire% to fire, %AltFire% to alt fire|%mutate VehicleCamera% to change camera|%ThrowWeapon% to exit the vehicle"
 	bSlopedPhys=True
 	FrontWide=(X=103.000000,Y=80.000000,Z=-4.500000)
 	BackWide=(X=-64.000000,Y=80.000000,Z=-4.500000)

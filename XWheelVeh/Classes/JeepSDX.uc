@@ -144,7 +144,7 @@ defaultproperties
 	EndSound=Sound'XWheelVeh.JeepSDX.JeepStop'
 	EngineSound=Sound'XWheelVeh.JeepSDX.JeepEng'
 	PassengerSeats(0)=(PassengerWeapon=Class'JSDXTurret',PassengerWOffset=(X=-78.125000,Z=8.062500),CameraOffset=(Z=37.500000),CamBehindviewOffset=(X=-75.000000,Z=57.500000),bIsAvailable=True,SeatName="Light Plasma Dual Cannon")
-	VehicleKeyInfoStr="Jeep SDX keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to turn|%Fire% to fire, %AltFire% to alt fire|1, 2 to switch seats|9 to toggle winter tires|0 to toggle light|%PrevWeapon%, %NextWeapon%, %SwitchToBestWeapon% to change camera|%ThrowWeapon% to exit the vehicle"
+	VehicleKeyInfoStr="Jeep SDX keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to turn|%Fire% to fire, %AltFire% to alt fire|1, 2 to switch seats|9 to toggle winter tires|0 to toggle light|%mutate VehicleCamera% to change camera|%ThrowWeapon% to exit the vehicle"
 	bSlopedPhys=True
 	FrontWide=(X=80.000000,Y=60.000000,Z=-7.500000)
 	BackWide=(X=-80.000000,Y=60.000000,Z=-7.500000)

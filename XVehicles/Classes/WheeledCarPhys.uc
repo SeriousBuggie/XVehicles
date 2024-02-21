@@ -761,7 +761,7 @@ defaultproperties
 	VehicleName="Wheeled Car"
 	TranslatorDescription="This is a wheeled vehicle, press [Fire] or [AltFire] to fire the different firemodes. Use your Strafe keys to turn this vehicle and Move Forward/Backward keys to accelerate/deaccelerate. To leave this vehicle, press your [ThrowWeapon] key."
 	bMaster=True
-	VehicleKeyInfoStr="Wheeled car keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to turn|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%PrevWeapon%, %NextWeapon%, %SwitchToBestWeapon% to change camera|%ThrowWeapon% to exit the vehicle"
+	VehicleKeyInfoStr="Wheeled car keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to turn|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%mutate VehicleCameran% to change camera|%ThrowWeapon% to exit the vehicle"
 	bDestroyUpsideDown=True
 	WDeAccelRate=50.000000
 	Mesh=LodMesh'UnrealShare.WoodenBoxM'
