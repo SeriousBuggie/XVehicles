@@ -20,7 +20,7 @@ function FireTurret( byte Mode, optional bool bForceFire )
 		if (ProjCls != None && VSize(RepAimPos - OwnerVehicle.Location) > OwnerVehicle.CollisionRadius + 
 			ProjCls.Default.DamageRadius*2)
 		{
-			HL = Location + vector(Rotation)*1.1*(OwnerVehicle.CollisionRadius + ProjCls.Default.DamageRadius);
+			HL = Location + 1.1*(OwnerVehicle.CollisionRadius + ProjCls.Default.DamageRadius)*vector(Rotation);
 			if (!OwnerVehicle.FastTrace(HL, Location) || OwnerVehicle.Trace(HL, HN, HL, Location, true) != None)
 				return;
 		}

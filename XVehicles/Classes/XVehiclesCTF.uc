@@ -72,7 +72,7 @@ event PreBeginPlay()
 		foreach AllActors(class'FlagBase', FB)
 		{
 			HL = FB.Location;
-			dir = vect(0,0,134.5)*FB.DrawScale/FB.default.DrawScale >> FB.Rotation;
+			dir = FB.DrawScale/FB.default.DrawScale*vect(0,0,134.5) >> FB.Rotation;
 			HL -= dir;
 			if (FB.Trace(HL, HN, HL) != None && (Normal(dir) dot HN) > 0.998)
 			{

@@ -22,9 +22,17 @@ simulated function Tick( float DeltaTime )
 				HL = End;
 			NumPuffs = VSize(HL - Location)/MoveSize - 1;
 		}
-		if (NumPuffs > 0)		{			r = Spawn(Class,self,,Location + MoveAmount/NetMul);			if (r != None)			{				r.RemoteRole = ROLE_None;				r.NumPuffs = NumPuffs - 1;
+		if (NumPuffs > 0)
+		{
+			r = Spawn(Class,self,,Location + MoveAmount/NetMul);
+			if (r != None)
+			{
+				r.RemoteRole = ROLE_None;
+				r.NumPuffs = NumPuffs - 1;
 				r.Texture = Texture;
-				r.MoveAmount = MoveAmount;			}		}
+				r.MoveAmount = MoveAmount;
+			}
+		}
 		NumPuffs = 0;
 	}
 }
@@ -32,7 +40,7 @@ simulated function Tick( float DeltaTime )
 simulated function PostBeginPlay()
 {
 	local rotator R;
-	MoveAmount = vector(Rotation)*MoveSize*NetMul;
+	MoveAmount = MoveSize*NetMul*vector(Rotation);
 	if ( Level.NetMode != NM_DedicatedServer )
 	{
 		R = Rotation;

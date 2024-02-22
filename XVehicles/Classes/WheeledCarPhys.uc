@@ -548,7 +548,7 @@ local byte i;
 	}
 	else DeAcc+=WAccelRate*Delta/100;
 
-	Ac = vector(Rotation)*Accel*MaxGroundSpeed*8/10;
+	Ac = Accel*MaxGroundSpeed*8/10*vector(Rotation);
 	VelFriction = Normal(VelFriction+Ac)*DeAcc;
 
 	Return VelFriction;

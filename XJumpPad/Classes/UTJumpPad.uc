@@ -335,7 +335,7 @@ simulated function vector TraceGround( vector Origin )
     }
         
     ShowMessage( "ERROR: Ground level not found below destination",, true );
-    return JumpTarget.Location + vect(0,0,-1)*JumpTarget.CollisionHeight;
+    return JumpTarget.Location + JumpTarget.CollisionHeight*vect(0,0,-1);
 }
 
 simulated function vector CalcVelocity( Actor Other )

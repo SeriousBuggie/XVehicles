@@ -74,7 +74,7 @@ function vector AdjustLocation(Actor NP, optional bool bInMid)
 	local float offset, k;
 	ret = NP.Location;	
 	if (VehicleOwner.bCanFly && NavigationPoint(NP) != None && 
-		!NP.FastTrace(NP.Location - vect(0,0,1)*2*VehicleOwner.CollisionHeight) &&
+		!NP.FastTrace(NP.Location - 2*VehicleOwner.CollisionHeight*vect(0,0,1)) &&
 		(VSize(NP.Location - VehicleOwner.Location) > 2*AirFlyScale*VehicleOwner.CollisionRadius || 
 		bInMid || PathNode(NP) != None || InventorySpot(NP) != None || PlayerStart(NP) != None || 
 		Spawnpoint(NP) != None || NP.Class.Name == 'NavigationPoint' || NP.isA('AirPath') || 

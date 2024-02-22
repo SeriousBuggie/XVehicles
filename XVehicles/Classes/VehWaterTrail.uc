@@ -42,7 +42,7 @@ simulated function ZoneChange( ZoneInfo newZone)
 		{
 			SetPhysics(PHYS_Projectile);
 			Velocity += newZone.ZoneVelocity;
-			SetRotation(rotator(vector(Rotation)*AnimFrame*InitDrawScale*256 + newZone.ZoneVelocity));
+			SetRotation(rotator(AnimFrame*InitDrawScale*256*vector(Rotation) + newZone.ZoneVelocity));
 		}
 
 		inWater = True;

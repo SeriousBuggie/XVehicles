@@ -16,7 +16,7 @@ local TCBulOutFX xs;
 
 	if (bReady)
 	{
-		xs = Spawn(Class'TCBulOutFX',,, Location + vector(Rotation)*DrawScale*20);
+		xs = Spawn(Class'TCBulOutFX',,, Location + DrawScale*20*vector(Rotation));
 		xs.DrawScale = DrawScale - 0.25;
 	}
 	else

@@ -2154,14 +2154,14 @@ simulated function bool CheckOnGround()
 				WExt.X = FMax(FrontWide.Y,BackWide.Y);
 				WExt.Y = WExt.X;
 				WExt.Z = CollisionHeight - MaxObstclHeight;
-				WEnd = WSt + vector(Rotation)*OldAccelD*(WExt.X + 2);
+				WEnd = WSt + OldAccelD*(WExt.X + 2)*vector(Rotation);
 				WAs = Trace(WHL,WHN,WEnd,WSt,False,WExt);
 	
 				if (WAs == None)
 				{
 					if (WallHitDir == -Accel && WallHitDir!=0)
 					{
-						WEnd = WSt + vector(Rotation)*WallHitDir*(WExt.X + 2);
+						WEnd = WSt + WallHitDir*(WExt.X + 2)*vector(Rotation);
 						WBs = Trace(WHL,WHN,WEnd,WSt,False,WExt);
 						
 						if (WBs == None)
@@ -3430,7 +3430,7 @@ simulated function DrawVehicleStatus( Canvas C, vector CameraPos, rotator Camera
 	}
 	else if( C.ViewPort.Actor.PlayerReplicationInfo!=None && (C.ViewPort.Actor.PlayerReplicationInfo.bIsSpectator
 	 || (C.ViewPort.Actor.PlayerReplicationInfo.Team<=3 && C.ViewPort.Actor.PlayerReplicationInfo.Team==CurrentTeam))
-	 && WorldToScreen(Location+vect(0,0,1)*CollisionHeight*1.1,C.ViewPort.Actor,CameraPos,CameraRot,C.ClipX,C.ClipY,X,Y) )
+	 && WorldToScreen(Location + CollisionHeight*1.1*vect(0,0,1),C.ViewPort.Actor,CameraPos,CameraRot,C.ClipX,C.ClipY,X,Y) )
 	{
 		C.DrawColor = Class'UnrealTeamScoreBoard'.Default.TeamColor[CurrentTeam];
 		C.Font = class'FontInfo'.Static.GetStaticSmallFont(C.ClipX);
@@ -3621,12 +3621,12 @@ simulated function SingularBump( Actor Other )
 			{
 				if ( Vector(Rotation) Dot Normal(NVelH) > 0)
 				{
-					NVelH = VectorProjection(NVelH, vector(Rotation)*65535);
+					NVelH = VectorProjection(NVelH, 65535*vector(Rotation));
 					OldAccelD = 1;
 				}
 				else
 				{
-					NVelH = VectorProjection(NVelH, -vector(Rotation)*65535);
+					NVelH = VectorProjection(NVelH, -65535*vector(Rotation));
 					OldAccelD = -1;
 				}
 	

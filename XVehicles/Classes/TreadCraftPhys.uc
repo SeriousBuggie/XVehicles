@@ -396,7 +396,7 @@ simulated function UpdateDriverInput( float Delta )
 			(Velocity dot Velocity) <= 256 /* 16*16 */)
 		{
 			OldAccelD = Accel;
-			Velocity = VSize(Velocity)*vector(Rotation)*Accel;
+			Velocity = VSize(Velocity)*Accel*vector(Rotation);
 			IceFix = True;
 		}
 		else if (IceFix && FMax(Region.Zone.ZoneGroundFriction, TreadsTraction) <= 4.0 && 
@@ -701,7 +701,7 @@ simulated function vector GetVirtualSpeedOnIce( float Delta )
 	}
 	else DeAcc+=WAccelRate*Delta/100;
 
-	Ac = vector(rotation)*Accel*MaxGroundSpeed*8/10;
+	Ac = Accel*MaxGroundSpeed*8/10*vector(rotation);
 	VelFriction = Normal(VelFriction+Ac)*DeAcc;
 	return VelFriction;
 }
