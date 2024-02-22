@@ -2801,7 +2801,7 @@ function float BotDesireability2(Pawn Bot)
 
 Auto State EmptyVehicle
 {
-Ignores FireWeapon,ReadDriverInput,ReadBotInput,DriverLeft;
+	Ignores FireWeapon, ReadDriverInput, ReadBotInput, DriverLeft;
 
 	function ServerPerformPackedMove(float InClientTime, byte Bits)
 	{
@@ -2816,38 +2816,37 @@ Ignores FireWeapon,ReadDriverInput,ReadBotInput,DriverLeft;
 	{
 		local Pawn P;
 
-		For( P=Level.PawnList; P!=None; P=P.NextPawn )
+		for (P = Level.PawnList; P != None; P = P.NextPawn)
 		{
-			if( P.bIsPlayer && PlayerPawn(P)!=None && VSize(P.Location-Location)<(CollisionRadius+100+P.CollisionRadius) && 
+			if (P.bIsPlayer && PlayerPawn(P) != None && VSize(P.Location - Location) < (CollisionRadius + 100 + P.CollisionRadius) && 
 				CanEnter(P, True) && !IsTeamLockedFor(P))
-//				P.ClientMessage("Hold 'Crouch' key to enter this"@VehicleName,'Pickup');
-				P.ReceiveLocalizedMessage( class'EnterMessagePlus', 0, None, None, self );
+				P.ReceiveLocalizedMessage(class'EnterMessagePlus', 0, None, None, self);
 		}
 	}
-	singular function Bump( Actor Other )
+	singular function Bump(Actor Other)
 	{
+		local Pawn Seeker;
 		Global.Bump(Other);
-		if( Other == None || Other.bDeleteMe )
-			Return;
-		if( !Other.bIsPawn || !CanEnter(Pawn(Other)) )
-			Return;
-		if( !VehicleAI.PawnCanDrive(Pawn(Other)) )
-			Return;
-		if( IsTeamLockedFor(Pawn(Other)) )
+		if (Other == None || !Other.bIsPawn || Other.bDeleteMe)
+			return;
+		Seeker = Pawn(Other);
+		if (!Seeker.bIsPlayer || !CanEnter(Seeker) || !VehicleAI.PawnCanDrive(Seeker))
+			return;
+		if (IsTeamLockedFor(Seeker))
 		{
-			Pawn(Other).ClientMessage("This"@VehicleName@"is team locked.",'CriticalEvent');
-			Return;
+			Seeker.ClientMessage("This" @ VehicleName @ "is team locked.", 'CriticalEvent');
+			return;
 		}
-		else if( Pawn(Other).PlayerReplicationInfo!=None && Pawn(Other).PlayerReplicationInfo.Team<=3
-		 && Pawn(Other).PlayerReplicationInfo.Team!=CurrentTeam)
+		else if(Seeker.PlayerReplicationInfo != None && Seeker.PlayerReplicationInfo.Team <= 3 &&
+			Seeker.PlayerReplicationInfo.Team != CurrentTeam)
 		{
-			CurrentTeam = Pawn(Other).PlayerReplicationInfo.Team;
-			SetOverlayMat(TeamOverlays[CurrentTeam],0.5);
-			PlaySound(Sound'CarAlarm01',SLOT_None,2,,2000);
-			if( PlayerPawn(Other)!=None )
-				PlayerPawn(Other).ClientPlaySound(Sound'Hijacked', , true);
+			CurrentTeam = Seeker.PlayerReplicationInfo.Team;
+			SetOverlayMat(TeamOverlays[CurrentTeam], 0.5);
+			PlaySound(Sound'CarAlarm01', SLOT_None, 2, , 2000);
+			if (PlayerPawn(Seeker) != None)
+				PlayerPawn(Seeker).ClientPlaySound(Sound'Hijacked', , true);
 		}
-		DriverEnter(Pawn(Other));
+		DriverEnter(Seeker);
 	}
 	function Timer()
 	{
@@ -2889,14 +2888,18 @@ Begin:
 
 State VehicleDriving
 {
-	singular function Bump( Actor Other )
+	singular function Bump(Actor Other)
 	{
 		local byte Fr;
+		local Pawn Seeker;
 
 		Global.Bump(Other);
-		if( Other == None || Other.bDeleteMe || !Other.bIsPawn || !CanAddPassenger(Pawn(Other),Fr) || !VehicleAI.PawnCanPassenge(Pawn(Other),Fr) )
-			Return;
-		PassengerEnter(Pawn(Other),Fr);
+		if (Other == None || !Other.bIsPawn || Other.bDeleteMe)
+			return;
+		Seeker = Pawn(Other);
+		if (!Seeker.bIsPlayer || !CanAddPassenger(Seeker, Fr) || !VehicleAI.PawnCanPassenge(Seeker, Fr))
+			return;
+		PassengerEnter(Seeker, Fr);
 	}
 	function Timer()
 	{
@@ -3512,7 +3515,7 @@ function vector VectorProjection(vector VProjector, vector VProjectedOn)
 	return VProjectedOn + Normal(-VProjectedOn)*(((-VProjectedOn) dot ( VProjector - VProjectedOn )) / VSize( VProjectedOn));
 }
 
-simulated function Bump( Actor Other )
+simulated function Bump(Actor Other)
 {
 	if (bInBump)
 		return;
@@ -3522,7 +3525,7 @@ simulated function Bump( Actor Other )
 }
 
 // not singular because v436 share singularity flag with state version of function
-simulated function SingularBump( Actor Other )
+simulated function SingularBump(Actor Other)
 {
 	local vector OtVel,MyVel;
 	local float Sp, Dmg;
@@ -3533,7 +3536,7 @@ simulated function SingularBump( Actor Other )
 	if (Other == None || Other.bDeleteMe)
 		return;
 // log(Self @ Level.TimeSeconds @ "Bump" @ Other);
-	if( Vehicle(Other)!=None )
+	if (Vehicle(Other) != None)
 	{
 		Dir = Other.Location-Location;
 		Dir.Z = 0;
