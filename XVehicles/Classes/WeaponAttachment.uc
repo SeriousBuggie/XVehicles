@@ -1240,7 +1240,8 @@ static function Vehicle AttackVehicle(WeaponAttachment Weap, Bot Bot, float MaxD
 		i = 0;
 	else 
 		i = 1;
-	Bot.Spawn(class'VehDmgTracker').Init(Bot, BestVeh[i], i == 1);
+	if (BestVeh[i] != None)
+		Bot.Spawn(class'VehDmgTracker').Init(Bot, BestVeh[i], i == 1);
 	return BestVeh[i];
 }
 
