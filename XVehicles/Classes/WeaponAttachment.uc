@@ -1200,7 +1200,6 @@ static function Vehicle AttackVehicle(WeaponAttachment Weap, Bot Bot, float MaxD
 	local float Dist, BestDist, BestVehDist[2];
 	local int i, VehTeam;
 	local vector HL, HN;
-	local Pawn StubPawn;
 	
 	foreach Bot.RadiusActors(class'Vehicle', Veh, MaxDistance)
 		if (Weap == None || Veh != Weap.OwnerVehicle)
@@ -1211,9 +1210,9 @@ static function Vehicle AttackVehicle(WeaponAttachment Weap, Bot Bot, float MaxD
 			VehTeam = Veh.CurrentTeam;
 			if (Veh.MyFactory != None)
 				VehTeam = Veh.MyFactory.TeamNum;
-			if (VehTeam != Bot.PlayerReplicationInfo.Team && !class'VehDmgTracker'.static.HealthTooLow(Veh, StubPawn, false))
+			if (VehTeam != Bot.PlayerReplicationInfo.Team && !class'VehDmgTracker'.static.HealthTooLow(Veh, false))
 				i = 0;
-			else if (VehTeam == Bot.PlayerReplicationInfo.Team && class'VehDmgTracker'.static.HealthTooLow(Veh, StubPawn, true))
+			else if (VehTeam == Bot.PlayerReplicationInfo.Team && class'VehDmgTracker'.static.HealthTooLow(Veh, true))
 				i = 1;
 			else
 				continue;
@@ -1237,8 +1236,6 @@ static function Vehicle AttackVehicle(WeaponAttachment Weap, Bot Bot, float MaxD
 				BestVehDist[i] = Dist;
 			}
 		}
-	if (StubPawn != None)
-		StubPawn.Destroy();
 	if (BestVeh[0] != None)
 		i = 0;
 	else 

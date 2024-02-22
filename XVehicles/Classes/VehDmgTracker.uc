@@ -1,9 +1,9 @@
 //=============================================================================
 // VehDmgTracker.
 //=============================================================================
-class VehDmgTracker expands HorseFly;
+class VehDmgTracker expands Info;
 
-var Pawn MyPawn, this; // writable version of self
+var Pawn MyPawn;
 var Vehicle MyVehicle;
 var bool DesiredResult;
 
@@ -11,7 +11,6 @@ event FellOutOfWorld();
 
 function VehDmgTracker Init(Pawn InPawn, Vehicle InVehicle, bool InDesiredResult)
 {
-	this = self;
 	MyPawn = InPawn;
 	MyVehicle = InVehicle;
 	DesiredResult = InDesiredResult;
@@ -26,7 +25,7 @@ function Check()
 		Destroy();
 		return;
 	}
-	if (HealthTooLow(MyVehicle, this, DesiredResult) != DesiredResult)
+	if (HealthTooLow(MyVehicle, DesiredResult) != DesiredResult)
 	{
 		MyPawn.Target = None;
 		if (MyPawn.FaceTarget == MyVehicle)
@@ -37,7 +36,13 @@ function Check()
 	}	
 }
 
-static function bool HealthTooLow(Vehicle Veh, out Pawn StubPawn, bool bDesiredResult)
+function Destroyed()
+{
+	Super.Destroyed();
+	GotoState('');
+}
+
+static function bool HealthTooLow(Vehicle Veh, bool bDesiredResult)
 {
 	local int OldHealth;
 	local bool ret;
@@ -49,12 +54,7 @@ static function bool HealthTooLow(Vehicle Veh, out Pawn StubPawn, bool bDesiredR
 		return ret;
 	OldHealth = Veh.Health;
 	foreach Veh.AllActors(class'Projectile', Proj, Veh.Name)
-	{
-		if (StubPawn == None)
-			StubPawn = Veh.Spawn(class'HorseFly');
-		if (StubPawn != None)
-			Veh.Health -= Veh.Level.Game.ReduceDamage(Proj.Damage, Proj.MyDamageType, StubPawn, Proj.Instigator);
-	}
+		Veh.Health -= Veh.Level.Game.ReduceDamage(Proj.Damage, Proj.MyDamageType, Veh.default.StubPawn, Proj.Instigator);
 	if (bDesiredResult && Veh.Health <= 0)
 		ret = false;
 	else if (Veh.Health != OldHealth)
@@ -74,6 +74,4 @@ Begin:
 defaultproperties
 {
 	RemoteRole=ROLE_None
-	DrawType=DT_None
-	bCollideWorld=False
 }

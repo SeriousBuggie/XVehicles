@@ -2,7 +2,6 @@
 Class VAIBehaviour extends Info;
 
 var Vehicle VehicleOwner;
-var Pawn TracePawn;
 
 var float AirFlyScale;
 
@@ -107,19 +106,9 @@ function bool CanReach(vector Point)
 	local bool ret;
 	if (VSize(Point - VehicleOwner.Driver.Location) < 800)
 		return VehicleOwner.Driver.PointReachable(Point);
-		
-	if (TracePawn == None)
-	{
-		TracePawn = Spawn(class'HorseFly');
-		if (TracePawn == None)
-			return false;
-		TracePawn.RemoteRole = ROLE_None;
-		TracePawn.AmbientSound = None;
-		TracePawn.DrawScale = 0.0001;
-		TracePawn.SetCollisionSize(1, 1);
-	}
-	TracePawn.SetLocation(Point);
-	return VehicleOwner.Driver.ActorReachable(TracePawn);
+
+	VehicleOwner.default.StubPawn.SetLocation(Point);
+	return VehicleOwner.Driver.ActorReachable(VehicleOwner.default.StubPawn);
 }
 
 function vector GetNextMoveTarget()

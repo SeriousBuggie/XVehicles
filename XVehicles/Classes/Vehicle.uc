@@ -359,6 +359,8 @@ var(Shielding) float ShieldLevel;
 
 var bool bReplicated;
 
+var Pawn StubPawn; // used only default value
+
 const SmallDrawScale = 0.0001;
 
 replication
@@ -377,8 +379,19 @@ replication
 
 function Spawned()
 {
+	local Pawn TracePawn;
 	Super.Spawned();
 	PlaySound(SpawnSound, SLOT_Misc);
+	if (default.StubPawn == None)
+	{
+		TracePawn = Spawn(Class'FlockPawn');
+		TracePawn.RemoteRole = ROLE_None;
+		TracePawn.DrawScale = 0.0001;
+		TracePawn.bProjTarget = false;
+		TracePawn.SetCollision(false, false, false);
+		TracePawn.SetCollisionSize(1, 1);
+		default.StubPawn = TracePawn;
+	}
 }
 
 function AnalyzeZone( ZoneInfo newZone)
@@ -3965,7 +3978,6 @@ function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 	local byte i;
 	local bool bHadPass;
 	local byte shldset, shldtkn;
-	local Pawn StubPawn;
 //	Log(self @ Level.TimeSeconds @ "TakeDamage" @ Damage @ InstigatedBy @ hitlocation @ momentum @ damageType @ InstigatedBy.DamageScaling);
 
 	if (!bVehicleBlewUp && !(Level.Game != None && Level.Game.bGameEnded))
@@ -3996,14 +4008,7 @@ function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 			if (!bTakeAlwaysDamage && !bHadPass && IsSameTeam(instigatedBy))
 				Damage = 0;
 			else
-			{
-				StubPawn = Spawn(class'HorseFly');
-				if (StubPawn != None)
-				{
-					Damage = Level.Game.ReduceDamage(Damage, DamageType, StubPawn, instigatedBy);
-					StubPawn.Destroy();
-				}
-			}
+				Damage = Level.Game.ReduceDamage(Damage, DamageType, default.StubPawn, instigatedBy);
 		}
 		else if (Driver.ReducedDamageType == 'All') // God mode on!
 			Damage = 0;
