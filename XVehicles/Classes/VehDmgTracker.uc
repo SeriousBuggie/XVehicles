@@ -54,7 +54,7 @@ static function bool HealthTooLow(Vehicle Veh, bool bDesiredResult)
 		return ret;
 	OldHealth = Veh.Health;
 	foreach Veh.AllActors(class'Projectile', Proj, Veh.Name)
-		Veh.Health -= Veh.Level.Game.ReduceDamage(Proj.Damage, Proj.MyDamageType, Veh.default.StubPawn, Proj.Instigator);
+		Veh.Health -= Veh.Level.Game.ReduceDamage(Proj.Damage, Proj.MyDamageType, Class'Vehicle'.default.StubPawn, Proj.Instigator);
 	if (bDesiredResult && Veh.Health <= 0)
 		ret = false;
 	else if (Veh.Health != OldHealth)

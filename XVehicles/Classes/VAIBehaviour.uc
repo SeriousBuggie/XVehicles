@@ -107,8 +107,8 @@ function bool CanReach(vector Point)
 	if (VSize(Point - VehicleOwner.Driver.Location) < 800)
 		return VehicleOwner.Driver.PointReachable(Point);
 
-	VehicleOwner.default.StubPawn.SetLocation(Point);
-	return VehicleOwner.Driver.ActorReachable(VehicleOwner.default.StubPawn);
+	Class'Vehicle'.default.StubPawn.SetLocation(Point);
+	return VehicleOwner.Driver.ActorReachable(Class'Vehicle'.default.StubPawn);
 }
 
 function vector GetNextMoveTarget()

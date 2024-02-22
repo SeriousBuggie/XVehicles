@@ -382,7 +382,7 @@ function Spawned()
 	local Pawn TracePawn;
 	Super.Spawned();
 	PlaySound(SpawnSound, SLOT_Misc);
-	if (default.StubPawn == None)
+	if (Class'Vehicle'.default.StubPawn == None)
 	{
 		TracePawn = Spawn(Class'FlockPawn');
 		TracePawn.RemoteRole = ROLE_None;
@@ -390,7 +390,7 @@ function Spawned()
 		TracePawn.bProjTarget = false;
 		TracePawn.SetCollision(false, false, false);
 		TracePawn.SetCollisionSize(1, 1);
-		default.StubPawn = TracePawn;
+		Class'Vehicle'.default.StubPawn = TracePawn;
 	}
 }
 
@@ -4008,7 +4008,7 @@ function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 			if (!bTakeAlwaysDamage && !bHadPass && IsSameTeam(instigatedBy))
 				Damage = 0;
 			else
-				Damage = Level.Game.ReduceDamage(Damage, DamageType, default.StubPawn, instigatedBy);
+				Damage = Level.Game.ReduceDamage(Damage, DamageType, Class'Vehicle'.default.StubPawn, instigatedBy);
 		}
 		else if (Driver.ReducedDamageType == 'All') // God mode on!
 			Damage = 0;
