@@ -327,13 +327,13 @@ function vector GetNextMoveTarget()
 }
 function bool PawnCanDrive( Pawn Other )
 {
-	if (VehicleOwner.HealthTooLowFor(Other) || VehicleOwner.NeedStop(Other) || !VehicleOwner.CrewFit(Other))
+	if (!Other.bIsPlayer || VehicleOwner.HealthTooLowFor(Other) || VehicleOwner.NeedStop(Other) || !VehicleOwner.CrewFit(Other))
 		return false;
 	if (Other.IsInState('Dying'))
 		return false;
 	if (PlayerPawn(Other) == None && HasFlag(Other) && VehicleOwner.DropFlag != VehicleOwner.EDropFlag.DF_None)
 		return false;
-	Return Other.bIsPlayer;
+	return true;
 }
 function bool PawnCanPassenge( Pawn Other, byte SeatNumber )
 {
