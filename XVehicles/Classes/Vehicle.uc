@@ -1225,9 +1225,30 @@ function RestartPawn(Pawn Other)
     }
 }
 
+function Actor GetFlagGoal()
+{
+	local Actor FlagGoal;
+	FlagGoal = FlagBase(Driver.MoveTarget);
+	if (FlagGoal == None)
+	{
+		FlagGoal = CTFFlag(Driver.MoveTarget);
+		if (FlagGoal != None && CTFFlag(FlagGoal).bHome)
+			FlagGoal = CTFFlag(FlagGoal).HomeBase;
+	}
+	return FlagGoal;
+}
+
+function bool NeedReturnBackAfter(Actor FlagGoal)
+{
+	return (DropFlag == DF_None || 
+		(CTFFlag(FlagGoal) != None && CurrentTeam == CTFFlag(FlagGoal).Team)) &&
+		!HealthTooLowFor(Driver);
+}
+
 singular function DriverLeft( optional bool bForcedLeave, optional coerce string Reason )
 {
-local vector ExitVect;
+	local vector ExitVect;
+	local Actor FlagGoal;
 
 	if( Driver!=None )
 	{
@@ -1269,7 +1290,18 @@ local vector ExitVect;
 			if (Driver != None)
 			{
 				if (Bot(Driver) != None)
+				{
 					Bot(Driver).EnemyDropped = None; // Prevent dumb moves
+					FlagGoal = GetFlagGoal();
+					if (FlagGoal != None && NeedReturnBackAfter(FlagGoal) &&
+						VSize(FlagGoal.Location - Driver.Location) < 
+						(FlagGoal.CollisionRadius + Driver.CollisionRadius))
+					{
+						Driver.Velocity += Normal(Location - Driver.Location)*Driver.GroundSpeed; // try enter back
+						Driver.MoveTarget = self;
+						Driver.Destination = Location;
+					}
+				}
 				Driver.MoveTimer = -1; // time to refresh paths
 				Driver.Velocity += Velocity; // inertial exit
 				Driver.Weapon = Driver.PendingWeapon;
@@ -2602,10 +2634,22 @@ function bool AboutToCrash(out int Accel)
 	local float Dir;
 	local vector HitLocation, HitNormal;
 	local int ret;
-	local Actor A;
+	local Actor A, FlagGoal;
 
-	// take 500 as crash speed. So use 490 as check
 	Dir = VSize(Velocity);
+	// brake for take flag
+	if (Dir > 100)
+	{
+		FlagGoal = GetFlagGoal();
+		if (FlagGoal != None && NeedReturnBackAfter(FlagGoal) &&
+			VSize(FlagGoal.Location - Location) < 
+			(FlagGoal.CollisionRadius + CollisionRadius + Dir/4))
+		{
+			Accel = GetMovementDir()*-1; // brake via reverse
+			return true;
+		}
+	}
+	// take 500 as crash speed. So use 490 as check
 	if (Dir > 490)
 	{
 		ret = GetMovementDir();
