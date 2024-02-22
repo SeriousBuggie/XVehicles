@@ -2667,7 +2667,7 @@ function bool AboutToCrash(out int Accel)
 	{
 		ret = GetMovementDir();
 		// about to crash with damage?
-		A = Trace(HitLocation, HitNormal, Location + vector(Rotation)*ret*Dir/2,,true,
+		A = Trace(HitLocation, HitNormal, Location + ret*Dir/2*vector(Rotation), , true,
 			vect(1,1,0)*CollisionRadius + vect(0,0,1)*(CollisionHeight - MaxObstclHeight));
 		if (A == None)
 			return false;
