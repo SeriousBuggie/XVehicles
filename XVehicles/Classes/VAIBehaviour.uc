@@ -325,9 +325,10 @@ function vector GetNextMoveTarget()
 		return AdjustLocation(VehicleOwner.Driver.MoveTarget);
 	return VehicleOwner.Driver.Destination;	
 }
-function bool PawnCanDrive( Pawn Other )
+function bool PawnCanDrive(Pawn Other, optional bool bForce)
 {
-	if (!Other.bIsPlayer || VehicleOwner.HealthTooLowFor(Other) || VehicleOwner.NeedStop(Other) || !VehicleOwner.CrewFit(Other))
+	if (!Other.bIsPlayer || (!bForce && VehicleOwner.HealthTooLowFor(Other)) || 
+		VehicleOwner.NeedStop(Other) || !VehicleOwner.CrewFit(Other))
 		return false;
 	if (Other.IsInState('Dying'))
 		return false;

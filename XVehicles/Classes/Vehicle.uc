@@ -2830,7 +2830,7 @@ Auto State EmptyVehicle
 		if (Other == None || !Other.bIsPawn || Other.bDeleteMe)
 			return;
 		Seeker = Pawn(Other);
-		if (!Seeker.bIsPlayer || !CanEnter(Seeker) || !VehicleAI.PawnCanDrive(Seeker))
+		if (!Seeker.bIsPlayer || !CanEnter(Seeker) || !VehicleAI.PawnCanDrive(Seeker, true))
 			return;
 		if (IsTeamLockedFor(Seeker))
 		{
