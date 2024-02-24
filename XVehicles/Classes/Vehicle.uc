@@ -1204,47 +1204,66 @@ function RestartPawn(Pawn Other)
 {
     local ENetRole OldRole;
     local PlayerPawn PP;
+    local Bot Bot;
+    local name OldPlayerReStartState;
     
     if (Other.IsInState('Dying'))
     	return;
     
     // fix UT bug
-    if (Bot(Other) != None) 
+    Bot = Bot(Other);
+    if (Bot != None) 
     {
-    	Bot(Other).PreSetMovement(); // for set bCanSwim
+    	Bot.PreSetMovement(); // for set bCanSwim
     	if (Other.Region.Zone != None && Other.Region.Zone.bWaterZone && Other.bCanSwim)
     		Other.setPhysics(PHYS_Swimming);
     	else
 	    	Other.SetPhysics(PHYS_Falling);
-	    if (Bot(Other).PlayerReStartState == 'PlayerWalking')
-		    Bot(Other).PlayerReStartState = 'Attacking';
+	    	
+	    if (Bot.NextState == 'RangedAttack')
+		{
+			Bot.NextState = 'Roaming';
+			Bot.NextLabel = 'Begin';
+		}
+	    if (Bot.PlayerReStartState == 'PlayerWalking')
+		    Bot.PlayerReStartState = 'Attacking';
+		// preserve old state
+		OldPlayerReStartState = Bot.PlayerReStartState;
+		Bot.PlayerReStartState = Bot.GetStateName();
+		if (Bot.PlayerReStartState == 'RangedAttack')
+			Bot.PlayerReStartState = 'Roaming';
 	}
     
     Other.ClientRestart();
-    PP = PlayerPawn(Other);
-
-	// OldUnreal fix: ClientReStart only runs on the client side if we call this on a dedicated server
-	// The server _tries_ to call the function, but ProcessRemoteFunction absorbs the call because RemoteRole==ROLE_AutonomousProxy
-	// This horrible hack ensures the server also calls ClientReStart so the client and server sync up
-	//
-	// Without this fix, the player gets stuck in state CheatFlying and PHYS_Falling when switching from ghost/fly to walk
-	// As for tanks it make on server player walk in water;
-    if ( PP != None && NetConnection(PP.Player) != None && PP.RemoteRole == ROLE_AutonomousProxy )
+    if (Bot != None) 
+    	Bot.PlayerReStartState = OldPlayerReStartState;
+    if (Other.RemoteRole == ROLE_AutonomousProxy)
     {
-        OldRole = PP.RemoteRole;
-        PP.RemoteRole = ROLE_None;
-        PP.ClientRestart();
-        PP.RemoteRole = OldRole;
-    }
+		PP = PlayerPawn(Other);
+
+		// OldUnreal fix: ClientReStart only runs on the client side if we call this on a dedicated server
+		// The server _tries_ to call the function, but ProcessRemoteFunction absorbs the call because RemoteRole==ROLE_AutonomousProxy
+		// This horrible hack ensures the server also calls ClientReStart so the client and server sync up
+		//
+		// Without this fix, the player gets stuck in state CheatFlying and PHYS_Falling when switching from ghost/fly to walk
+		// As for tanks it make on server player walk in water;
+		if (PP != None && NetConnection(PP.Player) != None)
+		{
+			OldRole = PP.RemoteRole;
+			PP.RemoteRole = ROLE_None;
+			PP.ClientRestart();
+			PP.RemoteRole = OldRole;
+		}
+	}
 }
 
-function Actor GetFlagGoal()
+function Actor GetFlagGoal(Pawn Pawn)
 {
 	local Actor FlagGoal;
-	FlagGoal = FlagBase(Driver.MoveTarget);
+	FlagGoal = FlagBase(Pawn.MoveTarget);
 	if (FlagGoal == None)
 	{
-		FlagGoal = CTFFlag(Driver.MoveTarget);
+		FlagGoal = CTFFlag(Pawn.MoveTarget);
 		if (FlagGoal != None && CTFFlag(FlagGoal).bHome)
 			FlagGoal = CTFFlag(FlagGoal).HomeBase;
 	}
@@ -1258,10 +1277,54 @@ function bool NeedReturnBackAfter(Actor FlagGoal)
 		!HealthTooLowFor(Driver);
 }
 
+function ProcessExit(Pawn Pawn, DriverCameraActor Camera)
+{
+	local Bot Bot;
+	local Actor FlagGoal;
+	
+	if (Pawn != None)
+	{
+		Bot = Bot(Pawn);
+		if (Bot != None)
+		{
+			Bot.EnemyDropped = None; // Prevent dumb moves
+			FlagGoal = GetFlagGoal(Bot);
+			if (FlagGoal != None && NeedReturnBackAfter(FlagGoal) &&
+				VSize(FlagGoal.Location - Bot.Location) < 
+				(FlagGoal.CollisionRadius + Bot.CollisionRadius))
+			{
+				Bot.Velocity += Normal(Location - Bot.Location)*Bot.GroundSpeed; // try enter back
+				Bot.MoveTarget = self;
+				Bot.Destination = Location;
+			}
+		}
+		Pawn.MoveTimer = -1; // time to refresh paths
+		Pawn.Velocity += Velocity; // inertial exit
+		Pawn.Weapon = Pawn.PendingWeapon;
+		Pawn.ChangedWeapon();
+		if (Pawn != none)
+		{
+			if (Pawn.Weapon != None && Pawn.Weapon.Owner != None)
+				Pawn.Weapon.BringUp();
+			if (PlayerPawn(Pawn) != None && Pawn.bDuck == 1 && bCanFly)
+				PreventEnter = Spawn(class'PreventEnter', Pawn);
+			Pawn.SetCollision(True, True, True);
+		}
+	}
+	if (PlayerPawn(Pawn) != None)
+	{
+		PlayerPawn(Pawn).ViewTarget = None;
+		PlayerPawn(Pawn).EndZoom();
+		Pawn.ClientSetLocation(Pawn.Location, Rotation);
+	}
+	else if (Pawn != None)
+		Pawn.SetRotation(rotator(Pawn.Location - Location));
+	Camera.SetCamOwner(None);
+}
+
 singular function DriverLeft( optional bool bForcedLeave, optional coerce string Reason )
 {
 	local vector ExitVect;
-	local Actor FlagGoal;
 
 	if( Driver!=None )
 	{
@@ -1300,40 +1363,7 @@ singular function DriverLeft( optional bool bForcedLeave, optional coerce string
 					Return;
 				}
 			}
-			if (Driver != None)
-			{
-				if (Bot(Driver) != None)
-				{
-					Bot(Driver).EnemyDropped = None; // Prevent dumb moves
-					FlagGoal = GetFlagGoal();
-					if (FlagGoal != None && NeedReturnBackAfter(FlagGoal) &&
-						VSize(FlagGoal.Location - Driver.Location) < 
-						(FlagGoal.CollisionRadius + Driver.CollisionRadius))
-					{
-						Driver.Velocity += Normal(Location - Driver.Location)*Driver.GroundSpeed; // try enter back
-						Driver.MoveTarget = self;
-						Driver.Destination = Location;
-					}
-				}
-				Driver.MoveTimer = -1; // time to refresh paths
-				Driver.Velocity += Velocity; // inertial exit
-				Driver.Weapon = Driver.PendingWeapon;
-				Driver.ChangedWeapon();
-				if( Driver.Weapon != None && Driver.Weapon.Owner != None )
-					Driver.Weapon.BringUp();
-				if (PlayerPawn(Driver) != None && Driver.bDuck == 1 && bCanFly)
-					PreventEnter = Spawn(class'PreventEnter', Driver);
-				Driver.SetCollision(True,True,True);
-			}
-			if (PlayerPawn(Driver) != None)
-			{
-				PlayerPawn(Driver).ViewTarget = None;
-				PlayerPawn(Driver).EndZoom();
-				Driver.ClientSetLocation(Driver.Location, Rotation);
-			}
-			else if (Driver != None)
-				Driver.SetRotation(rotator(Driver.Location - Location));
-			MyCameraAct.SetCamOwner(None);
+			ProcessExit(Driver, MyCameraAct);
 			LastDriver = Driver;
 			LastDriverTime = Level.TimeSeconds;
 		}
@@ -2297,10 +2327,12 @@ simulated function ResetPawn(Pawn Other, rotator R, Weapon Weap)
 		ResetPhysics(Other);
 		
 	if (Other.IsInState('FallingState'))
+	{
 		if ( (Other.NextState != '') && (Other.NextState != 'FallingState') )
 			Other.GotoState(Other.NextState, Other.NextLabel);
 		else
 			Other.GotoState('Attacking');
+	}
 }
 
 // Make sure driver is directly in center of vehicle.
@@ -2653,7 +2685,7 @@ function bool AboutToCrash(out int Accel)
 	// brake for take flag
 	if (Dir > 100)
 	{
-		FlagGoal = GetFlagGoal();
+		FlagGoal = GetFlagGoal(Driver);
 		if (FlagGoal != None && NeedReturnBackAfter(FlagGoal) &&
 			VSize(FlagGoal.Location - Location) < 
 			(FlagGoal.CollisionRadius + CollisionRadius + Dir/4))
@@ -4625,28 +4657,7 @@ function PassengerLeave( byte Seat, optional bool bForcedLeave )
 					Return;
 				}
 			}
-			if (Passengers[Seat] != None)
-			{
-				Passengers[Seat].MoveTimer = -1; // time to refresh paths
-				Passengers[Seat].Velocity += Velocity; // inertial exit
-				Passengers[Seat].Weapon = Passengers[Seat].PendingWeapon;
-				Passengers[Seat].ChangedWeapon();
-				if (Passengers[Seat] != None)
-				{
-					if (Passengers[Seat].Weapon != None)
-						Passengers[Seat].Weapon.BringUp();
-					if (Passengers[Seat].bDuck == 1 && bCanFly)
-						PreventEnter = Spawn(class'PreventEnter', Passengers[Seat]);
-					Passengers[Seat].SetCollision(True, True, True);
-				}
-			}
-			if (PlayerPawn(Passengers[Seat]) != None)
-			{
-				PlayerPawn(Passengers[Seat]).ViewTarget = None;
-				PlayerPawn(Passengers[Seat]).EndZoom();
-				Passengers[Seat].ClientSetLocation(Passengers[Seat].Location, Rotation);
-			}
-			PassengerSeats[Seat].PassengerCam.setCamOwner(None);
+			ProcessExit(Passengers[Seat], PassengerSeats[Seat].PassengerCam);
 		}
 	}
 	if (PassengerSeats[Seat].PGun != None)
