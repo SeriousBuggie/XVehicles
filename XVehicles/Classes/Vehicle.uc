@@ -2446,6 +2446,7 @@ function vector GetExitOffset(Pawn Other)
 {
 	local vector Goal, HL, HN, Extent;
 	local bool bIsMoveTarget;
+	local int i;
 	if (Bot(Other) != None)
 	{
 		Goal = Other.Destination;		
@@ -2459,6 +2460,19 @@ function vector GetExitOffset(Pawn Other)
 				return ExitOffset;
 		}
 		bIsMoveTarget = Other.MoveTarget != None && Goal == Other.MoveTarget.Location;
+		if (bIsMoveTarget && Other.RouteCache[0] == Other.MoveTarget && Other.RouteCache[1] != None)
+		{
+			HL = Goal - Location;
+			for (i = 1; i < ArrayCount(Other.RouteCache); i++)
+				if (Other.RouteCache[i] != None &&
+					(Other.RouteCache[i].Location - Location) dot HL < 0)
+				{
+					Other.MoveTarget = Other.RouteCache[i];
+					Other.Destination = Other.MoveTarget.Location;
+					Goal = Other.Destination;
+					break;
+				}
+		}
 		Extent.X = Other.CollisionRadius;
 		Extent.Y = Extent.X;
 		if (Other.Trace(HL, HN, Goal - vect(0,0,1)*(Other.CollisionHeight + 1), Goal, true, Extent) != None)
