@@ -314,8 +314,12 @@ function vector GetNextMoveTarget()
 		{
 			S = (Normal(VehicleOwner.ExitOffset)*(VehicleOwner.CollisionRadius + 10 + Visible[best].CollisionRadius/2)) >> VehicleOwner.Rotation;
 			V -= S;
-			if (bFlagBase)
+			if (bFlagBase && Bot(VehicleOwner.Driver).AlternatePath != None && 
+				((FlagBase(Visible[best]).Team == VehicleOwner.Driver.PlayerReplicationInfo.Team) ==
+				(VehicleOwner.Driver.PlayerReplicationInfo.HasFlag != None)))
+			{
 				Bot(VehicleOwner.Driver).AlternatePath = None; // hack for prevent bot run to it
+			}
 		}
 		return V;
 	}
