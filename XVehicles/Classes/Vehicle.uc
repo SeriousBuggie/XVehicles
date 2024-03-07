@@ -379,19 +379,28 @@ replication
 
 function Spawned()
 {
-	local Pawn TracePawn;
 	Super.Spawned();
 	PlaySound(SpawnSound, SLOT_Misc);
+	SpawnStubPawn(self);
+}
+
+static final function Pawn SpawnStubPawn(Actor Caller)
+{
+	local Pawn TracePawn;
 	if (Class'Vehicle'.default.StubPawn == None)
 	{
-		TracePawn = Spawn(Class'FlockPawn');
+		TracePawn = Caller.Spawn(Class'FlockPawn');
 		TracePawn.RemoteRole = ROLE_None;
 		TracePawn.DrawScale = 0.0001;
 		TracePawn.bProjTarget = false;
 		TracePawn.SetCollision(false, false, false);
 		TracePawn.SetCollisionSize(1, 1);
+		// prevent be killed
+		TracePawn.Health = 100123456;
+		TracePawn.ReducedDamageType = 'All';
 		Class'Vehicle'.default.StubPawn = TracePawn;
 	}
+	return Class'Vehicle'.default.StubPawn;
 }
 
 function AnalyzeZone( ZoneInfo newZone)
@@ -4057,7 +4066,7 @@ function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 			if (!bTakeAlwaysDamage && !bHadPass && IsSameTeam(instigatedBy))
 				Damage = 0;
 			else
-				Damage = Level.Game.ReduceDamage(Damage, DamageType, Class'Vehicle'.default.StubPawn, instigatedBy);
+				Damage = Level.Game.ReduceDamage(Damage, DamageType, SpawnStubPawn(self), instigatedBy);
 		}
 		else if (Driver.ReducedDamageType == 'All') // God mode on!
 			Damage = 0;

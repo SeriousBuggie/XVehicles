@@ -104,11 +104,13 @@ function vector AdjustLocation(Actor NP, optional bool bInMid)
 function bool CanReach(vector Point)
 {
 	local bool ret;
+	Local Pawn StubPawn;
 	if (VSize(Point - VehicleOwner.Driver.Location) < 800)
 		return VehicleOwner.Driver.PointReachable(Point);
 
-	Class'Vehicle'.default.StubPawn.SetLocation(Point);
-	return VehicleOwner.Driver.ActorReachable(Class'Vehicle'.default.StubPawn);
+	StubPawn = Class'Vehicle'.static.SpawnStubPawn(self);
+	StubPawn.SetLocation(Point);
+	return VehicleOwner.Driver.ActorReachable(StubPawn);
 }
 
 function vector GetNextMoveTarget()
