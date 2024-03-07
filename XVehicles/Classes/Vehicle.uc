@@ -398,6 +398,7 @@ static final function Pawn SpawnStubPawn(Actor Caller)
 		// prevent be killed
 		TracePawn.Health = 100123456;
 		TracePawn.ReducedDamageType = 'All';
+		TracePawn.ReducedDamagePct = 1.0;
 		Class'Vehicle'.default.StubPawn = TracePawn;
 	}
 	return Class'Vehicle'.default.StubPawn;
