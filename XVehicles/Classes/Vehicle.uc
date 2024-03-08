@@ -2919,7 +2919,6 @@ Auto State EmptyVehicle
 		{
 			BotAttract = Spawn(Class'BotAttractInv',Self);
 		}
-		CheckForEmpty();
 	}
 	function EndState()
 	{
