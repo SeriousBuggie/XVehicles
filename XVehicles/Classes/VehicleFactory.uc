@@ -31,7 +31,7 @@ function Timer()
 		MyVehicle = None;
 	if (MyVehicle != None && VSize(MyVehicle.Location - Location) > 2*MyVehicle.CollisionRadius)
 	{
-		if (MyVehicle.ResetTimer <= 0)
+		if (MyVehicle.LifeSpan == 0)
 			MyVehicle.CheckForEmpty();
 		if (bUseMultipleSpawn)
 		{

@@ -129,7 +129,6 @@ var bool bHasPassengers;
 var vector FloorNormal, ActualFloorNormal, GVTNormal, ActualGVTNormal;
 var VehicleAttachment AttachmentList; // Vehicle attachment list.
 var bool bDriving,bOnGround,bOldOnGround,bCameraOnBehindView,bVehicleBlewUp,bClientBlewUp,bHadADriver;
-var float ResetTimer;
 var BotAttractInv BotAttract;
 
 // Bot info
@@ -1647,10 +1646,6 @@ simulated function Tick( float Delta )
 	if (Pawn(Base) != None)
 		SetBase(None);
 	
-	if (IsInState('EmptyVehicle') && ResetTimer != Default.ResetTimer && 
-		Level.TimeSeconds > ResetTimer && Level.TimeSeconds > LastFix + 5)
-		Destroy();
-	
 	if (bLastTeleport)
 	{
 		AfterTeleport(Rotation.Yaw - LastTeleportYaw);		
@@ -2924,6 +2919,7 @@ Auto State EmptyVehicle
 		{
 			BotAttract = Spawn(Class'BotAttractInv',Self);
 		}
+		CheckForEmpty();
 	}
 	function EndState()
 	{
@@ -2933,6 +2929,7 @@ Auto State EmptyVehicle
 			BotAttract.Destroy();
 			BotAttract = None;
 		}
+		LifeSpan = 0;
 	}
 Begin:
 	Sleep(Level.TimeDilation);
@@ -3999,6 +3996,8 @@ function FixDamage(int Damage, Pawn EventInstigator, vector HitLocation, vector 
 	local string str;
 	local Actor A;
 	
+	if (LifeSpan != 0)
+		LifeSpan = Max(LifeSpan, 5);
 	if (Health <= 0 || Health >= FirstHealth)
 		return;
 	Health += Damage;
@@ -4728,10 +4727,10 @@ simulated function CheckForEmpty()
 	local bool bEmpty;
 	
 	bEmpty = Driver == None && Health > 0 && !bDeleteMe;
-	if( !bEmpty || HasPassengers() || MyFactory == None )
-		ResetTimer = Default.ResetTimer;
-	else if (ResetTimer <= 0)
-		ResetTimer = Level.TimeSeconds+MyFactory.VehicleResetTime;
+	if (!bEmpty || MyFactory == None || HasPassengers())
+		LifeSpan = 0;
+	else if (LifeSpan == 0)
+		LifeSpan = MyFactory.VehicleResetTime;
 	if (bEmpty && !IsInState('EmptyVehicle'))
 		GoToState('EmptyVehicle');
 }
@@ -4833,7 +4832,6 @@ defaultproperties
 	GVTNormal=(Z=1.000000)
 	ActualGVTNormal=(Z=1.000000)
 	bCameraOnBehindView=True
-	ResetTimer=-1.000000
 	ReqPPPhysics=PHYS_Flying
 	MaxObstclHeight=35.000000
 	bDisableTeamSpawn=True

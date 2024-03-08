@@ -151,6 +151,9 @@ function FixDamage(Actor Target, int Damage, Pawn EventInstigator, vector HitLoc
 	
 	if (Target == None || (!Target.isA('Vehicle') && !Target.isA('mantacar')))
 		return;
+		
+	if (Target.LifeSpan != 0)
+		Target.LifeSpan = Max(Target.LifeSpan, 5);
 	
 	if (!Target.isA('mantacar'))
 		str = "Health";
