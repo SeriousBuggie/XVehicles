@@ -131,7 +131,7 @@ var vector Velocity;
 var AmbushPoint AmbushSpot;
 var bool AmbushSpot_Taken;
 
-var bool bUsed;
+var bool bUsed, bGame;
 
 // ---------------- swJumpPad source --------------------------------
 
@@ -201,6 +201,8 @@ simulated function PostBeginPlay()
 	local Actor A;
 	local vector V, S;
     Super(NavigationPoint).PostBeginPlay();
+    
+    bGame = true;
     
     if( Role!=ROLE_Authority )
     {
@@ -676,7 +678,8 @@ local rotator R;
 
 event int SpecialCost(Pawn Seeker)
 {
-	if (bUsed && !bDisabled && Seeker != None && Seeker.Weapon != None && Seeker.Weapon.isA('DriverWeapon'))
+	if ((bUsed || (!bGame && URL != "")) && 
+		!bDisabled && Seeker != None && Seeker.Weapon != None && Seeker.Weapon.isA('DriverWeapon'))
 		return 100000;
 		
 	return ExtraCost;
