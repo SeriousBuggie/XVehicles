@@ -27,6 +27,7 @@ static function SpawnHUD(Actor A)
 	default.UsedHUD = A.Spawn(default.Class);
 	if (default.UsedHUD != None)
 	{
+		default.UsedHUD.UsedHUD = None;
 		A.Level.Game.BaseMutator.AddMutator(default.UsedHUD);
 		A.Level.Game.RegisterMessageMutator(default.UsedHUD);
 	}
