@@ -15,6 +15,8 @@ var float LastRender;
 var config int EnterCount;
 var float EnterLast;
 
+var bool bNeedCleaner;
+
 static function SpawnHUD(Actor A)
 {	
 	if (default.UsedHUD != None && !default.UsedHUD.bDeleteMe && default.UsedHUD.Level == A.Level)
@@ -196,8 +198,9 @@ simulated function PreBeginPlay()
 	if (Level.NetMode == NM_DedicatedServer)
 		Disable('Tick');
 
-	if (Level.NetMode == NM_Client && default.UsedHUD == None)
+	if (Level.NetMode == NM_Client && (default.UsedHUD == None || default.UsedHUD.Level != Level))
 		default.UsedHUD = self;
+	UsedHUD = None;
 		
 	N = Spawn(class'HudSpawnNotify');
 	N.HUDMutator = self;
@@ -277,8 +280,10 @@ simulated function PostRender(canvas Canvas)
 		return;
 	LastRender = Level.TimeSeconds;
 		
-	if (FoundHuds > 0 && Canvas != None && Canvas.Viewport != None &&
-		Canvas.Viewport.Actor != None && ChallengeHUD(Canvas.Viewport.Actor.MyHUD) != None &&
+	if (bNeedCleaner && Canvas != None && Canvas.Viewport != None && Canvas.Viewport.Actor != None)
+		bNeedCleaner = !Class'RefsCleaner'.static.Init(Canvas.Viewport.Actor);
+	if (FoundHuds > 0 && Canvas != None && Canvas.Viewport != None && Canvas.Viewport.Actor != None && 
+		ChallengeHUD(Canvas.Viewport.Actor.MyHUD) != None &&
 		Canvas.Viewport.Actor.MyHUD != OrigHUD)
 	{
 		MyHUD = ChallengeHUD(Canvas.Viewport.Actor.myHUD);
@@ -442,6 +447,7 @@ simulated function bool TraceIdentify(canvas Canvas)
 
 defaultproperties
 {
+	bNeedCleaner=True
 	bHUDMutator=True
 	bAlwaysRelevant=True
 	RemoteRole=ROLE_SimulatedProxy
