@@ -381,12 +381,14 @@ function Spawned()
 	Super.Spawned();
 	PlaySound(SpawnSound, SLOT_Misc);
 	SpawnStubPawn(self);
+	StubPawn = None;
 }
 
 static final function Pawn SpawnStubPawn(Actor Caller)
 {
 	local Pawn TracePawn;
-	if (Class'Vehicle'.default.StubPawn == None)
+	if (Class'Vehicle'.default.StubPawn == None ||
+		Class'Vehicle'.default.StubPawn.Level != Caller.Level)
 	{
 		TracePawn = Caller.Spawn(Class'FlockPawn');
 		TracePawn.RemoteRole = ROLE_None;

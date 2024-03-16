@@ -10,9 +10,10 @@ static simulated function Init(Actor Instigator)
 	if (default.Master != None && !default.Master.bDeleteMe &&
 		default.Master.Level == Instigator.Level)
 		return;
-		
+	
 	default.Master = Instigator.Spawn(class'CameraMaster');
 	default.Master.SetTimer(3, true);
+	default.Master.Master = None;
 }
 
 function Timer()
