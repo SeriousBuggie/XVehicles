@@ -1302,7 +1302,7 @@ function ProcessExit(Pawn Pawn, DriverCameraActor Camera)
 			FlagGoal = GetFlagGoal(Bot);
 			if (FlagGoal != None && NeedReturnBackAfter(FlagGoal) &&
 				VSize(FlagGoal.Location - Bot.Location) < 
-				(FlagGoal.CollisionRadius + Bot.CollisionRadius))
+				(Class'CTFFlag'.Default.CollisionRadius + Bot.CollisionRadius))
 			{
 				Bot.Velocity += Normal(Location - Bot.Location)*Bot.GroundSpeed; // try enter back
 				Bot.MoveTarget = self;
@@ -2709,7 +2709,7 @@ function bool AboutToCrash(out int Accel)
 		FlagGoal = GetFlagGoal(Driver);
 		if (FlagGoal != None && NeedReturnBackAfter(FlagGoal) &&
 			VSize(FlagGoal.Location - Location) < 
-			(FlagGoal.CollisionRadius + CollisionRadius + Dir/4))
+			(class'FlagBase'.default.CollisionRadius + CollisionRadius + Dir/4))
 		{
 			Accel = GetMovementDir()*-1; // brake via reverse
 			return true;
