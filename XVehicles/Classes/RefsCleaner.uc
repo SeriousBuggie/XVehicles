@@ -3,13 +3,16 @@
 //=============================================================================
 class RefsCleaner expands UWindowWindow;
 
-var RefsCleaner Win;
+var float LastWinTime;
+var LevelInfo Level;
 
 static simulated function bool Init(PlayerPawn PP)
 {
 	local WindowConsole C;
 	local RefsCleaner W;
-	if (default.Win == None && PP != None && PP.Player != None)
+	local bool ret;
+	ret = Abs(default.LastWinTime - PP.Level.TimeSeconds) < 3;
+	if (!ret && PP != None && PP.Player != None)
 	{
 		C = WindowConsole(PP.Player.Console);
 		if (C != None && C.Root != None)
@@ -18,11 +21,18 @@ static simulated function bool Init(PlayerPawn PP)
 			if (W != None)
 			{			
 				W.SendToBack();
-				default.Win = W;
+				W.Level = PP.Level;
+				ret = true;
 			}
 		}
 	}
-	return default.Win != None;
+	return ret;
+}
+
+function Tick(float Delta)
+{
+	if (Level != None)
+		default.LastWinTime = Level.TimeSeconds;
 }
 
 function NotifyBeforeLevelChange()
@@ -31,7 +41,8 @@ function NotifyBeforeLevelChange()
 
 	Super.NotifyBeforeLevelChange();
 	
-	default.Win = None;
+	Level = None;
+	default.LastWinTime = -100;
 	Close(false);
 }
 
@@ -44,6 +55,7 @@ function CleanRefs()
 
 defaultproperties
 {
+	LastWinTime=-100.000000
 	bAlwaysBehind=True
 	bTransient=True
 }
