@@ -253,7 +253,7 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 simulated function UpdateDriverInput( float Delta )
 {
 	local byte PitchDif;
-	local vector Ac, End, Start, HL, HN, X, Y, Z;
+	local vector Ac, X, Y, Z;
 	local float EngP, GoDown, DesiredHoverHeight, Scale, BigScale;
 	local rotator R;
 

@@ -132,7 +132,6 @@ simulated function UpdateDriverInput( float Delta )
 	local vector Ac,NVeloc, X, Y, Z;
 	local float DesTurn,DesTurnVis,DeAcc,DeAccRat;
 	local rotator R, RA, RB;
-	local byte i;
 	local rotator OldWheeledRot;
 	local bool bDirectVis;
 	
@@ -446,10 +445,9 @@ function int ShouldAccelFor( vector AcTarget )
 function int ShouldTurnFor( vector AcTarget, optional float YawAdjust, optional float DeadZone )
 {
 	local int ret;
-	
-	local vector X,Y,Z;
-	local rotator R;
-	local float Res, res2;
+//	local vector X,Y,Z;
+//	local rotator R;
+//	local float Res, res2;
 		
 	YawAdjust = 0;
 	if (bReversing)
@@ -482,7 +480,6 @@ simulated function vector GetVirtualSpeedOnIce(float Delta)
 {
 local float DeAcc,DeAccRat;
 local vector Ac;
-local byte i;
 
 	/*if( !bOnGround )
 	{

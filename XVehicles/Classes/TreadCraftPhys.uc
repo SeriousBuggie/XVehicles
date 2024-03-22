@@ -290,7 +290,6 @@ simulated function UpdateDriverInput( float Delta )
 	local float DeAcc,DeAccRat;
 	local rotator R;
 	local bool bTurnR;
-	local byte i;
 	
 	OldVehicleYaw = VehicleYaw;	
 
@@ -536,7 +535,8 @@ simulated function UpdateDriverInput( float Delta )
 function int ShouldAccel( vector AcTarget )
 {
 	local float dir;
-	local vector A, B, V;
+	local vector A, B;
+//	local vector V;
 	
 	A = AcTarget-Location;
 	A.Z = 0;
@@ -566,8 +566,6 @@ function int ShouldAccelFor( vector AcTarget )
 function int ShouldAccelFor2( vector AcTarget )
 {
 	local bool bStuck;
-	local vector X,Y,Z;
-	local float Res;
 	local int ret;
 	
 	if (AboutToCrash(ret))
@@ -630,9 +628,6 @@ simulated function vector GetVirtualSpeedOnIce( float Delta )
 {
 	local vector Ac;
 	local float DeAcc,DeAccRat;
-	local rotator R;
-	local bool bTurnR;
-	local byte i;
 
 	if( !bOnGround )
 	{

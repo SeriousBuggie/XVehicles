@@ -1015,7 +1015,6 @@ function AddFlag(Decoration HasFlag)
 
 simulated function ShowState(optional bool bFromTick)
 {
-	local int i;
 	local bool bUsed;
 	
 	bUsed = Driver != None || bHasPassengers;
@@ -1487,7 +1486,6 @@ simulated function ClientUpdateState(float Delta)
 	local vector ServerPredictLocation, Diff;
 	local float Dist;
 	local SavedMoveXV CurrentMove;
-	local int i, f;
 	local PlayerPawn LocalPlayer;
 	local VehState ClientState;
 	local bool bNeedUpdateYaw;
@@ -1971,9 +1969,7 @@ simulated function UpdateAttachment(WeaponAttachment vat, float Delta)
 {
 local vector WPosA;
 local rotator WRotA;
-local byte i;
 local Actor AttachBase;
-local WeaponAttachment WA;
 
 	AttachBase = vat.Base;
 	if (vat.bRotWithOtherWeap && WeaponAttachment(vat.Base) == None && vat.WAtt != None)
@@ -2083,7 +2079,7 @@ simulated function bool CheckOnGround()
 {
 	local vector End,Start,Ex,HL,HN;
 
-	local vector S, E, sHL[4],sHN[4], ePointsOffSet[4], MLoc, CrossedVect[2], GVTLoc, CurArcDir;
+	local vector S, E, sHL[4],sHN[4], ePointsOffSet[4], MLoc, CrossedVect[2], GVTLoc;
 	local actor Ac[4];
 	local byte b, AcCount;
 	local actor WAs, WBs, PossibleBase;
@@ -2299,7 +2295,7 @@ simulated function SwitchWeapon(Pawn Other, Weapon Weap)
 simulated function ResetPawn(Pawn Other, rotator R, Weapon Weap)
 {
 	local vector L;
-	local float dist, Radius;
+	local float Radius;
 	
 	L = Location;
 	L.Z += Other.default.CollisionHeight - CollisionHeight;
@@ -2832,7 +2828,7 @@ simulated function int GetMovementDir()
 
 function float BotDesireability2(Pawn Bot)
 {
-	local vector L;
+//	local vector L;
 //	Log(self @ "BotDesireability 1" @ Bot.GetHumanName() @ Bot.MoveTarget);
 	if (bDeleteMe )
 		Return -1;
@@ -3115,7 +3111,7 @@ function rotator GetFiringRot( float ProjSpeed, bool bInstantHit, vector PStartP
 		if (Passengers[SeatN] == None)
 		{
 			Cam = MyCameraAct;
-			SeatN = -1;
+			SeatN = 255; // for get zero in (SeatN+1) for next code
 		}
 		if (Cam != None)
 		{
@@ -3191,7 +3187,7 @@ simulated function vector CalcPlayerAimPos( optional byte SeatN )
 }
 simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte Seat )
 {
-	local float X, Y, XS, HP, XL, YL, LastY;
+	local float X, Y, XS, XL, YL, LastY;
 	local byte i, o;
 	Local Pawn CamOwner;
 	local ChallengeHud HUD;
@@ -3221,49 +3217,6 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 	XS = C.ClipX/4;
 	X = C.ClipX/2;
 	DrawHealthBar(C, Health, FirstHealth, X, Y, XS, 24);
-/*
-	C.DrawColor.R = 192;
-	C.DrawColor.G = 192;
-	C.DrawColor.B = 192;
-
-	C.SetPos(X,Y);
-	C.DrawTile(Texture'Misc',XS,24,0,0,122,16);
-
-	if (Health < (FirstHealth/5))
-	{
-		C.DrawColor.R = 96;
-		C.DrawColor.G = 0;
-		C.DrawColor.B = 0;
-	}
-	else if (Health < (FirstHealth/4))
-	{
-		C.DrawColor.R = 255;
-		C.DrawColor.G = 0;
-		C.DrawColor.B = 0;
-	}
-	else if (Health < (FirstHealth/3))
-	{
-		C.DrawColor.R = 255;
-		C.DrawColor.G = 128;
-		C.DrawColor.B = 0;
-	}
-	else if (Health < (FirstHealth/2))
-	{
-		C.DrawColor.R = 192;
-		C.DrawColor.G = 192;
-		C.DrawColor.B = 0;
-	}
-	else
-	{
-		C.DrawColor.R = 0;
-		C.DrawColor.G = 255;
-		C.DrawColor.B = 64;
-	}
-
-	HP = float(Health)/float(FirstHealth);
-	C.SetPos(X,Y);
-	C.DrawTile(Texture'Misc',XS*HP,24,0,16,122.f*HP,16);
-*/
 	//C.Font = Font'MedFont';
 	C.Font = Font'VehFont';
 
@@ -3583,7 +3536,7 @@ simulated function SingularBump(Actor Other)
 {
 	local vector OtVel,MyVel;
 	local float Sp, Dmg;
-	local vector V, Dir;
+	local vector Dir;
 	local vector befOtVel, befMyVel, NVelH;
 	local Pawn RealInstigator, RealOtherInstigator;
 	
@@ -3597,10 +3550,8 @@ simulated function SingularBump(Actor Other)
 		Sp = VSize(Dir) - (CollisionRadius + Other.CollisionRadius);
 		if (Sp < -1 && StationaryPhys(self) == None) // stuck inside other
 		{
-//			V = Location;
 			Sp -= 1;
 			MoveSmooth(Sp*Normal(Dir));
-//			log(self @ "stuck" @ Other @ Sp @ vSize(Location - V));
 			if (bCanFly)
 				Rising = 1;
 		}
@@ -3760,9 +3711,9 @@ function PushDeco(Decoration Deco)
 
 simulated function bool CanGetOver( float MSHV, float AllowedZVal ) // Check if maxstepheight value allows to get over this
 {
-	local vector Start,End,Ex,NVe,HL,HN, HN2;
+	local vector Start,End,Ex,NVe,HL,HN;
 	local Actor A;
-	local vector MovVect;
+//	local vector MovVect;
 	
 	if (bSlopedPhys && GVT!=None)
 	{

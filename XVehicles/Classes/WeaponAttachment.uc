@@ -449,8 +449,7 @@ simulated function DelayFX(byte Mode);	//Called at the same time as ActivateDela
 
 function Projectile FixProj(Projectile Proj)
 {
-	local vector HitLocation, HitNormal, TraceEnd, TraceStart;
-	local Actor Target;
+	local vector HitLocation, HitNormal;
 	local Pawn Instig;
 	if (Proj != None && Proj.Trace(HitLocation, HitNormal, Proj.Location, Location, false) != None)
 	{
@@ -727,7 +726,7 @@ simulated function Tick( float Delta )
 {
 	local vector Po;
 	local rotator Ro,RAdj,PRo;
-	local int Diff,OldY,OldP;
+	local int OldY,OldP;
 	local byte i, j;
 	local VehicleAttachment vat;
 	local bool bNeedFiringShaking;
@@ -1113,8 +1112,8 @@ function bool FindEnemy()
 {
 	local Pawn P;
 	local Bot Bot;
-	local float Dist, BestDist, BestVehDist[2];
-	local Actor Hit, Best, BestVeh[2];
+	local float Dist, BestDist;
+	local Actor Hit, Best;
 	local vector HL, HN, Extent;
 	local name BotState;
 	local Vehicle Veh;
@@ -1197,7 +1196,7 @@ static function float RangedAttack(Bot Bot, Actor Target, float SpecialPause)
 static function Vehicle AttackVehicle(WeaponAttachment Weap, Bot Bot, float MaxDistance)
 {
 	local Vehicle Veh, BestVeh[2];
-	local float Dist, BestDist, BestVehDist[2];
+	local float Dist, BestVehDist[2];
 	local int i, VehTeam;
 	local vector HL, HN;
 	
@@ -1265,9 +1264,9 @@ function bool CorrectPos(out vector EnemyLocation, vector FireLocation, int Z)
 function bool SeeEnemy(Actor Enemy)
 {
 	local vector P, Dir, EnemyLocation, FireLocation;
-	local float VProj, V1, V, SightRadius, BaseEyeHeight;
+	local float VProj, V1, V;
 	local rotator R;
-	local bool bFastTrace, bCanSee;
+	local bool bCanSee;
 	if (Enemy == None || (Pawn(Enemy) != None && Pawn(Enemy).Health <= 0))
 		return false;
 	Enemy = GetVehicle(Enemy);

@@ -61,7 +61,6 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 {
 	local rotator R;
 	local vector X,Y,Z;
-	local float S, T;
 	
 //	log("Turn" @ InTurn @ "Accel" @ InAccel @ "Rise" @ InRise @ "VehicleYaw" @ VehicleYaw);
 
