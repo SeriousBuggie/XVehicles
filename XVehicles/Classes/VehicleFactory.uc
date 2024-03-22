@@ -10,6 +10,7 @@ var bool bInitAct;
 var byte InitialTeamNum;
 var bool bDisableTeamSpawn; // replaced by class'VehiclesConfig'.default.bDisableTeamSpawn
 var() bool bUseMultipleSpawn;
+var bool bAssaultInit;
 
 function PostBeginPlay()
 {
@@ -20,6 +21,21 @@ function PostBeginPlay()
 }
 function Timer()
 {
+	local Assault Assault;	
+	Assault = Assault(Level.Game);
+	if (Assault != None && !bAssaultInit)
+	{
+		if (Assault.Defender == None || Assault.Attacker == None)
+		{
+			SetTimer(1, False);
+			return;
+		}
+		if (InitialTeamNum == 0)
+			TeamNum = Assault.Defender.TeamIndex;
+		if (InitialTeamNum == 1)
+			TeamNum = Assault.Attacker.TeamIndex;
+		bAssaultInit = true;
+	}
 	if( !bInitialActive )
 		Return;
 	if( VehicleClass==None )
