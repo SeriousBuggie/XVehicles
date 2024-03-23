@@ -353,7 +353,13 @@ simulated function bool CanGetOver( float MSHV, float AllowedZVal ) // Check if 
 	{
 		if (HN.Z >= AllowedZVal)
 		{
-			Move(vect(0,0,1)*MSHV + NVe*VSize(Start - HL));
+			if (!Move(vect(0,0,1)*MSHV))
+			{
+				Move(-12*NVe);
+				Move(vect(0,0,1)*MSHV);
+				Move(12*NVe);
+			}
+			Move(NVe*VSize(Start - HL));
 			HitWall(HN,A);
 			Return True;
 		}
@@ -364,7 +370,13 @@ simulated function bool CanGetOver( float MSHV, float AllowedZVal ) // Check if 
 	A = Trace(HL, HN, End, Start, True, Ex);
 	if (A != None && HN.Z >= AllowedZVal)
 	{
-		Move(vect(0,0,1)*MSHV + NVe*12);
+		if (!Move(vect(0,0,1)*MSHV))
+		{
+			Move(-12*NVe);
+			Move(vect(0,0,1)*MSHV);
+			Move(12*NVe);
+		}
+		Move(NVe*12);
 		HitWall(HN,A);
 		Return True;
 	}

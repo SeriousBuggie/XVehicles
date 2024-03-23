@@ -3714,7 +3714,7 @@ simulated function bool CanGetOver( float MSHV, float AllowedZVal ) // Check if 
 	local vector Start,End,Ex,NVe,HL,HN;
 	local Actor A;
 //	local vector MovVect;
-	
+
 	if (bSlopedPhys && GVT!=None)
 	{
 		if( MSHV<=0 )
@@ -3739,7 +3739,12 @@ simulated function bool CanGetOver( float MSHV, float AllowedZVal ) // Check if 
 			{
 				MSHV = HL.Z - (Location.Z - CollisionHeight) + 1;
 //				MovVect = vect(0,0,1)*MSHV+NVe*VSize(Start-HL);
-				Move(vect(0,0,1)*MSHV);
+				if (!Move(vect(0,0,1)*MSHV))
+				{
+					Move(-12*NVe);
+					Move(vect(0,0,1)*MSHV);
+					Move(12*NVe);
+				}
 				Move(NVe*Min(12, VSize(Start-HL)));
 				//Move(MovVect);
 				//SetLocation(Location + MovVect);
@@ -3757,7 +3762,12 @@ simulated function bool CanGetOver( float MSHV, float AllowedZVal ) // Check if 
 		
 		if (A!=None)
 			MSHV = HL.Z - (Location.Z - CollisionHeight) + 1;
-		Move(vect(0,0,1)*MSHV);
+		if (!Move(vect(0,0,1)*MSHV))
+		{
+			Move(-12*NVe);
+			Move(vect(0,0,1)*MSHV);
+			Move(12*NVe);
+		}
 		Move(NVe*12);
 		//Move(MovVect);
 		//SetLocation(Location + MovVect);
@@ -3861,7 +3871,8 @@ simulated singular function HitWall( vector HitNormal, Actor Wall )
 		HitNormal.Z = 0;
 
 		// if OtherHitN.Z < 0 - get over can not be applied
-		if( bOnGround && OtherHitN.Z >= 0 && CanGetOver(MaxObstclHeight,0.85) )
+		// Unfortunately BSP bugs can produce obstacles with such hit normal, but can be get over
+		if( bOnGround /*&& OtherHitN.Z >= 0*/ && CanGetOver(MaxObstclHeight, 0.85) )
 			Return;
 		else if (VSize(HitNormal) > 0) // bounce from walls on collide. 
 			MoveSmooth(HitNormal*16);
