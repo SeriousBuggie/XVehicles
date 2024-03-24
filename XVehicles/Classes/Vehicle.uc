@@ -1291,6 +1291,7 @@ function ProcessExit(Pawn Pawn, DriverCameraActor Camera)
 {
 	local Bot Bot;
 	local Actor FlagGoal;
+	local Vector SmallMove;
 	
 	if (Pawn != None)
 	{
@@ -1319,6 +1320,10 @@ function ProcessExit(Pawn Pawn, DriverCameraActor Camera)
 			if (PlayerPawn(Pawn) != None && Pawn.bDuck == 1 && bCanFly)
 				PreventEnter = Spawn(class'PreventEnter', Pawn);
 			Pawn.SetCollision(True, True, True);
+			// make touch with anything here
+			SmallMove = Normal(Location - Pawn.Location);
+			if (Pawn.Move(SmallMove))
+				Pawn.Move(-SmallMove);
 		}
 	}
 	if (PlayerPawn(Pawn) != None)
