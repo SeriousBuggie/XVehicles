@@ -853,7 +853,8 @@ simulated function Tick( float Delta )
 	
 	SetTurretYaw();
 
-	if (WeaponController == None)
+	if (WeaponController == None || WeaponController.IsInState('GameEnded') || 
+		(Level.Game != None && Level.Game.bGameEnded))
 	{
 		bRotatingBarrel = False;
 		AmbientSound = Default.AmbientSound;
