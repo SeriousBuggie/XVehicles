@@ -602,7 +602,12 @@ function int ShouldAccelFor2( vector AcTarget )
 function int ShouldTurnFor( vector AcTarget, optional float YawAdjust, optional float DeadZone )
 {
 	local int ret;
+	local vector Dir;
 	
+	Dir = AcTarget - Location;
+	// X dot X == VSize(X)*VSize(X)
+	if ((Dir dot Dir) <= 25 /* 5*5 */)
+		return 0;
 	YawAdjust = CurTurnSpeed;
 	
 	if( bReversing )
@@ -611,7 +616,7 @@ function int ShouldTurnFor( vector AcTarget, optional float YawAdjust, optional 
 		else
 			YawAdjust -= 12000;
 	ret = 1;
-	if ((AcTarget - Location) dot vector(Rotation) < 0)
+	if (Dir dot vector(Rotation) < 0)
 		ret = -1;
 
 	ret *= Super.ShouldTurnFor(AcTarget, YawAdjust, DeadZone);
