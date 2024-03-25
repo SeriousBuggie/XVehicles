@@ -3814,8 +3814,8 @@ simulated singular function HitWall( vector HitNormal, Actor Wall )
 
 	OtherHitN = HitNormal;
 
-	if (Bot(Driver) != None)
-		Driver.HitWall(HitNormal, Wall);
+//	if (Bot(Driver) != None)
+//		Driver.HitWall(HitNormal, Wall);
 
 	if (!bReadyToRun && (Self.IsA('WheeledCarPhys') || Self.IsA('TreadCraftPhys')))
 	{
