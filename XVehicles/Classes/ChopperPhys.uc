@@ -10,6 +10,8 @@ var() vector RotorOffset,RotorSize;
 var int RotorYaw;
 var bool bHasRotorDmg;
 
+var vector BotAccelDir;
+
 simulated function PostBeginPlay()
 {
 	Super.PostBeginPlay();
@@ -65,27 +67,7 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 //	log("Turn" @ InTurn @ "Accel" @ InAccel @ "Rise" @ InRise @ "VehicleYaw" @ VehicleYaw);
 
 	if (Driver != None && PlayerPawn(Driver) == None)
-	{ // bot drive code
-		if (Driver.IsInState('GameEnded') || Driver.IsInState('Dying') || 
-			(Level.Game != None && Level.Game.bGameEnded))
-			return vect(0,0,0);
-		X = MoveDest - Location;		
-		/*
-		S = VSize(Velocity);		
-		if (S > 0)
-		{
-			T = VSize(X)/S;
-			X -= Normal(Velocity)*(S*T - WAccelRate*T*T/2);
-		}
-		*/
-		// dont slow down if run over
-		if (Driver.Enemy == None || VSize(Driver.Enemy.Location - MoveDest) > 40)
-			X -= Velocity*0.9;
-		// X dot X == VSize(X)*VSize(X)
-		if ((X dot X) > 25 /* 5*5 */)
-			return Normal(X);
-		return vect(0,0,0);
-	}
+		return BotAccelDir;
 	if( InTurn==0 && InRise==0 && InAccel==0 )
 		return vect(0,0,0);
 	R.Yaw = VehicleYaw;
@@ -213,18 +195,52 @@ simulated function UpdateDriverInput( float Delta )
 		}
 	}
 }
-// bot can travel at any drection directly
-function int ShouldAccelFor( vector AcTarget )
-{
-	return 0;
-}
+
 function int ShouldTurnFor( vector AcTarget, optional float YawAdjust, optional float DeadZone )
 {
-	return 0;
+	Return Turning;
 }
+
 function int ShouldRiseFor( vector AcTarget )
 {
-	return 0;
+	return Rising;
+}
+
+function int ShouldAccelFor( vector AcTarget )
+{
+	local int ret;
+		
+	BotAccelDir = BotDrive();
+	
+	if (AboutToCrash(ret))
+		return ret;
+	return Accel;
+}
+
+function vector BotDrive()
+{
+	local vector Dir, X, Y, Z;
+	local bool bNeedDuck;
+	local Actor HitDuck;
+	local float V;
+	
+	if (Driver.IsInState('GameEnded') || Driver.IsInState('Dying') || 
+		(Level.Game != None && Level.Game.bGameEnded))
+		return vect(0,0,0);
+	Dir = MoveDest - Location;
+	// dont slow down if run over
+	if (Driver.Enemy == None || VSize(Driver.Enemy.Location - MoveDest) > 40)
+	{
+		GetAxes(rotator(Dir), X, Y, Z);
+		V = X dot Velocity;
+		Y = V*X;
+		Dir -= 0.55*V/WAccelRate*Y;
+		Dir -= 0.9*(Velocity - Y);
+	}
+	// X dot X == VSize(X)*VSize(X)
+	if ((Dir dot Dir) > 25 /* 5*5 */)
+		return Normal(Dir);
+	return vect(0,0,0);
 }
 
 simulated function vector GetMovementSpeeds()
