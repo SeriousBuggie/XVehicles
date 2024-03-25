@@ -1406,7 +1406,7 @@ singular function DriverLeft( optional bool bForcedLeave, optional coerce string
 		
 		Driver.BaseEyeHeight = BaseEyeHeight[0];
 		Driver.SightRadius = SightRadius[0];
-		if (Bot(Driver) != None)
+		if (Bot(Driver) != None && !Driver.bDeleteMe && Driver.Health > 0)
 			Bot(Driver).WhatToDoNext('', '');
 	}
 	Driver = None;
@@ -4670,7 +4670,7 @@ function PassengerLeave( byte Seat, optional bool bForcedLeave )
 		Passengers[Seat].BaseEyeHeight = BaseEyeHeight[Seat + 1];
 		Passengers[Seat].SightRadius = SightRadius[Seat + 1];
 		
-		if (Bot(Passengers[Seat]) != None)
+		if (Bot(Passengers[Seat]) != None && !Passengers[Seat].bDeleteMe && Passengers[Seat].Health > 0)
 			Bot(Passengers[Seat]).WhatToDoNext('', '');
 	}
 	Passengers[Seat] = None;
