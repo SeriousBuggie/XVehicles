@@ -21,6 +21,8 @@ var bool bDuck, bDuckFire;
 
 var RepulsorTracker RepulsorTracker;
 
+var vector BotAccelDir;
+
 const HoverGap = 50.0f;
 const HoverDuck = 30.0f;
 
@@ -185,62 +187,9 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 {
 	local rotator R;
 	local vector X,Y,Z;
-	local bool bNeedDuck;
-	local Actor HitDuck;
 
 	if (Driver != None && PlayerPawn(Driver) == None)
-	{ // bot drive code
-		if (Driver.IsInState('GameEnded') || Driver.IsInState('Dying') || 
-			(Level.Game != None && Level.Game.bGameEnded))
-			return vect(0,0,0);
-		X = MoveDest - Location;
-		Turning = 1; // for prevent slow down for move on side
-		Rising = 0;
-		if (X.Z > 100)
-			Rising = 1;
-		// dont slow down if run over
-		bNeedDuck = false;
-		if (Driver.Enemy != None)
-		{
-			if (DriverWeapon(Driver.Enemy.Weapon) == None && VSize(Driver.Enemy.Location - MoveDest) <= CollisionRadius)
-				bNeedDuck = true;
-			else if (!bOnGround && Driver.Enemy.Location.Z < Location.Z)
-			{
-				Y = Driver.Enemy.Location - Location;
-				Y.Z = 0;				
-				if (VSize(Y) < CollisionRadius + Driver.Enemy.CollisionRadius)
-					bNeedDuck = true;
-				else if (Normal(Driver.Enemy.Location - Location).Z < -0.9)
-					bNeedDuck = true;
-			}
-		}
-		if (!bNeedDuck)
-			X -= Velocity*0.85;
-		if (LiftCenter(Driver.MoveTarget) != None && LiftCenter(Driver.MoveTarget).MyLift != None)
-			bNeedDuck = true;
-		if (!bNeedDuck)
-		{
-			Z.X = CollisionRadius;
-			Z.Y = Z.X;
-			Z.Z = CollisionHeight;						
-			HitDuck = Trace(Y, Y, MoveDest - vect(0,0,1)*HoverDuck, Location - vect(0,0,1)*HoverDuck, true, Z);
-			if (Pawn(HitDuck) != None && Pawn(HitDuck).PlayerReplicationInfo != None && 
-				Pawn(HitDuck).PlayerReplicationInfo.Team != CurrentTeam)
-				bNeedDuck = true; // run over enemy
-			else if (HitDuck == None && Trace(Y, Y, MoveDest, Location, true, Z) != None)
-				bNeedDuck = true; // need crouch for pass this place
-		}
-		if (bNeedDuck && !bDuckFire)
-			PlayOwnedSound(DuckSound);
-		bDuckFire = bNeedDuck;
-		X.Z = 0;
-		if (bOnGround)
-			X = SetUpNewMVelocity(X, ActualFloorNormal, 0);
-		// X dot X == VSize(X)*VSize(X)
-		if ((X dot X) > 25 /* 5*5 */)
-			return Normal(X);
-		return vect(0,0,0);
-	}
+		return BotAccelDir;
 	R.Yaw = VehicleYaw;
 	GetAxes(R,X,Y,Z);
 	Z = X*InAccel+Y*InTurn*-1;
@@ -389,10 +338,99 @@ function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 	Super.TakeDamage(Damage, instigatedBy, hitlocation, momentum, damageType);
 }
 
-// Returns the bot turning value for target
 function int ShouldTurnFor( vector AcTarget, optional float YawAdjust, optional float DeadZone )
-{ // handled inside GetAccelDir
-	Return 0;
+{
+	Return Turning;
+}
+
+function int ShouldRiseFor( vector AcTarget )
+{
+	return Rising;
+}
+
+function int ShouldAccelFor( vector AcTarget )
+{
+	local int ret;
+		
+	BotAccelDir = BotDrive();
+	
+	if (AboutToCrash(ret))
+		return ret;
+	return Accel;
+}
+
+function vector BotDrive()
+{
+	local vector Dir, X, Y, Z, Vxy;
+	local bool bNeedDuck;
+	local Actor HitDuck;
+	local float V;
+	
+	if (Driver.IsInState('GameEnded') || Driver.IsInState('Dying') || 
+		(Level.Game != None && Level.Game.bGameEnded))
+		return vect(0,0,0);
+	Dir = MoveDest - Location;
+	bNeedDuck = false;
+	Accel = 1; // always accelerate
+	Rising = 0;
+	V = Dir.Z;
+	Dir.Z = 0;
+	if (bOnGround && V > 100 && VSize(Dir) < 800)
+		Rising = 1;
+	if (!bOnGround && V < -200 && VSize(Dir) < CollisionRadius)
+		bNeedDuck = true;
+	Turning = 0;
+	if (Abs(Normal(Dir) dot vector(rot(0, 1, 0)*VehicleYaw)) < 0.999)
+		Turning = 1; // for prevent slow down for move on side
+	// dont slow down if run over
+	if (Driver.Enemy != None)
+	{
+		if (DriverWeapon(Driver.Enemy.Weapon) == None && VSize(Driver.Enemy.Location - MoveDest) <= CollisionRadius)
+			bNeedDuck = true;
+		else if (!bOnGround && Driver.Enemy.Location.Z < Location.Z)
+		{
+			Y = Driver.Enemy.Location - Location;
+			Y.Z = 0;				
+			if (VSize(Y) < CollisionRadius + Driver.Enemy.CollisionRadius)
+				bNeedDuck = true;
+			else if (Normal(Driver.Enemy.Location - Location).Z < -0.9)
+				bNeedDuck = true;
+		}
+	}
+//	if (!bNeedDuck)
+//		X -= Velocity*0.85;
+	if (!bNeedDuck)
+	{		
+		GetAxes(rotator(Dir), X, Y, Z);
+		Vxy = Velocity;
+		Vxy.Z = 0;
+		Dir -= 0.6*Square(X dot Vxy)/WDeAccelRate*X;
+		Dir -= 0.85*(Y dot Vxy)*Y;
+	}
+	if (LiftCenter(Driver.MoveTarget) != None && LiftCenter(Driver.MoveTarget).MyLift != None)
+		bNeedDuck = true;
+	if (!bNeedDuck)
+	{
+		Z.X = CollisionRadius;
+		Z.Y = Z.X;
+		Z.Z = CollisionHeight;						
+		HitDuck = Trace(Y, Y, MoveDest - vect(0,0,1)*HoverDuck, Location - vect(0,0,1)*HoverDuck, true, Z);
+		if (Pawn(HitDuck) != None && Pawn(HitDuck).PlayerReplicationInfo != None && 
+			Pawn(HitDuck).PlayerReplicationInfo.Team != CurrentTeam)
+			bNeedDuck = true; // run over enemy
+		else if (HitDuck == None && Trace(Y, Y, MoveDest, Location, true, Z) != None)
+			bNeedDuck = true; // need crouch for pass this place
+	}
+	if (bNeedDuck && !bDuckFire)
+		PlayOwnedSound(DuckSound);
+	bDuckFire = bNeedDuck;
+	Dir.Z = 0;
+	if (bOnGround)
+		Dir = SetUpNewMVelocity(Dir, ActualFloorNormal, 0);
+	// X dot X == VSize(X)*VSize(X)
+	if ((Dir dot Dir) > 25 /* 5*5 */)
+		return Normal(Dir);
+	return vect(0,0,0);
 }
 
 simulated function PostBeginPlay()
