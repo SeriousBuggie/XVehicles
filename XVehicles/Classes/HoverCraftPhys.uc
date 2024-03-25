@@ -194,6 +194,7 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 			(Level.Game != None && Level.Game.bGameEnded))
 			return vect(0,0,0);
 		X = MoveDest - Location;
+		Turning = 1; // for prevent slow down for move on side
 		Rising = 0;
 		if (X.Z > 100)
 			Rising = 1;
@@ -323,15 +324,21 @@ simulated function UpdateDriverInput( float Delta )
 	// Update vehicle yaw.
 	if (bDriving && Driver != None)
 	{
+		/*
 		if (PlayerPawn(Driver) == None)
 		{
 			if (Driver.Target != None && FastTrace(Driver.Target.Location))
 				X = Driver.Target.Location - Location;
 			else
 				X = Velocity;
-			VehicleYaw = CalcTurnSpeed(VehicleTurnSpeed*Delta, VehicleYaw, rotator(X).Yaw);
+			if (VSize(X) > 10)
+				R = rotator(X);
+			else
+				R = Driver.ViewRotation;
+			VehicleYaw = CalcTurnSpeed(VehicleTurnSpeed*Delta, VehicleYaw, R.Yaw);
 		}
 		else
+		*/
 			VehicleYaw = CalcTurnSpeed(VehicleTurnSpeed*Delta, VehicleYaw, Driver.ViewRotation.Yaw);
 	}
 	// Update vehicle speed
