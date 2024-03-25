@@ -404,7 +404,7 @@ function vector BotDrive()
 		GetAxes(rotator(Dir), X, Y, Z);
 		Vxy = Velocity;
 		Vxy.Z = 0;
-		Dir -= 0.6*Square(X dot Vxy)/WDeAccelRate*X;
+		Dir -= 0.55*Square(X dot Vxy)/WDeAccelRate*X;
 		Dir -= 0.85*(Y dot Vxy)*Y;
 	}
 	if (LiftCenter(Driver.MoveTarget) != None && LiftCenter(Driver.MoveTarget).MyLift != None)
