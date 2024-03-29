@@ -220,8 +220,6 @@ function int ShouldAccelFor( vector AcTarget )
 function vector BotDrive()
 {
 	local vector Dir, X, Y, Z;
-	local bool bNeedDuck;
-	local Actor HitDuck;
 	local float V;
 	
 	if (Driver.IsInState('GameEnded') || Driver.IsInState('Dying') || 
