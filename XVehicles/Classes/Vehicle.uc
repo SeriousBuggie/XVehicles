@@ -2360,6 +2360,7 @@ simulated function UpdatePassengerPos()
 	local byte i;
 	local rotator R;
 	local bool bForceExit;
+	local Bot Bot;
 
 	For (i = 0; i < Arraycount(Passengers); i++)
 	{
@@ -2382,15 +2383,18 @@ simulated function UpdatePassengerPos()
 			
 			if (Level.NetMode < NM_Client && Bot(Passengers[i]) != None)
 			{
-				if ((Passengers[i].PlayerReplicationInfo.HasFlag != None && PlayerPawn(Driver) == None) ||
-					(Driver == None && (WaitForDriver < Level.TimeSeconds || LastDriver == None || LastDriver == Passengers[i] ||
+				Bot = Bot(Passengers[i]);
+				if ((Bot.PlayerReplicationInfo.HasFlag != None && PlayerPawn(Driver) == None) ||
+					(Driver == None && (WaitForDriver < Level.TimeSeconds || LastDriver == None || LastDriver == Bot ||
 					(Bot(LastDriver) != None && VSize(LastDriver.Location - Location) > 1000) ||
 					(PlayerPawn(LastDriver) != None && VSize(LastDriver.Location - Location) > 2000))) || 
-					(Bot(Driver) != None && Bot(Driver).Orders == 'Follow' && Bot(Driver).OrderObject == Passengers[i] &&
+					(Bot(Driver) != None && Bot(Driver).Orders == 'Follow' && Bot(Driver).OrderObject == Bot &&
 					Driver.PlayerReplicationInfo.HasFlag == None))
 					ChangeSeat(0, true, i); // become driver
-				else if (CTFFlag(Passengers[i].MoveTarget) != None && 
-					Passengers[i].PlayerReplicationInfo.HasFlag == None)
+				else if ((CTFFlag(Bot.MoveTarget) != None && Bot.PlayerReplicationInfo.HasFlag == None) ||
+					(FlagBase(Bot.MoveTarget) != None && Bot.PlayerReplicationInfo.HasFlag != None &&
+					Abs(VSize(Bot.MoveTarget.Location - Location) - VSize(ExitOffset)) < 
+					Bot.default.CollisionRadius + class'CTFFlag'.default.CollisionRadius) && NeedStop(Bot))
 					PassengerLeave(i, false);
 			}
 		}
