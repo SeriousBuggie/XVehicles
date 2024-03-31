@@ -4500,7 +4500,7 @@ function bool CanAddPassenger( Pawn Other, optional out byte FreeSlot )
 
 	if( !CanEnter(Other) || (Level.Game.bDeathMatch && !Level.Game.bTeamGame) )
 		Return False;
-	if( Level.Game.bTeamGame && Level.Game.bDeathMatch && Driver.PlayerReplicationInfo!=None )
+	if (Level.Game.bTeamGame && Level.Game.bDeathMatch && Driver != None && Driver.PlayerReplicationInfo != None)
 	{
 		if( Other.PlayerReplicationInfo==None || Other.PlayerReplicationInfo.Team!=Driver.PlayerReplicationInfo.Team )
 			Return False;
