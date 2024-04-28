@@ -2706,6 +2706,7 @@ function bool AboutToCrash(out int Accel)
 	local vector HitLocation, HitNormal;
 	local int ret;
 	local Actor A, FlagGoal;
+	local Vehicle Veh;
 
 	Dir = VSize(Velocity);
 	// brake for take flag
@@ -2733,19 +2734,20 @@ function bool AboutToCrash(out int Accel)
 			return false;
 		if (Pawn(A) != None)
 			return false; // teammates protected and can be taken as passengers, all other must die
-		if (Vehicle(A) != None && Vehicle(A).CurrentTeam != CurrentTeam && 
-			(Vehicle(A).Driver != None || Vehicle(A).HasPassengers()))
+		Veh = Vehicle(A);
+		if (Veh != None && Veh.CurrentTeam != CurrentTeam && 
+			(Veh.Driver != None || Veh.HasPassengers()))
 			return false; // crash into enemy non-empty vehicle for make damage
-		if (Vehicle(A) != None && Vehicle(A).CurrentTeam == CurrentTeam)
+		if (Veh != None && Veh.CurrentTeam == CurrentTeam)
 		{
 			if (bCanFly)
 			{
 				Rising = 1;
 				return false;
 			}
-			if (Vehicle(A).Driver != None && 
-				(Normal(Vehicle(A).Velocity) dot Normal(Velocity)) > 0.5 &&
-				VSize(Vehicle(A).Velocity) > VSize(Velocity) - 490)
+			if (Veh.Driver != None && 
+				(Normal(Veh.Velocity) dot Normal(Velocity)) > 0.5 &&
+				VSize(Veh.Velocity) > VSize(Velocity) - 490)
 				return false; // not slow down when follow teammate vehicle
 			Honk(); // make signal here, for notify other driver :)
 		}
