@@ -3550,11 +3550,13 @@ simulated function SingularBump(Actor Other)
 	local vector Dir;
 	local vector befOtVel, befMyVel, NVelH;
 	local Pawn RealInstigator, RealOtherInstigator;
+	local Vehicle Veh;
 	
 	if (Other == None || Other.bDeleteMe)
 		return;
 // log(Self @ Level.TimeSeconds @ "Bump" @ Other);
-	if (Vehicle(Other) != None)
+	Veh = Vehicle(Other);
+	if (Veh != None)
 	{
 		Dir = Other.Location-Location;
 		Dir.Z = 0;
@@ -3573,7 +3575,7 @@ simulated function SingularBump(Actor Other)
 		MyVel = Velocity;
 		Dir = Normal(Other.Location-Location);
 
-		befOtVel = Vehicle(Other).VeryOldVel[1];
+		befOtVel = Veh.VeryOldVel[1];
 		befMyVel = VeryOldVel[1];
 		
 		if (Accel == 0)
@@ -3586,7 +3588,7 @@ simulated function SingularBump(Actor Other)
 			VirtOldAccel = OldAccelD;
 		}
 
-		Vehicle(Other).PendingBump = Self;
+		Veh.PendingBump = Self;
 		
 		NVelH = Velocity - Other.Velocity;
 		Sp = VSize(NVelH);
@@ -3649,7 +3651,7 @@ simulated function SingularBump(Actor Other)
 					OldAccelD = -1;
 				}
 	
-				Vehicle(Other).OldAccelD = OldAccelD;
+				Veh.OldAccelD = OldAccelD;
 			}
 	
 			Other.Velocity = NVelH;
