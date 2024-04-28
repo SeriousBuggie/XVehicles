@@ -19,17 +19,20 @@ var bool bNeedCleaner;
 
 static function SpawnHUD(Actor A)
 {	
+	Local Mutator M;
 	if (default.UsedHUD != None && !default.UsedHUD.bDeleteMe && default.UsedHUD.Level == A.Level)
 		return;
 
 	foreach A.AllActors(class'XVehiclesHUD', default.UsedHUD)
 		break;
-	if (default.UsedHUD != None)
-		return;
-	default.UsedHUD = A.Spawn(default.Class);
+	if (default.UsedHUD == None)
+		default.UsedHUD = A.Spawn(default.Class);
 	if (default.UsedHUD != None)
 	{
 		default.UsedHUD.UsedHUD = None;
+		for (M = A.Level.Game.MessageMutator; M != None; M = M.NextMessageMutator)
+			if (M == default.UsedHUD)
+				return;
 		A.Level.Game.BaseMutator.AddMutator(default.UsedHUD);
 		A.Level.Game.RegisterMessageMutator(default.UsedHUD);
 	}
@@ -189,6 +192,10 @@ simulated function PreBeginPlay()
 {
 	local ChallengeHUD HUD;
 	local HUDSpawnNotify N;
+	
+	SpawnHUD(self);
+	if (default.UsedHUD != self)
+		return;
 	
 	Super.PreBeginPlay();
 	
