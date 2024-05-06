@@ -478,7 +478,7 @@ function SwitchVehicleLights()
 
 simulated function UpdateVehicleLights(bool bInHeadLightInUse)
 {
-	local byte i;
+	local int i;
 
 	if (bInHeadLightInUse && !bHeadLightInUse)
 	{	
@@ -618,7 +618,7 @@ simulated function InitKeysInfo()
 }
 simulated function PostBeginPlay()
 {
-	local byte i;
+	local int i;
 
 	Super.PostBeginPlay();
 	
@@ -797,7 +797,7 @@ simulated function DriverCameraActor GetCam(DriverWeapon Weapon)
 
 function KeepCams()
 {
-local byte i;
+	local int i;
 
 	if (MyCameraAct != None)
 		MyCameraAct.KeepView();
@@ -812,7 +812,7 @@ local byte i;
 // Owner pressed fire
 function FireWeapon( bool bAltFire )
 {
-	local byte i;
+	local int i;
 
 	if( bAltFire )
 		i = 1;
@@ -861,10 +861,10 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 // Client -> Server, the players movement keys pressed.
 simulated function ServerPerformMove( int InRise, int InTurn, int InAccel )
 {
-	local byte Bits;
-	Bits += (InRise + 1) & 3;
-	Bits += ((InTurn + 1) & 3) << 2;
-	Bits += ((InAccel + 1) & 3) << 4;
+	local int Bits;
+	Bits = ((InRise + 1) & 3) +
+		(((InTurn + 1) & 3) << 2) +
+		(((InAccel + 1) & 3) << 4);
 	if (Bits == LastPackedMove && Level.TimeSeconds - LastPackedMoveTime < 0.5)
 		return;
 	LastPackedMove = Bits;
@@ -1435,7 +1435,7 @@ simulated function VehicleAttachment AddAttachment( class<VehicleAttachment> Att
 simulated function Destroyed()
 {
 	local VehicleAttachment W,NW;
-	local byte i;
+	local int i;
 	if (Role != ROLE_Authority && PlayerPawn(Owner) != None && Owner.CollisionRadius != Owner.default.CollisionRadius)
 		Owner.SetCollisionSize(Owner.default.CollisionRadius, Owner.CollisionHeight);
 	if( Driver!=None )
@@ -1588,8 +1588,8 @@ function ServerPackState( float Delta)
 
 simulated function DmgFXGen(byte Mode)
 {
-local byte i;
-local vector CDmgOffSet;
+	local int i;
+	local vector CDmgOffSet;
 
 	if (!bDamageFXInWater && Region.Zone.bWaterZone)
 		return;
@@ -2086,7 +2086,7 @@ simulated function bool CheckOnGround()
 
 	local vector S, E, sHL[4],sHN[4], ePointsOffSet[4], MLoc, CrossedVect[2], GVTLoc;
 	local actor Ac[4];
-	local byte b, AcCount;
+	local int b, AcCount;
 	local actor WAs, WBs, PossibleBase;
 	local vector WHL, WHN, WSt, WEnd, WExt, WZRange;
 	local bool isNotAble, ret;
@@ -2357,7 +2357,7 @@ simulated function UpdateDriverPos()
 }
 simulated function UpdatePassengerPos()
 {
-	local byte i;
+	local int i;
 	local rotator R;
 	local bool bForceExit;
 	local Bot Bot;
@@ -3199,7 +3199,7 @@ simulated function vector CalcPlayerAimPos( optional byte SeatN )
 simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte Seat )
 {
 	local float X, Y, XS, XL, YL, LastY;
-	local byte i, o;
+	local int i, o;
 	Local Pawn CamOwner;
 	local ChallengeHud HUD;
 	local string str, exit;
@@ -3402,7 +3402,7 @@ simulated function RenderCanvasOverlays( Canvas C, DriverCameraActor Cam, byte S
 simulated function DrawVehicleStatus( Canvas C, vector CameraPos, rotator CameraRot )
 {
 	local float RendSize,X,Y,XS,YS,XL,YL,OffS;
-	local byte i;
+	local int i;
 
 	RendSize = VSize(CameraPos-Location)*(C.ViewPort.Actor.FovAngle/90.f);
 	if( RendSize>4000 || (Driver!=None && Driver==C.ViewPort.Actor) )
@@ -4009,9 +4009,8 @@ function bool IsSameTeam(Pawn Pawn)
 function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 						Vector momentum, name damageType)
 {
-	local byte i;
 	local bool bHadPass;
-	local byte shldset, shldtkn;
+	local int i, shldset, shldtkn;
 //	Log(self @ Level.TimeSeconds @ "TakeDamage" @ Damage @ InstigatedBy @ hitlocation @ momentum @ damageType @ InstigatedBy.DamageScaling);
 
 	if (!bVehicleBlewUp && !(Level.Game != None && Level.Game.bGameEnded))
@@ -4127,7 +4126,7 @@ Begin:
 function KillDriver( Pawn Killer, name damageType )
 {
 	local Pawn D;
-	local byte i;
+	local int i;
 
 	if( Driver!=None )
 	{
@@ -4207,7 +4206,7 @@ simulated function SpawnExplosionFX()
 	local VehicleAttachment W,NW;
 	local Effects exhx;
 	local TornOffCarPartActor WT;
-	local byte i, rnd;
+	local int i, rnd;
 	local vector vxc;
 
 	rnd = Min(Rand(5),4);
@@ -4363,7 +4362,7 @@ simulated function SpawnFurtherParts();	//use this to spawn further destroyed pa
 	local SilentBallExplosion S;
 	local VehicleAttachment W,NW;
 	local TornOffCarPartActor WT;
-	local byte i;
+	local int i;
 	local Fragment Fr;
 
 	S = Spawn(Class'SilentBallExplosion');
@@ -4500,7 +4499,7 @@ function ChangeSeat( byte SeatNum, bool bWasPassenger, byte PassengerNum )
 
 function bool CanAddPassenger( Pawn Other, optional out byte FreeSlot )
 {
-	local byte i;
+	local int i;
 
 	if( !CanEnter(Other) || (Level.Game.bDeathMatch && !Level.Game.bTeamGame) )
 		Return False;
@@ -4521,7 +4520,7 @@ function bool CanAddPassenger( Pawn Other, optional out byte FreeSlot )
 }
 simulated function bool HasPassengers()
 {
-	local byte i;
+	local int i;
 
 	For( i=0; i<ArrayCount(PassengerSeats); i++ )
 	{
@@ -4537,7 +4536,7 @@ simulated function bool HasPassengers()
 }
 function bool HasFreePassengerSeat( optional out byte SeatNum )
 {
-	local byte i;
+	local int i;
 
 	For( i=0; i<ArrayCount(PassengerSeats); i++ )
 	{
@@ -4689,7 +4688,7 @@ function PassengerLeave( byte Seat, optional bool bForcedLeave )
 }
 function PassengerFireWeapon( bool bAltFire, byte Seat )
 {
-	local byte i;
+	local int i;
 
 	if( PassengerSeats[Seat].PGun==None )
 		Return;
@@ -4724,7 +4723,7 @@ simulated function vector GetPassengerWOffset( byte Seat )
 // AI hint.
 function bool IsWorthyPassengerSeats()
 {
-	local byte i;
+	local int i;
 
 	For( i=0; i<8; i++ )
 	{
