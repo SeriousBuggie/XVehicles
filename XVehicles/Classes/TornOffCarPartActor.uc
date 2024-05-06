@@ -112,7 +112,7 @@ function Tick( float Delta )
 
 function CopyDisplayFrom( Actor Other, Vehicle OwnVeh )
 {
-local byte i;
+	local int i;
 
 	Mesh = Other.Mesh;
 	AnimSequence = Other.AnimSequence;

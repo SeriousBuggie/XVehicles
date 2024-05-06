@@ -57,7 +57,7 @@ replication
 
 simulated function PostBeginPlay()
 {
-	local byte i;
+	local int i;
 
 	if( Level.NetMode!=NM_DedicatedServer )
 	{
@@ -91,7 +91,7 @@ simulated function PostBeginPlay()
 
 simulated function SpawnFurtherParts()
 {
-	local byte i;
+	local int i;
 	local TornOffCarPartActor WT;
 
 	if (Level.NetMode == NM_DedicatedServer)
@@ -191,7 +191,7 @@ simulated function FellToGround()
 
 simulated function UpdateTreads(float Delta)
 {
-	local byte i;
+	local int i;
 	local float YDelta, TLinSpeed, TWheelAng, MaxFrT, CycleStep, VSizeVel;
 	local int PanSkip, dir;
 
@@ -708,12 +708,12 @@ simulated function vector GetVirtualSpeedOnIce( float Delta )
 
 simulated function AttachmentsTick( float Delta )
 {
-	local byte PitchDif, i;
+	local int PitchDif, i;
 	local float EngP;
 
 	//Water zone variables
-	local byte rec;
-	local byte FootSndVol, FootSndPitch;
+	local int rec;
+	local int FootSndVol, FootSndPitch;
 	local sound FootAmbSnd;
 	local float FootZoneSpeed;
 

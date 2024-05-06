@@ -146,7 +146,7 @@ local float d;
 
 simulated function PostBeginPlay()
 {
-local byte i;
+	local int i;
 
 	if (bUseEnergyFX)
 	{
@@ -201,7 +201,7 @@ simulated function PostNetBeginPlay()
 
 simulated function Destroyed()
 {
-local byte i;
+	local int i;
 
 	if( PitchPart!=None )
 	{
@@ -303,7 +303,7 @@ local int prog;
 
 function EnergyGather(float Delta, byte Mode)
 {
-local byte i;
+	local int i;
 
 	energyc += Delta;
 
@@ -394,7 +394,7 @@ local byte i;
 
 function ResetEnergy()
 {
-local byte i;
+	local int i;
 
 	For (i=0; i<16; i++)
 	{
@@ -418,7 +418,7 @@ local byte i;
 
 function ActivateDelay(byte Mode)
 {
-local byte i;
+	local int i;
 
 	bInFiringProcess = Mode + 1;
 	firec = WeapSettings[Mode].FireDelay;
@@ -479,7 +479,7 @@ function FireTurret( byte Mode, optional bool bForceFire )
 	local vector RealFireOffset;
 	local vector E,S,HL,HN;
 	local Actor A;
-	local byte i;
+	local int i;
 	local xVehProjDummy xWFX;
 	
 	//Log(self @ OwnerVehicle @ WeaponController.getHumanName() @ WeaponController.bFire @ WeaponController.bAltFire);
@@ -727,7 +727,7 @@ simulated function Tick( float Delta )
 	local vector Po;
 	local rotator Ro,RAdj,PRo;
 	local int OldY,OldP;
-	local byte i, j;
+	local int i, j;
 	local VehicleAttachment vat;
 	local bool bNeedFiringShaking;
 

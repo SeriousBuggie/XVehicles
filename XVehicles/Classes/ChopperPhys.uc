@@ -81,7 +81,7 @@ simulated function UpdateDriverInput( float Delta )
 	local rotator R,Rr;
 	local float Changed,DeAcc,DeAccRat;
 	local Actor A;
-	local byte i;
+	local int i;
 
 	if( bHasRotorDmg && !bOnGround && NextCutTime<Level.TimeSeconds )
 	{

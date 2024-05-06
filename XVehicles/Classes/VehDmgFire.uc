@@ -21,8 +21,7 @@ var float GlowCount;
 
 function PostBeginPlay()
 {
-	local vector Dir;
-	local byte i;
+	local int i;
 
 	Velocity = Rand(200)*vect(0,0,1) + vect(0,0,100);
 	AnimSequence = RndPos[Min(4,Rand(5))];

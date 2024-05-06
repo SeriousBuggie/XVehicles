@@ -64,7 +64,7 @@ function ServerPackState( float Delta)
 }
 simulated function PostBeginPlay()
 {
-	local byte i;
+	local int i;
 
 	Super.PostBeginPlay();
 
@@ -553,7 +553,7 @@ local vector Ac;
 
 simulated function AttachmentsTick( float Delta )
 {
-	local byte i,bSet[3];
+	local int i,bSet[3];
 	local rotator R,SR[3];
 	local Quat VehQ;
 	local byte PitchDif, TurnType;
@@ -564,7 +564,7 @@ simulated function AttachmentsTick( float Delta )
 
 	//Water zone variables
 	local VehWaterAttach VWaterTi;
-	local byte rec;
+	local int rec;
 	local byte FootSndVol, FootSndPitch;
 	local sound FootAmbSnd;
 	local float FootZoneSpeed;
@@ -719,7 +719,7 @@ simulated function AttachmentsTick( float Delta )
 
 simulated function Destroyed()
 {
-local byte i;
+	local int i;
 
 	For (i = 0; i < 8; i++)
 	{
