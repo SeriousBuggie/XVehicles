@@ -136,8 +136,8 @@ defaultproperties
 	MultiSkins(1)=Texture'XVehicles.Skins.CybotSk'
 	MultiSkins(4)=Texture'XVehicles.Skins.CybotCoreRed'
 	MultiSkins(5)=Texture'XVehicles.LaserFX.SentinelLaserFXRed'
-	SoundRadius=96
-	SoundVolume=192
+	SoundRadius=255
+	SoundVolume=255
 	SoundPitch=56
 	CollisionRadius=112.000000
 	CollisionHeight=88.000000

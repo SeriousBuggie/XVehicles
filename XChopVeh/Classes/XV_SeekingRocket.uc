@@ -103,6 +103,17 @@ function BlowUp(vector HitLocation)
 	MakeNoise(1.0);
 }
 
+auto state Flying
+{
+	simulated function ProcessTouch (Actor Other, Vector HitLocation)
+	{
+		if (Other == Owner || Other == Instigator)
+			return;
+		
+		Super.ProcessTouch(Other, HitLocation);
+	}
+}
+
 defaultproperties
 {
 	AccelRate=2000.000000

@@ -10,8 +10,6 @@ var() float MaxHoverSpeed,
 var() bool bHoverWhenNotDriving;
 var() vector Repulsor[3]; // used only 3, since Manta really one vehicle for it
 var() Sound JumpSound, DuckSound;
-var() bool bEngDynSndPitch;
-var() byte MinEngPitch, MaxEngPitch;
 
 var   float LastJumpTime,
 			ActualHoverHeight,

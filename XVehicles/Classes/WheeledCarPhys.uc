@@ -23,8 +23,6 @@ var byte NumWheels,WheelsTurning;
 var bool bHasWheelMeshes,bWasStuckOnW,bReversing;
 var float WheelYaw,WheelYawVis,StuckTimer,ReverseTimer;
 var int WheelsPitch;
-var(WheeledEng) bool bEngDynSndPitch;
-var(WheeledEng) byte MinEngPitch, MaxEngPitch;
 var() float WheelsTraction;
 var() int IronWheelsTerrainDmg;
 var vector VelFriction;

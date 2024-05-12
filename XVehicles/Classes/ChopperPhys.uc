@@ -77,11 +77,19 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 
 simulated function UpdateDriverInput( float Delta )
 {
+	local byte PitchDif;
 	local vector Ac,X,Y,Z,HL,HN,En;
 	local rotator R,Rr;
-	local float Changed,DeAcc,DeAccRat;
+	local float EngP, Changed,DeAcc,DeAccRat;
 	local Actor A;
 	local int i;
+	
+	if (bEngDynSndPitch)
+	{
+		PitchDif = MaxEngPitch - MinEngPitch;
+		EngP = MinEngPitch + Min(PitchDif, (VSize(Velocity)*PitchDif/MaxAirSpeed));
+		SoundPitch = Byte(EngP);
+	}
 
 	if( bHasRotorDmg && !bOnGround && NextCutTime<Level.TimeSeconds )
 	{

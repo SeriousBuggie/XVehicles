@@ -35,8 +35,6 @@ struct TTreading
 
 var() TTreading Treads[8];
 
-var(TreadedEng) bool bEngDynSndPitch;
-var(TreadedEng) byte MinEngPitch, MaxEngPitch;
 var() float TreadsTraction;
 var vector VelFriction;
 

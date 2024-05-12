@@ -66,6 +66,8 @@ var() byte CurrentTeam;
 var() localized string VehicleName,TranslatorDescription,MsgVehicleDesc;
 var() vector ExitOffset,BehinViewViewOffset,InsideViewOffset;
 var(Sounds) Sound SpawnSound,StartSound,EndSound,EngineSound,IdleSound,ImpactSounds[8],BulletHitSounds[6];
+var(Sounds) bool bEngDynSndPitch;
+var(Sounds) byte MinEngPitch, MaxEngPitch;
 var() config bool bUseBehindView;
 var() texture TeamOverlays[4];
 var() bool bDriverWOffset;	//Use BehindView offset settings relative to weapon in driver mode
