@@ -23,36 +23,43 @@ simulated function PostBeginPlay()
 simulated singular function HitWall( vector HitNormal, Actor Wall )
 {
 	local vector V;
+	local float fVelocity, Bounce;
 
 	MoveSmooth(HitNormal);
-	if( bDriving )
+	fVelocity = VSize(Velocity);
+	if (fVelocity > 1000)
+		Bounce = 0.15;
+	else if (fVelocity > 450)
+		Bounce = 0.05;
+	if (bDriving)
 	{
-		Velocity = SetUpNewMVelocity(Velocity,HitNormal,0.05);
+		Velocity = SetUpNewMVelocity(Velocity, HitNormal, Bounce);
 		Return;
 	}
-	V = SetUpNewMVelocity(Velocity,HitNormal,1);
-	if( !bOnGround && HitNormal.Z>0.8 )
+	V = SetUpNewMVelocity(Velocity, HitNormal, 1);
+	if (!bOnGround && HitNormal.Z > 0.8)
 	{
-		if( VSize(Normal(V)-Normal(Velocity))>0.85 && VSize(Velocity)>450 )
+		if (VSize(Normal(V) - Normal(Velocity)) > 0.85 && fVelocity > 450)
 		{
-			Velocity = SetUpNewMVelocity(Velocity,HitNormal,0.15);
+			Velocity = SetUpNewMVelocity(Velocity, HitNormal, Bounce);
 			Return;
 		}
 		bOnGround = True;
 		ActualFloorNormal = HitNormal;
-		Velocity = SetUpNewMVelocity(Velocity,HitNormal,0);
+		Velocity = SetUpNewMVelocity(Velocity, HitNormal, Bounce);
 		Return;
 	}
-	if( VSize(Normal(V)-Normal(Velocity))>0.85 || (bOnGround && !CanYawUpTo(Rotation,TransformForGroundRot(VehicleYaw,HitNormal),1500)) )
+	if (VSize(Normal(V) - Normal(Velocity)) > 0.85 || 
+		(bOnGround && !CanYawUpTo(Rotation, TransformForGroundRot(VehicleYaw, HitNormal), 1500)))
 	{
-		if( bOnGround && CanGetOver(35,0.85) )
+		Velocity = SetUpNewMVelocity(Velocity, HitNormal, Bounce);
+		if (bOnGround && VSize(SetUpNewMVelocity(Velocity, HitNormal, 0)) > 100 && CanGetOver(35, 0.85))
 			Return;
 		bOnGround = False;
-		Velocity = SetUpNewMVelocity(Velocity,HitNormal,0.5);
 	}
 	else
 	{
-		Velocity = SetUpNewMVelocity(Velocity,HitNormal,0);
+		Velocity = SetUpNewMVelocity(Velocity, HitNormal, Bounce);
 		ActualFloorNormal = HitNormal;
 		bOnGround = True;
 	}

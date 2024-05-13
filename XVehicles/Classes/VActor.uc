@@ -330,7 +330,7 @@ final simulated function rotator TransformForGroundRot( int CurrentYaw, vector G
 // Bounchyness 0-1, 0 = no bounching, 1 = full bounch off
 simulated function vector SetUpNewMVelocity( vector Vel, vector GNormal, float Bounchyness )
 {
-	Return Vel-(1.f+Bounchyness)*(Vel dot GNormal) * GNormal;
+	Return Vel - (1.f + Bounchyness)*(Vel dot GNormal)*GNormal;
 }
 simulated function bool CanGetOver( float MSHV, float AllowedZVal ) // Check if maxstepheight value allows to get over this
 {
