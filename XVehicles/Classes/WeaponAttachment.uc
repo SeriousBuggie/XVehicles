@@ -474,7 +474,7 @@ function float GetProjSpeed(byte Mode, vector P, rotator R)
 
 function FireTurret( byte Mode, optional bool bForceFire )
 {
-	local vector P, Pdual, L;
+	local vector P, Pdual, L, vPR;
 	local rotator R,Rdual,TR,PR;
 	local vector RealFireOffset;
 	local vector E,S,HL,HN;
@@ -533,11 +533,11 @@ function FireTurret( byte Mode, optional bool bForceFire )
 	}
 	bSkipFiringShaking = false;
 
-	GetTurretCoords(P,R,PR);
+	GetTurretCoords(P, R, PR);
 
-	if( bHasPitchPart )
+	if (bHasPitchPart)
 	{
-		P+=(PitchActorOffset >> R);
+		P += PitchActorOffset >> R;
 		R = PR;
 	}
 	else PR = R;
@@ -573,7 +573,7 @@ function FireTurret( byte Mode, optional bool bForceFire )
 	P = L;
 
 	Pdual = P;
-	P+=(RealFireOffset >> R);
+	P += RealFireOffset >> R;
 	
 	if (WeapSettings[Mode].DualMode == 2)
 	{
@@ -588,28 +588,31 @@ function FireTurret( byte Mode, optional bool bForceFire )
 	{
 		if (!WeapSettings[Mode].bInstantHit)
 		{
-			R = OwnerVehicle.GetFiringRot(GetProjSpeed(Mode, P, R),False,P,PassengerNum);
+			R = OwnerVehicle.GetFiringRot(GetProjSpeed(Mode, P, R), False, P, PassengerNum);
 			if (WeapSettings[Mode].DualMode == 2)
-				Rdual = OwnerVehicle.GetFiringRot(GetProjSpeed(Mode, Pdual, Rdual),False,Pdual,PassengerNum);
+				Rdual = OwnerVehicle.GetFiringRot(GetProjSpeed(Mode, Pdual, Rdual), False, Pdual, PassengerNum);
 		}
 		else
 		{
-			R = OwnerVehicle.GetFiringRot(9999,True,P,PassengerNum);
+			R = OwnerVehicle.GetFiringRot(9999, True, P, PassengerNum);
 			if (WeapSettings[Mode].DualMode == 2)
-				Rdual = OwnerVehicle.GetFiringRot(9999,True,Pdual,PassengerNum);
+				Rdual = OwnerVehicle.GetFiringRot(9999, True, Pdual, PassengerNum);
 		}
 	
 		TR = Rotation;
 		if (PitchPart != None)
 			TR = PitchPart.Rotation;
-		TR = Normalize(R-TR);
+		TR = Normalize(R - TR);
 	}
 
-	if( bPhysicalGunAimOnly || TR.Yaw>3500 || TR.Yaw<-3500 || TR.Pitch>3500 || TR.Pitch<-3500 ) {
-		if (OwnerVehicle.Trace(HL, HN, L + vector(PR)*40000, L, True) != None)
+	if (bPhysicalGunAimOnly || TR.Yaw > 3500 || TR.Yaw < -3500 || TR.Pitch > 3500 || TR.Pitch < -3500) {
+		vPR = vector(PR);
+		if (OwnerVehicle.Trace(HL, HN, L + 40000*vPR, L, True) != None)
 		{
-			if ((HL - P) dot (P - L) <= 0)
-				HL = L + vector(PR)*(16 + vector(PR) dot (P - L));
+			if ((HL - P) dot (HL - L) <= 0)
+				HL = P + 26*vPR;
+			else
+				HL += 10*vPR;
 			R = rotator(HL - P);
 			Rdual = rotator(HL - Pdual);
 		}

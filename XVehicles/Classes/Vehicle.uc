@@ -3104,7 +3104,7 @@ simulated function CalcCameraPos( out vector Pos, out rotator Rot, float Mult, o
 }
 function rotator GetFiringRot( float ProjSpeed, bool bInstantHit, vector PStartPos, optional byte SeatN )
 {
-	local vector End,Start,HL,HN;
+	local vector End, Start, HL, HN, vAim;
 	local rotator Aim;
 	local DriverCameraActor Cam;
 	local Pawn WeaponController;
@@ -3145,22 +3145,23 @@ function rotator GetFiringRot( float ProjSpeed, bool bInstantHit, vector PStartP
 			return DriverGun.Rotation;
 		else
 			return Rotation;
-	if( PlayerPawn(Driver)==None )
-		return Driver.AdjustAim(ProjSpeed,PStartPos,AimError,True,True);
+	if (PlayerPawn(Driver) == None)
+		return Driver.AdjustAim(ProjSpeed, PStartPos, AimError, True, True);
 		
 	if (MyCameraAct != None)
 	{
-		CalcCameraPos(Start,Aim,MyCameraAct.CurrentViewMult);
+		CalcCameraPos(Start, Aim, MyCameraAct.CurrentViewMult);
 		Start = AdjustCamTraceStart(Start, Aim, MyCameraAct);
 	}
 	else
-		CalcCameraPos(Start,Aim,1.0);
+		CalcCameraPos(Start, Aim, 1.0);
 	
-	End = Start+vector(Aim)*40000;
-	if( Trace(HL,HN,End,Start,True)==None )
-		return rotator(End-PStartPos);
+	vAim = vector(Aim);
+	End = Start + 40000*vAim;
+	if (Trace(HL, HN, End, Start, True) == None)
+		return rotator(End - PStartPos);
 	else 
-		return rotator(HL-PStartPos);
+		return rotator(HL - PStartPos + 10*vAim);
 }
 simulated function vector AdjustCamTraceStart(vector Start, rotator Aim, DriverCameraActor Cam)
 {
