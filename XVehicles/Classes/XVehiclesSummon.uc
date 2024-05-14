@@ -35,6 +35,7 @@ function Mutate(string MutateString, PlayerPawn Sender)
 	if (MutateString ~= "veh 9") V = "XStatVeh.EnergyTurret";
 	if (MutateString ~= "veh 0") V = "XHoverVeh.XManta";
 	if (MutateString ~= "veh 10") V = "XChopVeh.Raptor";
+	if (MutateString ~= "veh 11") V = "XXMP.Grinder";
 	
 	if (V != "")
 	{

@@ -32,26 +32,26 @@ simulated function PostNetBeginPlay()
 
 simulated function FixOffset()
 {
+	local Vehicle Veh;
 	if (Owner != None)
 	{
-		if (Vehicle(Owner) != None)	
-			PrePivot = Vehicle(Owner).GetStateOffset();
+		Veh = Vehicle(Owner);
+		if (Veh != None)	
+			PrePivot = Veh.GetStateOffset() + Veh.VehicleFlagOffset;
 		else
 			PrePivot.Z = Owner.CollisionHeight;
 		PrePivot.Z += 40;
 		
 		PrePivot = PrePivot >> Owner.Rotation;
 		
-		if (Vehicle(Owner) != None && Vehicle(Owner).bSlopedPhys && Vehicle(Owner).GVT!=None)
-			PrePivot += Vehicle(Owner).GVT.PrePivot;
+		if (Veh != None && Veh.bSlopedPhys && Veh.GVT != None)
+			PrePivot += Veh.GVT.PrePivot;
 	}
 }
 
 simulated function Tick(float Delta)
 {
 	local rotator r;
-	local bool bNetOwner;
-	local int i;
 	local vector X, Y, Z;
 	
 	Super.Tick(Delta);

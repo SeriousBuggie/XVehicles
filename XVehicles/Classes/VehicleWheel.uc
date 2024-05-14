@@ -7,5 +7,4 @@ var bool bMirroredWheel;
 
 defaultproperties
 {
-	DrawScale=0.200000
 }

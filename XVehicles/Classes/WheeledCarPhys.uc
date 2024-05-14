@@ -5,7 +5,8 @@ Enum WheelTypeType
 {
 	TT_None,
 	TT_TurningWheel,
-	TT_RevesedTurn
+	TT_RevesedTurn,
+	TT_Rotor
 };
 struct WheelsTypes
 {
@@ -551,8 +552,8 @@ local vector Ac;
 
 simulated function AttachmentsTick( float Delta )
 {
-	local int i,bSet[3];
-	local rotator R,SR[3];
+	local int i, bSet[4];
+	local rotator R, SR[ArrayCount(bSet)];
 	local Quat VehQ;
 	local byte PitchDif, TurnType;
 	local float EngP;
@@ -613,18 +614,28 @@ simulated function AttachmentsTick( float Delta )
 			MyWheel.SetLocation(BaseLoc + (MyWheel.WheelOffset >> Rotation)*DrawScale);
 
 			TurnType = MyWheel.TurnType;
-			if (bSet[TurnType] == 0)
+			if (TurnType == WheelTypeType.TT_Rotor)
 			{
-				bSet[TurnType] = 1;
 				R = MyWheel.WheelRot;
-				if (TurnType == 1)
-					R.Yaw += WheelYawVis;
-				else if (TurnType == 2)
-					R.Yaw -= WheelYawVis;
-				R.Pitch = WheelsPitch;
-				SR[TurnType] = QtoR(RtoQ(R) Qmulti VehQ);
+				R.Roll = WheelsPitch;
+				R = QtoR(RtoQ(R) Qmulti VehQ);
+				MyWheel.SetRotation(R);
 			}
-			MyWheel.SetRotation(SR[TurnType]);
+			else 
+			{
+				if (bSet[TurnType] == 0)
+				{
+					bSet[TurnType] = 1;
+					R = MyWheel.WheelRot;
+					if (TurnType == WheelTypeType.TT_TurningWheel)
+						R.Yaw += WheelYawVis;
+					else if (TurnType == WheelTypeType.TT_RevesedTurn)
+						R.Yaw -= WheelYawVis;
+					R.Pitch = WheelsPitch;
+					SR[TurnType] = QtoR(RtoQ(R) Qmulti VehQ);
+				}
+				MyWheel.SetRotation(SR[TurnType]);
+			}
 
 			//********************************************************************************
 			//Water Trail FX points update

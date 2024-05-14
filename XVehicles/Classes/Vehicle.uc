@@ -299,6 +299,7 @@ enum EDropFlag
 var() EDropFlag DropFlag;
 
 var VehicleFlag VehicleFlag;
+var() vector VehicleFlagOffset;
 var VehicleState VehicleState;
 var float VehicleStateNextCheck;
 
