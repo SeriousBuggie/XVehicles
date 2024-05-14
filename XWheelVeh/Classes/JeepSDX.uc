@@ -129,9 +129,6 @@ defaultproperties
 	Wheels(3)=(WheelOffset=(X=-80.000000,Y=60.000000,Z=-35.000000),WheelClass=Class'JSDXWheel',WheelMesh=LodMesh'JSDXWheelMir',bMirroredWheel=True)
 	MaxGroundSpeed=875.000000
 	WheelTurnSpeed=16000.000000
-	bEngDynSndPitch=True
-	MinEngPitch=32
-	MaxEngPitch=96
 	WheelsRadius=27.500000
 	TractionWheelsPosition=-80.000000
 	VehicleGravityScale=2.000000
@@ -143,6 +140,9 @@ defaultproperties
 	StartSound=Sound'XWheelVeh.JeepSDX.JeepStart'
 	EndSound=Sound'XWheelVeh.JeepSDX.JeepStop'
 	EngineSound=Sound'XWheelVeh.JeepSDX.JeepEng'
+	bEngDynSndPitch=True
+	MinEngPitch=32
+	MaxEngPitch=96
 	PassengerSeats(0)=(PassengerWeapon=Class'JSDXTurret',PassengerWOffset=(X=-78.125000,Z=8.062500),CameraOffset=(Z=37.500000),CamBehindviewOffset=(X=-75.000000,Z=57.500000),bIsAvailable=True,SeatName="Light Plasma Dual Cannon")
 	VehicleKeyInfoStr="Jeep SDX keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to turn|%Fire% to fire, %AltFire% to alt fire|1, 2 to switch seats|9 to toggle winter tires|0 to toggle light|%mutate VehicleCamera% to change camera|%ThrowWeapon% to exit the vehicle"
 	bSlopedPhys=True

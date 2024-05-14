@@ -102,9 +102,6 @@ defaultproperties
 	TreadPan(15)=Texture'XTreadVeh.Treads.ATread16'
 	Treads(0)=(MovPerTreadCycle=16.500000,TreadMesh=LodMesh'KrahtTread',TreadSkinN=1,TreadOffset=(X=20.000000,Y=81.000000,Z=-27.000000),TrackFrontOffset=(X=80.000000),TrackBackOffset=(X=-80.000000))
 	Treads(1)=(MovPerTreadCycle=16.500000,TreadMesh=LodMesh'KrahtTreadMir',TreadSkinN=1,TreadOffset=(X=20.000000,Y=-81.000000,Z=-27.000000),TrackFrontOffset=(X=80.000000),TrackBackOffset=(X=-80.000000))
-	bEngDynSndPitch=True
-	MinEngPitch=24
-	MaxEngPitch=80
 	TreadsTraction=5.000000
 	WreckTrackColHeight=32.000000
 	WreckTrackColRadius=48.000000
@@ -118,6 +115,9 @@ defaultproperties
 	StartSound=Sound'XTreadVeh.Kraht.KrahtStart'
 	EndSound=Sound'XTreadVeh.Kraht.KrahtEnd'
 	EngineSound=Sound'XTreadVeh.Kraht.KrahtEng'
+	bEngDynSndPitch=True
+	MinEngPitch=24
+	MaxEngPitch=80
 	bDriverWOffset=True
 	DriverWeapon=(WeaponClass=Class'KrahtTurret',WeaponOffset=(X=-38.500000,Z=41.250000))
 	VehicleKeyInfoStr="Kraht keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to turn|%Fire% to fire, %AltFire% to alt fire|%mutate VehicleCamera% to change camera|%ThrowWeapon% to exit the vehicle"

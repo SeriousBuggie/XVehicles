@@ -107,9 +107,6 @@ defaultproperties
 	TreadPan(15)=Texture'XTreadVeh.Treads.ATread16'
 	Treads(0)=(MovPerTreadCycle=45.000000,TreadMesh=LodMesh'TankTreadNB',TreadSkinN=1,TreadOffset=(Y=167.500000,Z=-71.000000),TrackWidth=112.000000,TrackFrontOffset=(X=256.000000),TrackBackOffset=(X=-256.000000))
 	Treads(1)=(MovPerTreadCycle=45.000000,TreadMesh=LodMesh'TankTreadNBMir',TreadSkinN=1,TreadOffset=(Y=-167.500000,Z=-71.000000),TrackWidth=112.000000,TrackFrontOffset=(X=256.000000),TrackBackOffset=(X=-256.000000))
-	bEngDynSndPitch=True
-	MinEngPitch=24
-	MaxEngPitch=80
 	TreadsTraction=5.000000
 	WreckTrackColHeight=64.000000
 	WreckTrackColRadius=96.000000
@@ -123,6 +120,9 @@ defaultproperties
 	StartSound=Sound'XTreadVeh.Shrali.ShraliStart'
 	EndSound=Sound'XTreadVeh.Shrali.ShraliEnd'
 	EngineSound=Sound'XTreadVeh.Shrali.ShraliEng'
+	bEngDynSndPitch=True
+	MinEngPitch=24
+	MaxEngPitch=80
 	bDriverWOffset=True
 	DriverWeapon=(WeaponClass=Class'ShraliTurret',WeaponOffset=(X=-208.125000,Z=64.625000))
 	PassengerSeats(0)=(PassengerWeapon=Class'ShraliIonRotSup',PassengerWOffset=(X=150.000000,Z=-7.250000),CameraOffset=(Z=37.500000),CamBehindviewOffset=(X=-168.750000,Z=80.000000),bIsAvailable=True,SeatName="Shrali Gunner")

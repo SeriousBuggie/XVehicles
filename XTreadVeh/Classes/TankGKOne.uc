@@ -106,9 +106,6 @@ defaultproperties
 	TreadPan(15)=Texture'XTreadVeh.Treads.BTread16'
 	Treads(0)=(MovPerTreadCycle=19.375000,TreadMesh=LodMesh'TankTreadAMir',TreadSkinN=1,TreadOffset=(X=-12.500000,Y=-98.125000,Z=-43.000000),bHaveAnimTWheels=True,WheelFramesN=17,WheelAnimSet="WheelsMove",WheelSize=20.625000,TrackWidth=52.000000,TrackFrontOffset=(X=128.000000),TrackBackOffset=(X=-128.000000))
 	Treads(1)=(MovPerTreadCycle=19.375000,TreadMesh=LodMesh'TankTreadA',TreadSkinN=1,TreadOffset=(X=-12.500000,Y=98.125000,Z=-43.000000),bHaveAnimTWheels=True,WheelFramesN=17,WheelAnimSet="WheelsMove",WheelSize=20.625000,TrackWidth=52.000000,TrackFrontOffset=(X=128.000000),TrackBackOffset=(X=-128.000000))
-	bEngDynSndPitch=True
-	MinEngPitch=32
-	MaxEngPitch=96
 	WreckTrackColHeight=32.000000
 	WreckTrackColRadius=64.000000
 	AIRating=3.000000
@@ -121,6 +118,9 @@ defaultproperties
 	StartSound=Sound'XTreadVeh.TankGKOne.TankGKOneOn'
 	EndSound=Sound'XTreadVeh.TankGKOne.TankGKOneOff'
 	EngineSound=Sound'XTreadVeh.TankGKOne.TankGKOneEng'
+	bEngDynSndPitch=True
+	MinEngPitch=32
+	MaxEngPitch=96
 	bDriverWOffset=True
 	DriverWeapon=(WeaponClass=Class'TankGKOneTurret',WeaponOffset=(X=-63.750000,Z=48.875000))
 	PassengerSeats(0)=(PassengerWeapon=Class'TankMGRot',PassengerWOffset=(X=-63.750000,Z=75.750000),CameraOffset=(Z=37.500000),CamBehindviewOffset=(X=-82.500000,Z=17.500000),bIsAvailable=True,SeatName="Machine Gun")

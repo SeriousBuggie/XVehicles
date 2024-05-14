@@ -161,9 +161,6 @@ defaultproperties
 	TreadPan(15)=Texture'XTreadVeh.TreadsC.CTread16'
 	Treads(0)=(MovPerTreadCycle=19.375000,TreadMesh=LodMesh'TankTreadBMir',TreadSkinN=1,TreadOffset=(X=-5.000000,Y=-94.500000,Z=-36.000000),bHaveAnimTWheels=True,WheelFramesN=17,WheelAnimSet="WheelsMove",WheelSize=20.625000,TrackWidth=52.000000,TrackFrontOffset=(X=128.000000),TrackBackOffset=(X=-128.000000))
 	Treads(1)=(MovPerTreadCycle=19.375000,TreadMesh=LodMesh'TankTreadB',TreadSkinN=1,TreadOffset=(X=-5.000000,Y=94.500000,Z=-36.000000),bHaveAnimTWheels=True,WheelFramesN=17,WheelAnimSet="WheelsMove",WheelSize=20.625000,TrackWidth=52.000000,TrackFrontOffset=(X=128.000000),TrackBackOffset=(X=-128.000000))
-	bEngDynSndPitch=True
-	MinEngPitch=32
-	MaxEngPitch=96
 	WreckTrackColHeight=32.000000
 	WreckTrackColRadius=64.000000
 	AIRating=8.000000
@@ -176,6 +173,9 @@ defaultproperties
 	StartSound=Sound'XTreadVeh.TankML.TankMLStart'
 	EndSound=Sound'XTreadVeh.TankML.TankMLEnd'
 	EngineSound=Sound'XTreadVeh.TankML.TankMLEng'
+	bEngDynSndPitch=True
+	MinEngPitch=32
+	MaxEngPitch=96
 	bDriverWOffset=True
 	DriverWeapon=(WeaponClass=Class'TankMLTurret',WeaponOffset=(X=-68.000000,Z=43.000000))
 	VehicleKeyInfoStr="Tank ML-102 keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to turn|%Fire% to fire, %AltFire% to alt fire|%mutate VehicleCamera% to change camera|%ThrowWeapon% to exit the vehicle"
