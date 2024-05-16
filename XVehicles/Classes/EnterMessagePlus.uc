@@ -3,6 +3,9 @@
 //=============================================================================
 class EnterMessagePlus expands PickupMessagePlus;
 
+var string EnterKey;
+var float LastTime;
+
 static function string GetString(
 	optional int Switch,
 	optional PlayerReplicationInfo RelatedPRI_1, 
@@ -20,6 +23,8 @@ static function string GetString(
 		else
 		{
 			key = Class'KeyBindObject'.Static.FindKeyBinding("Duck", Actor(OptionalObject));
+			default.EnterKey = key;
+			default.LastTime = Actor(OptionalObject).Level.TimeSeconds;
 			if (key != "")
 				key = "(" $ key $ ") ";
 			return "Hold 'Crouch' key " $ key $ "to enter this" @ Vehicle(OptionalObject).VehicleName $ 

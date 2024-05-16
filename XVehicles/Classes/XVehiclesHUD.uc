@@ -238,7 +238,6 @@ simulated function Tick(float Delta)
 simulated function FindHUD()
 {
 	local PlayerPawn P;
-	local ChallengeHUD HUD;
 
 	foreach AllActors(class'PlayerPawn', P)
 		if (ChallengeHUD(P.myHUD) != None)
@@ -377,6 +376,31 @@ simulated function DrawFixProgress(Canvas Canvas, Vehicle Vehicle)
 		Canvas.SetPos(X, Y);
 		Canvas.DrawText(Str);
 	}
+	else if (PlayerOwner != None) // Draw Enter Icon with hot key name
+	{
+		X = Level.TimeSeconds - Class'EnterMessagePlus'.default.LastTime;
+		if (X < 0.0 || X > 2.0 || VSize(PlayerOwner.Location - Vehicle.Location) > 
+			(Vehicle.CollisionRadius + 100 + PlayerOwner.CollisionRadius))
+			return;
+		Tex = Texture'EnterVehicle';
+		Str = Class'EnterMessagePlus'.default.EnterKey;
+		if (Str == "")
+			Str = "Crouch";
+		Canvas.Font = MyHUD.MyFonts.GetBigFont(Canvas.ClipX);			
+		Canvas.StrLen(Str, XL, YL);
+		X = (Canvas.ClipX - XL - Tex.USize*MyHUD.Scale)/2;
+		Y = (Canvas.ClipY - Tex.VSize*MyHUD.Scale)/2 - 1.5*YL;
+		
+		Canvas.DrawColor = MyHUD.WhiteColor;
+	
+		Canvas.Style = ERenderStyle.STY_Translucent;
+		Canvas.SetPos(X + XL + 3*MyHUD.Scale, Y + YL/2 - (Tex.VSize/2 + 2)*MyHUD.Scale);
+		Canvas.DrawTile(Tex, Tex.USize*MyHUD.Scale, 64*MyHUD.Scale, 0, 0, Tex.USize, Tex.VSize);
+		
+		Canvas.Style = ERenderStyle.STY_Normal;
+		Canvas.SetPos(X, Y);
+		Canvas.DrawText(Str);
+	}
 }
 
 simulated function float DrawPlayer(canvas Canvas, font Big, font Small, float YL, float Y, Pawn Pawn)
@@ -416,7 +440,6 @@ simulated function bool TraceIdentify(canvas Canvas)
 	local actor Camera, TraceActor;
 	local vector HitLocation, HitNormal, StartTrace, EndTrace;
 	local rotator CamRot;
-	local float X;
 	local Vehicle Other;
 	local int i;
 	
