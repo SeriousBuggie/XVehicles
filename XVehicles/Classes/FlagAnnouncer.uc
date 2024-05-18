@@ -13,13 +13,15 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch,
 {
 	local TeamInfo TeamInfo;
 	local CTFFlag CTFFlag, OtherFlag;
+	local CTFGame CTFGame;
 	local Sound Sound;
 	local Pawn P;
 	local bool bExcludeTournamentPlayers, bPlaySound;
 	local FlagAnnouncerSound SoundActor;
 	local Vehicle Veh;
 	
-	bPlaySound = !class'VehiclesConfig'.default.bDisableFlagAnnouncer && CTFGame(Level.Game).MaxTeams == 2;
+	CTFGame = CTFGame(Level.Game);
+	bPlaySound = !class'VehiclesConfig'.default.bDisableFlagAnnouncer && CTFGame != None && CTFGame.MaxTeams == 2;
 	
 	if (Message == class'DeathMatchMessage' && Switch == 3 && RelatedPRI_1 != None && 
 		PlayerPawn(RelatedPRI_1.Owner) != None && PlayerPawn(RelatedPRI_1.Owner).bIsPlayer)
@@ -88,19 +90,19 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch,
 					if (CTFFlag.Team == 0)
 					{
 						Sound = Sound'Blue_Team_Scores';
-						if (CTFGame(Level.Game) != None && 
-							CTFGame(Level.Game).Teams[0] != None &&
-							CTFGame(Level.Game).Teams[1] != None)
+						if (CTFGame != None && 
+							CTFGame.Teams[0] != None &&
+							CTFGame.Teams[1] != None)
 						{
-							if (CTFGame(Level.Game).Teams[1].Score == CTFGame(Level.Game).Teams[0].Score)
+							if (CTFGame.Teams[1].Score == CTFGame.Teams[0].Score)
 								Sound = Sound'Blue_Team_tied_for_the_lead';
-							else if (CTFGame(Level.Game).Teams[1].Score == CTFGame(Level.Game).Teams[0].Score + 1)
+							else if (CTFGame.Teams[1].Score == CTFGame.Teams[0].Score + 1)
 								Sound = Sound'Blue_Team_takes_the_lead';
-							else if (CTFGame(Level.Game).Teams[1].Score > CTFGame(Level.Game).Teams[0].Score)
+							else if (CTFGame.Teams[1].Score > CTFGame.Teams[0].Score)
 								Sound = Sound'Blue_Team_increases_their_lead';
-							if (CTFGame(Level.Game).GoalTeamScore > 0 && 
-								CTFGame(Level.Game).Teams[1].Score >= CTFGame(Level.Game).GoalTeamScore &&
-								CTFGame(Level.Game).Teams[1].Score > CTFGame(Level.Game).Teams[0].Score)
+							if (CTFGame.GoalTeamScore > 0 && 
+								CTFGame.Teams[1].Score >= CTFGame.GoalTeamScore &&
+								CTFGame.Teams[1].Score > CTFGame.Teams[0].Score)
 							{
 								Sound = Sound'blue_team_is_the_winner';
 								bExcludeTournamentPlayers = true;
@@ -110,19 +112,19 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch,
 					if (CTFFlag.Team == 1)
 					{
 						Sound = Sound'Red_Team_Scores';
-						if (CTFGame(Level.Game) != None && 
-							CTFGame(Level.Game).Teams[0] != None &&
-							CTFGame(Level.Game).Teams[1] != None)
+						if (CTFGame != None && 
+							CTFGame.Teams[0] != None &&
+							CTFGame.Teams[1] != None)
 						{
-							if (CTFGame(Level.Game).Teams[0].Score == CTFGame(Level.Game).Teams[1].Score)
+							if (CTFGame.Teams[0].Score == CTFGame.Teams[1].Score)
 								Sound = Sound'Red_Team_tied_for_the_lead';
-							else if (CTFGame(Level.Game).Teams[0].Score == CTFGame(Level.Game).Teams[1].Score + 1)
+							else if (CTFGame.Teams[0].Score == CTFGame.Teams[1].Score + 1)
 								Sound = Sound'Red_Team_takes_the_lead';
-							else if (CTFGame(Level.Game).Teams[0].Score > CTFGame(Level.Game).Teams[1].Score)
+							else if (CTFGame.Teams[0].Score > CTFGame.Teams[1].Score)
 								Sound = Sound'Red_Team_increases_their_lead';
-							if (CTFGame(Level.Game).GoalTeamScore > 0 && 
-								CTFGame(Level.Game).Teams[0].Score >= CTFGame(Level.Game).GoalTeamScore &&
-								CTFGame(Level.Game).Teams[0].Score > CTFGame(Level.Game).Teams[1].Score)
+							if (CTFGame.GoalTeamScore > 0 && 
+								CTFGame.Teams[0].Score >= CTFGame.GoalTeamScore &&
+								CTFGame.Teams[0].Score > CTFGame.Teams[1].Score)
 							{
 								Sound = Sound'red_team_is_the_winner';
 								bExcludeTournamentPlayers = true;
