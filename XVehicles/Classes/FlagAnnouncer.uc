@@ -3,6 +3,8 @@
 //=============================================================================
 class FlagAnnouncer expands MessagingSpectator;
 
+var float PrevScore[2];
+
 function PostBeginPlay() {	
 	PlayerReplicationInfo.RemoteRole = ROLE_None;
 	PlayerReplicationInfo.bAlwaysRelevant = false;
@@ -96,10 +98,13 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch,
 						{
 							if (CTFGame.Teams[1].Score == CTFGame.Teams[0].Score)
 								Sound = Sound'Blue_Team_tied_for_the_lead';
-							else if (CTFGame.Teams[1].Score == CTFGame.Teams[0].Score + 1)
-								Sound = Sound'Blue_Team_takes_the_lead';
 							else if (CTFGame.Teams[1].Score > CTFGame.Teams[0].Score)
-								Sound = Sound'Blue_Team_increases_their_lead';
+							{
+								if (PrevScore[1] <= PrevScore[0])
+									Sound = Sound'Blue_Team_takes_the_lead';
+								else
+									Sound = Sound'Blue_Team_increases_their_lead';
+							}
 							if (CTFGame.GoalTeamScore > 0 && 
 								CTFGame.Teams[1].Score >= CTFGame.GoalTeamScore &&
 								CTFGame.Teams[1].Score > CTFGame.Teams[0].Score)
@@ -118,10 +123,13 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch,
 						{
 							if (CTFGame.Teams[0].Score == CTFGame.Teams[1].Score)
 								Sound = Sound'Red_Team_tied_for_the_lead';
-							else if (CTFGame.Teams[0].Score == CTFGame.Teams[1].Score + 1)
-								Sound = Sound'Red_Team_takes_the_lead';
 							else if (CTFGame.Teams[0].Score > CTFGame.Teams[1].Score)
-								Sound = Sound'Red_Team_increases_their_lead';
+							{
+								if (PrevScore[0] <= PrevScore[1])
+									Sound = Sound'Red_Team_takes_the_lead';
+								else
+									Sound = Sound'Red_Team_increases_their_lead';
+							}
 							if (CTFGame.GoalTeamScore > 0 && 
 								CTFGame.Teams[0].Score >= CTFGame.GoalTeamScore &&
 								CTFGame.Teams[0].Score > CTFGame.Teams[1].Score)
@@ -150,6 +158,11 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch,
 				if (P.bIsPlayer && P.IsA('PlayerPawn') && 
 					(!bExcludeTournamentPlayers || !P.IsA('TournamentPlayer')))
 					PlayerPawn(P).ClientPlaySound(Sound, , true);
+	}
+	if (CTFGame != None && CTFGame.Teams[0] != None && CTFGame.Teams[1] != None)
+	{
+		PrevScore[0] = CTFGame.Teams[0].Score;
+		PrevScore[1] = CTFGame.Teams[1].Score;
 	}
 }
 
