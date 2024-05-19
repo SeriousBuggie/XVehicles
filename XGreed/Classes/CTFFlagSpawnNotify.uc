@@ -9,6 +9,9 @@ event Actor SpawnNotification(Actor A)
 	if (GreedFlag(A) == None)
 	{
 		GF = A.Spawn(Class'GreedFlag', A.Owner);
+		foreach AllActors(Class'FlagBase', CTFFlag(A).HomeBase)
+			break;
+		A.GotoState('');
 		A.Destroy();
 		A = GF;
 	}
