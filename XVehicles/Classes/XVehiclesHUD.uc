@@ -15,6 +15,8 @@ var float LastRender;
 var config int EnterCount;
 var float EnterLast;
 
+var float LastDuckPressed;
+
 var bool bNeedCleaner;
 
 static function SpawnHUD(Actor A)
@@ -376,7 +378,7 @@ simulated function DrawFixProgress(Canvas Canvas, Vehicle Vehicle)
 		Canvas.SetPos(X, Y);
 		Canvas.DrawText(Str);
 	}
-	else if (PlayerOwner != None) // Draw Enter Icon with hot key name
+	else if (PlayerOwner != None) // Draw Enter Icon with hotkey name
 	{
 		X = Level.TimeSeconds - Class'EnterMessagePlus'.default.LastTime;
 		if (X < 0.0 || X > 2.0 || VSize(PlayerOwner.Location - Vehicle.Location) > 
@@ -401,6 +403,43 @@ simulated function DrawFixProgress(Canvas Canvas, Vehicle Vehicle)
 		Canvas.SetPos(X, Y);
 		Canvas.DrawText(Str);
 	}
+}
+
+// Draw Exit Icon with hotkey name
+simulated function DrawExitInfo(Canvas Canvas, Vehicle Vehicle)
+{
+	local float XL, YL, X, Y;
+	local string Str;
+	local Texture Tex;
+
+	if (Canvas.ViewPort.Actor.bDuck != 1)
+	{
+		LastDuckPressed = 0;
+		return;
+	}
+	if (LastDuckPressed == 0)
+		LastDuckPressed = Level.TimeSeconds;
+	if (Level.TimeSeconds - LastDuckPressed < 0.7)
+		return;
+
+	Tex = Texture'ExitVehicle';
+	Str = Class'KeyBindObject'.Static.FindKeyBinding("ThrowWeapon", MyHUD);
+	if (Str == "")
+		Str = "ThrowWeapon";
+	Canvas.Font = MyHUD.MyFonts.GetBigFont(Canvas.ClipX);			
+	Canvas.StrLen(Str, XL, YL);
+	X = (Canvas.ClipX - XL - Tex.USize*MyHUD.Scale)/2;
+	Y = (Canvas.ClipY - Tex.VSize*MyHUD.Scale)/2 - 1.5*YL;
+	
+	Canvas.DrawColor = MyHUD.WhiteColor;
+
+	Canvas.Style = ERenderStyle.STY_Translucent;
+	Canvas.SetPos(X + XL + 3*MyHUD.Scale, Y + YL/2 - (Tex.VSize/2 + 2)*MyHUD.Scale);
+	Canvas.DrawTile(Tex, Tex.USize*MyHUD.Scale, 64*MyHUD.Scale, 0, 0, Tex.USize, Tex.VSize);
+	
+	Canvas.Style = ERenderStyle.STY_Normal;
+	Canvas.SetPos(X, Y);
+	Canvas.DrawText(Str);
 }
 
 simulated function float DrawPlayer(canvas Canvas, font Big, font Small, float YL, float Y, Pawn Pawn)
@@ -468,6 +507,9 @@ simulated function bool TraceIdentify(canvas Canvas)
 			}
 			break;
 		}
+		
+	if (Vehicle(TraceActor) != None)
+		DrawExitInfo(Canvas, Vehicle(TraceActor));
 
 	if ((MyHUD.IdentifyFadeTime == 0.0) || (IdentifyTarget == None) || MyHUD.IdentifyTarget != None)
 		return false;
