@@ -136,9 +136,9 @@ simulated event Landed(vector HitNormal)
 		bSimFall = false;
 }
 
-function Drop(pawn OldHolder, vector newVel)
+function Skull Drop(pawn OldHolder, vector newVel)
 {
-	local Skull Other;
+	local Skull Other, Ret;
 	local rotator R;
 	while (Charge > 0 && 
 		Charge != AmountRed && 
@@ -155,13 +155,15 @@ function Drop(pawn OldHolder, vector newVel)
 		else if (Charge > AmountGreen)
 			Other.Charge = AmountGreen;
 		Charge -= Other.Charge;
-		Other.Drop(OldHolder, newVel);
+		Other = Other.Drop(OldHolder, newVel);
+		if (Ret == None)
+			Ret = Other; // use biggest one		
 	}
 
 	if (Charge <= 0)
 	{
 		Destroy();
-		return;
+		return Ret;
 	}
 	
 	if (Charge == AmountRed)
@@ -182,7 +184,7 @@ function Drop(pawn OldHolder, vector newVel)
 		&& !SetLocation(OldHolder.Location) && Location != OldHolder.Location)
 	{ // can't make skull, so Destroy it.
 		Destroy();
-		return;
+		return Ret;
 	}
 
 	bSimFall = true;
@@ -197,6 +199,9 @@ function Drop(pawn OldHolder, vector newVel)
 	DropFrom(Location);
 	R.Yaw = Rotation.Yaw;
 	SetRotation(R);
+	if (Ret == None)
+		Ret = self;
+	return Ret;
 }
 
 defaultproperties
