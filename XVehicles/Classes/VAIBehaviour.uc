@@ -103,7 +103,6 @@ function vector AdjustLocation(Actor NP, optional bool bInMid)
 
 function bool CanReach(vector Point)
 {
-	local bool ret;
 	Local Pawn StubPawn;
 	if (VSize(Point - VehicleOwner.Driver.Location) < 800)
 		return VehicleOwner.Driver.PointReachable(Point);
@@ -255,7 +254,8 @@ function vector GetNextMoveTarget()
 				return VehicleOwner.Driver.Destination;
 			}
 			if (VehicleOwner.Driver.RouteCache[0] != None && 
-				Inventory(VehicleOwner.Driver.MoveTarget) != None)
+				Inventory(VehicleOwner.Driver.MoveTarget) != None && 
+				!VehicleOwner.Driver.MoveTarget.bGameRelevant)
 				return Pos[0];
 			return AdjustLocation(VehicleOwner.Driver.MoveTarget);
 		}
@@ -352,7 +352,7 @@ function bool PawnCanPassenge( Pawn Other, byte SeatNumber )
 }
 
 function bool FixBot(Bot Bot) {
-	local int s, i;
+	local int i;
 	local NavigationPoint NP, Best;
 	local float Dist, BestDist;
 
