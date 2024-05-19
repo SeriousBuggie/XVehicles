@@ -122,9 +122,60 @@ function ScoreFlag(Pawn Scorer, CTFFlag theFlag)
 			Scorer.DeleteInventory(Skull);
 			SetSkulls(Scorer, None);
 			Skull.Destroy();
-			RestartPlayer(Scorer);
+			TeleportToBase(Scorer);
 		}
 	}
+}
+
+function TeleportToBase(Pawn Traveler)
+{
+	local NavigationPoint BestStart;
+	local vector PrevPosition;
+	local rotator NewRotation;
+	local Bot B;
+	local Pawn P;
+
+	BestStart = FindPlayerStart(Traveler, 255);
+
+	if (BestStart != None)
+	{
+		PrevPosition = Traveler.Location;
+		Traveler.SetLocation(BestStart.Location);
+		PlayTeleportEffect(Traveler, true, true);
+		SpawnEffect(PrevPosition, BestStart.Location);
+		Traveler.Velocity = vect(0, 0, 0);
+		NewRotation = BestStart.Rotation;
+		NewRotation.Roll = 0;
+		Traveler.ClientSetRotation(NewRotation);
+		
+		B = Bot(Traveler);
+		if ( B != None )
+		{
+			B.MoveTarget = None;
+			B.MoveTimer = -1;
+			B.bJumpOffPawn = true;
+			if (!B.Region.Zone.bWaterZone)
+				B.SetFall();
+		}
+		else
+		{
+			// bots must re-acquire this player
+			for (P = Level.PawnList; P != None; P = P.NextPawn)
+				if (P.Enemy == Traveler && Bot(P) != None)
+					Bot(P).LastAcquireTime = Level.TimeSeconds;
+		}
+	}
+}
+
+function SpawnEffect(vector Start, vector Dest)
+{
+	local actor e;
+
+	e = Spawn(class'TranslocOutEffect',,,start, Owner.Rotation);
+	e.Mesh = Owner.Mesh;
+	e.Animframe = Owner.Animframe;
+	e.Animsequence = Owner.Animsequence;
+	e.Velocity = 900 * Normal(Dest - Start);
 }
 
 function AllClientsPlaySound(Sound Sound)
