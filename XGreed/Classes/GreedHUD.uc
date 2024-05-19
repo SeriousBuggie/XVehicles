@@ -68,12 +68,14 @@ simulated function DrawSkulls(Canvas Canvas, PlayerPawn me)
 	local float X, Y, Scale, Whiten;
 	local int Skulls;
 	local ChallengeHUD HUD;
+	local Pawn PawnOwner;
 		
 	HUD = ChallengeHUD(me.myHUD);
-	if (me.PlayerReplicationInfo  == None || me.PlayerReplicationInfo.bIsSpectator || HUD.bHideHUD)
+	PawnOwner = HUD.PawnOwner;
+	if (PawnOwner.PlayerReplicationInfo == None || PawnOwner.PlayerReplicationInfo.bIsSpectator || HUD.bHideHUD)
 		return;
 	
-	Skulls = Class'Greed'.static.getSkulls(me);
+	Skulls = Class'Greed'.static.getSkulls(PawnOwner);
 	Scale = HUD.Scale;
 	
 	X = Canvas.ClipX - 140 * Scale;

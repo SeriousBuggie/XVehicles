@@ -9,9 +9,22 @@ const AmountGreen = 1;
 
 event float BotDesireability(pawn Bot)
 {
-	if (!Bot.bIsPlayer || Bot.PlayerReplicationInfo == None || Bot(Bot) == None || 
-		Bot(Bot).Orders == 'Defend') // Defenders not want collect it, since not goes for register
+	local Pawn P;
+	if (!Bot.bIsPlayer || Bot.PlayerReplicationInfo == None || Bot(Bot) == None)
 		return -1;
+	// Defenders not want collect it, since not goes for register
+	// However, only if attacker near. If no - must collect for prevent easy cap by enemy coming to base
+	if (Bot(Bot).Orders == 'Defend')
+	{
+		foreach RadiusActors(Class'Pawn', P, 1000.0)
+			if (P.PlayerReplicationInfo == None || P.Health <= 0 || 
+				P.PlayerReplicationInfo.Team != Bot.PlayerReplicationInfo.Team)
+				continue;
+			else if (PlayerPawn(P) != None) // Human near
+				return -1;
+			else if (Bot(P) != None && Bot(Bot).Orders != 'Defend') // Non-defender bot near
+				return -1;
+	}
 	// always want pickup, more charge - more want
 	return MaxDesireability*Charge + 1000;
 }
@@ -69,9 +82,18 @@ function int GiveBonuses(int Before, int Add)
 	return Add;
 }
 
+function Tick(float Delta)
+{
+	Super.Tick(Delta);
+	
+	if (LifeSpan != 0.0 && LifeSpan < 2.0)
+		DrawScale = default.DrawScale*FMax(0.001, LifeSpan/2.0);
+}
+
 function BecomePickup()
 {
 	Super.BecomePickup();
+	DrawScale = default.DrawScale;
 	if (Charge >= AmountRed)
 		LifeSpan = 240;
 	else if (Charge >= AmountYellow)
@@ -83,6 +105,7 @@ function BecomePickup()
 function BecomeItem()
 {
 	Super.BecomeItem();
+	DrawScale = default.DrawScale;
 	LifeSpan = 0;
 	SetCollisionSize(default.CollisionRadius, default.CollisionHeight);
 }
