@@ -136,6 +136,17 @@ simulated event Landed(vector HitNormal)
 		bSimFall = false;
 }
 
+/** Slow down skulls that enter water */
+simulated event ZoneChange(ZoneInfo NewZone)
+{
+	if (NewZone.bWaterZone)
+	{
+		Velocity *= 0.25;
+	}
+
+	Super.ZoneChange(NewZone);
+}
+
 function Skull Drop(pawn OldHolder, vector newVel)
 {
 	local Skull Other, Ret;
