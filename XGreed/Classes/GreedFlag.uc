@@ -3,6 +3,10 @@
 //=============================================================================
 class GreedFlag expands CTFFlag;
 
+function PostBeginPlay()
+{
+}
+
 auto state Stub
 {
 Begin:
