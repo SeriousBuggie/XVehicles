@@ -408,10 +408,10 @@ static final function Pawn SpawnStubPawn(Actor Caller)
 	return Class'Vehicle'.default.StubPawn;
 }
 
-function AnalyzeZone( ZoneInfo newZone)
+function AnalyzeZone(ZoneInfo newZone)
 {
 	if (newZone != None && newZone.DamagePerSec > 0)
-		TakeDamage(Max(1,newZone.DamagePerSec/FootZoneDmgDiv),None,Location,vect(0,0,0),newZone.DamageType);
+		TakeDamage(FMax(1, newZone.DamagePerSec/FootZoneDmgDiv), None, Location, vect(0, 0, 0), newZone.DamageType);
 }
 
 static function float GetAngularSpeed(float LinVel, float Delta, float WRadius)
@@ -2604,7 +2604,7 @@ function ReadBotInput( float Delta )
 			Y = Normal(X);
 			VS.X = CollisionRadius;
 			VS.Y = VS.X;
-			VS.Z = Max(16, CollisionHeight - MaxObstclHeight - Abs(Y.Z)*CollisionRadius);
+			VS.Z = FMax(16, CollisionHeight - MaxObstclHeight - Abs(Y.Z)*CollisionRadius);
 			T = Location + Min(CollisionRadius, VSize(X))*GetMovementDir()*Y;
 			if (Trace(HitLocation, HitNormal, T, Location, true, VS) != None && 
 				 HitNormal.Z < 0.7 && VSize(HitLocation - Location) < 0.5*CollisionRadius)
@@ -3977,7 +3977,7 @@ function FixDamage(int Damage, Pawn EventInstigator, vector HitLocation, vector 
 	local Actor A;
 	
 	if (LifeSpan != 0)
-		LifeSpan = Max(LifeSpan, 5);
+		LifeSpan = FMax(LifeSpan, 5);
 	if (Health <= 0 || Health >= FirstHealth)
 		return;
 	Health += Damage;

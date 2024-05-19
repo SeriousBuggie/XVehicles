@@ -176,7 +176,7 @@ simulated function UpdateDriverInput( float Delta )
 		Return;
 	if( Driver!=None )
 	{
-		Changed = CalcTurnSpeed(Max(1, CurrentYawSpeed*Delta),VehicleYaw,Driver.ViewRotation.Yaw);
+		Changed = CalcTurnSpeed(FMax(1, CurrentYawSpeed*Delta),VehicleYaw,Driver.ViewRotation.Yaw);
 		Changed-=VehicleYaw;
 		if( Changed==0 )
 			CurrentYawSpeed = 5;

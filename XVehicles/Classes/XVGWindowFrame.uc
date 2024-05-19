@@ -25,8 +25,8 @@ function ResolutionChanged(float W, float H)
 function SetSizePos()
 {
 	SetSize(WinWidth, WinHeight);
-	WinLeft = Max(0, (Root.WinWidth  - WinWidth)/2);
-	WinTop  = Max(0, (Root.WinHeight - WinHeight)/2);
+	WinLeft = FMax(0, (Root.WinWidth  - WinWidth)/2);
+	WinTop  = FMax(0, (Root.WinHeight - WinHeight)/2);
 }
 
 function Resized()

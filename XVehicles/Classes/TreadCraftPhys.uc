@@ -78,7 +78,7 @@ simulated function PostBeginPlay()
 				{
 					VWaterT[i] = Spawn(Class'VehWaterAttach',Self);
 					VWaterT[i].WaveSize = Treads[i].TTread.DrawScale * Treads[i].TrackWidth * 2;
-					VWaterT[i].SoundRadius = Max(32,Min(Max(CollisionRadius,CollisionHeight)/2.5,255));
+					VWaterT[i].SoundRadius = Clamp(FMax(CollisionRadius,CollisionHeight)/2.5, 32, 255);
 				}	
 			}
 		}
@@ -228,7 +228,7 @@ simulated function UpdateTreads(float Delta)
 				PanSkip = Int(Treads[i].TPanCount/CycleStep);
 				Treads[i].TPanCount -= (CycleStep * PanSkip);
 	
-				PanSkip = Max(0, Min(PanSkip,7));
+				PanSkip = Clamp(PanSkip, 0, 7);
 				Treads[i].CurrentTPan += PanSkip;
 				if (Treads[i].CurrentTPan > 15)
 					Treads[i].CurrentTPan -= 15;
@@ -243,7 +243,7 @@ simulated function UpdateTreads(float Delta)
 				PanSkip = Abs(Int(Treads[i].TPanCount/CycleStep));
 				Treads[i].TPanCount += (CycleStep * PanSkip);
 	
-				PanSkip = Max(0, Min(PanSkip,7));
+				PanSkip = Clamp(PanSkip, 0, 7);
 				Treads[i].CurrentTPan -= PanSkip;
 				if (Treads[i].CurrentTPan < 0)
 					Treads[i].CurrentTPan += 15;
@@ -756,7 +756,7 @@ simulated function AttachmentsTick( float Delta )
 					else
 						FootZoneSpeed = 0;
 						
-					FootSndVol = Min(Max(8,VWaterT[i].WaveSize*3),255) * ((VSize(Location - OldLocation)/Delta + FootZoneSpeed)/ RefMaxWaterSpeed);
+					FootSndVol = FClamp(VWaterT[i].WaveSize*3.0, 8, 255) * ((VSize(Location - OldLocation)/Delta + FootZoneSpeed)/ RefMaxWaterSpeed);
 					FootSndPitch = 32 + ((VSize(Location - OldLocation)/Delta + FootZoneSpeed)/ RefMaxWaterSpeed) * 96;
 					FootAmbSnd = VWaterT[i].Region.Zone.AmbientSound;
 	

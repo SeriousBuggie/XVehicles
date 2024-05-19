@@ -87,7 +87,7 @@ simulated function PostBeginPlay()
 			{
 				VWaterT[NumWheels] = Spawn(Class'VehWaterAttach',Self);
 				VWaterT[NumWheels].WaveSize = FMax(MyWheels[NumWheels].CollisionRadius,MyWheels[NumWheels].CollisionHeight)*4;
-				VWaterT[NumWheels].SoundRadius = Max(32,Min(FMax(CollisionRadius,CollisionHeight)/2.5,255));
+				VWaterT[NumWheels].SoundRadius = Clamp(FMax(CollisionRadius,CollisionHeight)/2.5, 32, 255);
 			}
 
 			NumWheels++;
@@ -659,7 +659,7 @@ simulated function AttachmentsTick( float Delta )
 					else
 						FootZoneSpeed = 0;
 
-					FootSndVol = Min(Max(8,VWaterTi.WaveSize*3),255) * ((VSize(Location - OldLocation)/Delta + FootZoneSpeed)/ RefMaxWaterSpeed);
+					FootSndVol = FClamp(VWaterTi.WaveSize*3, 8, 255) * ((VSize(Location - OldLocation)/Delta + FootZoneSpeed)/ RefMaxWaterSpeed);
 					FootSndPitch = 32 + ((VSize(Location - OldLocation)/Delta + FootZoneSpeed)/ RefMaxWaterSpeed) * 96;
 					FootAmbSnd = VWaterTi.Region.Zone.AmbientSound;
 
