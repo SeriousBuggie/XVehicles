@@ -4,7 +4,14 @@ Object=(Name=XVehicles.XVehiclesHUD,Class=Class,MetaClass=Engine.Mutator,Descrip
 Object=(Name=XVehicles.XVehiclesMH,Class=Class,MetaClass=Engine.Mutator,Description="XVehiclesMH,MH rules for XVehicles")
 Object=(Name=XVehicles.XVehiclesCTF,Class=Class,MetaClass=Engine.Mutator,Description="XVehiclesCTF,CTF rules for XVehicles")
 Object=(Name=XVehicles.XVehiclesSummon,Class=Class,MetaClass=Engine.Mutator,Description="XVehiclesSummon,Summon XVehicles at any place for debug")
+Object=(Name=XChopVeh.XHeli2Raptor,Class=Class,MetaClass=Engine.Mutator,Description="XHeli2Raptor,Replace CybotHelico with Raptor")
+Object=(Name=XXMP.XJeepTDX2Grinder,Class=Class,MetaClass=Engine.Mutator,Description="XJeepTDX2Grinder,Replace JeepTDX with Grinder")
+
 Object=(Name=XVehicles.VehicleCTFGame,Class=Class,MetaClass=Botpack.TournamentGameInfo)
 Preferences=(Caption="Vehicle Capture the Flag",Parent="Game Types",Class=XVehicles.VehicleCTFGame,Immediate=True)
+
 Object=(Name=XVMH.VehicleMonsterHunt,Class=Class,MetaClass=Botpack.TournamentGameInfo)
 Preferences=(Caption="Vehicle MonsterHunt",Parent="Game Types",Class=XVMH.VehicleMonsterHunt,Immediate=True)
+
+Object=(Name=XGreed.Greed,Class=Class,MetaClass=Botpack.TournamentGameInfo)
+Preferences=(Caption="Greed",Parent="Game Types",Class=XGreed.Greed,Immediate=True)
