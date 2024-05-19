@@ -15,15 +15,14 @@ var float LastRender;
 var config int EnterCount;
 var float EnterLast;
 
-var float LastDuckPressed;
+var Vehicle LastVehicleDuck;
 
 var bool bNeedCleaner;
 
 static function SpawnHUD(Actor A)
 {	
 	Local Mutator M;
-	if (A.Level.Game == None || 
-		(default.UsedHUD != None && !default.UsedHUD.bDeleteMe && default.UsedHUD.Level == A.Level))
+	if (default.UsedHUD != None && !default.UsedHUD.bDeleteMe && default.UsedHUD.Level == A.Level)
 		return;
 
 	foreach A.AllActors(class'XVehiclesHUD', default.UsedHUD)
@@ -33,11 +32,14 @@ static function SpawnHUD(Actor A)
 	if (default.UsedHUD != None)
 	{
 		default.UsedHUD.UsedHUD = None;
-		for (M = A.Level.Game.MessageMutator; M != None; M = M.NextMessageMutator)
-			if (M == default.UsedHUD)
-				return;
-		A.Level.Game.BaseMutator.AddMutator(default.UsedHUD);
-		A.Level.Game.RegisterMessageMutator(default.UsedHUD);
+		if (A.Level.Game != None)
+		{
+			for (M = A.Level.Game.MessageMutator; M != None; M = M.NextMessageMutator)
+				if (M == default.UsedHUD)
+					return;
+			A.Level.Game.BaseMutator.AddMutator(default.UsedHUD);
+			A.Level.Game.RegisterMessageMutator(default.UsedHUD);
+		}
 	}
 }
 
@@ -415,12 +417,10 @@ simulated function DrawExitInfo(Canvas Canvas, Vehicle Vehicle)
 
 	if (Canvas.ViewPort.Actor.bDuck != 1)
 	{
-		LastDuckPressed = 0;
+		LastVehicleDuck = Vehicle;	
 		return;
 	}
-	if (LastDuckPressed == 0)
-		LastDuckPressed = Level.TimeSeconds;
-	if (Level.TimeSeconds - LastDuckPressed < 0.7)
+	if (Vehicle == None || LastVehicleDuck != Vehicle)
 		return;
 
 	Tex = Texture'ExitVehicle';
@@ -509,8 +509,7 @@ simulated function bool TraceIdentify(canvas Canvas)
 			break;
 		}
 		
-	if (Vehicle(TraceActor) != None)
-		DrawExitInfo(Canvas, Vehicle(TraceActor));
+	DrawExitInfo(Canvas, Vehicle(TraceActor));
 
 	if ((MyHUD.IdentifyFadeTime == 0.0) || (IdentifyTarget == None) || MyHUD.IdentifyTarget != None)
 		return false;
