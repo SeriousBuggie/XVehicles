@@ -22,7 +22,8 @@ var bool bNeedCleaner;
 static function SpawnHUD(Actor A)
 {	
 	Local Mutator M;
-	if (default.UsedHUD != None && !default.UsedHUD.bDeleteMe && default.UsedHUD.Level == A.Level)
+	if (A.Level.Game == None || 
+		(default.UsedHUD != None && !default.UsedHUD.bDeleteMe && default.UsedHUD.Level == A.Level))
 		return;
 
 	foreach A.AllActors(class'XVehiclesHUD', default.UsedHUD)
