@@ -420,7 +420,11 @@ simulated function DrawExitInfo(Canvas Canvas, Vehicle Vehicle)
 		LastVehicleDuck = Vehicle;	
 		return;
 	}
-	if (Vehicle == None || LastVehicleDuck != Vehicle)
+	if (Vehicle == None || LastVehicleDuck != Vehicle || 
+		AirShipPhys(Vehicle) != None ||
+		ChopperPhys(Vehicle) != None ||
+		HoverCraftPhys(Vehicle) != None ||
+		SubmarinePhys(Vehicle) != None)
 		return;
 
 	Tex = Texture'ExitVehicle';
