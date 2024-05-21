@@ -2700,9 +2700,15 @@ function bool NeedStop(Pawn pDriver)
 		UTJumpPad(pDriver.RouteCache[1]) != None && 
 		string(pDriver.RouteCache[1].Tag) ~= UTJumpPad(pDriver.RouteCache[0]).URL)
 		return true;
-	if (pDriver.MoveTarget != None && pDriver.MoveTarget.bGameRelevant)
+	if (IsImportantMoveTarget(pDriver.MoveTarget))
 		return true;
 	return false;
+}
+
+static function bool IsImportantMoveTarget(Actor MoveTarget)
+{
+	return MoveTarget != None && MoveTarget.bGameRelevant &&
+		DriverWeapon(MoveTarget) == None && BotAttractInv(MoveTarget) == None;
 }
 
 function bool AboutToCrash(out int Accel)

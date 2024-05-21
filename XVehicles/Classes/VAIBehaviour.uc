@@ -255,7 +255,7 @@ function vector GetNextMoveTarget()
 			}
 			if (VehicleOwner.Driver.RouteCache[0] != None && 
 				Inventory(VehicleOwner.Driver.MoveTarget) != None && 
-				!VehicleOwner.Driver.MoveTarget.bGameRelevant)
+				!VehicleOwner.IsImportantMoveTarget(VehicleOwner.Driver.MoveTarget))
 				return Pos[0];
 			return AdjustLocation(VehicleOwner.Driver.MoveTarget);
 		}
