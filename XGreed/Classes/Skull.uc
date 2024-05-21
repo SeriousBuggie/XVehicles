@@ -10,7 +10,7 @@ const AmountGreen = 1;
 event float BotDesireability(pawn Bot)
 {
 	local Pawn P;
-	const NearZero = 0.00000001; // for prevent SmartStockBots clear MoveTarget on FallBack
+	const NearZero = 0.00000001; // for prevent SmartStockBots clear MoveTarget on Fallback
 	if (!Bot.bIsPlayer || Bot.PlayerReplicationInfo == None || Bot(Bot) == None || bHidden)
 		return -1;
 	if (Lifespan != 0 && Lifespan < 0.5 + VSize(Location - Bot.Location)/Bot.GroundSpeed)
@@ -19,7 +19,7 @@ event float BotDesireability(pawn Bot)
 	// However, only if attacker near. If no - must collect for prevent easy cap by enemy coming to base
 	if (Bot(Bot).Orders == 'Defend')
 	{
-		foreach Bot.RadiusActors(Class'Pawn', P, 1000.0)
+		foreach RadiusActors(Class'Pawn', P, 1000.0)
 			if (P.PlayerReplicationInfo == None || P.Health <= 0 || 
 				P.PlayerReplicationInfo.Team != Bot.PlayerReplicationInfo.Team)
 				continue;
