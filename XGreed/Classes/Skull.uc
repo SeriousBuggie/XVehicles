@@ -4,7 +4,7 @@
 class Skull expands TournamentPickup;
 
 const AmountRed = 20;
-const AmountYellow = 5;
+const AmountGold = 5;
 const AmountGreen = 1;
 
 event float BotDesireability(pawn Bot)
@@ -50,25 +50,15 @@ function bool HandlePickupQuery( Inventory Item )
 
 function int GiveBonuses(int Before, int Add)
 {
-	local int AmpCount;
 	local ThighPads TP;
 	local UDamage Amp;
-	
-	if (Add >= 10 || (Before % 10 < 5 && (Before + Add) % 10 >= 5))
-	{
-		TP = Pawn(Owner).Spawn(Class'ThighPads');
-		TP.GiveTo(Pawn(Owner));
-		TP.PlaySound(TP.PickupSound, , 2.0);
-	}
-	AmpCount = Add/10;
-	if (Before % 10 > (Before + (Add % 10)) % 10)
-		AmpCount++;
-	if (AmpCount > 0)
+
+	if (Before/(2*AmountGold) != (Before + Add)/(2*AmountGold))
 	{
 		Amp = UDamage(Pawn(Owner).FindInventoryType(Class'UDamage'));
 		if (Amp != None)
 		{
-			Amp.Charge += AmpCount*Class'UDamage'.default.Charge;
+			Amp.Charge += Class'UDamage'.default.Charge;
 			Amp.BeginState(); // restart counter
 		}
 		else
@@ -78,6 +68,12 @@ function int GiveBonuses(int Before, int Add)
 			Amp.Activate();
 		}
 		Amp.PlaySound(Amp.PickupSound, , 2.0);
+	}
+	else if (Before/AmountGold != (Before + Add)/AmountGold)	
+	{
+		TP = Pawn(Owner).Spawn(Class'ThighPads');
+		TP.GiveTo(Pawn(Owner));
+		TP.PlaySound(TP.PickupSound, , 2.0);
 	}
 	return Add;
 }
@@ -96,7 +92,7 @@ function BecomePickup()
 	DrawScale = default.DrawScale;
 	if (Charge >= AmountRed)
 		LifeSpan = 240;
-	else if (Charge >= AmountYellow)
+	else if (Charge >= AmountGold)
 		LifeSpan = 120;
 	else
 		LifeSpan = 45;
@@ -176,7 +172,7 @@ function Skull Drop(pawn OldHolder, vector newVel)
 	local rotator R;
 	while (Charge > 0 && 
 		Charge != AmountRed && 
-		Charge != AmountYellow && 
+		Charge != AmountGold && 
 		Charge != AmountGreen)
 	{
 		Other = OldHolder.Spawn(Class'Skull');
@@ -184,8 +180,8 @@ function Skull Drop(pawn OldHolder, vector newVel)
 			break;
 		if (Charge > AmountRed)
 			Other.Charge = AmountRed;
-		else if (Charge > AmountYellow)
-			Other.Charge = AmountYellow;
+		else if (Charge > AmountGold)
+			Other.Charge = AmountGold;
 		else if (Charge > AmountGreen)
 			Other.Charge = AmountGreen;
 		Charge -= Other.Charge;
@@ -202,7 +198,7 @@ function Skull Drop(pawn OldHolder, vector newVel)
 	
 	if (Charge == AmountRed)
 		Texture = Texture'RedShield';
-	else if (Charge == AmountYellow)
+	else if (Charge == AmountGold)
 		Texture = Texture'N_Shield';
 	else if (Charge == AmountGreen)
 		Texture = Texture'Greenshield';
