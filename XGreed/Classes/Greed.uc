@@ -11,6 +11,8 @@ var float LastDamageTime;
 var string LastDamageInfo;
 var Actor LastDamageVehicle;
 
+var Actor TempVehicle;
+
 function PreBeginPlay()
 {
 	Super.PreBeginPlay();
@@ -29,13 +31,13 @@ event InitGame( string Options, out string Error )
 function int ReduceDamage(int Damage, name DamageType, pawn injured, pawn instigatedBy)
 {
 	Damage = Super.ReduceDamage(Damage, DamageType, injured, instigatedBy);
-	if (Damage > 0 && injured != None && injured.weapon != None && 
-		injured.weapon.isA('DriverWeapon'))
+	if (Damage > 0 && injured != None && injured.Weapon != None && 
+		injured.Weapon.isA('DriverWeapon'))
 	{
 		LastDamageDriver = injured;
 		LastDamageTime = Level.TimeSeconds;
 		LastDamageInfo = instigatedBy @ injured @ DamageType;
-		SetPropertyText("LastDamageVehicle", injured.weapon.GetPropertyText("VehicleOwner"));
+		SetPropertyText("LastDamageVehicle", injured.Weapon.GetPropertyText("VehicleOwner"));
 	}
 	return Damage;
 }
@@ -152,6 +154,7 @@ function TeleportToBase(Pawn Traveler)
 		if ( B != None )
 		{
 			B.MoveTarget = BestStart;
+			B.Destination = BestStart.Location;
 			B.MoveTimer = -1;
 			B.bJumpOffPawn = true;
 			if (!B.Region.Zone.bWaterZone)
@@ -201,12 +204,26 @@ function SetSkulls(Pawn Player, Skull Skull)
 		GRI.Skulls = 0;
 }
 
+function bool InVehicle(Pawn Pawn)
+{
+	return Pawn.Weapon != None && Pawn.Weapon.isA('DriverWeapon');
+}
+
 function bool HarvestSkullsNear(Bot aBot, float MaxDist)
 {
 	local Skull Skull;
 	local int Skulls;
 	local float Dist, BestDist, Scale;
 	local Actor Best, MoveTarget;
+	
+	if (InVehicle(aBot) && !ThereNoEnemy(aBot))
+	{
+		TempVehicle = None;
+		SetPropertyText("TempVehicle", aBot.Weapon.GetPropertyText("VehicleOwner"));
+		if (TempVehicle == None)
+			return false;
+		MaxDist = TempVehicle.CollisionRadius + aBot.default.CollisionRadius;
+	}
 	
 	Skulls = getSkulls(aBot);
 
@@ -308,6 +325,7 @@ function bool FindSpecialAttractionFor(Bot aBot)
 	local Skull Skull;
 	local int Skulls;
 	local GreedReplicationInfo GRI;
+	local Actor MoveTarget;
 
 	if (aBot.LastAttractCheck == Level.TimeSeconds)
 		return false;
@@ -351,7 +369,7 @@ function bool FindSpecialAttractionFor(Bot aBot)
 	
 	if (aBot.Orders == 'Defend' && Skulls <= 7)
 	{
-		if (VSize(FriendlyFlag.Location - aBot.Location) > 1000)
+		if (VSize(FriendlyFlag.Location - aBot.Location) > 1000 && InVehicle(aBot))
 		{
 			FindPathToBase(aBot, FriendlyFlag.HomeBase);
 			if (aBot.MoveTarget != None)
@@ -408,12 +426,13 @@ function bool FindSpecialAttractionFor(Bot aBot)
 			return true;
 		
 		// go to enemy base for kill defenders
-		if (!aBot.ActorReachable(EnemyFlag))
+		if (VSize(EnemyFlag.Location - aBot.Location) > 1000)
 		{
+			MoveTarget = aBot.MoveTarget;
 			FindPathToBase(aBot, EnemyFlag.HomeBase);
 			if (aBot.MoveTarget == EnemyFlag.HomeBase && Skulls < 1)
-				aBot.MoveTarget = None;
-			if (aBot.MoveTarget != None)
+				aBot.MoveTarget = MoveTarget;
+			else if (aBot.MoveTarget != None)
 			{
 				SetAttractionStateFor(aBot);
 				return true;

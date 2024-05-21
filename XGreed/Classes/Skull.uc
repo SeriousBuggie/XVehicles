@@ -9,25 +9,11 @@ const AmountGreen = 1;
 
 event float BotDesireability(pawn Bot)
 {
-	local Pawn P;
 	const NearZero = 0.00000001; // for prevent SmartStockBots clear MoveTarget on Fallback
 	if (!Bot.bIsPlayer || Bot.PlayerReplicationInfo == None || Bot(Bot) == None || bHidden)
 		return -1;
 	if (Lifespan != 0 && Lifespan < 0.5 + VSize(Location - Bot.Location)/Bot.GroundSpeed)
 		return NearZero;
-	// Defenders not want collect it, since not goes for register
-	// However, only if attacker near. If no - must collect for prevent easy cap by enemy coming to base
-	if (Bot(Bot).Orders == 'Defend')
-	{
-		foreach RadiusActors(Class'Pawn', P, 1000.0)
-			if (P.PlayerReplicationInfo == None || P.Health <= 0 || 
-				P.PlayerReplicationInfo.Team != Bot.PlayerReplicationInfo.Team)
-				continue;
-			else if (PlayerPawn(P) != None) // Human near
-				return NearZero;
-			else if (Bot(P) != None && Bot(Bot).Orders != 'Defend') // Non-defender bot near
-				return NearZero;
-	}
 	// always want pickup, more charge - more want
 	return MaxDesireability*Charge + 1000;
 }
