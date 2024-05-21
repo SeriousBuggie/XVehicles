@@ -49,6 +49,7 @@ function SetupLook()
 	HomeBase.GotoState(''); // disable checker
 	HomeBase.bHidden = true; // hide it
 	HomeBase.AmbientSound = Sound'A_Gameplay_ONS_ConduitAmbient';
+	HomeBase.SoundRadius = 64;
 	HomeBase.ExtraCost = 100000; // prevent walk through if not goal
 	HomeBase.AnimSequence = '';
 	R.Yaw = HomeBase.Rotation.Yaw;
