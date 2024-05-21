@@ -15,6 +15,21 @@ Begin:
 
 function Touch(Actor Other)
 {
+	if (RegisterTouch(Other))
+	{
+		PendingTouch = Other.PendingTouch;
+		Other.PendingTouch = self;
+	}
+}
+
+function PostTouch(Actor Other)
+{
+	if (RegisterTouch(Other))
+		Greed(Level.Game).ScoreFlag(Pawn(Other), self);
+}
+
+function bool RegisterTouch(Actor Other)
+{
 	local Pawn aPawn;
         
 	aPawn = Pawn(Other);
@@ -22,10 +37,10 @@ function Touch(Actor Other)
 	{
 		aPawn.MoveTimer = -1;
 		if (aPawn.PlayerReplicationInfo.Team == Team)
-			return;
-			
-		Greed(Level.Game).ScoreFlag(aPawn, self);
+			return false;
+		return true;
 	}
+	return false;
 }
 
 function SetupLook()

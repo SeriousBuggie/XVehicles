@@ -151,7 +151,7 @@ function TeleportToBase(Pawn Traveler)
 		B = Bot(Traveler);
 		if ( B != None )
 		{
-			B.MoveTarget = None;
+			B.MoveTarget = BestStart;
 			B.MoveTimer = -1;
 			B.bJumpOffPawn = true;
 			if (!B.Region.Zone.bWaterZone)
