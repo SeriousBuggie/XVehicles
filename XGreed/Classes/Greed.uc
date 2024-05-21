@@ -204,16 +204,24 @@ function SetSkulls(Pawn Player, Skull Skull)
 function bool HarvestSkullsNear(Bot aBot, float MaxDist)
 {
 	local Skull Skull;
+	local int Skulls;
 	local float Dist, BestDist, Scale;
 	local Actor Best, MoveTarget;
+	
+	Skulls = getSkulls(aBot);
 
-	BestDist = 12345678; // just big number;
 	Scale = 50.0;
 	if (MaxDist > 800)
 		Scale = 100.0;
-	foreach VisibleCollidingActors(Class'Skull', Skull, MaxDist)
+	BestDist = MaxDist - Skulls*Scale;
+	foreach aBot.VisibleCollidingActors(Class'Skull', Skull, MaxDist)
 	{
-		Dist = VSize(Skull.Location - aBot.Location) - Skull.Charge*Scale;
+		if (Skull.bHidden)
+			continue;
+		Dist = VSize(Skull.Location - aBot.Location);
+		if (Skull.LifeSpan > 0 && Skull.LifeSpan < 0.5 + Dist/aBot.GroundSpeed)
+			continue;
+		Dist -= Skull.Charge*Scale;
 		if (Dist < BestDist)
 		{
 			if (MaxDist > 800.0)
@@ -233,12 +241,6 @@ function bool HarvestSkullsNear(Bot aBot, float MaxDist)
 	{
 		aBot.MoveTarget = Best;
 		SetAttractionStateFor(aBot);
-		if (aBot.Enemy != None && !aBot.IsInState('FallBack'))
-		{
-			aBot.bNoClearSpecial = true;
-			aBot.TweenToRunning(0.1);
-			aBot.GotoState('Fallback', 'SpecialNavig');
-		}
 		return true;
 	}
 	return false;
@@ -284,11 +286,27 @@ event PostLogin(playerpawn NewPlayer)
 	SetSkulls(NewPlayer, None);
 }
 
+function bool MustKeepEnemy(Pawn E)
+{
+	if (E == None || E.PlayerReplicationInfo == None || E.Health <= 0)
+		return false;
+	return getSkulls(E) > 10;
+}
+
+function Dbg(Bot aBot, coerce string Info)
+{
+	Log(Level.TimeSeconds @ aBot.GetHumanName() @ 
+		aBot.GetStateName() @ "(" @ aBot.NextState @ aBot.NextLabel @ ")" @
+		"Skulls" @ getSkulls(aBot) @ "Enemy" @ aBot.Enemy @ "MoveTarget" @ aBot.MoveTarget @
+		Info);
+}
+
 function bool FindSpecialAttractionFor(Bot aBot)
 {
 	local CTFFlag FriendlyFlag, EnemyFlag;
 	local bool bOrdered;
 	local Skull Skull;
+	local int Skulls;
 	local GreedReplicationInfo GRI;
 
 	if (aBot.LastAttractCheck == Level.TimeSeconds)
@@ -310,45 +328,62 @@ function bool FindSpecialAttractionFor(Bot aBot)
 		Skull = Skull(aBot.FindInventoryType(Class'Skull'));
 		SetSkulls(aBot, Skull);
 	}
+	if (Skull != None)
+		Skulls = Skull.Charge;
+		
+	if (aBot.Enemy != None && aBot.Health < 60 && Skulls > 7)
+		aBot.SendTeamMessage(None, 'OTHER', 13, 25);
 
-	if (Skull != None && Skull.Charge > 0)
+	if (Skulls > 0 && aBot.ActorReachable(EnemyFlag))
 	{
-		if (aBot.Enemy != None && aBot.Health < 60 && Skull.Charge > 5)
-			aBot.SendTeamMessage(None, 'OTHER', 13, 25);
-		if (aBot.ActorReachable(EnemyFlag))
-		{
-			// if nobody near - harvest items near
-			if ((ThereNoEnemy(aBot) || (aBot.Enemy != None && aBot.Enemy.Weapon != None && aBot.Weapon != None && 
-				aBot.Weapon.AIRating > aBot.Enemy.Weapon.AIRating + 0.2) || FRand() < 0.5/Skull.Charge) &&
-				HarvestSkullsNear(aBot, 800.0))
-				return true;
-			aBot.MoveTarget = EnemyFlag;
-			SetAttractionStateFor(aBot);
+		// if nobody near - harvest items near
+		if ((ThereNoEnemy(aBot) || FRand() < 0.5/Skulls) && HarvestSkullsNear(aBot, 800.0))
 			return true;
-		}
-		else if ( (aBot.Orders == 'Attack')
-				 || ((aBot.Orders == 'Follow') && aBot.OrderObject.IsA('Bot')
-					&& ((Pawn(aBot.OrderObject).Health <= 0) 
-						 || ((EnemyFlag.Region.Zone == aBot.Region.Zone) && (VSize(EnemyFlag.Location - aBot.Location) < 2000)))) )
-		{
-			if ( !aBot.bKamikaze
-				&& ( (aBot.Weapon == None) || (aBot.Weapon.AIRating < 0.4)) )
-			{
-				aBot.bKamikaze = ( FRand() < 0.1 );
-				return false;
-			}
+		aBot.MoveTarget = EnemyFlag;
+		SetAttractionStateFor(aBot);
+		return true;
+	}
+	
+	bOrdered = aBot.bSniping || (aBot.Orders == 'Follow') || (aBot.Orders == 'Hold');
 
+	if ( (bOrdered && !aBot.OrderObject.IsA('Bot')) || (aBot.Weapon == None) || (aBot.Weapon.AIRating < 0.4) )
+		return false;
+	
+	if (aBot.Orders == 'Defend' && Skulls <= 7)
+	{
+		if (VSize(FriendlyFlag.Location - aBot.Location) > 1000)
+		{
+			FindPathToBase(aBot, FriendlyFlag.HomeBase);
+			if (aBot.MoveTarget != None)
+			{
+				SetAttractionStateFor(aBot);
+				return true;
+			}
+		}
+		if (HarvestSkullsNear(aBot, 800.0))
+			return true;
+		return false;
+	}
+
+	if (Skulls >= Clamp(Clamp(GoalTeamScore - Teams[aBot.PlayerReplicationInfo.Team].Score, 1, 3), 1, 
+		aBot.PlayerReplicationInfo.Score + 2))
+	{
+		if (aBot.Orders == 'Attack' ||
+				(aBot.Orders == 'Defend' && Skulls > 7) ||
+				(aBot.Orders == 'Follow' && aBot.OrderObject.IsA('Bot') && 
+				(Pawn(aBot.OrderObject).Health <= 0 || 
+				(EnemyFlag.Region.Zone == aBot.Region.Zone && VSize(EnemyFlag.Location - aBot.Location) < 2000))) )
+		{
 			if ( (aBot.Enemy != None) 
 				&& (aBot.Enemy.IsA('PlayerPawn') || (aBot.Enemy.IsA('Bot') && (Bot(aBot.Enemy).Orders == 'Attack')))
 				&& (((aBot.Enemy.Region.Zone == FriendlyFlag.HomeBase.Region.Zone) && (EnemyFlag.HomeBase.Region.Zone != FriendlyFlag.HomeBase.Region.Zone)) 
 					|| (VSize(aBot.Enemy.Location - FriendlyFlag.HomeBase.Location) < 0.6 * VSize(aBot.Location - EnemyFlag.HomeBase.Location))) )
-				{
-					aBot.SendTeamMessage(None, 'OTHER', 14, 15); //"Incoming!"
-					aBot.Orders = 'Freelance';
-					return false;
-				}		
-			// if nobody near - harvest items near
-			if (FRand() < 2/Skull.Charge && HarvestSkullsNear(aBot, 800.0))
+			{
+				aBot.SendTeamMessage(None, 'OTHER', 14, 15); //"Incoming!"
+				//aBot.Orders = 'Freelance';
+				//return false;
+			}
+			if (HarvestSkullsNear(aBot, 800.0))
 				return true;
 
 			FindPathToBase(aBot, EnemyFlag.HomeBase);
@@ -366,45 +401,37 @@ function bool FindSpecialAttractionFor(Bot aBot)
 		}
 		return false;
 	}
-	
-	bOrdered = aBot.bSniping || (aBot.Orders == 'Follow') || (aBot.Orders == 'Hold');
 
-	if ( (bOrdered && !aBot.OrderObject.IsA('Bot')) || (aBot.Weapon == None) || (aBot.Weapon.AIRating < 0.4) )
-		return false;
-
-	if (aBot.Orders != 'Defend')
+	if (aBot.Orders != 'Defend' && aBot.Enemy == None)
 	{
-		if (aBot.Enemy == None)
+		if (HarvestSkullsNear(aBot, 800.0) || HarvestSkullsNear(aBot, 4000.0))
+			return true;
+		
+		// go to enemy base for kill defenders
+		if (!aBot.ActorReachable(EnemyFlag))
 		{
-			if (HarvestSkullsNear(aBot, 800.0) || HarvestSkullsNear(aBot, 2000.0))
+			FindPathToBase(aBot, EnemyFlag.HomeBase);
+			if (aBot.MoveTarget == EnemyFlag.HomeBase && Skulls < 1)
+				aBot.MoveTarget = None;
+			if (aBot.MoveTarget != None)
+			{
+				SetAttractionStateFor(aBot);
 				return true;
-			
-			// go to enemy base for kill defenders
-			if (!aBot.ActorReachable(EnemyFlag))
-			{
-				FindPathToBase(aBot, EnemyFlag.HomeBase);
-				if (aBot.MoveTarget == EnemyFlag && (Skull == None || Skull.Charge <= 0))
-					aBot.MoveTarget = None;
-				if (aBot.MoveTarget != None)
-				{
-					SetAttractionStateFor(aBot);
-					return true;
-				}
 			}
-			
-			if ( FRand() < 0.35 )
-				aBot.GotoState('Wandering');
-			else
-			{
-				aBot.CampTime = 1.0;
-				aBot.bCampOnlyOnce = true;
-				aBot.GotoState('Roaming', 'Camp');
-			}
-			return true;
 		}
-		else if (HarvestSkullsNear(aBot, 800.0))
-			return true;
+		
+		if ( FRand() < 0.35 )
+			aBot.GotoState('Wandering');
+		else
+		{
+			aBot.CampTime = 1.0;
+			aBot.bCampOnlyOnce = true;
+			aBot.GotoState('Roaming', 'Camp');
+		}
+		return true;
 	}
+	if (HarvestSkullsNear(aBot, 800.0))
+		return true;
 	return false;
 }
 
@@ -433,7 +460,7 @@ function float GameThreatAdd(Bot aBot, Pawn Other)
 	Skulls = getSkulls(Other);
 
 	if (Skulls > 0)
-		return 10 + Skulls/10.0;
+		return Skulls/5.0;
 	else
 		return 0;
 }
@@ -450,21 +477,21 @@ function byte AssessBotAttitude(Bot aBot, Pawn Other)
 
 function byte PriorityObjective(Bot aBot)
 {
-	local CTFFlag Flag;
-
-	Flag = CTFReplicationInfo(GameReplicationInfo).FlagList[1 - aBot.PlayerReplicationInfo.Team]; 
-
-	if (getSkulls(aBot) > 0)
+	local CTFFlag EnemyFlag;
+	local int Skulls;
+	
+	if (aBot.PlayerReplicationInfo != None)
 	{
-		if ( (VSize(aBot.Location - Flag.HomeBase.Location) < 2000)
-			&& aBot.LineOfSightTo(Flag.HomeBase) )
+		EnemyFlag = CTFReplicationInfo(GameReplicationInfo).FlagList[1 - aBot.PlayerReplicationInfo.Team]; 
+		Skulls = getSkulls(aBot);
+		
+		if (Skulls > 0 && VSize(aBot.Location - EnemyFlag.HomeBase.Location) < 1000 && aBot.LineOfSightTo(EnemyFlag.HomeBase))
 			return 255;
-		return 2;
+		
+		if ((Skulls > Min(5, GoalTeamScore - Teams[aBot.PlayerReplicationInfo.Team].Score)) ||
+			(Skulls >= 3 && (VSize(aBot.Location - EnemyFlag.HomeBase.Location) < 2000) && aBot.LineOfSightTo(EnemyFlag.HomeBase)))
+			return 2;
 	}
-
-	if (aBot.Enemy != None && getSkulls(aBot.Enemy) > 0)
-		return 1;
-
 	return 0;
 }
 
