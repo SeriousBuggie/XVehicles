@@ -141,6 +141,11 @@ function TeleportToBase(Pawn Traveler)
 
 	if (BestStart != None)
 	{
+		if (Traveler.IsA('bbPlayer'))
+		{ // NewNet ugly stuff
+			if (float(Traveler.GetPropertyText("zzForceUpdateUntil")) < Level.TimeSeconds + 0.15)
+				Traveler.SetPropertyText("zzForceUpdateUntil", string(Level.TimeSeconds + 0.15));
+		}
 		PrevPosition = Traveler.Location;
 		Traveler.SetLocation(BestStart.Location);
 		PlayTeleportEffect(Traveler, true, true);
