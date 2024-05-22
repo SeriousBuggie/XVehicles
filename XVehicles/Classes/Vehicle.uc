@@ -2700,7 +2700,7 @@ function bool NeedStop(Pawn pDriver)
 		UTJumpPad(pDriver.RouteCache[1]) != None && 
 		string(pDriver.RouteCache[1].Tag) ~= UTJumpPad(pDriver.RouteCache[0]).URL)
 		return true;
-	if (IsImportantMoveTarget(pDriver.MoveTarget))
+	if (Driver == pDriver && IsImportantMoveTarget(pDriver.MoveTarget))
 		return true;
 	return false;
 }
