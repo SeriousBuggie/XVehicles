@@ -2707,8 +2707,12 @@ function bool NeedStop(Pawn pDriver)
 
 static function bool IsImportantMoveTarget(Actor MoveTarget)
 {
-	return MoveTarget != None && MoveTarget.bGameRelevant &&
-		DriverWeapon(MoveTarget) == None && BotAttractInv(MoveTarget) == None;
+	if (MoveTarget != None && (
+		(MoveTarget.bGameRelevant && DriverWeapon(MoveTarget) == None && BotAttractInv(MoveTarget) == None) ||
+		(FortStandard(MoveTarget) != None && FortStandard(MoveTarget).bTriggerOnly)
+		))
+		return true;
+	return false;
 }
 
 function bool AboutToCrash(out int Accel)

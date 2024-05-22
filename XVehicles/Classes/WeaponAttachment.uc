@@ -1161,7 +1161,8 @@ function bool FindEnemy()
 		{
 			if (P.Health <= 0 || FlockPawn(P) != None || FlockMasterPawn(P) != None || 
 				(P.PlayerReplicationInfo != None && P.PlayerReplicationInfo.bIsSpectator) ||
-				Bot.AttitudeTo(P) > ATTITUDE_Frenzy || !IsVisible(P, Bot))
+				Bot.AttitudeTo(P) > ATTITUDE_Frenzy || !IsVisible(P, Bot) ||
+				(FortStandard(P) != None && FortStandard(P).bTriggerOnly))
 				continue; // check not spectator and other stuff
 			Hit = TraceHit(Bot, P, HL, HN);
 			if (Hit == Level)
