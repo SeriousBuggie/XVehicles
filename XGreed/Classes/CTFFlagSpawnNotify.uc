@@ -21,5 +21,6 @@ event Actor SpawnNotification(Actor A)
 defaultproperties
 {
 	ActorClass=Class'Botpack.CTFFlag'
+	RemoteRole=ROLE_None
 	bGameRelevant=True
 }
