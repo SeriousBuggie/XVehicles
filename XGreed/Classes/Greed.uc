@@ -135,7 +135,6 @@ function TeleportToBase(Pawn Traveler)
 	local vector PrevPosition;
 	local rotator NewRotation;
 	local Bot B;
-	local Pawn P;
 
 	BestStart = FindPlayerStart(Traveler, 255);
 
@@ -156,7 +155,7 @@ function TeleportToBase(Pawn Traveler)
 		Traveler.ClientSetRotation(NewRotation);
 		
 		B = Bot(Traveler);
-		if ( B != None )
+		if (B != None)
 		{
 			B.MoveTarget = BestStart;
 			B.Destination = BestStart.Location;
@@ -164,13 +163,9 @@ function TeleportToBase(Pawn Traveler)
 			B.bJumpOffPawn = true;
 			if (!B.Region.Zone.bWaterZone)
 				B.SetFall();
-		}
-		else
-		{
-			// bots must re-acquire this player
-			for (P = Level.PawnList; P != None; P = P.NextPawn)
-				if (P.Enemy == Traveler && Bot(P) != None)
-					Bot(P).LastAcquireTime = Level.TimeSeconds;
+			B.SetOrders(BotReplicationInfo(B.PlayerReplicationInfo).RealOrders, 
+				BotReplicationInfo(B.PlayerReplicationInfo).RealOrderGiver, true);
+			B.GotoState('Roaming');
 		}
 	}
 }
@@ -391,12 +386,13 @@ function bool FindSpecialAttractionFor(Bot aBot)
 	if (Skulls >= Clamp(Clamp(GoalTeamScore - Teams[aBot.PlayerReplicationInfo.Team].Score, 1, 3), 1, 
 		aBot.PlayerReplicationInfo.Score + 2))
 	{
-		if (aBot.Orders == 'Attack' ||
+		if (aBot.Orders == 'Attack' || aBot.Orders == 'Freelance' ||
 				(aBot.Orders == 'Defend' && Skulls > 7) ||
 				(aBot.Orders == 'Follow' && aBot.OrderObject.IsA('Bot') && 
 				(Pawn(aBot.OrderObject).Health <= 0 || 
 				(EnemyFlag.Region.Zone == aBot.Region.Zone && VSize(EnemyFlag.Location - aBot.Location) < 2000))) )
 		{
+			aBot.Orders = 'Freelance'; // for able enter to others vehicles
 			if ( (aBot.Enemy != None) 
 				&& (aBot.Enemy.IsA('PlayerPawn') || (aBot.Enemy.IsA('Bot') && (Bot(aBot.Enemy).Orders == 'Attack')))
 				&& (((aBot.Enemy.Region.Zone == FriendlyFlag.HomeBase.Region.Zone) && (EnemyFlag.HomeBase.Region.Zone != FriendlyFlag.HomeBase.Region.Zone)) 
