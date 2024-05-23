@@ -4578,12 +4578,15 @@ function PassengerEnter( Pawn Other, byte Seat, optional int MyPitch, optional i
 	RotRollZero.Roll = 0;
 	ChangeCollision(Other, true);
 	Passengers[Seat] = Other;
-	if( PassengerSeats[Seat].PGun!=None )
+	if (PassengerSeats[Seat].PGun != None)
 	{
+		if (Seat == 0 && DriverGun == None && PlayerPawn(Driver) != None && 
+			PassengerSeats[Seat].PGun.WeaponController == Driver)
+			PlayerPawn(Driver).EndZoom();
 		PassengerSeats[Seat].PGun.WeaponController = Other;
 		PassengerSeats[Seat].PGun.SetOwner(Other);
 	}
-	if( PassengerSeats[Seat].PHGun==None )
+	if (PassengerSeats[Seat].PHGun == None)
 	{
 		PassengerSeats[Seat].PHGun = SpawnWeapon(DriverWeaponClass,Seat + 1,Other);
 		PassengerSeats[Seat].PHGun.bPassengerGun = True;
