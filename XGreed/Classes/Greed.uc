@@ -369,7 +369,8 @@ function bool FindSpecialAttractionFor(Bot aBot)
 	
 	if (aBot.Orders == 'Defend' && Skulls <= 7)
 	{
-		if (VSize(FriendlyFlag.Location - aBot.Location) > 1000 && InVehicle(aBot))
+		if (VSize(FriendlyFlag.Location - aBot.Location) > 1000 && 
+			(InVehicle(aBot) || aBot.IsInState('wandering')))
 		{
 			FindPathToBase(aBot, FriendlyFlag.HomeBase);
 			if (aBot.MoveTarget != None)
