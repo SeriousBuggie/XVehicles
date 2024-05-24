@@ -2820,7 +2820,7 @@ function int ShouldRiseFor( vector AcTarget )
 }
 
 // Pawn can enter this vehicle?
-function bool CanEnter(Pawn Other, optional bool bIgnoreDuck)
+function bool CanEnter(Pawn Other, optional bool bIgnoreDuck, optional bool bIgnoreTrace)
 {
 	local vector HL, HN;
 	if (Other.Health <= 0 || 
@@ -2830,8 +2830,11 @@ function bool CanEnter(Pawn Other, optional bool bIgnoreDuck)
 		Level.Game.bGameEnded || 
 		!Other.bCollideActors || 
 		(!bIgnoreDuck && PlayerPawn(Other) != None && (Other.bDuck == 0 || 
-		(PreventEnter != None && PreventEnter.Instigator == Other))) ||
-		!Other.FastTrace(Location) || 
+		(PreventEnter != None && PreventEnter.Instigator == Other))))
+		return false;
+	if (bIgnoreTrace)
+		return true;
+	if (!Other.FastTrace(Location) || 
 		(VSize(Other.Location - Location) > 10 && Other.Trace(HL, HN, Location, , true) != self))
 		return false;
 	return true;
@@ -2860,7 +2863,7 @@ function float BotDesireability2(Pawn Bot)
 		Return -1;
 //	Log(self @ "BotDesireability 2" @ Bot.GetHumanName() @ CurrentTeam @ CanEnter(Bot) @ 
 //		IsTeamLockedFor(Bot) @ VehicleAI.PawnCanDrive(Bot) @ Bot.bIsPlayer);
-	if (!CanEnter(Bot) || IsTeamLockedFor(Bot) || !VehicleAI.PawnCanDrive(Bot))
+	if (!CanEnter(Bot, false, true) || IsTeamLockedFor(Bot) || !VehicleAI.PawnCanDrive(Bot))
 		Return -1;
 /*	if (!Bot.actorReachable(self))
 	{
