@@ -12,6 +12,7 @@ var string LastDamageInfo;
 var Actor LastDamageVehicle;
 
 var Actor TempVehicle;
+var class<Inventory> BotAttractInvClass;
 
 function PreBeginPlay()
 {
@@ -19,6 +20,8 @@ function PreBeginPlay()
 	
 	spawn(class'CTFFlagSpawnNotify'); // Disable flags
 	spawn(class'GreedHUD');
+	
+	SetPropertyText("BotAttractInvClass", "Class'XVehicles.BotAttractInv'");
 }
 
 event InitGame( string Options, out string Error )
@@ -81,7 +84,7 @@ function Killed( pawn Killer, pawn Other, name damageType )
 			if (Skull.Charge >= 5 && Other.PlayerReplicationInfo != None && 
 				VSize(CTFReplicationInfo(GameReplicationInfo).FlagList[1 - Other.PlayerReplicationInfo.Team].HomeBase.Location - 
 				Other.Location) < 1000)
-				AllClientsPlaySound(Sound'Denied');
+				AllClientsPlaySound(Sound'XGreed.Denied');
 				
 			Skull.Charge += Bonus;
 			Skull.Drop(Other, 0.5*Other.Velocity);
@@ -263,14 +266,82 @@ function bool HarvestSkullsNear(Bot aBot, float MaxDist)
 	return false;
 }
 
-// fail safe polling fix - disabled
-function Timer_off()
+function Timer()
+{
+	Super.Timer();
+
+	FixDefenders();
+
+	// fail safe polling fix - disabled	
+	if (false)
+		PollingFix();
+}
+
+function FixDefenders()
+{
+	local Pawn P;
+	local Bot Bot;
+	local float Dist, InvDist, BestInvDist;
+	local FlagBase BotBase;
+	local Actor A;
+	local Inventory Inv, BestInv;
+	
+	for (P = Level.PawnList; P != None; P = P.NextPawn)
+	{
+		Bot = Bot(P);
+		if (Bot != None && Bot.PlayerReplicationInfo != None && 
+			Bot.Orders == 'Defend' && Bot.MoveTarget == None && Bot.IsInState('wandering'))
+		{
+			BotBase = FlagBase(Bot.OrderObject);
+			if (BotBase == None)
+				continue;
+			Dist = VSize(BotBase.Location - Bot.Location);
+			if (InVehicle(Bot))
+			{
+				if (Dist > 1000)
+					Bot.GotoState('Roaming');
+			}
+			else
+			{
+				BestInv = None;
+				if (BotAttractInvClass != None)
+					foreach Bot.RadiusActors(BotAttractInvClass, A, 2000)
+					{
+						Inv = Inventory(A);
+						if (Inv.BotDesireability(Bot) <= 0.001)
+							continue;
+						InvDist = VSize(Inv.Location - Bot.Location);
+						if (BestInv == None || BestInvDist > InvDist)
+						{
+							BestInv = Inv;
+							BestInvDist = InvDist;
+						}
+					}
+				if (BestInv != None)
+				{
+					if (Bot.actorReachable(BestInv))
+						Bot.MoveTarget = BestInv;
+					else
+						Bot.MoveTarget = Bot.FindPathToward(BestInv);
+					if (Bot.MoveTarget != None)
+						SetAttractionStateFor(Bot);
+				}
+				if (Bot.MoveTarget == None && Dist > 1000)
+				{
+					Bot.MoveTarget = Bot.FindPathToward(BotBase);
+					if (Bot.MoveTarget != None)
+						SetAttractionStateFor(Bot);
+				}
+			}
+		}
+	}
+}
+
+function PollingFix()
 {
 	local Pawn P;
 	local Skull Skull;
 	local GreedReplicationInfo GRI;
-
-	Super.Timer();
 	
 	for (P = Level.PawnList; P != None; P = P.NextPawn)
 		if (P.bIsPlayer && P.PlayerReplicationInfo != None)
@@ -372,7 +443,7 @@ function bool FindSpecialAttractionFor(Bot aBot)
 		if (VSize(FriendlyFlag.Location - aBot.Location) > 1000 && 
 			(InVehicle(aBot) || aBot.IsInState('wandering')))
 		{
-			FindPathToBase(aBot, FriendlyFlag.HomeBase);
+			aBot.MoveTarget = aBot.FindPathToward(FriendlyFlag.HomeBase);
 			if (aBot.MoveTarget != None)
 			{
 				SetAttractionStateFor(aBot);
