@@ -277,6 +277,16 @@ function Timer()
 		PollingFix();
 }
 
+function SetAttractionStateFor(Bot aBot)
+{
+	aBot.bNoClearSpecial = true;
+	aBot.TweenToRunning(0.1);
+	if (aBot.Enemy != None)
+		aBot.GotoState('FallBack', 'SpecialNavig');
+	else
+		aBot.GotoState('Roaming', 'SpecialNavig');
+}
+
 function FixDefenders()
 {
 	local Pawn P;
@@ -290,7 +300,7 @@ function FixDefenders()
 	{
 		Bot = Bot(P);
 		if (Bot != None && Bot.PlayerReplicationInfo != None && 
-			Bot.Orders == 'Defend' && Bot.MoveTarget == None && Bot.IsInState('wandering'))
+			Bot.Orders == 'Defend' && Bot.MoveTarget == None && (Bot.IsInState('wandering') || Bot.IsInState('Roaming')))
 		{
 			BotBase = FlagBase(Bot.OrderObject);
 			if (BotBase == None)

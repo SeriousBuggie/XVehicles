@@ -131,6 +131,86 @@ function Timer() {
 	Tmr++;
 }
 
+static function bool InVehicle(Pawn Pawn)
+{
+	return Pawn.Weapon != None && Pawn.Weapon.isA('DriverWeapon');
+}
+
+static function SetAttractionStateFor(Bot aBot)
+{
+	aBot.bNoClearSpecial = true;
+	aBot.TweenToRunning(0.1);
+	if (aBot.Enemy != None)
+		aBot.GotoState('FallBack', 'SpecialNavig');
+	else
+		aBot.GotoState('Roaming', 'SpecialNavig');
+}
+
+static function bool FixDefender(Bot Bot)
+{
+	local float Dist, InvDist, BestInvDist;
+	local FlagBase BotBase;
+	local BotAttractInv Inv, BestInv;
+
+	if (Bot != None && Bot.PlayerReplicationInfo != None && 
+		Bot.Orders == 'Defend' && Bot.MoveTarget == None && (Bot.IsInState('wandering') || Bot.IsInState('Roaming')))
+	{
+		BotBase = FlagBase(Bot.OrderObject);
+		if (BotBase == None)
+			return false;
+		Dist = VSize(BotBase.Location - Bot.Location);
+		if (InVehicle(Bot))
+		{
+			if (Dist > 1000)
+			{
+				Bot.MoveTarget = Bot.FindPathToward(BotBase);
+				if (Bot.MoveTarget != None)
+				{
+					SetAttractionStateFor(Bot);
+					return true;
+				}
+			}
+		}
+		else
+		{
+			BestInv = None;
+			foreach Bot.RadiusActors(Class'BotAttractInv', Inv, 2000)
+			{
+				if (Inv.BotDesireability(Bot) <= 0.001)
+					continue;
+				InvDist = VSize(Inv.Location - Bot.Location);
+				if (BestInv == None || BestInvDist > InvDist)
+				{
+					BestInv = Inv;
+					BestInvDist = InvDist;
+				}
+			}
+			if (BestInv != None)
+			{
+				if (Bot.actorReachable(BestInv))
+					Bot.MoveTarget = BestInv;
+				else
+					Bot.MoveTarget = Bot.FindPathToward(BestInv);
+				if (Bot.MoveTarget != None)
+				{
+					SetAttractionStateFor(Bot);
+					return true;
+				}
+			}
+			if (Bot.MoveTarget == None && Dist > 1000)
+			{
+				Bot.MoveTarget = Bot.FindPathToward(BotBase);
+				if (Bot.MoveTarget != None)
+				{
+					SetAttractionStateFor(Bot);
+					return true;	
+				}
+			}
+		}
+	}
+	return false;
+}
+
 static function FixBot(Bot Bot, optional int Tmr) {
 	local CTFFlag MyFlag, FriendlyFlag;
 	local Vehicle Veh, Best;
@@ -149,15 +229,20 @@ static function FixBot(Bot Bot, optional int Tmr) {
 	MyFlag = CTFFlag(Bot.PlayerReplicationInfo.HasFlag);
 	if (MyFlag == None)
 	{
-		if (Tmr % 10 == 0 && (Bot.IsInState('wandering') || 
-			(Bot.IsInState('Roaming') && Bot.Ambushspot != None && 
-			VSize(Bot.Ambushspot.Location - Bot.Location) <= 512 &&
-			Bot.FastTrace(Bot.Ambushspot.Location))))
+		if (Tmr % 10 == 0)
 		{
-			Best = class'WeaponAttachment'.static.AttackVehicle(None, Bot, 3000);
-			if (Best != None)
-				class'WeaponAttachment'.static.RangedAttack(Bot, Best, 1.0);
-			return;
+			if (FixDefender(Bot))
+				return;
+			if ((Bot.IsInState('wandering') || 
+				(Bot.IsInState('Roaming') && Bot.Ambushspot != None && 
+				VSize(Bot.Ambushspot.Location - Bot.Location) <= 512 &&
+				Bot.FastTrace(Bot.Ambushspot.Location))))
+			{
+				Best = class'WeaponAttachment'.static.AttackVehicle(None, Bot, 3000);
+				if (Best != None)
+					class'WeaponAttachment'.static.RangedAttack(Bot, Best, 1.0);
+				return;
+			}
 		}
 		if (Bot.Enemy != None)
 			return;
@@ -195,7 +280,6 @@ static function FixBot(Bot Bot, optional int Tmr) {
 static function TryHeal(Bot Bot)
 {
 	Local Pawn P;
-	Local Inventory Inv;
 	local name BotState;
 	local Vehicle Actor;
 	local Weapon BotWeapon;
