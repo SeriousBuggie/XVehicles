@@ -2737,7 +2737,7 @@ function bool AboutToCrash(out int Accel)
 		}
 	}
 	// take 500 as crash speed. So use 490 as check
-	if (Dir > 490)
+	if (Dir > 490 || bCanFly)
 	{
 		ret = GetMovementDir();
 		// about to crash with damage?
@@ -2767,8 +2767,11 @@ function bool AboutToCrash(out int Accel)
 			Honk(); // make signal here, for notify other driver :)
 		}
 //		Log("Detect crash into" @ A @ HitLocation @ HitNormal);
-		Accel = ret*-1; // brake via reverse
-		return true;
+		if (Dir > 490)
+		{
+			Accel = ret*-1; // brake via reverse
+			return true;
+		}
 	}
 	return false;
 }
