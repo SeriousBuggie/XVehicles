@@ -161,34 +161,34 @@ simulated function UpdateDriverInput( float Delta )
 		ActualFloorNormal = Z;
 		FloorNormal = Z;
 	}
-	if( Rotation!=R )
+	if (Rotation != R)
 		SetRotation(R);
-	if( !bDriving )
+	if (!bDriving)
 	{
 		DeAcc = VSize(Velocity);
 		DeAccRat = Delta*WDeAccelRate*Region.Zone.ZoneGroundFriction;
-		if( DeAccRat>DeAcc )
+		if (DeAccRat > DeAcc)
 			DeAccRat = DeAcc;
-		Velocity-=Normal(Velocity)*DeAccRat;
+		Velocity -= Normal(Velocity)*DeAccRat;
 		Return;
 	}
-	if( Level.NetMode==NM_Client && !IsNetOwner(Owner) )
+	if (Level.NetMode == NM_Client && !IsNetOwner(Owner))
 		Return;
-	if( Driver!=None )
+	if (Driver != None && !Driver.IsInState('GameEnded') && (Level.Game == None || !Level.Game.bGameEnded))
 	{
 		Changed = CalcTurnSpeed(FMax(1, CurrentYawSpeed*Delta),VehicleYaw,Driver.ViewRotation.Yaw);
-		Changed-=VehicleYaw;
-		if( Changed==0 )
+		Changed -= VehicleYaw;
+		if (Changed == 0)
 			CurrentYawSpeed = 5;
-		else if( CurrentYawSpeed<YawTurnSpeed )
+		else if (CurrentYawSpeed < YawTurnSpeed)
 		{
-			CurrentYawSpeed+=Delta*0.5*YawTurnSpeed;
-			if( CurrentYawSpeed>YawTurnSpeed )
+			CurrentYawSpeed += Delta*0.5*YawTurnSpeed;
+			if (CurrentYawSpeed > YawTurnSpeed)
 				CurrentYawSpeed = YawTurnSpeed;
 		}
-		VehicleYaw+=Changed;
+		VehicleYaw += Changed;
 	}	
-	Ac = GetAccelDir(Turning,Rising,Accel)*WAccelRate*Delta;
+	Ac = WAccelRate*Delta*GetAccelDir(Turning, Rising, Accel);
 /*	
 	if( VSize(Velocity)>MaxAirSpeed && VSize(Normal(Velocity)-Normal(Ac))<0.85 )
 		Velocity+=(Ac*0.1);

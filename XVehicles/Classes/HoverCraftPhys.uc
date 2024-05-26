@@ -269,7 +269,8 @@ simulated function UpdateDriverInput( float Delta )
 		Return;
 
 	// Update vehicle yaw.
-	if (bDriving && Driver != None)
+	if (bDriving && Driver != None && !Driver.IsInState('GameEnded') && 
+		(Level.Game == None || !Level.Game.bGameEnded))
 	{
 		/*
 		if (PlayerPawn(Driver) == None)
