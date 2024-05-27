@@ -81,12 +81,12 @@ function Killed( pawn Killer, pawn Other, name damageType )
 			Skull = Other.Spawn(Class'Skull');
 		if (Skull != None)
 		{
-			if (Skull.Charge >= 5 && Other.PlayerReplicationInfo != None && 
+			if (Skull.Amount >= 5 && Other.PlayerReplicationInfo != None && 
 				VSize(CTFReplicationInfo(GameReplicationInfo).FlagList[1 - Other.PlayerReplicationInfo.Team].HomeBase.Location - 
 				Other.Location) < 1000)
 				AllClientsPlaySound(Sound'XGreed.Denied');
 				
-			Skull.Charge += Bonus;
+			Skull.Amount += Bonus;
 			Skull.Drop(Other, 0.5*Other.Velocity);
 		}
 	}
@@ -110,13 +110,13 @@ function ScoreFlag(Pawn Scorer, CTFFlag theFlag)
 		Skull = Skull(Scorer.FindInventoryType(Class'Skull'));
 		if (Skull != None)
 		{
-			Scorer.PlayerReplicationInfo.Score += Skull.Charge;
-			Teams[Scorer.PlayerReplicationInfo.Team].Score += Skull.Charge;
+			Scorer.PlayerReplicationInfo.Score += Skull.Amount;
+			Teams[Scorer.PlayerReplicationInfo.Team].Score += Skull.Amount;
 
 			Scorer.PlaySound(Sound'DeliverSkulls');
 			AllClientsPlaySound(CaptureSound[Scorer.PlayerReplicationInfo.Team]);
 
-			EndStatsClass.Default.TotalFlags += Skull.Charge;
+			EndStatsClass.Default.TotalFlags += Skull.Amount;
 			BroadcastLocalizedMessage( class'CTFMessage', 0, Scorer.PlayerReplicationInfo, None, TheFlag );
 
 			if ( (bOverTime || (GoalTeamScore != 0)) && (Teams[Scorer.PlayerReplicationInfo.Team].Score >= GoalTeamScore) )
@@ -202,7 +202,7 @@ function SetSkulls(Pawn Player, Skull Skull)
 		GRI = Player.Spawn(Class'GreedReplicationInfo', Player);
 	GRI.Skull = Skull;
 	if (Skull != None)
-		GRI.Skulls = Skull.Charge;
+		GRI.Skulls = Skull.Amount;
 	else
 		GRI.Skulls = 0;
 }
@@ -241,7 +241,7 @@ function bool HarvestSkullsNear(Bot aBot, float MaxDist)
 		Dist = VSize(Skull.Location - aBot.Location);
 		if (Skull.LifeSpan > 0 && Skull.LifeSpan < 0.5 + Dist/aBot.GroundSpeed)
 			continue;
-		Dist -= Skull.Charge*Scale;
+		Dist -= Skull.Amount*Scale;
 		if (Dist < BestDist)
 		{
 			if (MaxDist > 800.0)
@@ -428,7 +428,7 @@ function bool FindSpecialAttractionFor(Bot aBot)
 		SetSkulls(aBot, Skull);
 	}
 	if (Skull != None)
-		Skulls = Skull.Charge;
+		Skulls = Skull.Amount;
 		
 	if (aBot.Enemy != None && aBot.Health < 60 && Skulls > 7)
 		aBot.SendTeamMessage(None, 'OTHER', 13, 25);

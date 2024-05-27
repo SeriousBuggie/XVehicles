@@ -3,9 +3,17 @@
 //=============================================================================
 class Skull expands TournamentPickup;
 
+var int Amount;
+
 const AmountRed = 20;
 const AmountGold = 5;
 const AmountGreen = 1;
+
+replication
+{
+	reliable if (Role == ROLE_Authority)
+		Amount;
+}
 
 event float BotDesireability(pawn Bot)
 {
@@ -14,8 +22,8 @@ event float BotDesireability(pawn Bot)
 		return -1;
 	if (Lifespan != 0 && Lifespan < 0.5 + VSize(Location - Bot.Location)/Bot.GroundSpeed)
 		return NearZero;
-	// always want pickup, more charge - more want
-	return MaxDesireability*Charge + 1000;
+	// always want pickup, more Amount - more want
+	return MaxDesireability*Amount + 1000;
 }
 
 function bool HandlePickupQuery( Inventory Item )
@@ -27,7 +35,7 @@ function bool HandlePickupQuery( Inventory Item )
 		else
 			Pawn(Owner).ReceiveLocalizedMessage(Item.PickupMessageClass, 0, None, None, Item.Class);
 		Item.PlaySound(Item.PickupSound, , 2.0);
-		Charge += GiveBonuses(Charge, Skull(Item).Charge);
+		Amount += GiveBonuses(Amount, Skull(Item).Amount);
 		Greed(Level.Game).SetSkulls(Pawn(Owner), self);
 		Item.Destroy();
 		return true;				
@@ -102,9 +110,9 @@ function BecomePickup()
 {
 	Super.BecomePickup();
 	DrawScale = default.DrawScale;
-	if (Charge >= AmountRed)
+	if (Amount >= AmountRed)
 		LifeSpan = 240;
-	else if (Charge >= AmountGold)
+	else if (Amount >= AmountGold)
 		LifeSpan = 120;
 	else
 		LifeSpan = 45;
@@ -122,7 +130,7 @@ function PickupFunction(Pawn Other)
 {
 	Super.PickupFunction(Other);
 	Greed(Level.Game).SetSkulls(Pawn(Owner), self);
-	GiveBonuses(0, Charge);
+	GiveBonuses(0, Amount);
 }
 
 event HitWall(vector HitNormal, actor Wall)
@@ -182,37 +190,41 @@ function Skull Drop(pawn OldHolder, vector newVel)
 {
 	local Skull Other, Ret;
 	local rotator R;
-	while (Charge > 0 && 
-		Charge != AmountRed && 
-		Charge != AmountGold && 
-		Charge != AmountGreen)
+	while (Amount > AmountGreen && 
+		Amount != AmountRed && 
+		Amount != AmountGold)
 	{
 		Other = OldHolder.Spawn(Class'Skull');
 		if (Other == None)
 			break;
-		if (Charge > AmountRed)
-			Other.Charge = AmountRed;
-		else if (Charge > AmountGold)
-			Other.Charge = AmountGold;
-		else if (Charge > AmountGreen)
-			Other.Charge = AmountGreen;
-		Charge -= Other.Charge;
+		if (Amount > AmountRed)
+			Other.Amount = AmountRed;
+		else if (Amount > AmountGold)
+			Other.Amount = AmountGold;
+		else if (Amount > AmountGreen)
+			Other.Amount = AmountGreen;
+		else
+		{
+			Other.Destroy();
+			break;
+		}
+		Amount -= Other.Amount;
 		Other = Other.Drop(OldHolder, newVel);
 		if (Ret == None)
 			Ret = Other; // use biggest one		
 	}
 
-	if (Charge <= 0)
+	if (Amount <= 0)
 	{
 		Destroy();
 		return Ret;
 	}
 	
-	if (Charge == AmountRed)
+	if (Amount == AmountRed)
 		Texture = Texture'RedShield';
-	else if (Charge == AmountGold)
+	else if (Amount == AmountGold)
 		Texture = Texture'N_Shield';
-	else if (Charge == AmountGreen)
+	else if (Amount == AmountGreen)
 		Texture = Texture'Greenshield';
 	else
 		Texture = Texture'BlueShield'; // must not happen
