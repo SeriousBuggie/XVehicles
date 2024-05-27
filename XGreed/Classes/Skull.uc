@@ -41,6 +41,7 @@ function int GiveBonuses(int Before, int Add)
 {
 	local ThighPads TP;
 	local UDamage Amp;
+	local float RespawnTimeOld;
 
 	if (Before/(2*AmountGold) != (Before + Add)/(2*AmountGold))
 	{
@@ -52,17 +53,39 @@ function int GiveBonuses(int Before, int Add)
 		}
 		else
 		{
+			RespawnTimeOld = Class'UDamage'.default.RespawnTime;
+			Class'UDamage'.default.RespawnTime = 0.0;
 			Amp = Pawn(Owner).Spawn(Class'UDamage');
-			Amp.GiveTo(Pawn(Owner));
-			Amp.Activate();
+			Class'UDamage'.default.RespawnTime = RespawnTimeOld;
+			if (Amp != None)
+			{
+				Amp.RespawnTime = 0.0;
+				Amp.GiveTo(Pawn(Owner));
+				Amp.Activate();
+			}
 		}
-		Amp.PlaySound(Amp.PickupSound, , 2.0);
+		if (Amp != None)
+			Amp.PlaySound(Amp.PickupSound, , 2.0);
 	}
 	else if (Before/AmountGold != (Before + Add)/AmountGold)	
 	{
-		TP = Pawn(Owner).Spawn(Class'ThighPads');
-		TP.GiveTo(Pawn(Owner));
-		TP.PlaySound(TP.PickupSound, , 2.0);
+		TP = ThighPads(Pawn(Owner).FindInventoryType(Class'ThighPads'));
+		if (TP != None)
+			TP.Charge = Class'ThighPads'.default.Charge;
+		else
+		{ // In case if it immediately oickup on respawn
+			RespawnTimeOld = Class'ThighPads'.default.RespawnTime;
+			Class'ThighPads'.default.RespawnTime = 0.0;
+			TP = Pawn(Owner).Spawn(Class'ThighPads');
+			Class'ThighPads'.default.RespawnTime = RespawnTimeOld;
+			if (TP != None)
+			{
+				TP.RespawnTime = 0.0;
+				TP.GiveTo(Pawn(Owner));
+			}
+		}
+		if (TP != None)
+			TP.PlaySound(TP.PickupSound, , 2.0);
 	}
 	return Add;
 }
