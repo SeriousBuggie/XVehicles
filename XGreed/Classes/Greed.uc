@@ -76,6 +76,10 @@ function Killed( pawn Killer, pawn Other, name damageType )
 			}
 			Bonus++;
 		}
+		// Positive pawn health make them drop/collect skulls in the loop
+		// So force Other to be really dead.
+		Other.Health = Min(0, Other.Health);
+		
 		Skull = Skull(Other.FindInventoryType(Class'Skull'));
 		if (Skull == None && Bonus > 0)
 			Skull = Other.Spawn(Class'Skull');

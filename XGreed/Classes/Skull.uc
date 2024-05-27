@@ -214,7 +214,7 @@ function Skull Drop(pawn OldHolder, vector newVel)
 			Ret = Other; // use biggest one		
 	}
 
-	if (Amount <= 0)
+	if (Amount <= 0 || bDeleteMe)
 	{
 		Destroy();
 		return Ret;
@@ -234,12 +234,16 @@ function Skull Drop(pawn OldHolder, vector newVel)
 		Velocity *= 0.5;
 	bCollideWorld = true;
 	SetCollisionSize(default.CollisionRadius, default.CollisionHeight);
+	if (bDeleteMe)
+		return Ret;
  	if (!SetLocation(OldHolder.Location + (OldHolder.CollisionHeight - CollisionHeight)*vect(0, 0, 1)) 
 		&& !SetLocation(OldHolder.Location) && Location != OldHolder.Location)
 	{ // can't make skull, so Destroy it.
 		Destroy();
 		return Ret;
 	}
+	if (bDeleteMe)
+		return Ret;
 
 	bSimFall = true;
 	SimAnim.X = 0;
@@ -249,6 +253,8 @@ function Skull Drop(pawn OldHolder, vector newVel)
 	SetPhysics(PHYS_Falling);
 	SetBase(None);
 	SetCollision(true, false, false);
+	if (bDeleteMe)
+		return Ret;
 	bBounce = true;
 	DropFrom(Location);
 	R.Yaw = Rotation.Yaw;
