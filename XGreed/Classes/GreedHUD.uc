@@ -10,6 +10,7 @@ var float LastSkullsTime;
 var Font FirstFont;
 var Font BigFont;
 var float LastFontX;
+var float FirstFontHeight;
 
 var() color RedColor, BlueColor, GreenColor, YellowColor, WhiteColor, BlackColor;
 
@@ -41,21 +42,42 @@ simulated event PostRender(canvas Canvas) {
 
 simulated function MyPostRender(canvas C) {
 	local PlayerPawn me;
-	local int cnt;
+	local int j, cnt, Team, Skulls;
 	local Pawn p, player[144];
+	local PlayerReplicationInfo PRI;
+	local float tmp;
 
 	me = C.ViewPort.Actor;
+	if (me.PlayerReplicationInfo != None)
+		Team = me.PlayerReplicationInfo.Team;
+	else
+		Team = 255;
 	
 	if (FirstFont == None || LastFontX != C.ClipX) {
 		FirstFont = class'FontInfo'.Static.GetStaticSmallFont(C.ClipX);
 		BigFont = class'FontInfo'.Static.GetStaticBigFont(C.ClipX);
 		LastFontX = C.ClipX;
+		C.TextSize("W", tmp, FirstFontHeight);
 	}
+	C.Font = FirstFont;
+	C.DrawColor.R = 255;
+	C.DrawColor.G = 255;
+	C.DrawColor.B = 0;
 	
 	cnt = 0;
-	ForEach me.AllActors(class'Pawn', p) {
-		if (!p.bIsPlayer || p.health <= 0 || p == me) continue;
+	ForEach me.AllActors(class'PlayerReplicationInfo', PRI) {
+		if (PRI.bIsSpectator) continue;
+		p = Pawn(PRI.Owner);
+		if (p == None || !p.bIsPlayer || p.health <= 0 || p == me || cnt >= ArrayCount(player)) continue;
 		player[cnt++] = p;
+		if (Team != 255 && PRI.Team == Team) {
+			Skulls = Class'Greed'.static.getSkulls(P);
+			if (Skulls >= 5) {
+				C.CurX = 0;
+				C.CurY = C.ClipY/2 + 60 + j++*FirstFontHeight*10/9;
+				C.DrawText(PRI.PlayerName @ "-" @ Skulls @ "skulls");
+			}
+		}
 	}
 	
 	DrawLabel(C, me, player, cnt);
@@ -131,8 +153,6 @@ simulated function DrawLabel(Canvas C, PlayerPawn me, Pawn actor[144], int cnt) 
 
 	//outline.R = 0; outline.G = 0; outline.B = 0;
 	Team = -1;
-
-	C.Font = FirstFont;
 
 	me.PlayerCalcView(Camera, CamLoc, CamRot);
 
