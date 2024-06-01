@@ -235,23 +235,26 @@ simulated function DrawLabel(Canvas C, PlayerPawn me, Pawn actor[144], int cnt) 
 	}
 }
 
-simulated function DrawTextClipped(Canvas C, int X, int Y, string text, Color outline) {
+simulated function DrawTextClipped(Canvas C, float X, float Y, string text, optional Color outline) {
 	local Color old;
 
 	old = C.DrawColor;
 	C.DrawColor = outline;
 
-	C.SetPos(X - 1, Y - 1);
+	C.CurY = Y - 1;
+	C.CurX = X - 1;
 	C.DrawTextClipped(text, False);
-	C.SetPos(X + 1, Y + 1);
+	C.CurX = X + 1;
 	C.DrawTextClipped(text, False);
-	C.SetPos(X - 1, Y + 1);
+	C.CurY = Y + 1;
+	C.CurX = X - 1;
 	C.DrawTextClipped(text, False);
-	C.SetPos(X + 1, Y - 1);
+	C.CurX = X + 1;
 	C.DrawTextClipped(text, False);
 
 	C.DrawColor = old;
-	C.SetPos(X, Y);
+	C.CurY = Y;
+	C.CurX = X;
 	C.DrawTextClipped(text, False);
 }
 
