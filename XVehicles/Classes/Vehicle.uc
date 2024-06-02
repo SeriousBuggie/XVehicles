@@ -2392,7 +2392,10 @@ simulated function UpdatePassengerPos()
 					(Bot(LastDriver) != None && VSize(LastDriver.Location - Location) > 1000) ||
 					(PlayerPawn(LastDriver) != None && VSize(LastDriver.Location - Location) > 2000))) || 
 					(Bot(Driver) != None && Bot(Driver).Orders == 'Follow' && Bot(Driver).OrderObject == Bot &&
-					Driver.PlayerReplicationInfo.HasFlag == None))
+					Driver.PlayerReplicationInfo.HasFlag == None) ||
+					(Level.Game.IsA('Greed') && Bot.Orders == 'Freelance' && 
+					Bot(Driver) != None && Bot(Driver).Orders != 'Freelance' && 
+					DeathMatchPlus(Level.Game).GameThreatAdd(Bot, Bot) > DeathMatchPlus(Level.Game).GameThreatAdd(Bot, Driver)))
 					ChangeSeat(0, true, i); // become driver
 				else if ((CTFFlag(Bot.MoveTarget) != None && Bot.PlayerReplicationInfo.HasFlag == None) ||
 					(FlagBase(Bot.MoveTarget) != None && Bot.PlayerReplicationInfo.HasFlag != None &&
