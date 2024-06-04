@@ -25,21 +25,24 @@ function Swap()
 	local JeepTDXFactory JeepTDXFact;
 	local JeepSDXFactory JeepSDXFact;
 	local GrinderFactory GrinderFact;
-	local bool bGrinderFound;
+	local int Found;
+
+	foreach AllActors(class'JeepTDXFactory', JeepTDXFact)
+	{
+		JeepTDXFact.VehicleClass = Class'GrinderFactory'.default.VehicleClass;
+		Found = Found | 1;
+	}
 	
 	foreach AllActors(class'GrinderFactory', GrinderFact)
 	{
 		GrinderFact.VehicleClass = Class'JeepTDXFactory'.default.VehicleClass;
-		bGrinderFound = true;
+		Found = Found | 2;
 	}
-	
-	foreach AllActors(class'JeepTDXFactory', JeepTDXFact)
-		JeepTDXFact.VehicleClass = Class'GrinderFactory'.default.VehicleClass;
-		
-	if (!bGrinderFound)
+
+	if (Found == 1)
 	{ // swap JeepSDX to JeepTDX, since alone JeepSDX is too weak for compete with Grinder
 		foreach AllActors(class'JeepSDXFactory', JeepSDXFact)
-		 JeepSDXFact.VehicleClass = Class'JeepTDXFactory'.default.VehicleClass;
+			JeepSDXFact.VehicleClass = Class'JeepTDXFactory'.default.VehicleClass;
 	}
 }
 
