@@ -287,8 +287,10 @@ static function TryHeal(Bot Bot)
 	if (FixGun(Bot.Weapon) != None) // use own heal code
 		return;
 	if (Bot.PlayerReplicationInfo == None ||
+		TeamGamePlus(Bot.Level.Game) == None ||
 		(Bot.Enemy != None && Bot.Enemy != Bot) ||
-		CTFFlag(Bot.Target) != None || Bot.PlayerReplicationInfo.HasFlag != None)
+		CTFFlag(Bot.Target) != None || Bot.PlayerReplicationInfo.HasFlag != None ||
+		TeamGamePlus(Bot.Level.Game).PriorityObjective(Bot) >= 2)
 		return;
 	BotState = Bot.GetStateName();
 	if (BotState == 'RangedAttack' || BotState == 'FallingState' || BotState == 'TakeHit' || BotState == 'ImpactJumping')

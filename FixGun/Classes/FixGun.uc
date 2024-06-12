@@ -66,15 +66,15 @@ function Tick(float delta)
 function MyTimer()
 {
 	Local Pawn P;
-	Local Inventory Inv;
-	local FixGun FG;
 	local Bot Bot;
 	local name BotState;
 
 	Bot = Bot(Owner);
 	if (Bot == None || Bot.Weapon != self || Bot.PlayerReplicationInfo == None ||
+		TeamGamePlus(Level.Game) == None ||
 		(Bot.Enemy != None && Bot.Enemy != Bot) ||
-		CTFFlag(Bot.Target) != None || Bot.PlayerReplicationInfo.HasFlag != None)
+		CTFFlag(Bot.Target) != None || Bot.PlayerReplicationInfo.HasFlag != None ||
+		TeamGamePlus(Level.Game).PriorityObjective(Bot) >= 2)
 		return;
 	BotState = Bot.GetStateName();
 	if (BotState == 'RangedAttack' || BotState == 'FallingState' || BotState == 'TakeHit' || BotState == 'ImpactJumping')
