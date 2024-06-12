@@ -4,7 +4,7 @@ var bool bGameEnded;
 
 replication
 {
-	reliable if( Role == ROLE_Authority )
+	reliable if (Role == ROLE_Authority)
 		bGameEnded;
 }
 
@@ -46,7 +46,16 @@ simulated function Restore()
 
 simulated event Actor SpawnNotification(Actor A)
 {
-	A.Spawn(class'FastWSTracker', A);
+	local GuidedWarShell B;
+	local FastWSTracker T;
+	if (Role == ROLE_Authority)
+	{
+		T = A.Spawn(class'FastWSTracker');
+		B = GuidedWarShell(A.Spawn(A.Class)); // for tick FastWSTracker first
+		A.Destroy();
+		A = B;
+		T.MyShell = B;
+	}
 	return A;
 }
 

@@ -1,27 +1,32 @@
 class FastWSTracker expands Info;
 
-simulated function PostBeginPlay()
+var GuidedWarShell MyShell;
+
+replication
 {
-	local GuidedWarShell MyShell;
-	Super.PostBeginPlay();
-	
-	MyShell = GuidedWarShell(Owner);
-	
-	if (MyShell == None)
-		Destroy();
+	reliable if (Role == ROLE_Authority)
+		MyShell;
 }
 
 simulated function Tick(float Delta)
 {
-	local GuidedWarShell MyShell;
-	Super.Tick(delta);
+	Super.Tick(Delta);
 	
-	MyShell = GuidedWarShell(Owner);
-	
-	if (MyShell == None)
+	if (MyShell == None || MyShell.bDeleteMe)
 		Destroy();
 	else
-		MyShell.AutonomousPhysics(Delta); //x2 speed
+	{
+		if (Owner != MyShell.Owner)
+			SetOwner(MyShell.Owner);
+		if (Level.NetMode == NM_Client && 
+			(PlayerPawn(MyShell.Instigator) == None || ViewPort(PlayerPawn(MyShell.Instigator).Player) == None))
+			return;
+		if ( (Level.NetMode != NM_Standalone)
+			&& ((Level.NetMode != NM_ListenServer) || (Instigator == None) 
+				|| (Instigator.IsA('PlayerPawn') && (PlayerPawn(Instigator).Player != None)
+					&& (ViewPort(PlayerPawn(Instigator).Player) == None))) )
+			MyShell.AutonomousPhysics(Delta); //x2 speed
+	}
 }
 
 defaultproperties
