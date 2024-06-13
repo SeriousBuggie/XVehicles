@@ -64,4 +64,5 @@ static function color GetColor(
 
 defaultproperties
 {
+	LastTime=-1000.000000
 }
