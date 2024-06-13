@@ -69,7 +69,7 @@ local rotator r;
 			r = PlayerPawn(Owner).ViewTarget.Rotation;
 			r.Roll = (DistortRollPerSec * DistortionAmount * Cos(TimeSec*PI));
 			PlayerPawn(Owner).ViewTarget.SetRotation(r);
-			PlayerPawn(Owner).SetFOVAngle(DistortionAmount*Cos(TimeSec*PI) + PlayerPawn(Owner).default.FOVAngle + (PlayerPawn(Owner).DesiredFOV - PlayerPawn(Owner).default.FOVAngle));
+			PlayerPawn(Owner).SetFOVAngle(DistortionAmount*Cos(TimeSec*PI) + PlayerPawn(Owner).DesiredFOV);
 		}
 	}
 	else
@@ -77,7 +77,7 @@ local rotator r;
 		if (Class'xZoneInfo'.default.hasDistortion && DistortionAmount > 0)
 		{
 			PlayerPawn(Owner).ViewRotation.Roll = (DistortRollPerSec * DistortionAmount * Cos(TimeSec*PI));
-			PlayerPawn(Owner).SetFOVAngle(DistortionAmount*Cos(TimeSec*PI) + PlayerPawn(Owner).default.FOVAngle + (PlayerPawn(Owner).DesiredFOV - PlayerPawn(Owner).default.FOVAngle));
+			PlayerPawn(Owner).SetFOVAngle(DistortionAmount*Cos(TimeSec*PI) + PlayerPawn(Owner).DesiredFOV);
 		}
 
 		if (PrePivot != vect(0,0,0))
@@ -101,7 +101,7 @@ local rotator r;
 			PlayerPawn(Owner).ViewTarget.SetRotation(r);
 		}
 
-		PlayerPawn(Owner).SetFOVAngle( PlayerPawn(Owner).Default.FOVAngle);
+		PlayerPawn(Owner).SetFOVAngle(PlayerPawn(Owner).DesiredFOV);
 		PlayerPawn(Owner).ViewRotation.Roll = 0;
 	}
 }
