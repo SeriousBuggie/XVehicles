@@ -3008,14 +3008,19 @@ State VehicleDriving
 	}
 	function Touch(Actor Other)
 	{
-		if (Triggers(Other) != None && Driver != None)
+		if (NeedTouch(Other) && Driver != None)
 			Other.Touch(Driver);
 	}
 	function UnTouch(Actor Other)
 	{
-		if (Triggers(Other) != None && Driver != None)
+		if (NeedTouch(Other) && Driver != None)
 			Other.UnTouch(Driver);
 	}
+}
+
+function bool NeedTouch(Actor Other)
+{
+	return Triggers(Other) != None || ControlPoint(Other) != None;
 }
 
 simulated event SetInitialState()
