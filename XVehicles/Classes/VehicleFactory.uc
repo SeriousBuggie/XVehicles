@@ -16,8 +16,10 @@ function PostBeginPlay()
 {
 	bInitAct = bInitialActive;
 	InitialTeamNum = TeamNum;
-	if( bInitialActive )
-		SetTimer(1,False);
+	if (bInitialActive)
+		SetTimer(1, False);
+	if (TeamGamePlus(Level.Game) != None && !TeamGamePlus(Level.Game).bSpawnInTeamArea)
+		bStartTeamLocked = false;
 }
 function Timer()
 {
