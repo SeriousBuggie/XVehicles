@@ -408,6 +408,13 @@ function vector BotDrive()
 	}
 	if (LiftCenter(Driver.MoveTarget) != None && LiftCenter(Driver.MoveTarget).MyLift != None)
 		bNeedDuck = true;
+	if (LiftExit(Driver.MoveTarget) != None && 
+		LiftExit(Driver.MoveTarget).Location.Z - Location.Z > JumpingHeight && 
+		LiftExit(Driver.MoveTarget).MyLift != None && 
+		LiftExit(Driver.MoveTarget).MyLift.myMarker != None &&
+		VSize(Location - LiftExit(Driver.MoveTarget).MyLift.myMarker.Location) < 
+		CollisionRadius + LiftExit(Driver.MoveTarget).MyLift.myMarker.CollisionRadius)
+		bNeedDuck = true;
 	if (ControlPoint(Driver.MoveTarget) != None)
 		bNeedDuck = true;
 	if (!bNeedDuck)
