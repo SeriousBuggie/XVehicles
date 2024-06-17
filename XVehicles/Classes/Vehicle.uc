@@ -2530,7 +2530,12 @@ function bool CrewFit(Pawn Other)
 {
 	local Bot Bot, DBot;
 	Bot = Bot(Other);
-	if (Bot == None || Bot.Orders == 'Freelance' || Driver == None || Driver == Other)
+	if (Bot == None || Driver == None || Driver == Other)
+		return true;
+	if (Domination(Level.Game) != None && PlayerPawn(Driver) != None && DriverGun == None && 
+		(Bot.Orders != 'Follow' || Bot.OrderObject != Driver))
+		return false;
+	if (Bot.Orders == 'Freelance')
 		return true;
 	if (PlayerPawn(Driver) != None && Other.PlayerReplicationInfo != None && Other.PlayerReplicationInfo.HasFlag != None)
 		return true;

@@ -52,8 +52,8 @@ function float GetVehAIRating( Pawn Seeker )
 		else 
 		{
 			// stop use second seat, if this take gun from non-human driver
-			if (VehicleOwner.DriverGun == None &&
-				VehicleOwner.Driver != None && PlayerPawn(VehicleOwner.Driver) == None)
+			if (VehicleOwner.DriverGun == None && VehicleOwner.Driver != None && 
+				(PlayerPawn(VehicleOwner.Driver) == None || Domination(Level.Game) != None))
 				return 0.0001;
 			if (HasFlag(Seeker.Enemy) || HasFlag(Seeker.FaceTarget) ||
 				InVehicle(Seeker.Enemy) || InVehicle(Seeker.FaceTarget))

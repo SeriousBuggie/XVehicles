@@ -408,6 +408,8 @@ function vector BotDrive()
 	}
 	if (LiftCenter(Driver.MoveTarget) != None && LiftCenter(Driver.MoveTarget).MyLift != None)
 		bNeedDuck = true;
+	if (ControlPoint(Driver.MoveTarget) != None)
+		bNeedDuck = true;
 	if (!bNeedDuck)
 	{
 		Z.X = CollisionRadius;
