@@ -7,19 +7,26 @@ function HurtRadiusOwned( float DamageAmount, float DamageRadius, name DamageNam
     local actor Victims;
     local float damageScale, dist;
     local vector dir;
+    local int CurrentTeam;
     
     if( bHurtEntry )
         return;
 
     bHurtEntry = true;
-    foreach VisibleCollidingActors( class 'Actor', Victims, DamageRadius, HitLocation )
+    if (Instigator != none && Instigator.PlayerReplicationInfo != None)
+	    CurrentTeam = Instigator.PlayerReplicationInfo.Team;
+	else
+		CurrentTeam = -1;
+    foreach VisibleCollidingActors(class 'Actor', Victims, DamageRadius, HitLocation)
     {
-        if( Victims != self && Victims != Owner)
+        if (Victims != self && Victims != Owner)
         {
             dir = Victims.Location - HitLocation;
             dist = FMax(1,VSize(dir));
             dir = dir/dist; 
             damageScale = 1 - FMax(0,(dist - Victims.CollisionRadius)/DamageRadius);
+            if (IsSameTeam(CurrentTeam, Pawn(Victims)))
+            	DamageAmount = 0;
             Victims.TakeDamage
             (
                 damageScale * DamageAmount,
@@ -33,6 +40,11 @@ function HurtRadiusOwned( float DamageAmount, float DamageRadius, name DamageNam
     bHurtEntry = false;
 }
 
+function bool IsSameTeam(int CurrentTeam, Pawn Pawn)
+{
+	return Level.Game.bTeamGame && Pawn != none && Pawn.PlayerReplicationInfo != None && 
+		Pawn.PlayerReplicationInfo.Team == CurrentTeam;
+}
 
 simulated function ClientShakes(float dist)
 {
@@ -52,7 +64,6 @@ local float d;
 simulated function ClientFlashes()
 {
 local Vector EndFlashFog;
-local float f;
 local PlayerPawn p;
 
 	//EndFlashFog.X=1;	EndFlashFog.Y=3;	EndFlashFog.Z=0;
