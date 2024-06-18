@@ -4228,10 +4228,11 @@ local float d;
 	if (bExplShake && ExplShakeTime > 0 && ExplShakeMag > 0)
 	{
 		ForEach RadiusActors(Class'PlayerPawn', PP, dist)
-		{
-			d = dist - VSize(PP.Location - Location);
-			PP.ShakeView( ExplShakeTime, d*ExplShakeMag/dist , d*ExplShakeMag/10/dist);
-		}
+			if (DriverWeapon(PP.Weapon) == None)
+			{
+				d = dist - VSize(PP.Location - Location);
+				PP.ShakeView( ExplShakeTime, d*ExplShakeMag/dist , d*ExplShakeMag/10/dist);
+			}
 	}
 }
 
