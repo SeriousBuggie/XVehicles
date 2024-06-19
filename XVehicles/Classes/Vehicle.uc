@@ -394,6 +394,7 @@ static final function Pawn SpawnStubPawn(Actor Caller)
 		Class'Vehicle'.default.StubPawn.Level != Caller.Level)
 	{
 		TracePawn = Caller.Spawn(Class'FlockPawn');
+		TracePawn.Texture = Texture'TransInvis';
 		TracePawn.RemoteRole = ROLE_None;
 		TracePawn.DrawScale = 0.0001;
 		TracePawn.bProjTarget = false;
