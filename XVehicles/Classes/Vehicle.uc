@@ -1054,7 +1054,7 @@ simulated function ShowState(optional bool bFromTick)
 
 function TryDropFlag(Pawn Other)
 {
-	if (Other.PlayerReplicationInfo!=None && Other.PlayerReplicationInfo.HasFlag!=None)
+	if (Other.PlayerReplicationInfo != None && Other.PlayerReplicationInfo.HasFlag != None)
 		Other.PlayerReplicationInfo.HasFlag.Drop(vect(0,0,0));
 }
 
