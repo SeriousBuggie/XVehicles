@@ -634,8 +634,8 @@ function FireTurret( byte Mode, optional bool bForceFire )
 	else
 	{
 		S = P;
-		P = Normal(vector(R)+VRand()*FRand()*WeapSettings[Mode].HitError);
-		E = S+P*80000;
+		P = Normal(vector(R) + GetRandomSpread(R, WeapSettings[Mode].HitError));
+		E = S + P*80000;
 		SpawnTraceEffects(P);
 		A = OwnerVehicle.Trace(HL,HN,E,S,True);
 		xWFX = Spawn(Class'xVehProjDummy', OwnerVehicle,, S, rotator(P));
@@ -649,8 +649,8 @@ function FireTurret( byte Mode, optional bool bForceFire )
 	else if (WeapSettings[Mode].DualMode == 2)
 	{
 		S = Pdual;
-		Pdual = Normal(vector(Rdual)+VRand()*FRand()*WeapSettings[Mode].HitError);
-		E = S+Pdual*80000;
+		Pdual = Normal(vector(Rdual) + GetRandomSpread(R, WeapSettings[Mode].HitError));
+		E = S + Pdual*80000;
 		SpawnTraceEffects(PDual);
 		A = OwnerVehicle.Trace(HL,HN,E,S,True);
 		xWFX = Spawn(Class'xVehProjDummy', OwnerVehicle,, S, rotator(Pdual));
@@ -662,6 +662,20 @@ function FireTurret( byte Mode, optional bool bForceFire )
 	if (!bFireRateByAnim)
 		SetTimer(WeapSettings[Mode].RefireRate,False);
 	bFireRestrict = True;
+}
+
+function vector GetRandomSpread(rotator R, float HitError)
+{
+	local vector Rnd, X, Y, Z;
+	if (HitError == 0.0)
+		return vect(0, 0, 0);
+	do
+	{
+		Rnd.Y = FRand()*2 - 1;
+		Rnd.Z = FRand()*2 - 1;
+	} until (Rnd dot Rnd < 1.0);
+	GetAxes(R, X, Y, Z);
+	return HitError*(Y*Rnd.Y + Z*Rnd.Z);
 }
 
 simulated function ClientFireEffect()
