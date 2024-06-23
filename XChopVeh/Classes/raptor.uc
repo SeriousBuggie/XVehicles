@@ -4,19 +4,14 @@
 class Raptor expands ChopperPhys;
 
 /*
-#forceexec MESH  MODELIMPORT MESH=Raptor MODELFILE=Z:\XV\Raptor.psk LODSTYLE=10
-//#forceexec ANIM  IMPORT ANIM=RaptorAnims ANIMFILE=Z:\XV\HoverBike.psa COMPRESS=1 MAXKEYS=999999 IMPORTSEQS=1
+#forceexec MESH  MODELIMPORT MESH=Raptor MODELFILE=Z:\XV\AttackCraft.psk LODSTYLE=10
 #forceexec MESH ORIGIN MESH=Raptor X=-25 Y=0 Z=18
 #forceexec MESH  LODPARAMS MESH=Raptor STRENGTH=0
 #forceexec MESHMAP   SCALE MESHMAP=Raptor X=1 Y=1 Z=1
-//#forceexec MESH  DEFAULTANIM MESH=Raptor ANIM=RaptorAnims
 
-//#forceexec ANIM  SEQUENCE ANIM=RaptorAnims SEQ=All STARTFRAME=0 NUMFRAMES=1 RATE=30.0000 COMPRESS=1.00
-//#forceexec ANIM  SEQUENCE ANIM=RaptorAnims SEQ=Still STARTFRAME=0 NUMFRAMES=1 RATE=30.0000 COMPRESS=1.00
-
-//#forceexec ANIM DIGEST ANIM=RaptorAnims  VERBOSE
-#forceexec MESHMAP SETTEXTURE MESHMAP=Raptor NUM=0 TEXTURE=AttackCraftNoColor
-#forceexec MESHMAP SETTEXTURE MESHMAP=Raptor NUM=1 TEXTURE=AttackCraftNoColor
+#forceexec MESHMAP SETTEXTURE MESHMAP=Raptor NUM=0 TEXTURE=RaptorYellow
+#forceexec MESHMAP SETTEXTURE MESHMAP=Raptor NUM=1 TEXTURE=RaptorYellow
+#forceexec MESHMAP SETTEXTURE MESHMAP=Raptor NUM=2 TEXTURE=RaptorYellow
 // */
 
 var byte CurrentTeamColor;
