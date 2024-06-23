@@ -100,8 +100,8 @@ defaultproperties
 	TreadPan(13)=Texture'XTreadVeh.Treads.ATread14'
 	TreadPan(14)=Texture'XTreadVeh.Treads.ATread15'
 	TreadPan(15)=Texture'XTreadVeh.Treads.ATread16'
-	Treads(0)=(MovPerTreadCycle=16.500000,TreadMesh=LodMesh'KrahtTread',TreadSkinN=1,TreadOffset=(X=20.000000,Y=81.000000,Z=-27.000000),TrackFrontOffset=(X=80.000000),TrackBackOffset=(X=-80.000000))
-	Treads(1)=(MovPerTreadCycle=16.500000,TreadMesh=LodMesh'KrahtTreadMir',TreadSkinN=1,TreadOffset=(X=20.000000,Y=-81.000000,Z=-27.000000),TrackFrontOffset=(X=80.000000),TrackBackOffset=(X=-80.000000))
+	Treads(0)=(MovPerTreadCycle=17.500000,TreadMesh=LodMesh'KrahtTread',TreadSkinN=1,TreadOffset=(X=20.000000,Y=81.000000,Z=-27.000000),TrackFrontOffset=(X=80.000000),TrackBackOffset=(X=-80.000000))
+	Treads(1)=(MovPerTreadCycle=17.500000,TreadMesh=LodMesh'KrahtTreadMir',TreadSkinN=1,TreadOffset=(X=20.000000,Y=-81.000000,Z=-27.000000),TrackFrontOffset=(X=80.000000),TrackBackOffset=(X=-80.000000))
 	TreadsTraction=5.000000
 	WreckTrackColHeight=32.000000
 	WreckTrackColRadius=48.000000

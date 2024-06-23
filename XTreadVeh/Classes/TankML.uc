@@ -159,8 +159,8 @@ defaultproperties
 	TreadPan(13)=Texture'XTreadVeh.TreadsC.CTread14'
 	TreadPan(14)=Texture'XTreadVeh.TreadsC.CTread15'
 	TreadPan(15)=Texture'XTreadVeh.TreadsC.CTread16'
-	Treads(0)=(MovPerTreadCycle=19.375000,TreadMesh=LodMesh'TankTreadBMir',TreadSkinN=1,TreadOffset=(X=-5.000000,Y=-94.500000,Z=-36.000000),bHaveAnimTWheels=True,WheelFramesN=17,WheelAnimSet="WheelsMove",WheelSize=20.625000,TrackWidth=52.000000,TrackFrontOffset=(X=128.000000),TrackBackOffset=(X=-128.000000))
-	Treads(1)=(MovPerTreadCycle=19.375000,TreadMesh=LodMesh'TankTreadB',TreadSkinN=1,TreadOffset=(X=-5.000000,Y=94.500000,Z=-36.000000),bHaveAnimTWheels=True,WheelFramesN=17,WheelAnimSet="WheelsMove",WheelSize=20.625000,TrackWidth=52.000000,TrackFrontOffset=(X=128.000000),TrackBackOffset=(X=-128.000000))
+	Treads(0)=(MovPerTreadCycle=23.000000,TreadMesh=LodMesh'TankTreadBMir',TreadSkinN=1,TreadOffset=(X=-5.000000,Y=-94.500000,Z=-36.000000),bHaveAnimTWheels=True,WheelFramesN=17,WheelAnimSet="WheelsMove",WheelSize=20.625000,TrackWidth=52.000000,TrackFrontOffset=(X=128.000000),TrackBackOffset=(X=-128.000000))
+	Treads(1)=(MovPerTreadCycle=23.000000,TreadMesh=LodMesh'TankTreadB',TreadSkinN=1,TreadOffset=(X=-5.000000,Y=94.500000,Z=-36.000000),bHaveAnimTWheels=True,WheelFramesN=17,WheelAnimSet="WheelsMove",WheelSize=20.625000,TrackWidth=52.000000,TrackFrontOffset=(X=128.000000),TrackBackOffset=(X=-128.000000))
 	WreckTrackColHeight=32.000000
 	WreckTrackColRadius=64.000000
 	AIRating=8.000000
