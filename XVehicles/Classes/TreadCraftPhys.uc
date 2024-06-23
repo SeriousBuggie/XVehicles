@@ -259,7 +259,7 @@ simulated function UpdateTreads(float Delta)
 			{
 				if (TLinSpeed > 10 || TLinSpeed < -10)	//Bug fix on stopped tracks moving on big slopes
 					TWheelAng = GetAngularSpeed(TLinSpeed,Delta,Treads[i].WheelSize);
-				MaxFrT = (Treads[i].WheelFramesN-1)/Treads[i].WheelFramesN;
+				MaxFrT = float(Treads[i].WheelFramesN - 1)/Treads[i].WheelFramesN;
 	
 				if (!Treads[i].bWheenAnimInverted)
 					Treads[i].CurrentWheelFrame += (TWheelAng * MaxFrT / 65536);
