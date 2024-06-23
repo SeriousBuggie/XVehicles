@@ -388,6 +388,10 @@ simulated function DrawFixProgress(Canvas Canvas, Vehicle Vehicle)
 			(Vehicle.CollisionRadius + 100 + PlayerOwner.CollisionRadius))
 			return;
 		Tex = Texture'EnterVehicle';
+		if (PlayerOwner.PlayerReplicationInfo != None && PlayerOwner.PlayerReplicationInfo.HasFlag != None &&
+			(Vehicle.DropFlag == Vehicle.EDropFlag.DF_All || 
+			(Vehicle.DropFlag == Vehicle.EDropFlag.DF_Driver && Vehicle.Driver == None)))
+			Tex = Texture'DropFlag';
 		Str = Class'EnterMessagePlus'.default.EnterKey;
 		if (Str == "")
 			Str = "Crouch";
