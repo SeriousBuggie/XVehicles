@@ -20,6 +20,12 @@ simulated function Tick( float DeltaTime)
 		PrePivot = PrePivotRel >> Owner.Rotation;
 }
 
+simulated function Destroyed()
+{
+	if (TankMGMuz(Target) != None && Target != Self)
+		Target.Destroy();
+}
+
 defaultproperties
 {
 	bNetTemporary=False

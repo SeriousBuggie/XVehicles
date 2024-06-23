@@ -66,6 +66,7 @@ simulated function PostBeginPlay()
 				Treads[i].TTread = Spawn(Class'TreadsTrailer',Self);
 				Treads[i].TTread.PrePivotRel = Treads[i].TreadOffset;
 				Treads[i].TTread.Mesh = Treads[i].TreadMesh;
+				Treads[i].TTread.TreadSkinN = Treads[i].TreadSkinN;
 				if (!Treads[i].bUseAltTread)
 					Treads[i].TTread.MultiSkins[Treads[i].TreadSkinN] = TreadPan[0];
 				else
