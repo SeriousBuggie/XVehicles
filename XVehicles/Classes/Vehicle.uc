@@ -1281,6 +1281,10 @@ function Actor GetFlagGoal(Pawn Pawn)
 		if (FlagGoal != None && CTFFlag(FlagGoal).bHome)
 			FlagGoal = CTFFlag(FlagGoal).HomeBase;
 	}
+	if (Pawn.PlayerReplicationInfo != None && FlagBase(FlagGoal) != None && 
+		(FlagBase(FlagGoal).Team == Pawn.PlayerReplicationInfo.Team) ==
+		(Pawn.PlayerReplicationInfo.HasFlag == None))
+		return None;
 	return FlagGoal;
 }
 
