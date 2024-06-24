@@ -6,6 +6,7 @@ Object=(Name=XVehicles.XVehiclesCTF,Class=Class,MetaClass=Engine.Mutator,Descrip
 Object=(Name=XVehicles.XVehiclesSummon,Class=Class,MetaClass=Engine.Mutator,Description="XVehiclesSummon,Summon XVehicles at any place for debug")
 Object=(Name=XChopVeh.XHeli2Raptor,Class=Class,MetaClass=Engine.Mutator,Description="XHeli2Raptor,Replace CybotHelico with Raptor")
 Object=(Name=XXMP.XJeepTDX2Grinder,Class=Class,MetaClass=Engine.Mutator,Description="XJeepTDX2Grinder,Replace JeepTDX with Grinder")
+Object=(Name=XTreadVeh.XTankGKOne2Goliath,Class=Class,MetaClass=Engine.Mutator,Description="XTankGKOne2Goliath,Replace Tank GK-1 with Goliath")
 
 Object=(Name=XVehicles.VehicleCTFGame,Class=Class,MetaClass=Botpack.TournamentGameInfo)
 Preferences=(Caption="Vehicle Capture the Flag",Parent="Game Types",Class=XVehicles.VehicleCTFGame,Immediate=True)
