@@ -1219,19 +1219,25 @@ static function Vehicle AttackVehicle(WeaponAttachment Weap, Bot Bot, float MaxD
 	local float Dist, BestVehDist[2];
 	local int i, VehTeam;
 	local vector HL, HN;
+	local TeamGamePlus TG;
 	
+	TG = TeamGamePlus(Bot.Level.Game);
 	foreach Bot.RadiusActors(class'Vehicle', Veh, MaxDistance)
 		if (Weap == None || Veh != Weap.OwnerVehicle)
 		{
-			if (Veh.CurrentTeam == Bot.PlayerReplicationInfo.Team && 
+			if (Veh.MyFactory == None)
+				continue;
+			if (TG != None && Veh.CurrentTeam == Bot.PlayerReplicationInfo.Team && 
 				(Veh.Driver != None || Veh.bHasPassengers || Veh.Level.TimeSeconds - Veh.LastFix < 15))
 				continue;
-			VehTeam = Veh.CurrentTeam;
-			if (Veh.MyFactory != None)
-				VehTeam = Veh.MyFactory.TeamNum;
-			if (VehTeam != Bot.PlayerReplicationInfo.Team && !class'VehDmgTracker'.static.HealthTooLow(Veh, false))
+			VehTeam = Veh.MyFactory.TeamNum;
+			if (TG != None && Veh.MyFactory.bStartTeamLocked && 
+				VehTeam != Bot.PlayerReplicationInfo.Team && 
+				!class'VehDmgTracker'.static.HealthTooLow(Veh, false))
 				i = 0;
-			else if (VehTeam == Bot.PlayerReplicationInfo.Team && class'VehDmgTracker'.static.HealthTooLow(Veh, true))
+			else if ((TG == None || !Veh.MyFactory.bStartTeamLocked || 
+				VehTeam == Bot.PlayerReplicationInfo.Team) && 
+				class'VehDmgTracker'.static.HealthTooLow(Veh, true))
 				i = 1;
 			else
 				continue;
