@@ -281,6 +281,9 @@ var float LastTeleportTime; // for fix flicker teleport between two locations
 var int LastTeleportYaw; // for support teleports with change yaw
 var bool bLastTeleport;
 
+var int Reverse;
+var float ReverseTime;
+
 var bool bInBump;
 
 var Pawn LastDriver;
@@ -2732,7 +2735,7 @@ function bool AboutToCrash(out int Accel)
 {
 	local float Dir;
 	local vector HitLocation, HitNormal;
-	local int ret;
+	local int ret, check, i;
 	local Actor A, FlagGoal;
 	local Vehicle Veh;
 
@@ -2745,24 +2748,58 @@ function bool AboutToCrash(out int Accel)
 			VSize(FlagGoal.Location - Location) < 
 			(class'FlagBase'.default.CollisionRadius + CollisionRadius + Dir/4))
 		{
-			Accel = GetMovementDir()*-1; // brake via reverse
+			Accel = -GetMovementDir(); // brake via reverse
 			return true;
 		}
+	}	
+	if (Reverse != 0 && ReverseTime < Level.TimeSeconds)
+		Reverse = 0;
+	if (Dir > 0)
+	{
+		ret = GetMovementDir();
+		check = ret;
+		for (i = 0; i < 2; i++)
+		{
+			// about to crash?
+			A = Trace(HitLocation, HitNormal, Location + check*Dir/2*vector(Rotation), , true,
+				vect(1,1,0)*CollisionRadius + vect(0,0,1)*(CollisionHeight - MaxObstclHeight));
+			if (A != None)
+			{
+				Veh = Vehicle(A);
+				// pass flag carrier
+				if (Veh != None && Veh.CurrentTeam == CurrentTeam && 
+					Veh.Driver != None && Veh.Driver.PlayerReplicationInfo != None &&
+					Veh.Driver.PlayerReplicationInfo.HasFlag != None)
+				{
+					if (bCanFly)
+					{
+						Rising = 1;
+						return false;
+					}
+					Reverse = -check;
+					ReverseTime = Level.TimeSeconds + 1;
+					break;
+				}
+			}
+			if (i == 0 && Reverse == 0)
+				break;
+			check *= -1;
+		}
+	}
+	if (Reverse != 0)
+	{
+		Accel = Reverse;
+		return true;
 	}
 	// take 500 as crash speed. So use 490 as check
 	if (Dir > 490 || bCanFly)
 	{
-		ret = GetMovementDir();
-		// about to crash with damage?
-		A = Trace(HitLocation, HitNormal, Location + ret*Dir/2*vector(Rotation), , true,
-			vect(1,1,0)*CollisionRadius + vect(0,0,1)*(CollisionHeight - MaxObstclHeight));
 		if (A == None)
 			return false;
 		if (A == Level && HitNormal.Z > 0.5) // slope?
 			return false;
 		if (Pawn(A) != None)
 			return false; // teammates protected and can be taken as passengers, all other must die
-		Veh = Vehicle(A);
 		if (Veh != None && Veh.CurrentTeam != CurrentTeam && 
 			(Veh.Driver != None || Veh.HasPassengers()))
 			return false; // crash into enemy non-empty vehicle for make damage
@@ -2782,7 +2819,7 @@ function bool AboutToCrash(out int Accel)
 //		Log("Detect crash into" @ A @ HitLocation @ HitNormal);
 		if (Dir > 490)
 		{
-			Accel = ret*-1; // brake via reverse
+			Accel = -ret; // brake via reverse
 			return true;
 		}
 	}
