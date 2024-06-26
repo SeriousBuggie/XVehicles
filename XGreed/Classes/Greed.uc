@@ -617,7 +617,6 @@ function bool SetEndCams(string Reason)
 
 defaultproperties
 {
-	GoalTeamScore=100.000000
 	StartUpMessage="Return the enemy's skulls to their base."
 	gamegoal="captured skulls wins the match!"
 	GameName="Greed"

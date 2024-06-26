@@ -4,6 +4,7 @@
 class Skull expands TournamentPickup;
 
 var int Amount;
+var float Scale;
 
 const AmountRed = 20;
 const AmountGold = 5;
@@ -109,21 +110,13 @@ function Tick(float Delta)
 function BecomePickup()
 {
 	Super.BecomePickup();
-	DrawScale = default.DrawScale;
-	if (Amount >= AmountRed)
-		LifeSpan = 240;
-	else if (Amount >= AmountGold)
-		LifeSpan = 120;
-	else
-		LifeSpan = 45;
+	UpdateLook();
 }
 
 function BecomeItem()
 {
 	Super.BecomeItem();
-	DrawScale = default.DrawScale;
-	LifeSpan = 0;
-	SetCollisionSize(default.CollisionRadius, default.CollisionHeight);
+	UpdateLook(true);
 }
 
 function PickupFunction(Pawn Other)
@@ -159,7 +152,7 @@ event HitWall(vector HitNormal, actor Wall)
 		{
 			bBounce = false;
 			Landed(HitNormal);
-			SetCollisionSize(default.CollisionRadius*2, default.CollisionHeight); // Make bigger for easy pickup
+			SetCollisionSize(default.CollisionRadius*(Scale + 1), default.CollisionHeight*Scale); // Make bigger for easy pickup
 		}
 	}
 }
@@ -184,6 +177,40 @@ simulated event ZoneChange(ZoneInfo NewZone)
 	}
 
 	Super.ZoneChange(NewZone);
+}
+
+function UpdateLook(optional bool bReset)
+{
+	if (bReset)
+	{
+		DrawScale = default.DrawScale;
+		PrePivot = default.PrePivot;
+		LifeSpan = 0;
+		SetCollisionSize(default.CollisionRadius, default.CollisionHeight);
+		return;
+	}	
+	if (Amount >= AmountRed)
+	{
+		Scale = 2.5;
+		Texture = Texture'RedShield';
+		LifeSpan = 240;
+	}
+	else if (Amount >= AmountGold)
+	{
+		Scale = 1.5;
+		Texture = Texture'N_Shield';
+		LifeSpan = 120;
+	}
+	else
+	{
+		Scale = 1;
+		Texture = Texture'Greenshield';
+		LifeSpan = 45;
+	}
+	DrawScale = default.DrawScale*Scale;
+	PrePivot = default.PrePivot*Scale;
+	SetCollisionSize(FMin(Class'TournamentPlayer'.default.CollisionRadius, default.CollisionRadius*Scale), 
+		FMin(Class'TournamentPlayer'.default.CollisionHeight, default.CollisionHeight*Scale));
 }
 
 function Skull Drop(pawn OldHolder, vector newVel)
@@ -220,14 +247,7 @@ function Skull Drop(pawn OldHolder, vector newVel)
 		return Ret;
 	}
 	
-	if (Amount == AmountRed)
-		Texture = Texture'RedShield';
-	else if (Amount == AmountGold)
-		Texture = Texture'N_Shield';
-	else if (Amount == AmountGreen)
-		Texture = Texture'Greenshield';
-	else
-		Texture = Texture'BlueShield'; // must not happen
+	UpdateLook();
 
 	Velocity = (0.2 + FRand()) * (newVel + 400 * FRand() * VRand());
 	If (Region.Zone.bWaterZone)
@@ -266,6 +286,7 @@ function Skull Drop(pawn OldHolder, vector newVel)
 
 defaultproperties
 {
+	Scale=1.000000
 	PickupMessage="You pickup a Skull"
 	PickupViewMesh=Mesh'Relics.RelicSkull'
 	PickupViewScale=0.750000
