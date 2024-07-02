@@ -148,6 +148,99 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch,
 					break;
 			}
 	}
+	if (Message != None && Message.Name == 'OneFlagMessage')
+	{
+		TeamInfo = TeamInfo(OptionalObject);
+		if (TeamInfo != None)
+			switch(Switch)
+			{
+				case 0:
+					if (TeamInfo.TeamIndex == 1)
+					{
+						Sound = Sound'Blue_Team_Scores';
+						if (CTFGame != None && 
+							CTFGame.Teams[0] != None &&
+							CTFGame.Teams[1] != None)
+						{
+							if (CTFGame.Teams[1].Score == CTFGame.Teams[0].Score)
+								Sound = Sound'Blue_Team_tied_for_the_lead';
+							else if (CTFGame.Teams[1].Score > CTFGame.Teams[0].Score)
+							{
+								if (PrevScore[1] <= PrevScore[0])
+									Sound = Sound'Blue_Team_takes_the_lead';
+								else
+									Sound = Sound'Blue_Team_increases_their_lead';
+							}
+							if (CTFGame.GoalTeamScore > 0 && 
+								CTFGame.Teams[1].Score >= CTFGame.GoalTeamScore &&
+								CTFGame.Teams[1].Score > CTFGame.Teams[0].Score)
+							{
+								Sound = Sound'blue_team_is_the_winner';
+								bExcludeTournamentPlayers = true;
+							}
+						}
+					}
+					if (TeamInfo.TeamIndex == 0)
+					{
+						Sound = Sound'Red_Team_Scores';
+						if (CTFGame != None && 
+							CTFGame.Teams[0] != None &&
+							CTFGame.Teams[1] != None)
+						{
+							if (CTFGame.Teams[0].Score == CTFGame.Teams[1].Score)
+								Sound = Sound'Red_Team_tied_for_the_lead';
+							else if (CTFGame.Teams[0].Score > CTFGame.Teams[1].Score)
+							{
+								if (PrevScore[0] <= PrevScore[1])
+									Sound = Sound'Red_Team_takes_the_lead';
+								else
+									Sound = Sound'Red_Team_increases_their_lead';
+							}
+							if (CTFGame.GoalTeamScore > 0 && 
+								CTFGame.Teams[0].Score >= CTFGame.GoalTeamScore &&
+								CTFGame.Teams[0].Score > CTFGame.Teams[1].Score)
+							{
+								Sound = Sound'red_team_is_the_winner';
+								bExcludeTournamentPlayers = true;
+							}
+						}
+					}
+					break;
+				case 2:
+					if (RelatedPRI_1.Team == 0)
+						Sound = Sound'Red_Flag_Dropped';
+					if (RelatedPRI_1.Team == 1)
+						Sound = Sound'Blue_Flag_Dropped';
+					if (Sound != None && RelatedPRI_1 != None && CTFFlag(RelatedPRI_1.HasFlag) != None &&
+						CTFFlag(RelatedPRI_1.HasFlag).Holder != None)
+						ForEach AllActors(class'CTFFlag', OtherFlag)
+							if (OtherFlag.Team == 1 - RelatedPRI_1.Team)
+							{
+								if (OtherFlag.bHome && VSize(OtherFlag.HomeBase.Location - 
+									CTFFlag(RelatedPRI_1.HasFlag).Holder.Location) < 1000)
+									Sound = Sound'Denied';
+								break;
+							}
+					break;
+				case 3:
+					if (TeamInfo.TeamIndex == 0)
+						Sound = Sound'Red_Flag_Taken';
+					if (TeamInfo.TeamIndex == 1)
+						Sound = Sound'Blue_Flag_Taken';
+					if (RelatedPRI_1 != None && Bot(RelatedPRI_1.Owner) != None)
+						class'XVehiclesCTF'.static.FixBot(Bot(RelatedPRI_1.Owner), -1);
+					break;
+			}
+		CTFFlag = CTFFlag(OptionalObject);
+		if (CTFFlag != None)
+			switch(Switch)
+			{
+				case 1:
+					Sound = Sound'Red_Flag_Returned';
+					break;
+			}
+	}
+	log(Message @ Switch @ RelatedPRI_1 @ RelatedPRI_2 @ OptionalObject);
 	if (bPlaySound && Sound != None)
 	{
 		SoundActor = Spawn(class'FlagAnnouncerSound');
