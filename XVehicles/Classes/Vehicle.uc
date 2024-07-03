@@ -2705,11 +2705,28 @@ function bool NeedStop(Pawn pDriver)
 		if (CTFFlag(pDriver.MoveTarget) != None && pDriver.PlayerReplicationInfo.HasFlag != pDriver.MoveTarget)
 			return true;
 		if (FlagBase(pDriver.MoveTarget) != None &&
-			(FlagBase(pDriver.MoveTarget).Team != pDriver.PlayerReplicationInfo.Team) == (pDriver.PlayerReplicationInfo.HasFlag == None) &&
 			(CTFReplicationInfo(Level.Game.GameReplicationInfo) == None ||
 			CTFReplicationInfo(Level.Game.GameReplicationInfo).FlagList[FlagBase(pDriver.MoveTarget).Team] == None ||
 			CTFReplicationInfo(Level.Game.GameReplicationInfo).FlagList[FlagBase(pDriver.MoveTarget).Team].bHome))
+		{
+			if (Level.Game.IsA('OneFlagCTFGame'))
+			{
+				if (pDriver.PlayerReplicationInfo.HasFlag != None &&
+					!pDriver.MoveTarget.IsA('NeutralFlagBase') && 
+					FlagBase(pDriver.MoveTarget).Team != pDriver.PlayerReplicationInfo.Team)
+					return true;
+				if (pDriver.PlayerReplicationInfo.HasFlag == None && 
+					pDriver.MoveTarget.IsA('NeutralFlagBase'))
+					return true;
+			}
+			else
+			{
+				if ((FlagBase(pDriver.MoveTarget).Team != pDriver.PlayerReplicationInfo.Team) == 
+					(pDriver.PlayerReplicationInfo.HasFlag == None))
+					return true;
+			}
 			return true;
+		}
 	}
 	if (UTJumpPad(pDriver.MoveTarget) != None && 
 		pDriver.MoveTarget == pDriver.RouteCache[0] &&
