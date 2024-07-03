@@ -240,7 +240,6 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch,
 					break;
 			}
 	}
-	log(Message @ Switch @ RelatedPRI_1 @ RelatedPRI_2 @ OptionalObject);
 	if (bPlaySound && Sound != None)
 	{
 		SoundActor = Spawn(class'FlagAnnouncerSound');
