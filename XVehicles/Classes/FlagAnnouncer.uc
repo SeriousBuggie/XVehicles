@@ -231,15 +231,14 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch,
 						class'XVehiclesCTF'.static.FixBot(Bot(RelatedPRI_1.Owner), -1);
 					break;
 			}
-		CTFFlag = CTFFlag(OptionalObject);
-		if (CTFFlag != None)
-			switch(Switch)
-			{
-				case 1:
-					Sound = Sound'Red_Flag_Returned';
-					break;
-			}
+		switch(Switch)
+		{
+			case 1:
+				Sound = Sound'Red_Flag_Returned';
+				break;
+		}
 	}
+	//log(Message @ Switch @ RelatedPRI_1 @ RelatedPRI_2 @ OptionalObject);
 	if (bPlaySound && Sound != None)
 	{
 		SoundActor = Spawn(class'FlagAnnouncerSound');
