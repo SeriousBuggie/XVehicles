@@ -5,7 +5,17 @@ class FlagAnnouncer expands MessagingSpectator;
 
 var float PrevScore[ArrayCount(class'TeamGamePlus'.default.Teams)];
 
-auto state GameEnded
+state GameEnded
+{
+	function BeginState();
+	function EndState();
+	function Timer()
+	{
+		Global.Timer();
+	}
+}
+
+auto state Nothing
 {
 	function BeginState();
 	function EndState();
@@ -45,7 +55,7 @@ function Timer()
 			else if (Diff == 0)
 				ReportTeam = OldDiff;
 			if (ReportTeam != 0)
-				BroadcastLocalizedMessage(class'CTFMessage', 0, None, None, TeamGame.Teams[Clamp(ReportTeam, 0, 1)]);
+				ReceiveLocalizedMessage(class'CTFMessage', 0, None, None, TeamGame.Teams[Clamp(ReportTeam, 0, 1)]);
 		}
 	}
 	StorePrevScore();
