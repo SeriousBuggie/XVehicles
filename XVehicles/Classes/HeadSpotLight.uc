@@ -25,7 +25,7 @@ function Timer()
 
 simulated function Tick(float Delta)
 {
-	if (Vehicle(Owner) != None)
+	if (!bHidden && Mesh != None && Vehicle(Owner) != None && Level.NetMode != NM_DedicatedServer)
 	{
 		if (Vehicle(Owner).bSlopedPhys && Vehicle(Owner).GVT != None)
 			PrePivot = Vehicle(Owner).GVT.PrePivot + (POffSet >> Vehicle(Owner).Rotation);
