@@ -570,7 +570,7 @@ simulated function AttachmentsTick( float Delta )
 
 	Super.AttachmentsTick(Delta);
 
-	if (bEngDynSndPitch)
+	if (bEngDynSndPitch && Level.NetMode != NM_DedicatedServer)
 	{
 		PitchDif = MaxEngPitch - MinEngPitch;
 		if (FMax(Region.Zone.ZoneGroundFriction,WheelsTraction) > 4.0)

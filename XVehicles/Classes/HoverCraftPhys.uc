@@ -205,7 +205,7 @@ simulated function UpdateDriverInput( float Delta )
 	local float EngP, GoDown, DesiredHoverHeight, Scale, BigScale;
 	local rotator R;
 
-	if (bEngDynSndPitch)
+	if (bEngDynSndPitch && Level.NetMode != NM_DedicatedServer)
 	{
 		PitchDif = MaxEngPitch - MinEngPitch;
 		EngP = MinEngPitch + Min(PitchDif, (VSize(Velocity)*PitchDif/MaxHoverSpeed));
