@@ -1601,6 +1601,8 @@ simulated function ClientUpdateState(float Delta)
 				}
 			}
 			
+			ServerState.YawLow = byte(ServerState_Yaw);
+			ServerState.YawHigh = byte(ServerState_Yaw >> 8);
 			ServerStateTime = Level.TimeSeconds;
 		}
 		else
@@ -1617,6 +1619,7 @@ simulated function ClientUpdateState(float Delta)
 		
 	if (bNeedUpdateYaw && bShouldRepVehYaw)
 	{
+		ServerState_Yaw = ServerState.YawLow + (ServerState.YawHigh << 8);
 		if (bFPRepYawUpdatesView && !bCameraOnBehindView && Driver != None && IsNetOwner(Driver))
 			Driver.ViewRotation.Yaw += (ServerState_Yaw - VehicleYaw) & 0xffff;
 		VehicleYaw = ServerState_Yaw;
