@@ -7,15 +7,15 @@ class SavedMoveXV expands Info;
 var SavedMoveXV NextMove;		// Next move in linked list.
 var float TimeStamp;		// Time of this move.
 var float Delta;			// Distance moved.
-var float Yaw;
+var int Yaw;
 var int Rise;
 var int Turn;
 var int Accel;
 
-// Player attributes after applying this move
+// Vehicle attributes after applying this move
 var vector SavedLocation;   
 var vector SavedVelocity;
-var float SavedYaw;
+var int SavedYaw;
 
 final function Clear()
 {

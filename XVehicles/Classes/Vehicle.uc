@@ -120,7 +120,7 @@ var bool bLastCheckOnGroundResult;
 var int Turning,Rising,Accel;
 var int VehicleYaw;
 
-var byte LastPackedMove;
+var XVEnums.E28 LastPackedMove;
 var float LastPackedMoveTime;
 
 // Driving pawn
@@ -143,10 +143,11 @@ struct VehState
 {
 	var vector Location;
 	var vector Velocity;
-	var float Yaw;
+	var byte YawLow, YawHigh;
 	var float ClientTime;
 };
 var VehState ServerState;
+var int ServerState_Yaw;
 var float ServerStateTime;
 var DriverCameraActor MyCameraAct;
 var OverlayMatDispRep ReplicOverlayMat;
@@ -860,18 +861,16 @@ function Honk()
 }
 
 // Return normal for acceleration direction.
-simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
+simulated function vector GetAccelDir(int InTurn, int InRise, int InAccel)
 {
 	Return vector(Rotation)*InAccel;
 }
 
 // Client -> Server, the players movement keys pressed.
-simulated function ServerPerformMove( int InRise, int InTurn, int InAccel )
+simulated function ServerPerformMove(int InRise, int InTurn, int InAccel)
 {
-	local int Bits;
-	Bits = ((InRise + 1) & 3) +
-		(((InTurn + 1) & 3) << 2) +
-		(((InAccel + 1) & 3) << 4);
+	local XVEnums.E28 Bits;
+	Bits = Class'XVEnums'.static.IntToE28(InRise*9 + InTurn*3 + InAccel + 13);
 	if (Bits == LastPackedMove && Level.TimeSeconds - LastPackedMoveTime < 0.5)
 		return;
 	LastPackedMove = Bits;
@@ -879,17 +878,15 @@ simulated function ServerPerformMove( int InRise, int InTurn, int InAccel )
 	ServerPerformPackedMove(Level.TimeSeconds, Bits);
 }
 
-function ServerPerformPackedMove(float InClientTime, byte Bits)
+function ServerPerformPackedMove(float InClientTime, XVEnums.E28 Bits)
 {
-	Rising = (Bits & 3) - 1;
-	Turning = ((Bits >> 2) & 3) - 1;
-	Accel = ((Bits >> 4) & 3) - 1;
-	if( Turning>1 )
-		Turning = 1;
-	if( Rising>1 )
-		Rising = 1;
-	if( Accel>1 )
-		Accel = 1;
+	local int i;
+	i = int(Bits);
+	Accel = (i % 3) - 1;
+	i /= 3;
+	Turning = (i % 3) - 1;
+	i /= 3;
+	Rising = (i % 3) - 1;
 
 	ClientLastTime = InClientTime;
 	ServerLastTime = Level.TimeSeconds;
@@ -1503,7 +1500,6 @@ simulated function ClientUpdateState(float Delta)
 	local float Dist;
 	local SavedMoveXV CurrentMove;
 	local PlayerPawn LocalPlayer;
-	local VehState ClientState;
 	local bool bNeedUpdateYaw;
 	
 	if (class'VActor'.Default.StaticPP != None)
@@ -1513,12 +1509,7 @@ simulated function ClientUpdateState(float Delta)
 
 	bNeedUpdateYaw = ServerState.ClientTime != 0;
 	if (bNeedUpdateYaw)
-	{
-		ClientState.Location = Location;
-		ClientState.Velocity = Velocity;
-		ClientState.Yaw = VehicleYaw;
-		ClientState.ClientTime = Level.TimeSeconds;
-		
+	{		
 		ServerStateTime = Level.TimeSeconds;
 		if (LocalPlayer == Driver)
 			ServerStateTime = ServerState.ClientTime;
@@ -1526,6 +1517,7 @@ simulated function ClientUpdateState(float Delta)
 		else if (LocalPlayer != None && LocalPlayer.PlayerReplicationInfo != None)
 			ServerStateTime -= 0.001*LocalPlayer.PlayerReplicationInfo.Ping;
 		*/
+		ServerState_Yaw = ServerState.YawLow + (ServerState.YawHigh << 8);
 		ServerState.ClientTime = 0;
 		ServerState.Velocity /= 15.f;
 		
@@ -1549,7 +1541,7 @@ simulated function ClientUpdateState(float Delta)
 					// replay via simple assumptions
 					
 					ServerState.Velocity += CurrentMove.SavedVelocity - CurrentMove.Velocity;
-					ServerState.Yaw += CurrentMove.SavedYaw - CurrentMove.Yaw;						
+					ServerState_Yaw += CurrentMove.SavedYaw - CurrentMove.Yaw;						
 					ServerState.Location += CurrentMove.SavedLocation - CurrentMove.Acceleration;
 					
 					CurrentMove = CurrentMove.NextMove;
@@ -1573,8 +1565,8 @@ simulated function ClientUpdateState(float Delta)
 	if (bNeedUpdateYaw && bShouldRepVehYaw)
 	{
 		if (bFPRepYawUpdatesView && !bCameraOnBehindView && Driver != None && IsNetOwner(Driver))
-			Driver.ViewRotation.Yaw += ServerState.Yaw - VehicleYaw;
-		VehicleYaw = ServerState.Yaw;
+			Driver.ViewRotation.Yaw += (ServerState_Yaw - VehicleYaw) & 0xffff;
+		VehicleYaw = ServerState_Yaw;
 	}
 		
 	Diff = ServerPredictLocation - Location;
@@ -1586,12 +1578,15 @@ simulated function ClientUpdateState(float Delta)
 		MoveSmooth(Diff*0.1);
 }
 // Server send to client vehicle pos/rot/vel
-function ServerPackState( float Delta)
+function ServerPackState(float Delta)
 {
 	ServerState.Location = Location;
 	ServerState.Velocity = Velocity*15.f;
 	if (bShouldRepVehYaw)
-		ServerState.Yaw = VehicleYaw;
+	{
+		ServerState.YawLow = byte(VehicleYaw);
+		ServerState.YawHigh = byte(VehicleYaw >> 8);
+	}
 	ServerState.ClientTime = ClientLastTime;
 	if (PlayerPawn(Driver) != None && Level.TimeSeconds != ServerLastTime)
 		ServerState.ClientTime += Level.TimeSeconds - ServerLastTime;
@@ -2951,7 +2946,7 @@ Auto State EmptyVehicle
 {
 	Ignores FireWeapon, ReadDriverInput, ReadBotInput, DriverLeft;
 
-	function ServerPerformPackedMove(float InClientTime, byte Bits)
+	function ServerPerformPackedMove(float InClientTime, XVEnums.E28 Bits)
 	{
 		Turning = 0;
 		Rising = 0;

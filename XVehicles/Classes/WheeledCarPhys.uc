@@ -20,7 +20,8 @@ struct WheelsTypes
 var() WheelsTypes Wheels[8];
 var() float MaxGroundSpeed,WheelMaxYaw,WheelTurnSpeed;
 var VehicleWheel MyWheels[8];
-var byte NumWheels,WheelsTurning;
+var byte NumWheels;
+var XVEnums.E4 WheelsTurning;
 var bool bHasWheelMeshes,bWasStuckOnW,bReversing;
 var float WheelYaw,WheelYawVis,StuckTimer,ReverseTimer;
 var int WheelsPitch;
@@ -50,16 +51,16 @@ function ZoneChange( ZoneInfo NewZone )
 simulated function ClientUpdateState( float Delta )
 {
 	Super.ClientUpdateState(Delta);
-	if( WheelsTurning>0 )
+	if (WheelsTurning > E4_V0)
 	{
-		Turning = int(WheelsTurning)-2;
-		WheelsTurning = 0;
+		Turning = int(WheelsTurning) - 2;
+		WheelsTurning = E4_V0;
 	}
 }
-function ServerPackState( float Delta)
+function ServerPackState(float Delta)
 {
 	Super.ServerPackState(Delta);
-	WheelsTurning = Turning+2;
+	WheelsTurning = Class'XVEnums'.static.IntToE4(Turning + 2);
 }
 simulated function PostBeginPlay()
 {

@@ -38,7 +38,7 @@ simulated function ServerPerformMove( int InRise, int InTurn, int InAccel );
 
 // Nothing here to constantly replicate.
 simulated function ClientUpdateState( float Delta );
-function ServerPackState( float Delta);
+function ServerPackState(float Delta);
 
 simulated function bool CheckOnGround()
 {

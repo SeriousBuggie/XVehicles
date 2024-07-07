@@ -3,7 +3,8 @@ Class TreadCraftPhys extends Vehicle;
 
 var() float MaxGroundSpeed,VehicleTurnSpeed;
 var float CurTurnSpeed,NextAUpdTime;
-var byte TurningRep,NumMoveAnimFrames,CurrentAnimFrame;
+var byte NumMoveAnimFrames, CurrentAnimFrame;
+var XVEnums.E4 TurningRep;
 var bool bHasAnimTread;
 
 var bool bWasStuckOnW,bReversing;
@@ -112,19 +113,19 @@ simulated function SpawnFurtherParts()
 	}
 }
 
-simulated function ClientUpdateState( float Delta )
+simulated function ClientUpdateState(float Delta)
 {
 	Super.ClientUpdateState(Delta);
-	if( TurningRep>0 )
+	if (TurningRep > E4_V0)
 	{
-		Turning = int(TurningRep)-2;
-		TurningRep = 0;
+		Turning = int(TurningRep) - 2;
+		TurningRep = E4_V0;
 	}
 }
-function ServerPackState( float Delta)
+function ServerPackState(float Delta)
 {
 	Super.ServerPackState(Delta);
-	TurningRep = Turning+2;
+	TurningRep = Class'XVEnums'.static.IntToE4(Turning + 2);
 }
 // Return normal for acceleration direction.
 simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
