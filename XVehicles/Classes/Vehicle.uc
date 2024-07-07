@@ -1215,18 +1215,18 @@ function ChangeProps(Pawn Other, bool bInside, int Seat, optional WeaponAttachme
 {
 	Local Bot Bot;
 	if (bInside)
-	{		
-		Passengers[Seat].BaseEyeHeight = BaseEyeHeight[Seat];
-		Passengers[Seat].SightRadius = SightRadius[Seat];
-		EnterTime[Seat] = Level.TimeSeconds;
-	}
-	else
-	{			
+	{
 		BaseEyeHeight[Seat] = Other.BaseEyeHeight;
 		if (WA != None)	
 			Other.BaseEyeHeight = WA.GetBaseEyeHeight();
 		SightRadius[Seat] = Other.SightRadius;
 		Other.SightRadius = 64000;
+		EnterTime[Seat] = Level.TimeSeconds;
+	}
+	else
+	{
+		Other.BaseEyeHeight = BaseEyeHeight[Seat];
+		Other.SightRadius = SightRadius[Seat];
 		EnterTime[Seat] = 0;
 	}
 	Bot = Bot(Other);
@@ -1240,8 +1240,8 @@ function ChangeProps(Pawn Other, bool bInside, int Seat, optional WeaponAttachme
 		{
 			PendingChangeProps[Seat] = None;
 			// restore network usage
-			Bot.NetUpdateFrequency = Other.default.NetUpdateFrequency;
-			Bot.NetPriority = Other.default.NetPriority;
+			Bot.NetUpdateFrequency = Bot.default.NetUpdateFrequency;
+			Bot.NetPriority = Bot.default.NetPriority;
 			
 			if (!Bot.bDeleteMe && Bot.Health > 0)
 				Bot.WhatToDoNext('', '');
