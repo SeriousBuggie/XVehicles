@@ -4,6 +4,8 @@
 class FlagAnnouncer expands MessagingSpectator;
 
 var float PrevScore[ArrayCount(class'TeamGamePlus'.default.Teams)];
+var float FlagLastEventTime[ArrayCount(PrevScore)];
+var CTFFlag PendingChangeProps[ArrayCount(PrevScore)];
 
 state GameEnded
 {
@@ -30,14 +32,15 @@ function PostBeginPlay() {
 	PlayerReplicationInfo.bAlwaysRelevant = false;
 	Super.PostBeginPlay();
 
-	if (Level.Game.Class.Name == 'Domination' && TeamGamePlus(Level.Game).MaxTeams == 2)
-		SetTimer(1.0, true);
+	SetTimer(1.0, true);
 }
 
 function Timer()
 {
 	local TeamGamePlus TeamGame;
-	local int ReportTeam, Diff, OldDiff;
+	local int ReportTeam, Diff, OldDiff, i;
+	local CTFFlag Flag;
+	local float T;
 	
 	Super.Timer();
 
@@ -59,6 +62,19 @@ function Timer()
 		}
 	}
 	StorePrevScore();
+	
+	T = Level.TimeSeconds + 1;
+	for (i = 0; i < ArrayCount(PendingChangeProps); i++)
+	{
+		if (PendingChangeProps[i] != None && FlagLastEventTime[i] < T)
+		{
+			Flag = PendingChangeProps[i];
+			PendingChangeProps[i] = None;
+			// reduce network usage
+			if (Flag.Holder != None)
+				Flag.NetUpdateFrequency = 2;
+		}
+	}
 }
 
 function StorePrevScore()
@@ -237,6 +253,16 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Sw,
 				if (RelatedPRI_1 != None && Bot(RelatedPRI_1.Owner) != None)
 					class'XVehiclesCTF'.static.FixBot(Bot(RelatedPRI_1.Owner), -1);
 				break;
+		}
+		OtherFlag = CTFFlag(OptionalObject);
+		if (OtherFlag != None)
+		{
+			OtherFlag.NetUpdateFrequency = OtherFlag.default.NetUpdateFrequency;
+			if (OtherFlag.Team < ArrayCount(FlagLastEventTime))
+			{
+				FlagLastEventTime[OtherFlag.Team] = Level.TimeSeconds;
+				PendingChangeProps[OtherFlag.Team] = OtherFlag;
+			}
 		}
 	}
 	if (bPlaySound && Sound != None)
