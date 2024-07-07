@@ -97,6 +97,8 @@ struct PassengersType
 var() PassengersType PassengerSeats[8];
 var float BaseEyeHeight[9];
 var float SightRadius[9];
+var float EnterTime[9];
+var Pawn PendingChangeProps[9];
 
 struct OverlayMatDispRep
 {
@@ -1077,7 +1079,7 @@ function DriverEnter( Pawn Other, optional int MyPitch, optional int MyYaw )
 	Instigator = Other;
 	PlaySound(StartSound,SLOT_Misc);
 	AmbientSound = EngineSound;
-	ChangeCollision(Other, true);
+	ChangeCollision(Other, true, 0);
 	if (DriverGun != None)
 	{
 		DriverGun.WeaponController = Other;
@@ -1129,12 +1131,7 @@ function DriverEnter( Pawn Other, optional int MyPitch, optional int MyYaw )
 	CheckForEmpty();
 	ShowState();
 	Other.ClearPaths();
-	
-	BaseEyeHeight[0] = Other.BaseEyeHeight;
-	if (WA != None)	
-		Other.BaseEyeHeight = WA.GetBaseEyeHeight();
-	SightRadius[0] = Other.SightRadius;
-	Other.SightRadius = 64000;
+	ChangeProps(Other, true, 0, WA);
 }
 
 function DebugDump(coerce string Place) {
@@ -1142,7 +1139,7 @@ function DebugDump(coerce string Place) {
 	Driver.ConsoleCommand("WayTo FlagBase");
 }
 
-function ChangeCollision(Pawn Other, bool bInside)
+function ChangeCollision(Pawn Other, bool bInside, int Seat)
 {
 	Local vector L;
 	Local Bot Bot;
@@ -1214,6 +1211,44 @@ function ChangeCollision(Pawn Other, bool bInside)
 	}
 }
 
+function ChangeProps(Pawn Other, bool bInside, int Seat, optional WeaponAttachment WA)
+{
+	Local Bot Bot;
+	if (bInside)
+	{		
+		Passengers[Seat].BaseEyeHeight = BaseEyeHeight[Seat];
+		Passengers[Seat].SightRadius = SightRadius[Seat];
+		EnterTime[Seat] = Level.TimeSeconds;
+	}
+	else
+	{			
+		BaseEyeHeight[Seat] = Other.BaseEyeHeight;
+		if (WA != None)	
+			Other.BaseEyeHeight = WA.GetBaseEyeHeight();
+		SightRadius[Seat] = Other.SightRadius;
+		Other.SightRadius = 64000;
+		EnterTime[Seat] = 0;
+	}
+	Bot = Bot(Other);
+	if (Bot != None)
+	{
+		if (bInside)
+		{
+			PendingChangeProps[Seat] = Bot;
+		}
+		else
+		{
+			PendingChangeProps[Seat] = None;
+			// restore network usage
+			Bot.NetUpdateFrequency = Other.default.NetUpdateFrequency;
+			Bot.NetPriority = Other.default.NetPriority;
+			
+			if (!Bot.bDeleteMe && Bot.Health > 0)
+				Bot.WhatToDoNext('', '');
+		}
+	}
+}
+
 function RestartPawn(Pawn Other)
 {
     local ENetRole OldRole;
@@ -1267,6 +1302,28 @@ function RestartPawn(Pawn Other)
 			PP.RemoteRole = ROLE_None;
 			PP.ClientRestart();
 			PP.RemoteRole = OldRole;
+		}
+	}
+}
+
+function Timer()
+{
+	local int Seat;
+	local float T;
+	local Pawn P;
+	if (Driver != None || bHasPassengers)
+	{
+		T = Level.TimeSeconds + 1;
+		for (Seat = 0; Seat < ArrayCount(PendingChangeProps); Seat++)
+		{
+			if (PendingChangeProps[Seat] != None && EnterTime[Seat] != 0 && EnterTime[Seat] < T)
+			{
+				P = PendingChangeProps[Seat];
+				PendingChangeProps[Seat] = None;
+				// reduce network usage
+				P.NetUpdateFrequency = 2;
+				P.NetPriority = 0.5;
+			}
 		}
 	}
 }
@@ -1365,7 +1422,7 @@ singular function DriverLeft( optional bool bForcedLeave, optional coerce string
 					Driver.GoToState('PlayerWalking');
 			}
 			RestartPawn(Driver);
-			ChangeCollision(Driver, false);
+			ChangeCollision(Driver, false, 0);
 
 			ExitVect = GetExitOffset(Driver);
 			if (Bot(Driver) == None && (Normal(Velocity) Dot Normal(ExitVect >> Rotation)) > 0.35 && 
@@ -1377,7 +1434,7 @@ singular function DriverLeft( optional bool bForcedLeave, optional coerce string
 				if (!Driver.Move(Location+(ExitVect >> Rotation) - Driver.Location) && !bForcedLeave)
 				{
 //					Log("Failed exit Driver for" @ Driver);
-					ChangeCollision(Driver, true);
+					ChangeCollision(Driver, true, 0);
 					if (PlayerPawn(Driver) != None)
 						Driver.GoToState('PlayerFlying');
 					if (!bDeleteMe && Health > 0)
@@ -1411,11 +1468,7 @@ singular function DriverLeft( optional bool bForcedLeave, optional coerce string
 	if (Driver != None)
 	{
 		Driver.ClearPaths();
-		
-		Driver.BaseEyeHeight = BaseEyeHeight[0];
-		Driver.SightRadius = SightRadius[0];
-		if (Bot(Driver) != None && !Driver.bDeleteMe && Driver.Health > 0)
-			Bot(Driver).WhatToDoNext('', '');
+		ChangeProps(Driver, false, 0);
 	}
 	Driver = None;
 	//SetOwner(None); Set to none 1 sec later to avoid unwanted functions errors.
@@ -2994,6 +3047,7 @@ Auto State EmptyVehicle
 	function Timer()
 	{
 		local PlayerPawn PP;
+		Global.Timer();
 		foreach RadiusActors(class'PlayerPawn', PP, CollisionRadius + 100)
 			if (CanEnter(PP))
 				Bump(PP);
@@ -3050,6 +3104,7 @@ State VehicleDriving
 		local PlayerPawn PP;
 		local byte Fr;
 		local int i;
+		Global.Timer();
 		if (Driver != None)
 		{
 			Driver.MakeNoise(2.0);
@@ -4650,7 +4705,7 @@ function PassengerEnter( Pawn Other, byte Seat, optional int MyPitch, optional i
 
 	RotRollZero = Rotation;
 	RotRollZero.Roll = 0;
-	ChangeCollision(Other, true);
+	ChangeCollision(Other, true, Seat + 1);
 	Passengers[Seat] = Other;
 	if (PassengerSeats[Seat].PGun != None)
 	{
@@ -4705,11 +4760,7 @@ function PassengerEnter( Pawn Other, byte Seat, optional int MyPitch, optional i
 	CheckForEmpty();
 	ShowState();
 	
-	BaseEyeHeight[Seat + 1] = Other.BaseEyeHeight;
-	if (PassengerSeats[Seat].PGun != None)	
-		Other.BaseEyeHeight = PassengerSeats[Seat].PGun.GetBaseEyeHeight();
-	SightRadius[Seat + 1] = Other.SightRadius;
-	Other.SightRadius = 64000;
+	ChangeProps(Other, true, Seat + 1, PassengerSeats[Seat].PGun);
 }
 function PassengerLeave( byte Seat, optional bool bForcedLeave )
 {
@@ -4727,7 +4778,7 @@ function PassengerLeave( byte Seat, optional bool bForcedLeave )
 				Driver != None && Driver.IsInState('PlayerFlying'))
 				Passengers[Seat].GoToState('PlayerWalking');
 			RestartPawn(Passengers[Seat]);
-			ChangeCollision(Passengers[Seat], false);
+			ChangeCollision(Passengers[Seat], false, Seat + 1);
 
 			ExitVect = GetExitOffset(Passengers[Seat]);
 			if (Bot(Passengers[Seat]) == None && (Normal(Velocity) Dot Normal(ExitVect >> Rotation)) > 0.35 && 
@@ -4738,7 +4789,7 @@ function PassengerLeave( byte Seat, optional bool bForcedLeave )
 				ExitVect.Y = -ExitVect.Y;
 				if (!Passengers[Seat].SetLocation(Location+(ExitVect >> Rotation)) && !bForcedLeave)
 				{
-					ChangeCollision(Passengers[Seat], true);
+					ChangeCollision(Passengers[Seat], true, Seat + 1);
 					if (PlayerPawn(Passengers[Seat]) != None)
 						Passengers[Seat].GoToState('PlayerFlying');
 						
@@ -4767,11 +4818,7 @@ function PassengerLeave( byte Seat, optional bool bForcedLeave )
 		PassengerSeats[Seat].PassengerCam.SetCamOwner(None);
 	if (Passengers[Seat] != None)
 	{
-		Passengers[Seat].BaseEyeHeight = BaseEyeHeight[Seat + 1];
-		Passengers[Seat].SightRadius = SightRadius[Seat + 1];
-		
-		if (Bot(Passengers[Seat]) != None && !Passengers[Seat].bDeleteMe && Passengers[Seat].Health > 0)
-			Bot(Passengers[Seat]).WhatToDoNext('', '');
+		ChangeProps(Passengers[Seat], false, Seat + 1);
 	}
 	Passengers[Seat] = None;
 
