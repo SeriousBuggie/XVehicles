@@ -120,7 +120,7 @@ var bool bLastCheckOnGroundResult;
 var int Turning,Rising,Accel;
 var int VehicleYaw;
 
-var XVEnums.E28 LastPackedMove;
+var int LastPackedMove;
 var float LastPackedMoveTime;
 
 // Driving pawn
@@ -869,13 +869,13 @@ simulated function vector GetAccelDir(int InTurn, int InRise, int InAccel)
 // Client -> Server, the players movement keys pressed.
 simulated function ServerPerformMove(int InRise, int InTurn, int InAccel)
 {
-	local XVEnums.E28 Bits;
-	Bits = Class'XVEnums'.static.IntToE28(InRise*9 + InTurn*3 + InAccel + 13);
-	if (Bits == LastPackedMove && Level.TimeSeconds - LastPackedMoveTime < 0.5)
+	local int i;
+	i = InRise*9 + InTurn*3 + InAccel;
+	if (i == LastPackedMove && Level.TimeSeconds - LastPackedMoveTime < 0.5)
 		return;
-	LastPackedMove = Bits;
+	LastPackedMove = i;
 	LastPackedMoveTime = Level.TimeSeconds;
-	ServerPerformPackedMove(Level.TimeSeconds, Bits);
+	ServerPerformPackedMove(LastPackedMoveTime, Class'XVEnums'.static.IntToE28(i + 13));
 }
 
 function ServerPerformPackedMove(float InClientTime, XVEnums.E28 Bits)
