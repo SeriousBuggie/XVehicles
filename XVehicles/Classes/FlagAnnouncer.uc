@@ -114,7 +114,7 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Sw,
 	TeamGame = TeamGamePlus(Level.Game);
 	bPlaySound = !class'VehiclesConfig'.default.bDisableFlagAnnouncer && TeamGame != None && TeamGame.MaxTeams == 2;
 	
-	//log(Message @ Switch @ RelatedPRI_1 @ RelatedPRI_2 @ OptionalObject);
+	//log(Message @ Sw @ RelatedPRI_1 @ RelatedPRI_2 @ OptionalObject);
 	if (Message == class'DeathMatchMessage' && Sw == 3 && RelatedPRI_1 != None && 
 		PlayerPawn(RelatedPRI_1.Owner) != None && PlayerPawn(RelatedPRI_1.Owner).bIsPlayer)
 	{
@@ -136,11 +136,11 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Sw,
 				break;
 			case 1:
 				Message = class'CTFMessage';
+				Sw = 3;
 				if (OptionalObject == None)
 					OptionalObject = TeamGame.Teams[0];
 				else if (OptionalObject.IsA('NeutralFlag'))
-					OptionalObject = TeamGame.Teams[Clamp(int(OptionalObject.GetPropertyText("LastTeam")), 
-						0, ArrayCount(TeamGame.Teams))];
+					OptionalObject = TeamGame.Teams[Clamp(int(OptionalObject.GetPropertyText("LastTeam")), 0, 1)];
 				break;
 			case 2:
 				Message = class'CTFMessage';
@@ -148,7 +148,7 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Sw,
 				break;
 			case 3:
 				Message = class'CTFMessage';
-				Sw = 4;
+				Sw = 6;
 				break;
 		}
 	}
@@ -216,6 +216,8 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Sw,
 				}
 				break;
 			case 1:
+			case 3:
+			case 5:
 				if (CurrentTeam == 0)
 					Sound = Sound'Red_Flag_Returned';
 				if (CurrentTeam == 1)
@@ -236,13 +238,6 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Sw,
 								Sound = Sound'Denied';
 							break;
 						}
-				break;
-			case 3:
-			case 5:
-				if (CurrentTeam == 0)
-					Sound = Sound'Red_Flag_Returned';
-				if (CurrentTeam == 1)
-					Sound = Sound'Blue_Flag_Returned';
 				break;
 			case 4:
 			case 6:
