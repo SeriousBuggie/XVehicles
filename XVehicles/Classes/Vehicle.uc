@@ -96,9 +96,9 @@ struct PassengersType
 };
 var() PassengersType PassengerSeats[8];
 var float BaseEyeHeight[9];
-var float SightRadius[9];
-var float EnterTime[9];
-var Pawn PendingChangeProps[9];
+var float SightRadius[ArrayCount(BaseEyeHeight)];
+var float EnterTime[ArrayCount(BaseEyeHeight)];
+var Pawn PendingChangeProps[ArrayCount(BaseEyeHeight)];
 
 struct OverlayMatDispRep
 {
