@@ -1562,14 +1562,17 @@ simulated function ClientUpdateState(float Delta)
 
 	bNeedUpdateYaw = ServerState.ClientTime != 0;
 	if (bNeedUpdateYaw)
-	{		
-		ServerStateTime = Level.TimeSeconds;
-		if (LocalPlayer == Driver)
-			ServerStateTime = ServerState.ClientTime;
-		/* // linear prediction is not good enough
-		else if (LocalPlayer != None && LocalPlayer.PlayerReplicationInfo != None)
-			ServerStateTime -= 0.001*LocalPlayer.PlayerReplicationInfo.Ping;
-		*/
+	{
+		if (ServerState.ClientTime > 0)
+		{ // ignore specal init value -1, which need for set VehicleYaw initially
+			ServerStateTime = Level.TimeSeconds;
+			if (LocalPlayer == Driver)
+				ServerStateTime = ServerState.ClientTime;
+			/* // linear prediction is not good enough
+			else if (LocalPlayer != None && LocalPlayer.PlayerReplicationInfo != None)
+				ServerStateTime -= 0.001*LocalPlayer.PlayerReplicationInfo.Ping;
+			*/
+		}
 		ServerState_Yaw = ServerState.YawLow + (ServerState.YawHigh << 8);
 		ServerState.ClientTime = 0;
 		ServerState.Velocity /= 15.f;
