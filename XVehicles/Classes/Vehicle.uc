@@ -1313,10 +1313,11 @@ function Timer()
 	local Pawn P;
 	if (Driver != None || bHasPassengers)
 	{
-		T = Level.TimeSeconds + 1;
+		T = Level.TimeSeconds - 1;
 		for (Seat = 0; Seat < ArrayCount(PendingChangeProps); Seat++)
 		{
-			if (PendingChangeProps[Seat] != None && EnterTime[Seat] != 0 && EnterTime[Seat] < T)
+			if (PendingChangeProps[Seat] != None && EnterTime[Seat] != 0 && EnterTime[Seat] <= T &&
+				PendingChangeProps[Seat].LightType == LT_None)
 			{
 				P = PendingChangeProps[Seat];
 				PendingChangeProps[Seat] = None;
