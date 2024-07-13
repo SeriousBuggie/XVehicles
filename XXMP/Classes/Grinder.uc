@@ -53,7 +53,6 @@ class Grinder expands WheeledCarPhys;
 #forceexec MESHMAP SETTEXTURE MESHMAP=GrinderRotor NUM=0 TEXTURE=GrinderNone
 // */
 
-
 var byte CurrentTeamColor;
 
 simulated function Tick(float delta)

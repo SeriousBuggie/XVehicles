@@ -933,7 +933,7 @@ simulated function vector GetStateOffset()
 {
 	local vector Offset;
 	
-	if (DriverWeapon.WeaponClass == None)
+	if (DriverWeapon.WeaponClass == None || !bDriverWOffset)
 		Offset = vect(0, 0, 1) * CollisionHeight;
 	else
 	{
