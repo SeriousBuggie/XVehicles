@@ -32,8 +32,9 @@ simulated function Timer()
 		return;
 	}
 	
-	if (Level.NetMode != NM_Client)
-		PlaySound(FlameSound, SLOT_Misc);
+	Mass /= 1.1;
+	if (Mass > 0 && LifeSpan > 0.25)
+		Owner.TakeDamage(Mass, instigator, Owner.Location, vect(0, 0, 0), 'burned');
 	
 	if (Level.NetMode == NM_DedicatedServer)
 		return;
@@ -48,16 +49,15 @@ simulated function Timer()
 	e = Spawn(FlameClass);
 	e.DrawScale *= Scale*Owner.CollisionRadius/ScaleFire;
 	
-	Mass /= 1.1;
-	if (Mass > 0 && LifeSpan > 0.25)
-		Owner.TakeDamage(Mass, instigator, Owner.Location, vect(0, 0, 0), 'burned');
+	PlaySound(FlameSound, SLOT_Misc);
 }
 
-function Destroyed()
+simulated function Destroyed()
 {
-	if (Owner != None)
+	if (Role == ROLE_Authority && Owner != None)
 		Owner.bShadowCast = False;
-	PlaySound(Sound'Silence', SLOT_Misc); // clear sound
+	if (Level.NetMode != NM_DedicatedServer)
+		PlaySound(Sound'Silence', SLOT_Misc); // clear sound
 }
 
 defaultproperties
