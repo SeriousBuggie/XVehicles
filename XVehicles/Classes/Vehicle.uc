@@ -2452,6 +2452,7 @@ simulated function UpdatePassengerPos()
 				Bot = Bot(Passengers[i]);
 				if ((Bot.PlayerReplicationInfo.HasFlag != None && PlayerPawn(Driver) == None) ||
 					(Driver == None && (WaitForDriver < Level.TimeSeconds || LastDriver == None || LastDriver == Bot ||
+					DriverWeapon(LastDriver.Weapon) != None ||
 					(Bot(LastDriver) != None && VSize(LastDriver.Location - Location) > 1000) ||
 					(PlayerPawn(LastDriver) != None && VSize(LastDriver.Location - Location) > 2000))) || 
 					(Bot(Driver) != None && Bot(Driver).Orders == 'Follow' && Bot(Driver).OrderObject == Bot &&
