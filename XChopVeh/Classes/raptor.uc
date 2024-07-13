@@ -88,7 +88,7 @@ defaultproperties
 	MinEngPitch=64
 	MaxEngPitch=96
 	DriverWeapon=(WeaponClass=Class'RaptorGun',WeaponOffset=(X=0.000000))
-	VehicleKeyInfoStr="Cybot Helico keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to strafe|%Jump%, %Duck% to move up/down|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%ThrowWeapon% to exit the vehicle"
+	VehicleKeyInfoStr="Raptor keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to strafe|%Jump%, %Duck% to move up/down|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%ThrowWeapon% to exit the vehicle"
 	WDeAccelRate=200.000000
 	HeadLights(0)=(VLightOffset=(X=100.000000,Y=14.000000,Z=-43.000000),VLightTex=Texture'XHoverVeh.pics.FlashFlare1',VLightScale=0.500000)
 	HeadLights(1)=(VLightOffset=(X=100.000000,Y=-14.000000,Z=-43.000000),VLightTex=Texture'XHoverVeh.pics.FlashFlare1',VLightScale=0.500000)
@@ -98,7 +98,7 @@ defaultproperties
 	DamageGFX(0)=(bHaveThisGFX=True,bHaveFlames=True,DmgFXOffset=(X=-84.000000,Y=9.000000,Z=47.000000),FXRange=15)
 	DestroyedExplDmg=70
 	ExplosionGFX(0)=(bHaveThisExplFX=True,ExplSize=6.750000)
-	ExplosionGFX(1)=(bHaveThisExplFX=True,ExplSize=2.000000,AttachName="CybBlades")
+	ExplosionGFX(1)=(bHaveThisExplFX=True,ExplSize=2.000000,AttachName="RaptorGun")
 	ExplosionGFX(2)=(bHaveThisExplFX=True,ExplSize=1.750000,bUseCoordOffset=True,bSymetricalCoordY=True,ExplFXOffSet=(X=100.000000,Y=80.000000,Z=-5.000000))
 	ExplosionGFX(3)=(bHaveThisExplFX=True,ExplSize=1.750000,bUseCoordOffset=True,bSymetricalCoordY=True,ExplFXOffSet=(X=-64.000000,Y=80.000000,Z=-5.000000))
 	bEnableShield=True
