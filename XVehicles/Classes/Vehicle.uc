@@ -2839,9 +2839,7 @@ function bool AboutToCrash(out int Accel)
 			{
 				Veh = Vehicle(A);
 				// pass flag carrier
-				if (Veh != None && Veh.CurrentTeam == CurrentTeam && 
-					Veh.Driver != None && Veh.Driver.PlayerReplicationInfo != None &&
-					Veh.Driver.PlayerReplicationInfo.HasFlag != None)
+				if (Veh != None && Veh.CurrentTeam == CurrentTeam && Veh.VehicleFlag != None)
 				{
 					if (bCanFly)
 					{
