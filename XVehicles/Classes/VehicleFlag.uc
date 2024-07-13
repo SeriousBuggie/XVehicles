@@ -56,6 +56,9 @@ simulated function Tick(float Delta)
 	
 	Super.Tick(Delta);
 	
+	if (Level.NetMode == NM_DedicatedServer)
+		return;
+	
 	FixOffset();
 
 	if (Owner != None) {
