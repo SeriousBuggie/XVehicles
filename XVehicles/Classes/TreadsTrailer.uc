@@ -1,10 +1,11 @@
-Class TreadsTrailer extends Effects;
+Class TreadsTrailer extends VehicleAttachment;
 
 var vector PrePivotRel;
 var int TreadSkinN;
 
 function Tick(float Delta)
 {
+	Super.Tick(Delta);
 	if (Vehicle(Owner) != None)
 	{
 		if (Mesh == Mesh'SmokeBm')
@@ -26,10 +27,9 @@ function Tick(float Delta)
 
 defaultproperties
 {
-	bNetTemporary=False
 	bTrailerSameRotation=True
 	bTrailerPrePivot=True
 	Physics=PHYS_Trailer
-	RemoteRole=ROLE_None
-	DrawType=DT_Mesh
+	CollisionRadius=0.000000
+	CollisionHeight=0.000000
 }

@@ -1722,6 +1722,45 @@ simulated function Tick( float Delta )
 		AfterTeleport(Rotation.Yaw - LastTeleportYaw);		
 		bLastTeleport = false;
 	}
+	
+	if (!class'VehiclesConfig'.default.bDisableTeamSpawn)
+	{
+		if (Level.NetMode == NM_Client)
+		{
+			if (ReplicOverlayMat.MatTexture != None)
+			{
+				SetOverlayMat(ReplicOverlayMat.MatTexture,float(ReplicOverlayMat.MatDispTime)/25.f);
+				ReplicOverlayMat.MatTexture = None;
+			}
+		}
+		else if (bResetOLRep && OverlayResetTime<Level.TimeSeconds)
+		{
+			bResetOLRep = False;
+			ReplicOverlayMat.MatTexture = None;
+			ReplicOverlayMat.MatDispTime = 0;
+		}
+		if (Level.NetMode != NM_DedicatedServer)
+		{
+			if (OverlayMat != None)
+			{
+				if (OverlayMActor == None)
+					OverlayMActor = Spawn(Class'MatOverlayFX', Self);
+				OverlayMActor.Texture = OverlayMat;
+				if (OverlayTime >= 1)
+					OverlayMActor.ScaleGlow = 1;
+				else OverlayMActor.ScaleGlow = OverlayTime;
+				OverlayMActor.AmbientGlow = OverlayMActor.ScaleGlow * 255;
+				OverlayTime -= Delta;
+				if (OverlayTime <= 0)
+					OverlayMat = None;
+			}
+			else if (OverlayMActor != None)
+			{
+				OverlayMActor.Destroy();
+				OverlayMActor = None;
+			}
+		}
+	}
 
 	if (!bReadyToRun && (IsA('WheeledCarPhys') || IsA('TreadCraftPhys')))
 	{
@@ -1823,45 +1862,6 @@ simulated function Tick( float Delta )
 	
 	if (Level.NetMode != NM_DedicatedServer && Level.NetMode != NM_ListenServer && VehicleState != None)
 		VehicleState.bHidden = VehicleState.Mass >= Level.TimeSeconds;
-
-	if (!class'VehiclesConfig'.default.bDisableTeamSpawn)
-	{
-		if( Level.NetMode==NM_Client )
-		{
-			if( ReplicOverlayMat.MatTexture!=None )
-			{
-				SetOverlayMat(ReplicOverlayMat.MatTexture,float(ReplicOverlayMat.MatDispTime)/25.f);
-				ReplicOverlayMat.MatTexture = None;
-			}
-		}
-		else if( bResetOLRep && OverlayResetTime<Level.TimeSeconds )
-		{
-			bResetOLRep = False;
-			ReplicOverlayMat.MatTexture = None;
-			ReplicOverlayMat.MatDispTime = 0;
-		}
-		if( Level.NetMode!=NM_DedicatedServer)
-		{
-			if( OverlayMat!=None )
-			{
-				if( OverlayMActor==None )
-					OverlayMActor = Spawn(Class'MatOverlayFX',Self);
-				OverlayMActor.Texture = OverlayMat;
-				if( OverlayTime>=1 )
-					OverlayMActor.ScaleGlow = 1;
-				else OverlayMActor.ScaleGlow = (OverlayTime/1);
-				OverlayMActor.AmbientGlow = OverlayMActor.ScaleGlow * 255;
-				OverlayTime-=Delta;
-				if( OverlayTime<=0 )
-					OverlayMat = None;
-			}
-			else if( OverlayMActor!=None )
-			{
-				OverlayMActor.Destroy();
-				OverlayMActor = None;
-			}
-		}
-	}
 
 	if (Driver != None && !bDeleteMe)
 		UpdateDriverPos();

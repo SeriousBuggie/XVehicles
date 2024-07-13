@@ -827,25 +827,8 @@ simulated function Tick( float Delta )
 		OwnerVehicle.UpdateAttachment(self, Delta);
 	if (bDriverWeapon && WeaponController != OwnerVehicle.Driver)
 		WeaponController = OwnerVehicle.Driver;
-	if (Level.NetMode!=NM_DedicatedServer && !bInvisGun)
-	{
-		if (OwnerVehicle.OverlayMat != None)
-		{
-			if (OverlayMActor == None)
-				OverlayMActor = Spawn(Class'MatOverlayFX', Self);
-			OverlayMActor.Texture = OwnerVehicle.OverlayMat;
-			if (OwnerVehicle.OverlayTime >= 1)
-				OverlayMActor.ScaleGlow = 1;
-			else
-				OverlayMActor.ScaleGlow = OwnerVehicle.OverlayTime/1;
-			OverlayMActor.AmbientGlow = OverlayMActor.ScaleGlow * 255;
-		}
-		else if (OverlayMActor != None)
-		{
-			OverlayMActor.Destroy();
-			OverlayMActor = None;
-		}
-	}
+	if (Level.NetMode != NM_DedicatedServer && !bInvisGun)
+		ProcessOverlayMat();
 	if (!bTurretYawInit)
 	{
 		bTurretYawInit = true;

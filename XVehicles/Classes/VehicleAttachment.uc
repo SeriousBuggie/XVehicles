@@ -18,6 +18,13 @@ replication
 		LocationRep;
 }
 
+function PreBeginPlay()
+{
+	OwnerVehicle = Vehicle(Owner);
+	if (OwnerVehicle == None && VehicleAttachment(Owner) != None)
+		OwnerVehicle = VehicleAttachment(Owner).OwnerVehicle;
+}
+
 simulated function Detach(Actor Other)
 {
 	Super.Detach(Other);
@@ -53,9 +60,20 @@ simulated function Tick(float Delta)
 	//if (OwnerVehicle.AttachmentList == Self)
 	if (bMasterPart)
 		OwnerVehicle.AttachmentsTick(Delta);
+	ProcessOverlayMat();
+}
+
+simulated function AddCanvasOverlay( Canvas C )
+{
+	if( NextAttachment!=None )
+		NextAttachment.AddCanvasOverlay(C);
+}
+
+simulated function ProcessOverlayMat()
+{
 	if (Level.NetMode != NM_DedicatedServer && !class'VehiclesConfig'.default.bDisableTeamSpawn)
 	{
-		if( OwnerVehicle.OverlayMat!=None )
+		if (OwnerVehicle.OverlayMat != None)
 		{
 			if (OverlayMActor == None)
 				OverlayMActor = Spawn(Class'MatOverlayFX',Self);
@@ -72,11 +90,6 @@ simulated function Tick(float Delta)
 			OverlayMActor = None;
 		}
 	}
-}
-simulated function AddCanvasOverlay( Canvas C )
-{
-	if( NextAttachment!=None )
-		NextAttachment.AddCanvasOverlay(C);
 }
 
 defaultproperties
