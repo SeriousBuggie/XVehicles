@@ -106,7 +106,7 @@ defaultproperties
 	Wheels(3)=(WheelOffset=(X=-87.000000,Y=78.500000,Z=-47.000000),WheelRot=(Yaw=32768),WheelClass=Class'JuggernautWheel',WheelMesh=SkeletalMesh'JuggernautWheel',bMirroredWheel=True)
 	MaxGroundSpeed=500.000000
 	WheelsRadius=80.000000
-	TractionWheelsPosition=-82.500000
+	TractionWheelsPosition=-78.000000
 	AIRating=3.000000
 	VehicleGravityScale=3.000000
 	WAccelRate=350.000000
