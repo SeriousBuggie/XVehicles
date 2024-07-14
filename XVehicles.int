@@ -10,6 +10,7 @@ Object=(Name=XTreadVeh.XTankGKOne2Goliath,Class=Class,MetaClass=Engine.Mutator,D
 Object=(Name=XTreadVeh.XTankGKOne2Juggernaut,Class=Class,MetaClass=Engine.Mutator,Description="XTankGKOne2Juggernaut,Replace Tank GK-1 with Juggernaut")
 Object=(Name=XChopVeh.XHeli2Banshee,Class=Class,MetaClass=Engine.Mutator,Description="XHeli2Banshee,Replace CybotHelico with Banshee")
 Object=(Name=XTreadVeh.XTankGKOne2TankScorpion,Class=Class,MetaClass=Engine.Mutator,Description="XTankGKOne2TankScorpion,Replace Tank GK-1 with Tank Scorpion")
+Object=(Name=UT3Rewards.UT3Rewards,Class=Class,MetaClass=Engine.Mutator,Description="UT3Rewards,UT3 Announcer Rewards for XVehicles")
 
 Object=(Name=XVehicles.VehicleCTFGame,Class=Class,MetaClass=Botpack.TournamentGameInfo)
 Preferences=(Caption="Vehicle Capture the Flag",Parent="Game Types",Class=XVehicles.VehicleCTFGame,Immediate=True)
