@@ -14,6 +14,8 @@ var Actor LastDamageVehicle;
 var Actor TempVehicle;
 var class<Inventory> BotAttractInvClass;
 
+var Pawn LastScorer;
+
 function PreBeginPlay()
 {
 	Super.PreBeginPlay();
@@ -124,14 +126,21 @@ function ScoreFlag(Pawn Scorer, CTFFlag theFlag)
 			BroadcastLocalizedMessage( class'CTFMessage', 0, Scorer.PlayerReplicationInfo, None, TheFlag );
 
 			if ( (bOverTime || (GoalTeamScore != 0)) && (Teams[Scorer.PlayerReplicationInfo.Team].Score >= GoalTeamScore) )
+			{
+				LastScorer = Scorer;
 				EndGame("teamscorelimit");
+			}
 			else if ( bOverTime )
+			{
+				LastScorer = Scorer;
 				EndGame("timelimit");
+			}
 				
 			Scorer.DeleteInventory(Skull);
 			SetSkulls(Scorer, None);
 			Skull.Destroy();
-			TeleportToBase(Scorer);
+			if (!bGameEnded)
+				TeleportToBase(Scorer);
 		}
 	}
 }
@@ -605,6 +614,7 @@ function bool SetEndCams(string Reason)
 {
 	local bool Ret;
 	local GreedFlag Flag;
+	local PlayerPawn PP;
 	
 	Ret = Super.SetEndCams(Reason);
 	foreach AllActors(Class'GreedFlag', Flag)
@@ -612,11 +622,18 @@ function bool SetEndCams(string Reason)
 		Flag.bHidden = false;
 		Flag.HomeBase.bHidden = true;
 	}
+	if (LastScorer != None)
+		foreach AllActors(Class'PlayerPawn', PP)
+			if (PP == LastScorer)
+				PP.ViewTarget = None;
+			else
+				PP.ViewTarget = LastScorer;
 	return Ret;
 }
 
 defaultproperties
 {
+	GoalTeamScore=100.000000
 	StartUpMessage="Return the enemy's skulls to their base."
 	gamegoal="captured skulls wins the match!"
 	GameName="Greed"
