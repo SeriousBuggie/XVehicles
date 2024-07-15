@@ -72,6 +72,35 @@ simulated function Destroyed()
 	Super.Destroyed();
 }
 
+function FireTurret( byte Mode, optional bool bForceFire )
+{
+	if (Bot(WeaponController) != None)
+	{
+		if (Mode == 0 && IsGoodTarget(WeaponController, WeaponController.Target))
+			Mode = 1; // use minigun instead
+	}
+
+	Super.FireTurret(Mode, bForceFire);	
+}
+
+simulated static function bool IsGoodTarget(Pawn Instigator, Actor Other)
+{
+	local float Dist;
+	if (Other == None)
+		return false;
+	Dist = VSize(Other.Location - Instigator.Location);
+	if (Dist > 0.5*(default.WeapSettings[0].ProjectileClass.default.MaxSpeed + 
+		default.WeapSettings[0].ProjectileClass.default.Speed))
+		return true;
+	if (Pawn(Other) != None && DriverWeapon(Pawn(Other).Weapon) != None)
+		Other = DriverWeapon(Pawn(Other).Weapon).VehicleOwner;
+	if (Vehicle(Other) == None && Vehicle(Other.Base) != None)
+		Other = Vehicle(Other.Base);
+	if (Vehicle(Other) != None && Vehicle(Other).bCanFly && Vehicle(Other).Driver != None)
+		return true;
+	return false;
+}
+
 defaultproperties
 {
 	PitchRange=(Max=4500,Min=-2800)
