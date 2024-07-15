@@ -47,7 +47,7 @@ simulated static function bool IsGoodTarget(Pawn Instigator, Actor Other)
 	if (Other == None)
 		return false;
 	Dist = VSize(Other.Location - Instigator.Location);
-	if (Dist > 2.5*default.MaxSpeed)
+	if (Dist > 1.25*(default.MaxSpeed + default.Speed))
 		return false;
 	if (Pawn(Other) != None && DriverWeapon(Pawn(Other).Weapon) != None)
 		Other = DriverWeapon(Pawn(Other).Weapon).VehicleOwner;
