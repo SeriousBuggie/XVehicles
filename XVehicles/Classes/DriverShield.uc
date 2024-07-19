@@ -83,8 +83,8 @@ simulated function Tick(float delta)
 simulated function BindKeys()
 {
 	local PlayerPawn PP;
-	local int i, pos;
-	local string KeyName, KeyBinding, KeyBindingCaps, Cmd;
+	local int i;
+	local string KeyName, KeyBinding, KeyBindingCaps;
 	
 	if (Level.NetMode == NM_DedicatedServer || bKeysSet)
 		return;

@@ -114,7 +114,7 @@ function ProcessMenuKey(int KeyNo, string KeyName)
 {
 	local string CurrBind;
 	local PlayerPawn PP;
-	local int i, pos;
+	local int i;
 	local bool bClear;
 	
 	bClear = (KeyNo >= 0x70 && KeyNo <= 0x79) // function keys

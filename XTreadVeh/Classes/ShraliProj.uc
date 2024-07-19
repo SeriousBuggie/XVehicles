@@ -85,8 +85,6 @@ simulated function ProcessTouch (Actor Other, Vector HitLocation)
 
 function BlowTheHellUp(vector HitLocation, vector HitNormal)
 {
-	local byte i;
-
     HurtRadiusOwned(Damage, DamageRadius, MyDamageType, MomentumTransfer, HitLocation);
 	
 	Spawn(Class'BigRockSpawner',,, HitLocation, rotator(HitNormal));

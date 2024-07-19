@@ -81,8 +81,6 @@ State PendingJump
 // copied from Bot with some changes
 function TryToDuck(vector duckDir, bool bReversed)
 {
-	local bool bDuckLeft;
-	
 	duckDir.Z = 0;
 
 	//PendingBot.SetFall(); // already call in BigJump

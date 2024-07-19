@@ -66,7 +66,7 @@ function check() {
 	fix();
 }
 
-function bool fix()
+function fix()
 {
 	local DoubleJumpSpot NP;
 	local int i, j, flags, dist;
@@ -126,9 +126,7 @@ simulated function bool Accept( actor Incoming, Actor Source )
 
 simulated function Touch( actor Other )
 {
-	local DoubleJumpSpot Dest;
 	local Bot B;
-	local int i;
 
 	B = Bot(Other);
 	if (B == None || B.MoveTarget != self || URL == "")

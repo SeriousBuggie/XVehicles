@@ -6,7 +6,6 @@ class xzEnforcer expands Enforcer;
 function SetSwitchPriority(pawn Other)
 {
     local int i;
-    local name temp, carried;
 
     if ( PlayerPawn(Other) != None )
     {

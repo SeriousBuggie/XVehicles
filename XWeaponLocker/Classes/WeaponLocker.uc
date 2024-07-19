@@ -56,7 +56,6 @@ function Inventory SpawnCopy( pawn P )
 {
 	local int i;
 	local Weapon InvK, wep;
-	local bool bChanged;
 	local Actor NWRepObj;
 	local string InvStr;
 	local Class<Weapon> WeaponClass;
@@ -256,7 +255,7 @@ static final operator(22) rotator >>    ( rotator A, rotator B )
 
 simulated function SetPickups()
 {
-	local vector X, Y, Z, SpawnOffset;
+	local vector SpawnOffset;
 	local int i, j, count;
 	local float Interval;
 	local WDumbMeshes TeamLight;

@@ -23,34 +23,34 @@ struct ReplInfo
 	var() config bool bAllowTranslocator;
 	var() config bool bDisableFlagAnnouncer;
 };
-var ReplInfo Repl;
+var ReplInfo ReplI;
 
 replication
 {
 	reliable if (Role == ROLE_Authority)
-		Repl;
+		ReplI;
 }
 
 simulated function PostNetBeginPlay()
 {
-	default.bHideState = Repl.bHideState;
-	default.bPulseAltHeal = Repl.bPulseAltHeal;
-	default.bDisableTeamSpawn = Repl.bDisableTeamSpawn;
-	default.bDisableFastWarShell = Repl.bDisableFastWarShell;
-	default.bAllowTranslocator = Repl.bAllowTranslocator;
-	default.bDisableFlagAnnouncer = Repl.bDisableFlagAnnouncer;
+	default.bHideState = ReplI.bHideState;
+	default.bPulseAltHeal = ReplI.bPulseAltHeal;
+	default.bDisableTeamSpawn = ReplI.bDisableTeamSpawn;
+	default.bDisableFastWarShell = ReplI.bDisableFastWarShell;
+	default.bAllowTranslocator = ReplI.bAllowTranslocator;
+	default.bDisableFlagAnnouncer = ReplI.bDisableFlagAnnouncer;
 }
 
 function Store()
 {
-	Repl.bHideState = default.bHideState;
-	Repl.bPulseAltHeal = default.bPulseAltHeal;
-	Repl.bDisableTeamSpawn = default.bDisableTeamSpawn;
-	Repl.bDisableFastWarShell = default.bDisableFastWarShell;
-	Repl.bAllowTranslocator = default.bAllowTranslocator;
-	Repl.bDisableFlagAnnouncer = default.bDisableFlagAnnouncer;
+	ReplI.bHideState = default.bHideState;
+	ReplI.bPulseAltHeal = default.bPulseAltHeal;
+	ReplI.bDisableTeamSpawn = default.bDisableTeamSpawn;
+	ReplI.bDisableFastWarShell = default.bDisableFastWarShell;
+	ReplI.bAllowTranslocator = default.bAllowTranslocator;
+	ReplI.bDisableFlagAnnouncer = default.bDisableFlagAnnouncer;
 	
-	Repl.Version = ++default.Version;
+	ReplI.Version = ++default.Version;
 }
 
 static function Update(Actor Source)

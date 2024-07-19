@@ -3,7 +3,7 @@
 //=============================================================================
 class FlagAnnouncerSound expands Projectile;
 
-var Sound PlaySound;
+var Sound sPlaySound;
 var bool bExcludeTournamentPlayers;
 var int Team;
 var bool bAnnouncer;
@@ -11,12 +11,12 @@ var bool bAnnouncer;
 replication
 {
 	reliable if (Role == ROLE_Authority)
-		PlaySound, bExcludeTournamentPlayers, Team, bAnnouncer;
+		sPlaySound, bExcludeTournamentPlayers, Team, bAnnouncer;
 }
 
 function Init(Sound InPlaySound, bool InExcludeTournamentPlayers, int InTeam, bool InAnnouncer)
 {
-	PlaySound = InPlaySound;
+	sPlaySound = InPlaySound;
 	bExcludeTournamentPlayers = InExcludeTournamentPlayers;
 	Team = InTeam;
 	bAnnouncer = InAnnouncer;
@@ -36,7 +36,7 @@ simulated function Tick(float Delta)
 					b3DSound = TournamentPlayer(P).b3DSound;
 					TournamentPlayer(P).b3DSound = true; // hack for v436, for prevent play too loud
 				}
-				P.ClientPlaySound(PlaySound, , bAnnouncer);
+				P.ClientPlaySound(sPlaySound, , bAnnouncer);
 				if (TournamentPlayer(P) != None)
 					TournamentPlayer(P).b3DSound = b3DSound;
 			}

@@ -26,7 +26,6 @@ var bool bLowFps;
 
 simulated function PostBeginPlay()
 {
-	local xZoneInfo xZObj;
 	local PlayerPawn PP;
 
 	/* // XZonesMut disabled. for more info look at XZonesMut class
@@ -79,12 +78,9 @@ singular simulated function ActorEntered( actor Other )
 {
 local xOldLocDummy OldLD;
 local Projectile xPD;
-local byte i;
 local Pawn InstP;
 local vector StartLoc;
 local byte willFloat;
-local actor A;
-local vector AddVelocity;
 
 	if (bWaterZone && isWaterFX && enableWaterZoneFX && !Other.bStatic && !bLowFps)
 	{
@@ -194,8 +190,6 @@ local vector AddVelocity;
 singular simulated function ActorLeaving( actor Other )
 {
 local xOldLocDummy OldLD;
-local Projectile xPD;
-local byte i;
 local Pawn InstP;
 local vector StartLoc;
 local byte willFloat;

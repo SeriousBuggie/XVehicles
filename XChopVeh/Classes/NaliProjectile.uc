@@ -335,7 +335,6 @@ simulated function ProcessTouch (Actor Other, Vector HitLocation)
 simulated function SetWallDecal( vector HitNormal, actor Wall)
 {
 local Decal d;
-local bool bFog;
 
 	if ( (ExplosionDecal != None) && (Level.NetMode != NM_DedicatedServer))
 	{

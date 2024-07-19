@@ -126,7 +126,7 @@ var() float GridsSpeed;
 
 var() bool bAutoSize;
 
-var vector Velocity;
+var vector jVelocity;
 
 var AmbushPoint AmbushSpot;
 var bool AmbushSpot_Taken;
@@ -193,7 +193,7 @@ Const URotToDegree      = 0.00549316;
 replication
 {
 	reliable if( Role==ROLE_Authority )
-		Velocity;
+		jVelocity;
 }
 
 simulated function PostBeginPlay()
@@ -223,7 +223,7 @@ simulated function PostBeginPlay()
             if( string(A.tag) ~= URL && A != Self ) 
                 JumpTarget = A;
 
-		Velocity = CalcVelocity(self);
+		jVelocity = CalcVelocity(self);
 		bUsed = true;
 	}
 	
@@ -630,8 +630,8 @@ local rotator R;
 			rX = (Rand(57) - 28) * DrawScale;
 			rY = (Rand(57) - 28) * DrawScale;
 	
-			JStreak = Spawn(Class'JPadEmitPrtc',,, Location + rX*Z + rY*Y + 4*X, rotator(Velocity));
-			JStreak.Velocity = Normal(Velocity) * FRand() * ParticlesSpeed * DrawScale;
+			JStreak = Spawn(Class'JPadEmitPrtc',,, Location + rX*Z + rY*Y + 4*X, rotator(jVelocity));
+			JStreak.Velocity = Normal(jVelocity) * FRand() * ParticlesSpeed * DrawScale;
 	
 			JStreak.DrawScale = DrawScale;
 	
@@ -657,7 +657,7 @@ local rotator R;
 		GetAxes(R, X, Y, Z);
 		JGrid = Spawn(Class'JPadEmitGrid',,, Location + 4*X);
 		
-		JGrid.Velocity = Normal(Velocity) * GridsSpeed * DrawScale;
+		JGrid.Velocity = Normal(jVelocity) * GridsSpeed * DrawScale;
 
 		JGrid.DrawScale = DrawScale;
 

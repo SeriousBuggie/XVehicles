@@ -109,7 +109,6 @@ simulated function Tick(float DeltaTime)
 {
 local float SizeCoef, SizeDelta, dotOld, dotNew, ProjDelta;
 local vector VectorREF, VectorDELTA, VectProj;
-local float VLineMax, VLine;
 local vector X, Y, Z;
 
 	if (bReceivedData)
