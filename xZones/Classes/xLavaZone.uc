@@ -9,7 +9,7 @@ defaultproperties
 {
 	isWaterFX=True
 	DistortionAmount=9
-	ZoneAmbSound=Sound'xZones.Lava.BubbleLavaLoop'
+	ZoneAmbSound=Sound'xZones.lava.BubbleLavaLoop'
 	ZoneAmbVolume=255
 	SplashClass(0)=Class'LavaVertSplashA00'
 	SplashClass(1)=Class'LavaVertSplashA01'

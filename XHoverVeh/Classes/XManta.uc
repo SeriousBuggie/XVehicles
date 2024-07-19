@@ -76,9 +76,6 @@ defaultproperties
 	Repulsor(2)=(X=-10.000000,Y=-80.000000,Z=-7.000000)
 	JumpSound=Sound'XHoverVeh.Manta.HoverBikeJump05'
 	DuckSound=Sound'XHoverVeh.Manta.HoverBikeTurbo01'
-	bEngDynSndPitch=True
-	MinEngPitch=64
-	MaxEngPitch=128
 	AIRating=6.000000
 	WAccelRate=1000.000000
 	VehicleName="Manta"
@@ -88,6 +85,9 @@ defaultproperties
 	StartSound=Sound'XHoverVeh.Manta.HoverBikeStart01'
 	EndSound=Sound'XHoverVeh.Manta.HoverBikeStop01'
 	EngineSound=Sound'XHoverVeh.Manta.HoverBikeEng02'
+	bEngDynSndPitch=True
+	MinEngPitch=64
+	MaxEngPitch=128
 	DriverWeapon=(WeaponClass=Class'MantaGun',WeaponOffset=(X=0.000000))
 	WDeAccelRate=1500.000000
 	HeadLights(0)=(VLightOffset=(X=85.000000,Y=11.000000,Z=-2.000000),VLightTex=Texture'XHoverVeh.pics.FlashFlare1',VLightScale=0.500000)
