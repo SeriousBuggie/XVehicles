@@ -133,7 +133,7 @@ local float d;
 	For ( P=Level.PawnList; P!=None; P=P.nextPawn )
 	{
 		if (PlayerPawn(P) != None && VSize(P.Location - Location) <= FiringShaking[i].ShakeRadius &&
-			DriverWeapon(P.Weapon) == None)
+			(DriverWeapon(P.Weapon) == None || class'VehiclesConfig'.default.bAllowCameraShakeInVehicle))
 		{
 			d = FiringShaking[i].ShakeRadius - VSize(P.Location - Location);
 	

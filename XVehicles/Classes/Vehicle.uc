@@ -4343,7 +4343,7 @@ local float d;
 	if (bExplShake && ExplShakeTime > 0 && ExplShakeMag > 0)
 	{
 		ForEach RadiusActors(Class'PlayerPawn', PP, dist)
-			if (DriverWeapon(PP.Weapon) == None)
+			if (DriverWeapon(PP.Weapon) == None || class'VehiclesConfig'.default.bAllowCameraShakeInVehicle)
 			{
 				d = dist - VSize(PP.Location - Location);
 				PP.ShakeView( ExplShakeTime, d*ExplShakeMag/dist , d*ExplShakeMag/10/dist);

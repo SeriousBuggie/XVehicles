@@ -12,6 +12,7 @@ var() config bool bDisableTeamSpawn;
 var() config bool bDisableFastWarShell;
 var() config bool bAllowTranslocator;
 var() config bool bDisableFlagAnnouncer;
+var() config bool bAllowCameraShakeInVehicle;
 
 struct ReplInfo
 {
@@ -22,6 +23,7 @@ struct ReplInfo
 	var() config bool bDisableFastWarShell;
 	var() config bool bAllowTranslocator;
 	var() config bool bDisableFlagAnnouncer;
+	var() config bool bAllowCameraShakeInVehicle;
 };
 var ReplInfo ReplI;
 
@@ -39,6 +41,7 @@ simulated function PostNetBeginPlay()
 	default.bDisableFastWarShell = ReplI.bDisableFastWarShell;
 	default.bAllowTranslocator = ReplI.bAllowTranslocator;
 	default.bDisableFlagAnnouncer = ReplI.bDisableFlagAnnouncer;
+	default.bAllowCameraShakeInVehicle = ReplI.bAllowCameraShakeInVehicle;
 }
 
 function Store()
@@ -49,6 +52,7 @@ function Store()
 	ReplI.bDisableFastWarShell = default.bDisableFastWarShell;
 	ReplI.bAllowTranslocator = default.bAllowTranslocator;
 	ReplI.bDisableFlagAnnouncer = default.bDisableFlagAnnouncer;
+	ReplI.bAllowCameraShakeInVehicle = default.bAllowCameraShakeInVehicle;
 	
 	ReplI.Version = ++default.Version;
 }

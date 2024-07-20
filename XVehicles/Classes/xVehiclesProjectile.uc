@@ -53,7 +53,9 @@ local float d;
 
 	For ( P=Level.PawnList; P!=None; P=P.nextPawn )
 	{
-		if (PlayerPawn(P) != None && DriverWeapon(P.Weapon) == None && VSize(P.Location - Location) <= dist)
+		if (PlayerPawn(P) != None && 
+			(DriverWeapon(P.Weapon) == None || class'VehiclesConfig'.default.bAllowCameraShakeInVehicle) && 
+			VSize(P.Location - Location) <= dist)
 		{
 			d = dist - VSize(P.Location - Location);
 			PlayerPawn(P).ShakeView( 0.5, d*2000.0/dist , d*200.0/dist);
