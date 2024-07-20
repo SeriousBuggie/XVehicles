@@ -51,6 +51,7 @@ function CleanRefs()
 	Class'Vehicle'.default.StubPawn = None;
 	Class'CameraMaster'.default.Master = None;
 	Class'XVehiclesHUD'.default.UsedHUD = None;
+	Class'VehiclesConfig'.default.Instance = None;
 }
 
 defaultproperties
