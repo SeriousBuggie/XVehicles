@@ -8,7 +8,9 @@ var() float MaxHoverSpeed,
 			MaxPushUpDiff,
 			JumpDelay;
 var() bool bHoverWhenNotDriving;
-var() vector Repulsor[3]; // used only 3, since Manta really one vehicle for it
+var() bool bCanDuck;
+var() vector Repulsor[8]; // used only 3, since Manta really one vehicle for it
+var() int RepulsorCount;
 var() Sound JumpSound, DuckSound;
 
 var   float LastJumpTime,
@@ -64,7 +66,7 @@ simulated function bool CheckOnGround()
 		if (RepulsorTracker == None)
 			RepulsorTracker = Spawn(class'RepulsorTracker', self);
 		
-		for (i = 0; i < ArrayCount(Repulsor); i++)
+		for (i = 0; i < RepulsorCount; i++)
 		{
 			RepDist[i] = -1;
 			R.Yaw = Rotation.Yaw;
@@ -98,7 +100,7 @@ simulated function bool CheckOnGround()
 				HL.Z += 0.1; // avoid be on edge
 			}
 			Dist = Rep.Z - HL.Z;
-			RepulsorTracker.SetLocation(Dest);		
+			RepulsorTracker.SetLocation(HL);
 			if (RepulsorTracker.Region.Zone.bWaterZone) {
 				bIsOnGround = true;
 				// end in water, now need find water surface
@@ -116,7 +118,7 @@ simulated function bool CheckOnGround()
 			}
 			else if (Mover(PossibleBase) != None)
 			{
-				if (bDuck || bDuckFire)
+				if (bCanDuck && (bDuck || bDuckFire))
 				{
 					if (PossibleBase.IsInState('StandOpenTimed'))
 						Mover(PossibleBase).Attach(Driver);
@@ -136,13 +138,16 @@ simulated function bool CheckOnGround()
 		else
 		{
 			// Manta specific: not pitch down, only up
-			PushUp[0] = FMax(PushUp[0], (PushUp[1] + PushUp[2])/2);
-			if (bDuck || bDuckFire)
+			if (RepulsorCount == 3)
 			{
-				PushUp[1] -= 1;
-				PushUp[2] -= 1;
+				PushUp[0] = FMax(PushUp[0], (PushUp[1] + PushUp[2])/2);
+				if (bCanDuck && (bDuck || bDuckFire))
+				{
+					PushUp[1] -= 1;
+					PushUp[2] -= 1;
+				}
 			}
-			for (i = 0; i < ArrayCount(Repulsor); i++)
+			for (i = 0; i < RepulsorCount; i++)
 			{
 				if (RepDist[i] == -1)
 					PushUp[i] = PushUp[PushUpMax];
@@ -154,7 +159,7 @@ simulated function bool CheckOnGround()
 			ActualFloorNormal = Normal((RepPos[1] - RepPos[0]) cross (RepPos[2] - RepPos[0]));
 			if (ActualFloorNormal.Z < 0)
 				ActualFloorNormal = -ActualFloorNormal;
-			ActualHoverHeight = HoveringHeight - ActualHoverHeight/ArrayCount(Repulsor);
+			ActualHoverHeight = HoveringHeight - ActualHoverHeight/RepulsorCount;
 		}
 	}
 	
@@ -202,7 +207,7 @@ simulated function UpdateDriverInput( float Delta )
 {
 	local byte PitchDif;
 	local vector Ac, X, Y, Z;
-	local float EngP, GoDown, DesiredHoverHeight, Scale, BigScale;
+	local float EngP, GoDown, DesiredHoverHeight, Scale, BigScale, Vel;
 	local rotator R;
 
 	if (bEngDynSndPitch && Level.NetMode != NM_DedicatedServer)
@@ -218,7 +223,7 @@ simulated function UpdateDriverInput( float Delta )
 	R = TransformForGroundRot(VehicleYaw, FloorNormal);
 	if (Rotation != R)
 		SetRotation(R);
-		
+
 	GoDown = 1;
 	if (bDriving || bHoverWhenNotDriving)
 	{
@@ -232,13 +237,13 @@ simulated function UpdateDriverInput( float Delta )
 		{
 			if (((Rising < 0 && !bDuck) ||
 				(Driver.bAltFire != 0 && !bDuckFire)) &&
-				DuckSound != None)
+				DuckSound != None && bCanDuck)
 				PlayOwnedSound(DuckSound);
-			bDuck = Rising < 0;
-			bDuckFire = Driver.bAltFire != 0;
+			bDuck = bCanDuck && Rising < 0;
+			bDuckFire = bCanDuck && Driver.bAltFire != 0;
 		}
 		
-		if (bDuck || bDuckFire)
+		if (bCanDuck && (bDuck || bDuckFire))
 		{				
 			DesiredHoverHeight -= HoverDuck;
 			GoDown = 8;
@@ -248,15 +253,17 @@ simulated function UpdateDriverInput( float Delta )
 		if (bOnGround && LastJumpTime < Level.TimeSeconds - 0.4)
 		{
 			DesiredHoverHeight -= ActualHoverHeight;
-			if (Abs(DesiredHoverHeight) < 2)
-				Velocity.Z = 0;
-			else
-				Velocity.Z = DesiredHoverHeight*FMax(DesiredHoverHeight*DesiredHoverHeight*BigScale, Scale)*0.01/
+			Vel = VSize(Velocity);
+			Velocity.Z = 0;
+			Velocity.Z -= 1.1*Vel*(ActualFloorNormal dot Normal(Velocity))*ActualFloorNormal.Z;
+			Vel = Velocity.Z;
+			if (Abs(DesiredHoverHeight) > 2)
+				Velocity.Z += DesiredHoverHeight*FMax(DesiredHoverHeight*DesiredHoverHeight*BigScale, Scale)*0.01/
 					(1 + (Delta - 0.01)*25);
 			BigScale = 5;
 			if (Level.TimeSeconds - DriveFrom < 0.4)
 				BigScale = 2.5; // *2.5 = /0.4
-			Velocity.Z = FMin(Velocity.Z, HoveringHeight*BigScale);
+			Velocity.Z = FMin(Velocity.Z, Vel + HoveringHeight*BigScale);
 		}
 	}
 	else if (bOnGround)
@@ -406,32 +413,35 @@ function vector BotDrive()
 		Dir -= 0.55*Square(X dot Vxy)/WDeAccelRate*X;
 		Dir -= 0.85*(Y dot Vxy)*Y;
 	}
-	if (LiftCenter(Driver.MoveTarget) != None && LiftCenter(Driver.MoveTarget).MyLift != None)
-		bNeedDuck = true;
-	if (LiftExit(Driver.MoveTarget) != None && 
-		LiftExit(Driver.MoveTarget).Location.Z - Location.Z > JumpingHeight && 
-		LiftExit(Driver.MoveTarget).MyLift != None && 
-		LiftExit(Driver.MoveTarget).MyLift.myMarker != None &&
-		VSize(Location - LiftExit(Driver.MoveTarget).MyLift.myMarker.Location) < 
-		CollisionRadius + LiftExit(Driver.MoveTarget).MyLift.myMarker.CollisionRadius)
-		bNeedDuck = true;
-	if (ControlPoint(Driver.MoveTarget) != None)
-		bNeedDuck = true;
-	if (!bNeedDuck)
+	if (bCanDuck)
 	{
-		Z.X = CollisionRadius;
-		Z.Y = Z.X;
-		Z.Z = CollisionHeight;						
-		HitDuck = Trace(Y, Y, MoveDest - vect(0,0,1)*HoverDuck, Location - vect(0,0,1)*HoverDuck, true, Z);
-		if (Pawn(HitDuck) != None && Pawn(HitDuck).PlayerReplicationInfo != None && 
-			Pawn(HitDuck).PlayerReplicationInfo.Team != CurrentTeam)
-			bNeedDuck = true; // run over enemy
-		else if (HitDuck == None && Trace(Y, Y, MoveDest, Location, true, Z) != None)
-			bNeedDuck = true; // need crouch for pass this place
+		if (LiftCenter(Driver.MoveTarget) != None && LiftCenter(Driver.MoveTarget).MyLift != None)
+			bNeedDuck = true;
+		if (LiftExit(Driver.MoveTarget) != None && 
+			LiftExit(Driver.MoveTarget).Location.Z - Location.Z > JumpingHeight && 
+			LiftExit(Driver.MoveTarget).MyLift != None && 
+			LiftExit(Driver.MoveTarget).MyLift.myMarker != None &&
+			VSize(Location - LiftExit(Driver.MoveTarget).MyLift.myMarker.Location) < 
+			CollisionRadius + LiftExit(Driver.MoveTarget).MyLift.myMarker.CollisionRadius)
+			bNeedDuck = true;
+		if (ControlPoint(Driver.MoveTarget) != None)
+			bNeedDuck = true;
+		if (!bNeedDuck)
+		{
+			Z.X = CollisionRadius;
+			Z.Y = Z.X;
+			Z.Z = CollisionHeight;						
+			HitDuck = Trace(Y, Y, MoveDest - vect(0,0,1)*HoverDuck, Location - vect(0,0,1)*HoverDuck, true, Z);
+			if (Pawn(HitDuck) != None && Pawn(HitDuck).PlayerReplicationInfo != None && 
+				Pawn(HitDuck).PlayerReplicationInfo.Team != CurrentTeam)
+				bNeedDuck = true; // run over enemy
+			else if (HitDuck == None && Trace(Y, Y, MoveDest, Location, true, Z) != None)
+				bNeedDuck = true; // need crouch for pass this place
+		}
+		if (bNeedDuck && !bDuckFire)
+			PlayOwnedSound(DuckSound);
 	}
-	if (bNeedDuck && !bDuckFire)
-		PlayOwnedSound(DuckSound);
-	bDuckFire = bNeedDuck;
+	bDuckFire = bCanDuck && bNeedDuck;
 	Dir.Z = 0;
 	if (bOnGround)
 		Dir = SetUpNewMVelocity(Dir, ActualFloorNormal, 0);
@@ -448,10 +458,10 @@ simulated function PostBeginPlay()
 	Super.PostBeginPlay();
 	if (VehicleAI != None)
 	{
-		for (i = 0; i < ArrayCount(Repulsor); i++)
+		for (i = 0; i < RepulsorCount; i++)
 			Avg += Repulsor[i].Z;
 		VehicleAI.AirFlyScale = (HoveringHeight - HoverGap - 
-			Avg/ArrayCount(Repulsor) - class'NavigationPoint'.default.CollisionHeight)/CollisionHeight;
+			Avg/RepulsorCount - class'NavigationPoint'.default.CollisionHeight)/CollisionHeight;
 	}
 }
 

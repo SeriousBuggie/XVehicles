@@ -71,9 +71,11 @@ defaultproperties
 	HoveringHeight=160.000000
 	JumpingHeight=730.000000
 	MaxPushUpDiff=3.000000
+	bCanDuck=True
 	Repulsor(0)=(X=95.000000,Z=-7.000000)
 	Repulsor(1)=(X=-10.000000,Y=80.000000,Z=-7.000000)
 	Repulsor(2)=(X=-10.000000,Y=-80.000000,Z=-7.000000)
+	RepulsorCount=3
 	JumpSound=Sound'XHoverVeh.Manta.HoverBikeJump05'
 	DuckSound=Sound'XHoverVeh.Manta.HoverBikeTurbo01'
 	AIRating=6.000000

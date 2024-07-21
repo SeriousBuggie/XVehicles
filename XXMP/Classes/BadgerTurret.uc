@@ -8,6 +8,8 @@ simulated function FireEffect()
 	Super.FireEffect();
 	if (Role == ROLE_Authority)
 		SpawnSmoke();
+	if (OwnerVehicle != None && OwnerVehicle.bCanFly && PitchPart != None)
+		MakeRecoil();
 }
 
 function SpawnSmoke()
@@ -30,6 +32,14 @@ function SpawnSmoke()
 			}
 		}
 	}
+}
+
+simulated function MakeRecoil()
+{
+	local vector X, Y, Z;
+	GetAxes(PitchPart.Rotation, X, Y, Z);
+	OwnerVehicle.Velocity -= 3*WeapSettings[0].ProjectileClass.Default.Speed*
+		WeapSettings[0].ProjectileClass.Default.Mass/OwnerVehicle.Mass*X;
 }
 
 defaultproperties
