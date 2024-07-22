@@ -122,8 +122,8 @@ defaultproperties
 	MaxObstclHeight=44.000000
 	DriverCrosshairTex=Texture'XTreadVeh.Icons.TankGKOneMainCross'
 	bUseVehicleLights=True
-	HeadLights(0)=(VLightOffset=(X=136.500000,Y=15.000000,Z=-13.500000),VLightTex=Texture'XWheelVeh.Misc.JeepHeadL',VSpriteProj=1.250000,VLightScale=0.440000,VHeadLight=(bHaveSpotLight=True,HeadLightIntensity=80,HLightSat=255,HeadCone=64,HeadDistance=192))
-	HeadLights(1)=(VLightOffset=(X=136.500000,Y=26.000000,Z=-13.500000),VLightTex=Texture'XWheelVeh.Misc.JeepHeadL',VSpriteProj=1.250000,VLightScale=0.440000,VHeadLight=(bHaveSpotLight=True,HeadLightIntensity=80,HLightSat=255,HeadCone=64,HeadDistance=192))
+	HeadLights(0)=(VLightOffset=(X=136.500000,Y=15.000000,Z=-13.500000),VLightTex=Texture'XVehicles.Misc.JeepHeadL',VSpriteProj=1.250000,VLightScale=0.440000,VHeadLight=(bHaveSpotLight=True,HeadLightIntensity=80,HLightSat=255,HeadCone=64,HeadDistance=192))
+	HeadLights(1)=(VLightOffset=(X=136.500000,Y=26.000000,Z=-13.500000),VLightTex=Texture'XVehicles.Misc.JeepHeadL',VSpriteProj=1.250000,VLightScale=0.440000,VHeadLight=(bHaveSpotLight=True,HeadLightIntensity=80,HLightSat=255,HeadCone=64,HeadDistance=192))
 	GroundPower=2.500000
 	DamageGFX(0)=(bHaveThisGFX=True,bHaveFlames=True,DmgFXOffset=(X=52.000000,Y=10.000000,Z=25.000000),FXRange=12)
 	DestroyedExplDmg=420

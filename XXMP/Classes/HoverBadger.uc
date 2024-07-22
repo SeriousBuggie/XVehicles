@@ -158,10 +158,10 @@ defaultproperties
 	bUseSignalLights=True
 	StopLights(0)=(VLightOffset=(X=-57.750000,Y=54.000000,Z=5.000000),VLightTex=Texture'Botpack.Translocator.Tranglow',VSpriteProj=2.500000,VLightScale=0.250000)
 	StopLights(1)=(VLightOffset=(X=-57.750000,Y=-56.000000,Z=5.000000),VLightTex=Texture'Botpack.Translocator.Tranglow',VSpriteProj=2.500000,VLightScale=0.250000)
-	BackwardsLights(0)=(VLightOffset=(X=-56.750000,Y=48.000000,Z=7.500000),VLightTex=Texture'XWheelVeh.Misc.JeepBackL',VSpriteProj=2.500000,VLightScale=0.250000)
-	BackwardsLights(1)=(VLightOffset=(X=-56.750000,Y=-50.000000,Z=7.500000),VLightTex=Texture'XWheelVeh.Misc.JeepBackL',VSpriteProj=2.500000,VLightScale=0.250000)
-	HeadLights(0)=(VLightOffset=(X=82.000000,Y=13.500000,Z=-12.000000),VLightTex=Texture'XWheelVeh.Misc.JeepHeadL',VSpriteProj=1.250000,VLightScale=0.440000,VHeadLight=(bHaveSpotLight=True,HeadLightIntensity=80,HLightSat=255,HeadCone=64,HeadDistance=192))
-	HeadLights(1)=(VLightOffset=(X=82.000000,Y=-15.000000,Z=-12.000000),VLightTex=Texture'XWheelVeh.Misc.JeepHeadL',VSpriteProj=1.250000,VLightScale=0.440000,VHeadLight=(bHaveSpotLight=True,HeadLightIntensity=80,HLightSat=255,HeadCone=64,HeadDistance=192))
+	BackwardsLights(0)=(VLightOffset=(X=-56.750000,Y=48.000000,Z=7.500000),VLightTex=Texture'XVehicles.Misc.JeepBackL',VSpriteProj=2.500000,VLightScale=0.250000)
+	BackwardsLights(1)=(VLightOffset=(X=-56.750000,Y=-50.000000,Z=7.500000),VLightTex=Texture'XVehicles.Misc.JeepBackL',VSpriteProj=2.500000,VLightScale=0.250000)
+	HeadLights(0)=(VLightOffset=(X=82.000000,Y=13.500000,Z=-12.000000),VLightTex=Texture'XVehicles.Misc.JeepHeadL',VSpriteProj=1.250000,VLightScale=0.440000,VHeadLight=(bHaveSpotLight=True,HeadLightIntensity=80,HLightSat=255,HeadCone=64,HeadDistance=192))
+	HeadLights(1)=(VLightOffset=(X=82.000000,Y=-15.000000,Z=-12.000000),VLightTex=Texture'XVehicles.Misc.JeepHeadL',VSpriteProj=1.250000,VLightScale=0.440000,VHeadLight=(bHaveSpotLight=True,HeadLightIntensity=80,HLightSat=255,HeadCone=64,HeadDistance=192))
 	GroundPower=2.500000
 	DamageGFX(0)=(bHaveThisGFX=True,bHaveFlames=True,DmgFXOffset=(X=52.000000,Y=5.000000),FXRange=12)
 	DestroyedExplDmg=420
