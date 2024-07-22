@@ -3,6 +3,7 @@
 //=============================================================================
 class GoliathMGRot expands TankMGRot;
 
+var() float BarrelYOffset;
 var int Barrel;
 
 function SpawnFireEffects( byte Mode )
@@ -13,11 +14,11 @@ function SpawnFireEffects( byte Mode )
 	if (TMGMz == None && PitchPart != None)
 	{
 		ROffset = WeapSettings[Mode].FireStartOffset + vect(-30,0,-3);
-		ROffset.Y = 3.7*Barrel - 1.0;
+		ROffset.Y = BarrelYOffset*Barrel - 1.0;
 		TMGMz = Spawn(Class'TankMGMuz',PitchPart,,PitchPart.Location + (ROffset >> PitchPart.Rotation), PitchPart.Rotation);
 		TMGMz.PrePivotRel = ROffset;
 		
-		ROffset.Y = -3.7*Barrel - 1.0;
+		ROffset.Y = -BarrelYOffset*Barrel - 1.0;
 		TMGMz2 = Spawn(Class'TankMGMuz',PitchPart,,PitchPart.Location + (ROffset >> PitchPart.Rotation), PitchPart.Rotation);
 		TMGMz2.PrePivotRel = ROffset;
 		TMGMz2.AnimFrame = 0.5;
@@ -25,39 +26,18 @@ function SpawnFireEffects( byte Mode )
 	}
 }
 
-simulated function FireEffect()
-{
-	Super.FireEffect();
-	if (Level.netmode != NM_DedicatedServer)
-		SpawnShell();
-}
-
-simulated function SpawnShell()
-{
-	local UT_Shellcase s;
-	local vector X, Y, Z;
-
-	if (PitchPart != None)
-	{
-		s = Spawn(class'MiniShellCase', WeaponController, '', PitchPart.Location + (vect(15, -8, 11) >> PitchPart.Rotation));
-		if (s != None)
-		{
-			s.DrawScale = 0.5;
-			GetAxes(PitchPart.Rotation, X, Y, Z);
-			s.Eject(((FRand()*0.3+0.4)*X - (FRand()*0.2+2.2)*Y + (FRand()*0.5+1.0) * Z)*80);              
-		}
-	}
-}
-
 function SpawnTraceEffects(vector Dir)
 {
-	local vector ROffset;	
+	local vector ROffset;
+	
+	if (OwnerVehicle == None)
+		return;
 
 	if (PitchPart != None && TracerCount > 1)
 	{
 		ROffset = WeapSettings[0].FireStartOffset + vect(-20,0,0);
-		ROffset.Y = 3.7*Barrel - 1.0;
-		Spawn(Class'TMGunTracer',,,PitchPart.Location + (ROffset >> PitchPart.Rotation), rotator(Dir));
+		ROffset.Y = BarrelYOffset*Barrel - 1.0;
+		OwnerVehicle.Spawn(Class'TMGunTracer',OwnerVehicle,,PitchPart.Location + (ROffset >> PitchPart.Rotation), rotator(Dir));
 		TracerCount = 0;
 		Barrel *= -1;
 	}
@@ -67,7 +47,9 @@ function SpawnTraceEffects(vector Dir)
 
 defaultproperties
 {
+	BarrelYOffset=3.700000
 	Barrel=1
+	ShellOffset=(X=15.000000,Y=-8.000000,Z=11.000000)
 	TurretPitchActor=Class'GoliathMGun'
 	PitchActorOffset=(X=0.000000,Y=0.000000,Z=1.500000)
 	WeapSettings(0)=(FireStartOffset=(X=77.750000,Z=9.300000))

@@ -3,30 +3,6 @@
 //=============================================================================
 class BadgerMGRot expands TankMGRot;
 
-simulated function FireEffect()
-{
-	Super.FireEffect();
-	if (Level.NetMode != NM_DedicatedServer)
-		SpawnShell();
-}
-
-simulated function SpawnShell()
-{
-	local UT_Shellcase s;
-	local vector X, Y, Z;
-
-	if (PitchPart != None)
-	{
-		s = Spawn(class'MiniShellCase', WeaponController, '', PitchPart.Location + (vect(0, -8, 11) >> PitchPart.Rotation));
-		if (s != None)
-		{
-			s.DrawScale = 0.5;
-			GetAxes(PitchPart.Rotation, X, Y, Z);
-			s.Eject(((FRand()*0.3+0.4)*X - (FRand()*0.2+2.2)*Y + (FRand()*0.5+1.0) * Z)*80);              
-		}
-	}
-}
-
 function SpawnFireEffects( byte Mode )
 {
 	if (Mode == 1)
@@ -47,6 +23,7 @@ function FireTurret( byte Mode, optional bool bForceFire )
 
 defaultproperties
 {
+	ShellOffset=(X=0.000000,Y=-8.000000,Z=11.000000)
 	PitchRange=(Max=14000,Min=-3000)
 	bAltFireZooms=False
 	TurretPitchActor=Class'BadgerMGun'

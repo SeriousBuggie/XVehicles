@@ -19,12 +19,38 @@ class TankMGRot expands xTreadVehWeapon;
 
 #exec AUDIO IMPORT NAME="TankGKMGunFire" FILE=SOUNDS\TankGKMGunFire.wav GROUP="TankGKOne"
 
+var() vector ShellOffset;
+
 var TankMGMuz TMGMz;
 var byte TracerCount;
 
+simulated function FireEffect()
+{
+	Super.FireEffect();
+	if (ShellOffset.Y != 0 && Level.NetMode != NM_DedicatedServer)
+		SpawnShell();
+}
+
+simulated function SpawnShell()
+{
+	local UT_Shellcase s;
+	local vector X, Y, Z;
+
+	if (PitchPart != None)
+	{
+		s = Spawn(class'MiniShellCase', WeaponController, '', PitchPart.Location + (ShellOffset >> PitchPart.Rotation));
+		if (s != None)
+		{
+			s.DrawScale = 0.5;
+			GetAxes(PitchPart.Rotation, X, Y, Z);
+			s.Eject(((FRand()*0.3+0.4)*X - (FRand()*0.2+2.2)*Y + (FRand()*0.5+1.0) * Z)*80);              
+		}
+	}
+}
+
 function SpawnFireEffects( byte Mode )
 {
-local vector ROffset;
+	local vector ROffset;
 
 	if (TMGMz == None && PitchPart != None)
 	{
@@ -36,7 +62,7 @@ local vector ROffset;
 
 function SpawnTraceEffects(vector Dir)
 {
-local vector ROffset;
+	local vector ROffset;
 
 	if (PitchPart != None && TracerCount > 1)
 	{
