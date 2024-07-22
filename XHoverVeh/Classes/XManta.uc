@@ -96,7 +96,6 @@ defaultproperties
 	HeadLights(1)=(VLightOffset=(X=85.000000,Y=-11.000000,Z=-2.000000),VLightTex=Texture'XHoverVeh.pics.FlashFlare1',VLightScale=0.500000)
 	HeadLightOn=None
 	HeadLightOff=None
-	DropFlag=DF_All
 	DamageGFX(0)=(bHaveThisGFX=True,bHaveFlames=True,DmgFXOffset=(X=50.000000,Y=-25.000000,Z=-7.000000))
 	DestroyedExplDmg=70
 	ExplosionGFX(0)=(bHaveThisExplFX=True,ExplSize=6.750000)

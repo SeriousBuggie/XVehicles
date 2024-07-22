@@ -93,7 +93,6 @@ defaultproperties
 	WDeAccelRate=200.000000
 	HeadLightOn=None
 	HeadLightOff=None
-	DropFlag=DF_All
 	DamageGFX(0)=(bHaveThisGFX=True,bHaveFlames=True,DmgFXOffset=(X=66.000000),FXRange=15)
 	DestroyedExplDmg=70
 	ExplosionGFX(0)=(bHaveThisExplFX=True,ExplSize=6.750000)

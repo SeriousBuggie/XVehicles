@@ -119,7 +119,6 @@ defaultproperties
 	DriverWeapon=(WeaponClass=Class'CybBlades',WeaponOffset=(X=0.000000))
 	VehicleKeyInfoStr="Cybot Helico keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to strafe|%Jump%, %Duck% to move up/down|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%ThrowWeapon% to exit the vehicle"
 	WDeAccelRate=200.000000
-	DropFlag=DF_All
 	DamageGFX(0)=(bHaveThisGFX=True,bHaveFlames=True,DmgFXOffset=(X=-32.000000,Z=20.000000),FXRange=15)
 	DestroyedExplDmg=70
 	ExplosionGFX(0)=(bHaveThisExplFX=True,ExplSize=6.750000)
