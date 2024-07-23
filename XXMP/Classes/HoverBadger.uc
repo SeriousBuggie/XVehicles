@@ -5,7 +5,7 @@ class HoverBadger expands HoverCraftPhys;
 
 var byte CurrentTeamColor;
 var() vector SmokeOffset;
-var VehicleWheel MyWheels[ArrayCount(Repulsor)];
+var VehicleWheel MyWheels[4];
 
 simulated function Tick(float delta)
 {
