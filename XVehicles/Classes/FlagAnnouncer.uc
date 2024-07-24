@@ -63,7 +63,7 @@ function Timer()
 	}
 	StorePrevScore();
 	
-	T = Level.TimeSeconds + 1;
+	T = Level.TimeSeconds - 1;
 	for (i = 0; i < ArrayCount(PendingChangeProps); i++)
 	{
 		if (PendingChangeProps[i] != None && FlagLastEventTime[i] < T)
