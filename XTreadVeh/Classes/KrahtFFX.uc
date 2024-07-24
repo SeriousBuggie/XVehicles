@@ -8,11 +8,11 @@ var() bool bFadeIn;
 replication
 {
 	// Variables the server should send to the client.
-	reliable if( Role==ROLE_Authority )
+	reliable if (Role == ROLE_Authority)
 		PrePivotRel;
 }
 
-simulated function Tick( float DeltaTime)
+simulated function Tick(float DeltaTime)
 {
 	if (bFadeIn)
 	{
@@ -25,7 +25,7 @@ simulated function Tick( float DeltaTime)
 		ScaleGlow = LifeSpan * Default.ScaleGlow / Default.LifeSpan;
 	}
 
-	if (Owner != None)
+	if (Level.NetMode != NM_DedicatedServer && Owner != None)
 		PrePivot = PrePivotRel >> Owner.Rotation;
 }
 

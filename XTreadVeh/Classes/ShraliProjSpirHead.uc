@@ -19,13 +19,14 @@ var rotator OwnerRot;
 replication
 {
 	// Variables the server should send to the client.
-	reliable if( Role==ROLE_Authority )
+	reliable if (Role == ROLE_Authority)
 		PrePivotRel;
 }
 
 simulated function Tick(float Delta)
 {
-	if (PrePivotRel != vect(0,0,0) && Owner != None && Owner.Rotation != OwnerRot)
+	if (Level.NetMode != NM_DedicatedServer &&
+		PrePivotRel != vect(0,0,0) && Owner != None && Owner.Rotation != OwnerRot)
 	{
 		PrePivot = (PrePivotRel >> Owner.Rotation);
 		OwnerRot = Owner.Rotation;

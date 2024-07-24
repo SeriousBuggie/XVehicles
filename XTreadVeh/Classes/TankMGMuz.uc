@@ -5,7 +5,7 @@ var vector PrePivotRel;
 replication
 {
 	// Variables the server should send to the client.
-	reliable if( Role==ROLE_Authority )
+	reliable if (Role == ROLE_Authority)
 		PrePivotRel;
 }
 
@@ -14,9 +14,9 @@ simulated function PostBeginPlay()
 	LoopAnim('Shoot');
 }
 
-simulated function Tick( float DeltaTime)
+simulated function Tick(float DeltaTime)
 {
-	if (Owner != None)
+	if (Level.NetMode != NM_DedicatedServer && Owner != None)
 		PrePivot = PrePivotRel >> Owner.Rotation;
 }
 

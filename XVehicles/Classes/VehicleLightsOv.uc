@@ -16,11 +16,8 @@ function Timer()
 
 simulated function Tick(float Delta)
 {
-	if (Vehicle(Owner)!=None)
-	{
-		if (Vehicle(Owner).bSlopedPhys && Vehicle(Owner).GVT!=None)
-			PrePivot = Vehicle(Owner).GVT.PrePivot;
-	}
+	if (Vehicle(Owner) != None && Vehicle(Owner).bSlopedPhys && Vehicle(Owner).GVT != None)
+		PrePivot = Vehicle(Owner).GVT.PrePivot;
 }
 
 defaultproperties

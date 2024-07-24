@@ -17,7 +17,7 @@ simulated function Tick(float Delta)
 	Veh = Vehicle(Owner);
 	if (Veh != None)
 	{
-		if (Veh.bSlopedPhys && Veh.GVT!=None)
+		if (Veh.bSlopedPhys && Veh.GVT != None)
 			PrePivot = Veh.GVT.PrePivot + (POffSet >> Veh.Rotation);
 		else
 			PrePivot = (POffSet >> Veh.Rotation);

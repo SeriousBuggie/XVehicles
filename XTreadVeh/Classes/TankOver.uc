@@ -5,13 +5,13 @@ var actor SlopedPart;
 replication
 {
 	// Variables the server should send to the client.
-	reliable if( Role==ROLE_Authority )
+	reliable if (Role == ROLE_Authority)
 		SlopedPart;
 }
 
 simulated function Tick(float Delta)
 {
-	if (SlopedPart != None)
+	if (Level.NetMode != NM_DedicatedServer && SlopedPart != None)
 		if (Vehicle(SlopedPart) != None && Vehicle(SlopedPart).GVT != None)
 			PrePivot = Vehicle(SlopedPart).GVT.PrePivot;
 		else

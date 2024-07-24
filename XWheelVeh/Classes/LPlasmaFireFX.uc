@@ -7,19 +7,16 @@ var vector PrePivotRel;
 replication
 {
 	// Variables the server should send to the client.
-	reliable if( Role==ROLE_Authority && bNetInitial )
+	reliable if (Role == ROLE_Authority)
 		PrePivotRel;
 }
 
-simulated function Tick( float DeltaTime)
+simulated function Tick(float DeltaTime)
 {
-	if (Level.NetMode != NM_DedicatedServer)
-	{
-		DrawScale = LifeSpan * Default.DrawScale / Default.LifeSpan;
-		ScaleGlow = LifeSpan * Default.ScaleGlow / Default.LifeSpan;
-		if (Owner != None)
-			PrePivot = PrePivotRel >> Owner.Rotation;
-	}
+	DrawScale = LifeSpan * Default.DrawScale / Default.LifeSpan;
+	ScaleGlow = LifeSpan * Default.ScaleGlow / Default.LifeSpan;
+	if (Level.NetMode != NM_DedicatedServer && Owner != None)
+		PrePivot = PrePivotRel >> Owner.Rotation;
 }
 
 defaultproperties

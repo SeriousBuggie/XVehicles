@@ -14,7 +14,7 @@ replication
 simulated function Tick( float DeltaTime)
 {
 	ScaleGlow = (Default.LifeSpan - LifeSpan) * Default.ScaleGlow / Default.LifeSpan;
-	if (Owner != None)
+	if (Level.NetMode != NM_DedicatedServer && Owner != None)
 		PrePivot = PrePivotRel >> Owner.Rotation;
 }
 
