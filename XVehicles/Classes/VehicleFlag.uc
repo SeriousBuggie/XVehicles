@@ -56,10 +56,8 @@ simulated function Tick(float Delta)
 	
 	Super.Tick(Delta);
 	
-	if (Level.NetMode == NM_DedicatedServer)
-		return;
-	
-	FixOffset();
+	if (Level.NetMode != NM_DedicatedServer)	
+		FixOffset();
 
 	if (Owner != None) {
 		SetLocation(Owner.Location - (vect(10,0,0)*Pos >> Owner.Rotation));
@@ -75,7 +73,10 @@ simulated function Tick(float Delta)
 		r.Pitch = -r.Pitch;
 		r.Roll = -r.Roll;
 		SetRotation(r);
+		bHidden = false;
 	}
+	else if (Role != ROLE_Authority)
+		bHidden = true;
 	if (Vehicle(Owner) != None && (Vehicle(Owner).IsNetOwned() || 
 		(class'VActor'.Default.StaticPP != None && class'VActor'.Default.StaticPP.Actor != None && 
 		class'VActor'.Default.StaticPP.Actor.ViewTarget != None &&
