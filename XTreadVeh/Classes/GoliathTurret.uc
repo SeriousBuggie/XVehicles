@@ -7,6 +7,6 @@ defaultproperties
 {
 	TurretPitchActor=Class'GoliathCannon'
 	PitchActorOffset=(X=45.000000,Y=0.000000)
-	WeapSettings(0)=(FireStartOffset=(X=217.000000))
+	WeapSettings(0)=(FireStartOffset=(X=217.000000),RefireRate=2.500000,FireSound=Sound'XTreadVeh.Goliath.TankFire01')
 	Mesh=SkeletalMesh'GoliathCanon'
 }
