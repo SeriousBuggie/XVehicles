@@ -256,10 +256,8 @@ simulated function UpdateDriverInput( float Delta )
 			Vel = VSize(Velocity);
 			Velocity.Z = 0;
 			if (bCanDuck && (bDuck || bDuckFire))
-				Vel *= 0.5;
-			else
-				Vel *= 1.1;
-			Velocity.Z -= Vel*(ActualFloorNormal dot Normal(Velocity))*ActualFloorNormal.Z;
+				Vel *= 0.1;
+			Velocity.Z -= Vel*(ActualFloorNormal dot Normal(Velocity));
 			Vel = Velocity.Z;
 			if (Abs(DesiredHoverHeight) > 2)
 				Velocity.Z += DesiredHoverHeight*FMax(DesiredHoverHeight*DesiredHoverHeight*BigScale, Scale)*0.01/
