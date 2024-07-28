@@ -57,6 +57,13 @@ simulated function ChangeColor()
 		DriverGun.WeapSettings[0].ProjectileClass = Proj;
 }
 
+simulated event AnimEnd()
+{
+	Super.AnimEnd();
+	if (HasAnim('Idle'))
+		TweenAnim('Idle', 0.5);
+}
+
 defaultproperties
 {
 	CurrentTeamColor=42

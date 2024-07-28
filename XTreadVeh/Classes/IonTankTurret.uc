@@ -6,8 +6,8 @@ class IonTankTurret expands TankGKOneTurret;
 simulated function FireEffect()
 {
 	Super.FireEffect();
-	if (PitchPart != None && PitchPart.HasAnim('Name'))
-		PitchPart.PlayAnim('Name');
+	if (PitchPart != None && PitchPart.HasAnim('Fire'))
+		PitchPart.PlayAnim('Fire');
 }
 
 defaultproperties

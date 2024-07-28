@@ -9,8 +9,8 @@ function SpawnFireEffects(byte Mode)
 	
 	if (OwnerVehicle == None)
 		return;
-	if (Mode == 1 && OwnerVehicle.HasAnim('Name'))
-		OwnerVehicle.PlayAnim('Name');
+	if (Mode == 1 && OwnerVehicle.HasAnim('Fire'))
+		OwnerVehicle.PlayAnim('Fire');
 }
 
 defaultproperties
