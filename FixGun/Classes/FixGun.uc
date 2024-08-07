@@ -49,6 +49,8 @@ function float RateSelf( out int bUseAltMode )
 		bUseAltMode = 1; // do special heal
 		return 10;
 	}
+	if (Pawn(Owner) == None) // Prevent flood in the log
+		return AIRating;
 	return Super.RateSelf(Ignored);
 }	
 
