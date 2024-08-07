@@ -8,7 +8,7 @@ function Timer()
 	local int Mode;
 	Super.Timer();
 	// reset loop sound on stop fire
-	if (WeaponController.bFire == 0 && WeaponController.bAltFire == 0)
+	if (WeaponController == None || (WeaponController.bFire == 0 && WeaponController.bAltFire == 0))
 		PlaySound(WeapSettings[Mode].FireDelaySnd, SLOT_Misc, WeapSettings[Mode].FireSndVolume,,
 			WeapSettings[Mode].FireSndRange*62.5);
 }
