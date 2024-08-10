@@ -9,6 +9,7 @@ var Class<Effects> FlameClass;
 var float ScaleFire;
 var Sound FlameSound;
 var float ScaleSound;
+var bool InDying;
 
 simulated function PostBeginPlay()
 {
@@ -24,6 +25,8 @@ simulated function Timer()
 {
 	local Effects e;
 	local float Scale;
+	local Carcass Carc;
+	local PlayerReplicationInfo PRI;
 
 	if (Owner == None || Owner.bDeleteMe || 
 		(Region.Zone.bWaterZone && !Region.Zone.IsA('LavaZone') && Region.Zone.DamageType != 'Burned'))
@@ -33,8 +36,32 @@ simulated function Timer()
 	}
 	
 	Mass /= 1.1;
-	if (Mass > 0 && LifeSpan > 0.25)
-		Owner.TakeDamage(Mass, instigator, Owner.Location, vect(0, 0, 0), 'burned');
+	if (Mass > 0 && LifeSpan > 0.25 && Carcass(Owner) == None)
+	{
+		if (!InDying)
+			Owner.TakeDamage(Mass, instigator, Owner.Location, vect(0, 0, 0), 'burned');
+		if (Owner.bDeleteMe || (InDying && !Owner.IsInState('Dying')))
+		{
+			Destroy();
+			return;
+		}
+		if (Owner.IsInState('Dying'))
+		{
+			InDying = true;
+			if (PlayerPawn(Owner) != None && Carcass(PlayerPawn(Owner).ViewTarget) != None)
+				SetOwner(PlayerPawn(Owner).ViewTarget);
+			else if (Pawn(Owner) != None && Pawn(Owner).PlayerReplicationInfo != None)
+			{
+				PRI = Pawn(Owner).PlayerReplicationInfo;
+				foreach AllActors(Class'Carcass', Carc)
+					if (Carc.PlayerOwner == PRI)
+					{
+						SetOwner(Carc);
+						break;
+					}
+			}	
+		}
+	}
 	
 	if (Level.NetMode == NM_DedicatedServer)
 		return;
