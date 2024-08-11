@@ -1084,10 +1084,12 @@ function rotator GetBotInput( float Delta )
 function vector GetLastVisiblePathPoint()
 {
 	local int i;
-	for (i = ArrayCount(OwnerVehicle.Driver.RouteCache) - 1; i >= 0; i--)
-		if (OwnerVehicle.Driver.RouteCache[i] != None && 
-			FastTrace(OwnerVehicle.Driver.RouteCache[i].Location))
-			return OwnerVehicle.Driver.RouteCache[i].Location;
+	local Pawn Driver;
+	Driver = OwnerVehicle.Driver;
+	for (i = ArrayCount(Driver.RouteCache) - 1; i >= 0; i--)
+		if (Driver.RouteCache[i] != None && 
+			FastTrace(Driver.RouteCache[i].Location))
+			return Driver.RouteCache[i].Location;
 	return RepAimPos;
 }
 function Actor TraceHit(Bot Bot, Actor A, out vector HL, out vector HN)
