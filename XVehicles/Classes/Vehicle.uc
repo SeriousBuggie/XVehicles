@@ -1157,7 +1157,8 @@ function ChangeCollision(Pawn Other, bool bInside, int Seat)
 	else
 	{
 		Other.DrawScale = Other.default.DrawScale;
-		Other.SetCollision(False,False,False); // after move be set to true
+		// bCollideActors necessary for collide with movers.
+		Other.SetCollision(True,False,False); // after move be set to true
 		Other.bCollideWorld = True;
 		Other.SetCollisionSize(Other.default.CollisionRadius, Other.default.CollisionHeight);
 		if (Other.Region.Zone == None)
