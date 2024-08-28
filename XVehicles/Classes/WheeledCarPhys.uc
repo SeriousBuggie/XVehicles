@@ -771,5 +771,6 @@ defaultproperties
 	VehicleKeyInfoStr="Wheeled car keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to turn|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%mutate VehicleCameran% to change camera|%ThrowWeapon% to exit the vehicle"
 	bDestroyUpsideDown=True
 	WDeAccelRate=50.000000
+	bArcMovement=True
 	Mesh=LodMesh'UnrealShare.WoodenBoxM'
 }
