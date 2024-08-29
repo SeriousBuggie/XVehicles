@@ -1711,7 +1711,7 @@ simulated function AfterTeleport(float YawChange)
 // Main tick
 simulated function Tick( float Delta )
 {
-	local bool bSlopedG, bIsNetOwner;
+	local bool bSlopedG, bIsNetOwner, bGameEnded;
 	local float f, ArcRatio;
 	local SavedMoveXV NewMove;
 	const ArcMovementScale = 2;
@@ -1867,12 +1867,18 @@ simulated function Tick( float Delta )
 
 	if (Driver != None && !bDeleteMe)
 		UpdateDriverPos();
-	if (!bDriving || (Driver != None && Driver.IsInState('GameEnded')) || 
-		(Level.Game != None && Level.Game.bGameEnded))
+	bGameEnded = (Driver != None && Driver.IsInState('GameEnded')) || (Level.Game != None && Level.Game.bGameEnded);
+	if (!bDriving || bGameEnded)
 	{
 		Turning = 0;
 		Rising = 0;
 		Accel = 0;
+	}
+	if (bGameEnded)
+	{
+		Velocity = vect(0, 0, 0);
+		ActualFloorNormal = FloorNormal;
+		ActualGVTNormal = GVTNormal;
 	}
 	else if (Level.NetMode<NM_Client || IsNetOwner(Driver))
 	{
@@ -1919,9 +1925,14 @@ simulated function Tick( float Delta )
 	{
 		ArcRatio = FClamp((Region.Zone.ZoneGravity.Z*ArcMovementScale - Velocity.Z)/
 			FMin(-1.0, Region.Zone.ZoneGravity.Z), 0.0, 1.0);
-		ActualFloorNormal = Normal(ActualFloorNormal*4 + vector(Rotation)*ArcRatio);
+		ActualFloorNormal = Normal(ActualFloorNormal*4 + vector(Rotation)*GetMovementDir()*ArcRatio);
 		if (ActualFloorNormal == vect(0,0,0))
 			ActualFloorNormal = FloorNormal;
+		else if (ActualFloorNormal.Z <= 0.1)
+		{
+			ActualFloorNormal.Z = 0.1;
+			ActualFloorNormal = Normal(ActualFloorNormal);
+		}
 /*
 		// X dot X == VSize(X)*VSize(X)
 		if (bOldOnGround && (Velocity dot Velocity) > MinArcSpeed*MinArcSpeed*6.25) //2.5*2.5
@@ -1941,9 +1952,14 @@ simulated function Tick( float Delta )
 		// X dot X == VSize(X)*VSize(X)
 		if (bSlopedPhys && (Velocity dot Velocity) > 0)
 		{
-			ActualGVTNormal = Normal(ActualGVTNormal*4 + vector(Rotation)*ArcRatio);
+			ActualGVTNormal = Normal(ActualGVTNormal*4 + vector(Rotation)*GetMovementDir()*ArcRatio);
 			if (ActualGVTNormal == vect(0,0,0))
 				ActualGVTNormal = GVTNormal;
+			else if (ActualGVTNormal.Z <= 0.1)
+			{
+				ActualGVTNormal.Z = 0.1;
+				ActualGVTNormal = Normal(ActualGVTNormal);
+			}
 
 			if (GVTNormal!=ActualGVTNormal)
 			{
