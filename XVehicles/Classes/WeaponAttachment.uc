@@ -719,11 +719,20 @@ function Timer()
 		Return;
 	if (Bot(WeaponController) != None && WeaponController.bFire + WeaponController.bAltFire > 0 && 
 		WeaponController.Enemy == None && (!WeaponController.IsInState('RangedAttack') || !Bot(WeaponController).bComboPaused))
-		Bot(WeaponController).StopFiring();
+		StopFiring(WeaponController);
 	if( WeaponController.bFire!=0 )
 		FireTurret(0);
 	else if( WeaponController.bAltFire!=0 )
 		FireTurret(1);
+}
+
+// proper version of StopFiring, which not ruin current state
+static function StopFiring(Pawn Bot)
+{
+	Bot.bFire = 0;
+	Bot.bAltFire = 0;
+	if (Bot.IsInState('RangedAttack'))
+		Bot.GotoState(Bot.NextState, Bot.NextLabel);
 }
 
 simulated function AnimEnd()
@@ -1059,12 +1068,12 @@ function rotator GetBotInput( float Delta )
 		VSize(RepAimPos - WeaponController.MoveTarget.Location) < 10 && 
 		Pawn(WeaponController.MoveTarget) != None && Pawn(WeaponController.MoveTarget).PlayerReplicationInfo != None &&
 		Pawn(WeaponController.MoveTarget).PlayerReplicationInfo.Team == WeaponController.PlayerReplicationInfo.Team)
-		WeaponController.StopFiring();
+		StopFiring(WeaponController);
 	if (RepAimPos == OwnerVehicle.MoveDest)
 	{
 		if ((WeaponController.bFire > 0 || WeaponController.bAltFire > 0) &&
 			!WeaponController.IsInState('RangedAttack'))
-			WeaponController.StopFiring();
+			StopFiring(WeaponController);
 		if (OwnerVehicle.Driver != None && PlayerPawn(OwnerVehicle.Driver) == None && 
 			VSize(Location - RepAimPos) < 2000)
 			RepAimPos = GetLastVisiblePathPoint();
@@ -1187,12 +1196,24 @@ function bool FindEnemy()
 }
 static function float RangedAttack(Bot Bot, Actor Target, float SpecialPause)
 {
+	local bool bSpecialMoveTarget;
 	Bot.Target = Target;
 	Bot.bComboPaused = true;
 	Bot.SpecialPause = SpecialPause; // calculate exact time for shoot
-	Bot.MoveTimer = -1f; // time refresh path
+	bSpecialMoveTarget = Bot.MoveTarget != None && 
+		(VSize(Bot.MoveTarget.Location - Bot.Location) > 600.0 ||
+		LiftCenter(Bot.MoveTarget) != None || LiftExit(Bot.MoveTarget) != None ||
+		Teleporter(Bot.MoveTarget) != None || WarpZoneMarker(Bot.MoveTarget) != None ||
+		LiftExit(Bot.RouteCache[0]) != None || LiftExit(Bot.RouteCache[1]) != None);
+	if (!bSpecialMoveTarget) // prevent refresh paths, if there special move goals
+		Bot.MoveTimer = -1f; // time refresh path
 	Bot.NextState = Bot.GetStateName();
-	Bot.NextLabel = 'Begin';
+	if (bSpecialMoveTarget && 
+		(Bot.NextState == 'Roaming' || Bot.NextState == 'Fallback' || 
+		Bot.NextState == 'Hold' || Bot.NextState == 'Retreating'))
+		Bot.NextLabel = 'Moving';
+	else
+		Bot.NextLabel = 'Begin';
 	Bot.GotoState('RangedAttack');
 	return SpecialPause;
 }

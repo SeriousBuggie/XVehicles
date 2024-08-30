@@ -31,7 +31,7 @@ function Check()
 		if (MyPawn.FaceTarget == MyVehicle)
 			MyPawn.FaceTarget = None;
 		if (Bot(MyPawn) != None)
-			Bot(MyPawn).StopFiring();
+			Class'WeaponAttachment'.static.StopFiring(MyPawn);
 		Destroy();
 	}	
 }

@@ -3981,6 +3981,16 @@ simulated singular function Landed( vector HitNormal)
 {
 //	Log(self @ Level.TimeSeconds @ "Landed" @ HitNormal);
 	HitWall(HitNormal, None);
+	if (Driver != None)
+	{
+		if (Driver.IsInState('wandering'))
+			Driver.GotoState('Attacking');
+		else if (Driver.NextState == 'wandering')
+		{
+			Driver.NextState = 'Attacking';
+			Driver.NextLabel = 'Begin';
+		}
+	}
 }
 
 simulated singular function HitWall( vector HitNormal, Actor Wall )
