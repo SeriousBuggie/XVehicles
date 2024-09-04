@@ -1722,7 +1722,7 @@ simulated function Tick( float Delta )
 	local bool bSlopedG, bIsNetOwner, bGameEnded;
 	local float f, ArcRatio;
 	local SavedMoveXV NewMove;
-	const ArcMovementScale = 2;
+	const ArcMovementScale = 2.5;
 
 	if (Pawn(Base) != None)
 		SetBase(None);
@@ -1931,9 +1931,18 @@ simulated function Tick( float Delta )
 	//Arc movement physics
 	else if (bArcMovement && !bSlopedG && Velocity.Z > Region.Zone.ZoneGravity.Z*ArcMovementScale)
 	{
-		ArcRatio = FClamp((Region.Zone.ZoneGravity.Z*ArcMovementScale - Velocity.Z)/
-			FMin(-1.0, Region.Zone.ZoneGravity.Z), 0.0, 1.0);
-		ActualFloorNormal = Normal(ActualFloorNormal*4 + vector(Rotation)*GetMovementDir()*ArcRatio);
+		if (Velocity.Z > Region.Zone.ZoneGravity.Z*0.25)
+		{
+			ArcRatio = 0;
+			ActualFloorNormal = FloorNormal;
+			ActualGVTNormal = GVTNormal;
+		}
+		else
+		{
+			ArcRatio = FClamp((Region.Zone.ZoneGravity.Z*ArcMovementScale - Velocity.Z)/
+				FMin(-1.0, Region.Zone.ZoneGravity.Z), 0.0, 1.0);
+			ActualFloorNormal = Normal(ActualFloorNormal*8 + vector(Rotation)*GetMovementDir()*ArcRatio);
+		}
 		if (ActualFloorNormal == vect(0,0,0))
 			ActualFloorNormal = FloorNormal;
 		else if (ActualFloorNormal.Z <= 0.1)
@@ -1960,7 +1969,7 @@ simulated function Tick( float Delta )
 		// X dot X == VSize(X)*VSize(X)
 		if (bSlopedPhys && (Velocity dot Velocity) > 0)
 		{
-			ActualGVTNormal = Normal(ActualGVTNormal*4 + vector(Rotation)*GetMovementDir()*ArcRatio);
+			ActualGVTNormal = Normal(ActualGVTNormal*8 + vector(Rotation)*GetMovementDir()*ArcRatio);
 			if (ActualGVTNormal == vect(0,0,0))
 				ActualGVTNormal = GVTNormal;
 			else if (ActualGVTNormal.Z <= 0.1)
