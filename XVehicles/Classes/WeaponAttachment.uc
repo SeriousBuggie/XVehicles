@@ -1133,7 +1133,7 @@ function bool FindEnemy()
 	Bot = Bot(WeaponController);
 	if (Bot == None || NextTimeRangedAttack > Level.TimeSeconds)
 		return false;
-	if (Bot.Enemy != None) {
+	if (Bot.Enemy != None && !OwnerVehicle.IsSameTeam(Bot.Enemy)) {
 		// from APawn::LineOfSightTo
 		i = Min(5000, 5000*(16.0 + Bot.Enemy.Visibility)*0.015);
 		if (VSize(Bot.Enemy.Location - Bot.Location) <= i)
@@ -1297,7 +1297,7 @@ function bool SeeEnemy(Actor Enemy)
 	local float VProj, V1, V;
 	local rotator R;
 	local bool bCanSee;
-	if (Enemy == None || (Pawn(Enemy) != None && Pawn(Enemy).Health <= 0))
+	if (Enemy == None || (Pawn(Enemy) != None && (Pawn(Enemy).Health <= 0 || OwnerVehicle.IsSameTeam(Pawn(Enemy)))))
 		return false;
 	Enemy = GetVehicle(Enemy);
 	FireLocation = Location;
