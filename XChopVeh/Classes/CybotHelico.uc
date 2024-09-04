@@ -9,17 +9,7 @@ simulated function PostBeginPlay()
 		AddAttachment(class'CybGuideBlades');
 }
 
-auto state StartingUp
-{
-Begin:
-	PlaySound(Sound'CybTransformSnd',,12.0,,1200.0);
-	PlayAnim('Transform', 5.0);
-	Sleep(0.1);
-	FinishAnim();
-	GoToState('EmptyVehicle');
-}
-
-State EmptyVehicle
+auto state EmptyVehicle
 {
 	function BeginState()
 	{
@@ -28,6 +18,11 @@ State EmptyVehicle
 			DriverGun.PlayAnim('Rotate');
 		if (AttachmentList != None && AttachmentList.AnimSequence == 'Rotating')
 			AttachmentList.PlayAnim('Rotate');
+		if (AnimSequence != 'Transform')
+		{
+			PlaySound(Sound'CybTransformSnd',,12.0,,1200.0);
+			PlayAnim('Transform', 5.0);
+		}
 	}
 	function EndState()
 	{
@@ -91,6 +86,7 @@ function ChangeColor()
 
 defaultproperties
 {
+	CurrentTeamColor=42
 	MaxAirSpeed=2000.000000
 	YawTurnSpeed=36000.000000
 	AIRating=5.000000
