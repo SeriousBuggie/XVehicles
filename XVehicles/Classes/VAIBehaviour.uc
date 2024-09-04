@@ -114,6 +114,20 @@ function bool CanReach(vector Point)
 
 function vector GetNextMoveTarget()
 {
+	local vector Ret;
+	local bool CollideActors;
+	// Pawn must collide with actors, or PointReachable/ActorReachable will ignore movers.
+	CollideActors = VehicleOwner.Driver.bCollideActors;
+	if (!CollideActors)
+		VehicleOwner.Driver.SetCollision(true);
+	Ret = GetNextMoveTargetInternal();
+	if (!CollideActors)
+		VehicleOwner.Driver.SetCollision(CollideActors);
+	return Ret;
+}
+
+function vector GetNextMoveTargetInternal()
+{
 	local int i, best;
 	local float Z, Dist, BestDist, Closest, HeightDiff;
 	Local vector V, dV, S, T, T2, NextT, HitLocation, HitNormal;

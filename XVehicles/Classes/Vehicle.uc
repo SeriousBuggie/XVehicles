@@ -1139,6 +1139,14 @@ function DebugDump(coerce string Place) {
 	Driver.ConsoleCommand("WayTo FlagBase");
 }
 
+function bool GetCollideActors(Pawn Other)
+{
+	// AI need CollideActors for ride on top of movers.
+	return Other == Driver && PlayerPawn(Other) == None && 
+		(Mover(Other.Base) != None || Mover(Base) != None || 
+		(Other.MoveTarget != None && Mover(Other.MoveTarget.Base) != None));
+}
+
 function ChangeCollision(Pawn Other, bool bInside, int Seat)
 {
 	Local vector L;
@@ -1146,7 +1154,7 @@ function ChangeCollision(Pawn Other, bool bInside, int Seat)
 	if (bInside)
 	{
 		Other.DrawScale = SmallDrawScale;
-		Other.SetCollision(False,False,False);
+		Other.SetCollision(GetCollideActors(Other), False, False);
 		L = Location;
 		L.Z += Other.default.CollisionHeight - CollisionHeight;
 		if (PlayerPawn(Other) != None)
@@ -2387,6 +2395,7 @@ simulated function ResetPawn(Pawn Other, rotator R, Weapon Weap)
 {
 	local vector L;
 	local float Radius;
+	local bool CollideActors;
 	
 	L = Location;
 	L.Z += Other.default.CollisionHeight - CollisionHeight;
@@ -2406,10 +2415,11 @@ simulated function ResetPawn(Pawn Other, rotator R, Weapon Weap)
 		SwitchWeapon(Other, Weap);
 
 	Other.Velocity = Velocity;
-	if( Level.NetMode<NM_Client )
+	if (Level.NetMode < NM_Client)
 	{
-		if( Other.bCollideActors )
-			Other.SetCollision(false);
+		CollideActors = GetCollideActors(Other);
+		if (Other.bCollideActors != CollideActors)
+			Other.SetCollision(CollideActors);
 		Other.DrawScale = SmallDrawScale;
 		Other.SetRotation(R);
 		if( PlayerPawn(Other)==None )
