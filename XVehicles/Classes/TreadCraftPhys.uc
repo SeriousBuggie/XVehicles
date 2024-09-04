@@ -314,12 +314,15 @@ simulated function UpdateDriverInput( float Delta )
 				Velocity+=Region.Zone.ZoneGravity*Delta*VehicleGravityScale;
 			else
 				Velocity+=Region.Zone.ZoneGravity*Delta*VehicleGravityScale*0.35;
-			FallingLenghtZ += Abs(OldLocation.Z - Location.Z);
+			DeAcc = OldLocation.Z - Location.Z;
+			if (DeAcc > 0)
+				FallingLenghtZ += DeAcc;
 		}
 		if (Level.NetMode != NM_DedicatedServer)
 			UpdateTreads(Delta);
 		Return;
 	}
+	FallingLenghtZ = 0;
 
 	if( Turning!=0 )
 	{

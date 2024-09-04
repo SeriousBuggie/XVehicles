@@ -214,9 +214,12 @@ simulated function UpdateDriverInput( float Delta )
 			Velocity += Region.Zone.ZoneGravity*Delta*VehicleGravityScale*0.35;
 		else
 			Velocity += Region.Zone.ZoneGravity*Delta*VehicleGravityScale;
-		FallingLenghtZ += Abs(OldLocation.Z - Location.Z);
+		DeAcc = OldLocation.Z - Location.Z;
+		if (DeAcc > 0)
+			FallingLenghtZ += DeAcc;
 		Return;
 	}
+	FallingLenghtZ = 0;
 	
 	Velocity += CalcGravityStrength(Region.Zone.ZoneGravity*(VehicleGravityScale/GroundPower), FloorNormal)*
 		Delta/(FMax(Region.Zone.ZoneGroundFriction, WheelsTraction)/8.f + 1.f);
