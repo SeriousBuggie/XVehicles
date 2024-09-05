@@ -3,14 +3,17 @@
 //=============================================================================
 class xTurret expands StationaryPhys abstract;
 
-auto state StartingUp
+auto state EmptyVehicle
 {
-Begin:
-	PlaySound(Sound'CybTransformSnd',,12.0,,1200.0);
-	PlayAnim('Transform', 5.0);
-	Sleep(0.1);
-	FinishAnim();
-	GoToState('EmptyVehicle');
+	function BeginState()
+	{
+		Super.BeginState();
+		if (AnimSequence != 'Transform')
+		{
+			PlaySound(Sound'CybTransformSnd',,12.0,,1200.0);
+			PlayAnim('Transform', 5.0);
+		}
+	}
 }
 
 simulated function PostNetBeginPlay()
