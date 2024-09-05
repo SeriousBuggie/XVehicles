@@ -43,6 +43,21 @@ static function SpawnHUD(Actor A)
 	}
 }
 
+function bool HandlePickupQuery(Pawn Other, Inventory item, out byte bAllowPickup)
+{
+	// Prevent bots pickup stuff, when use hacks for move, which need make them collide with actors.
+	if (Other != None && PlayerPawn(Other) == None && item != None && 
+		DriverWeapon(Other.Weapon) != None && 
+		Other.bCollideActors && item.bCollideActors &&
+		Other.Location != item.Location && // Skip items spawned for this pawn.
+		VSize(Other.Location - item.Location) <= Other.CollisionRadius + item.CollisionRadius)
+	{
+		bAllowPickup = 0;
+		return true;
+	}
+	return Super.HandlePickupQuery(Other, item, bAllowPickup);
+}
+
 function Vehicle GetVehicle(PlayerPawn Sender)
 {
 	if (Sender != None && DriverWeapon(Sender.Weapon) != None)
