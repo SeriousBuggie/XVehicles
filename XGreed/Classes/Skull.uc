@@ -5,6 +5,7 @@ class Skull expands TournamentPickup;
 
 var int Amount;
 var float Scale;
+var(Collision) float SkullCollisionHeight, SkullCollisionRadius;
 
 const AmountRed = 20;
 const AmountGold = 5;
@@ -152,7 +153,7 @@ event HitWall(vector HitNormal, actor Wall)
 		{
 			bBounce = false;
 			Landed(HitNormal);
-			SetCollisionSize(default.CollisionRadius*(Scale + 1), default.CollisionHeight*Scale); // Make bigger for easy pickup
+			SetCollisionSize(default.SkullCollisionRadius*(Scale + 1), default.SkullCollisionHeight*Scale); // Make bigger for easy pickup
 		}
 	}
 }
@@ -186,7 +187,7 @@ function UpdateLook(optional bool bReset)
 		DrawScale = default.DrawScale;
 		PrePivot = default.PrePivot;
 		LifeSpan = 0;
-		SetCollisionSize(default.CollisionRadius, default.CollisionHeight);
+		SetCollisionSize(default.SkullCollisionRadius, default.SkullCollisionHeight);
 		return;
 	}	
 	if (Amount >= AmountRed)
@@ -209,8 +210,26 @@ function UpdateLook(optional bool bReset)
 	}
 	DrawScale = default.DrawScale*Scale;
 	PrePivot = default.PrePivot*Scale;
-	SetCollisionSize(FMin(Class'TournamentPlayer'.default.CollisionRadius, default.CollisionRadius*Scale), 
-		FMin(Class'TournamentPlayer'.default.CollisionHeight, default.CollisionHeight*Scale));
+	SetCollisionSize(FMin(Class'TournamentPlayer'.default.CollisionRadius, default.SkullCollisionRadius*Scale), 
+		FMin(Class'TournamentPlayer'.default.CollisionHeight, default.SkullCollisionHeight*Scale));
+}
+
+// Special spawn, which ensure skull spawn in most possible cases, for not lost them.
+function Skull SpawnSkull(pawn OldHolder)
+{
+	local Skull Other;
+	// First try not fell out from the world.
+	default.bCollideWorld = true;
+	Other = OldHolder.Spawn(Class'Skull');
+	default.bCollideWorld = false;
+	if (Other == None) // If fail - try without collision with world.
+		Other = OldHolder.Spawn(Class'Skull');
+	if (Other != None)
+	{
+		Other.SetCollisionSize(default.SkullCollisionHeight, default.SkullCollisionHeight);
+		Other.SetCollision(true);
+	}
+	return Other;
 }
 
 function Skull Drop(pawn OldHolder, vector newVel)
@@ -221,7 +240,7 @@ function Skull Drop(pawn OldHolder, vector newVel)
 		Amount != AmountRed && 
 		Amount != AmountGold)
 	{
-		Other = OldHolder.Spawn(Class'Skull');
+		Other = SpawnSkull(OldHolder);
 		if (Other == None)
 			break;
 		if (Amount > AmountRed)
@@ -253,7 +272,7 @@ function Skull Drop(pawn OldHolder, vector newVel)
 	If (Region.Zone.bWaterZone)
 		Velocity *= 0.5;
 	bCollideWorld = true;
-	SetCollisionSize(default.CollisionRadius, default.CollisionHeight);
+	SetCollisionSize(default.SkullCollisionRadius, default.SkullCollisionHeight);
 	if (bDeleteMe)
 		return Ret;
  	if (!SetLocation(OldHolder.Location + (OldHolder.CollisionHeight - CollisionHeight)*vect(0, 0, 1)) 
@@ -287,6 +306,8 @@ function Skull Drop(pawn OldHolder, vector newVel)
 defaultproperties
 {
 	Scale=1.000000
+	SkullCollisionHeight=15.000000
+	SkullCollisionRadius=15.000000
 	PickupMessage="You pickup a Skull"
 	PickupViewMesh=Mesh'Relics.RelicSkull'
 	PickupViewScale=0.750000
@@ -300,8 +321,9 @@ defaultproperties
 	PrePivot=(X=0.000000,Y=0.000000,Z=-2.000000)
 	bMeshEnviroMap=True
 	bGameRelevant=True
-	CollisionRadius=15.000000
-	CollisionHeight=15.000000
+	CollisionRadius=0.000000
+	CollisionHeight=0.000000
+	bCollideActors=False
 	bFixedRotationDir=False
 	RotationRate=(Pitch=0,Yaw=0)
 }
