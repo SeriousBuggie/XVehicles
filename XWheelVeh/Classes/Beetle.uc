@@ -60,7 +60,6 @@ simulated function Tick(float delta)
 
 simulated function ChangeColor()
 {
-	local int i;
 	CurrentTeamColor = CurrentTeam;
 	switch (CurrentTeamColor)
 	{
