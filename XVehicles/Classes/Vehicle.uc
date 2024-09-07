@@ -1331,8 +1331,8 @@ function Timer()
 				P = PendingChangeProps[Seat];
 				PendingChangeProps[Seat] = None;
 				// reduce network usage
-				P.NetUpdateFrequency = 2;
-				P.NetPriority = 0.5;
+				P.NetUpdateFrequency = 10;
+				//P.NetPriority = 0.5;
 			}
 		}
 	}
