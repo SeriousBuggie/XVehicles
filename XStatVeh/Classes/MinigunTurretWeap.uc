@@ -152,7 +152,7 @@ defaultproperties
 	WeapSettings(0)=(FireStartOffset=(X=120.000000,Z=45.000000),RefireRate=0.150000,FireSound=Sound'XStatVeh.Attack.CybFire',bInstantHit=True,hitdamage=20,HitType="Ballistic",HitMomentum=10000.000000,HitHeavyness=2)
 	bPhysicalGunAimOnly=True
 	AnimSequence="Still"
-	Texture=Texture'XStatVeh.Skins.CybotMetal'
+	Texture=Texture'XVehicles.Skins.CybotMetal'
 	Mesh=LodMesh'CybSentinelTurret'
 	DrawScale=5.000000
 	MultiSkins(1)=Texture'XVehicles.Skins.CybotSk'

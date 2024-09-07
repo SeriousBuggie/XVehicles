@@ -124,6 +124,7 @@ defaultproperties
 	bEnableShield=True
 	ShieldLevel=0.600000
 	AnimSequence="Still"
+	Texture=Texture'XVehicles.Skins.CybotMetal'
 	Mesh=LodMesh'CybHeli'
 	DrawScale=8.000000
 	PrePivot=(X=0.000000,Y=0.000000,Z=-26.000000)

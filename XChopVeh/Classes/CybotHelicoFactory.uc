@@ -4,6 +4,7 @@ defaultproperties
 {
 	VehicleClass=Class'CybotHelico'
 	AnimSequence="BothFire"
+	Texture=Texture'XVehicles.Skins.CybotMetal'
 	Mesh=LodMesh'CybHeli'
 	DrawScale=8.000000
 	PrePivot=(X=0.000000,Y=0.000000,Z=-26.000000)

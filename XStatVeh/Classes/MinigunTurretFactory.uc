@@ -7,7 +7,7 @@ defaultproperties
 {
 	VehicleClass=Class'MinigunTurret'
 	AnimSequence="UnTransform"
-	Texture=Texture'XStatVeh.Skins.CybotMetal'
+	Texture=Texture'XVehicles.Skins.CybotMetal'
 	Mesh=LodMesh'CybSentinelGun'
 	DrawScale=5.000000
 	PrePivot=(X=0.000000,Y=0.000000,Z=3.000000)

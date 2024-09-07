@@ -39,7 +39,7 @@ defaultproperties
 	bEnableShield=True
 	ShieldLevel=0.600000
 	AnimSequence="Still"
-	Texture=Texture'XStatVeh.Skins.CybotMetal'
+	Texture=Texture'XVehicles.Skins.CybotMetal'
 	Mesh=LodMesh'CybSentinelBase'
 	DrawScale=5.000000
 	AmbientGlow=17
