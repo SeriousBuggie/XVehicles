@@ -113,7 +113,7 @@ defaultproperties
 	Health=1350
 	VehicleName="Juggernaut"
 	ExitOffset=(X=0.000000,Y=203.000000)
-	BehinViewViewOffset=(X=-250.000000,Y=0.000000,Z=150.000000)
+	BehinViewViewOffset=(X=-400.000000,Y=0.000000,Z=150.000000)
 	StartSound=Sound'JuggernautStartup'
 	EndSound=Sound'XWheelVeh.JeepSDX.JeepStop'
 	EngineSound=Sound'JuggernautIdle'
