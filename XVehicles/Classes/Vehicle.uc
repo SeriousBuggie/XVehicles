@@ -1931,18 +1931,23 @@ simulated function Tick( float Delta )
 	//Arc movement physics
 	else if (bArcMovement && !bSlopedG && Velocity.Z > Region.Zone.ZoneGravity.Z*ArcMovementScale)
 	{
-		if (Velocity.Z > Region.Zone.ZoneGravity.Z*0.25)
+		ArcRatio = Velocity.Z/FMin(-1.0, Region.Zone.ZoneGravity.Z);
+		if (ArcRatio < 0.25)
 		{
-			ArcRatio = 0;
-			ActualFloorNormal = FloorNormal;
-			ActualGVTNormal = GVTNormal;
+			ArcRatio = FMax(0.0, 0.5*(ArcRatio - 0.1));
+			if (bOldOnGround)
+			{
+				ActualFloorNormal = FloorNormal;
+				ActualGVTNormal = GVTNormal;
+			}
 		}
 		else
 		{
 			ArcRatio = FClamp((Region.Zone.ZoneGravity.Z*ArcMovementScale - Velocity.Z)/
 				FMin(-1.0, Region.Zone.ZoneGravity.Z), 0.0, 1.0);
-			ActualFloorNormal = Normal(ActualFloorNormal*8 + vector(Rotation)*GetMovementDir()*ArcRatio);
 		}
+		if (ArcRatio > 0)
+			ActualFloorNormal = Normal(ActualFloorNormal*8 + vector(Rotation)*GetMovementDir()*ArcRatio);
 		if (ActualFloorNormal == vect(0,0,0))
 			ActualFloorNormal = FloorNormal;
 		else if (ActualFloorNormal.Z <= 0.1)
@@ -1969,7 +1974,8 @@ simulated function Tick( float Delta )
 		// X dot X == VSize(X)*VSize(X)
 		if (bSlopedPhys && (Velocity dot Velocity) > 0)
 		{
-			ActualGVTNormal = Normal(ActualGVTNormal*8 + vector(Rotation)*GetMovementDir()*ArcRatio);
+			if (ArcRatio > 0)
+				ActualGVTNormal = Normal(ActualGVTNormal*8 + vector(Rotation)*GetMovementDir()*ArcRatio);
 			if (ActualGVTNormal == vect(0,0,0))
 				ActualGVTNormal = GVTNormal;
 			else if (ActualGVTNormal.Z <= 0.1)
@@ -2272,6 +2278,14 @@ simulated function bool CheckOnGround()
 					ret = True;
 					ret = ActualFloorNormal.Z >= 0.7;
 				}
+			}
+		}
+		else
+		{ // No ground - preserve old vehicle rotation in air.
+			if (bLastCheckOnGroundResult)
+			{
+				ActualFloorNormal = NormalWeightSum(0.1, ActualFloorNormal, FloorNormal);
+				ActualGVTNormal = NormalWeightSum(0.1, ActualGVTNormal, GVTNormal);
 			}
 		}
 	}
