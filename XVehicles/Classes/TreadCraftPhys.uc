@@ -179,10 +179,16 @@ local float TRadius, TreadLinSpeed;
 
 simulated function FellToGround()
 {
+    local float Scale;
+	local vector X, Y, Z;
 	if (FallingLenghtZ > 0)
 	{
 		if ((FallingLenghtZ * VehicleGravityScale) > 1500)
-			TakeImpactDamage(FallingLenghtZ*VehicleGravityScale/15,None, "FellToGround_1");
+		{
+			GetAxes(Rotation, X, Y, Z);
+			Scale = FMin(1.0, 1.0 - ActualFloorNormal dot Z);
+			TakeImpactDamage(Scale*FallingLenghtZ*VehicleGravityScale/15,None, "FellToGround_1");
+		}
 		else if ((FallingLenghtZ * VehicleGravityScale) > 120)
 			TakeImpactDamage(0,None, "FellToGround_2");
 		FallingLenghtZ = 0;
@@ -322,6 +328,8 @@ simulated function UpdateDriverInput( float Delta )
 			UpdateTreads(Delta);
 		Return;
 	}
+	if (FallingLenghtZ > 0 && ActualFloorNormal.Z > 0.65)
+		FellToGround();
 	FallingLenghtZ = 0;
 
 	if( Turning!=0 )

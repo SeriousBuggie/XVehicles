@@ -117,10 +117,16 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 
 simulated function FellToGround()
 {
+    local float Scale;
+	local vector X, Y, Z;
 	if (FallingLenghtZ > 0)
 	{
 		if ((FallingLenghtZ * VehicleGravityScale) > 1500)
-			TakeImpactDamage(FallingLenghtZ*VehicleGravityScale/15,None, "FellToGround_3");
+		{
+			GetAxes(Rotation, X, Y, Z);
+			Scale = FMin(1.0, 1.0 - ActualFloorNormal dot Z);
+			TakeImpactDamage(Scale*FallingLenghtZ*VehicleGravityScale/15,None, "FellToGround_3");
+		}
 		else if ((FallingLenghtZ * VehicleGravityScale) > 120)
 			TakeImpactDamage(0,None, "FellToGround_4");
 		FallingLenghtZ = 0;
@@ -219,6 +225,8 @@ simulated function UpdateDriverInput( float Delta )
 			FallingLenghtZ += DeAcc;
 		Return;
 	}
+	if (FallingLenghtZ > 0 && ActualFloorNormal.Z > 0.65)
+		FellToGround();
 	FallingLenghtZ = 0;
 	
 	Velocity += CalcGravityStrength(Region.Zone.ZoneGravity*(VehicleGravityScale/GroundPower), FloorNormal)*
