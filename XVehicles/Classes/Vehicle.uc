@@ -2196,9 +2196,9 @@ simulated function bool CheckOnGround()
 	local vector S, E, sHL[4],sHN[4], ePointsOffSet[4], MLoc, CrossedVect[2], GVTLoc;
 	local actor Ac[4];
 	local int b, AcCount;
-	local actor WAs, WBs, PossibleBase;
-	local vector WHL, WHN, WSt, WEnd, WExt, WZRange;
-	local bool isNotAble, ret;
+	local actor PossibleBase;
+	local vector WZRange;
+	local bool ret;
 	
 	if (Location == LastCheckOnGroundLocation && 
 		Level.TimeSeconds < LastCheckOnGroundTime + 0.2 && Mover(Base) == None)
@@ -2243,41 +2243,25 @@ simulated function bool CheckOnGround()
 				MoveSmooth(vect(0,0,-1));
 				Enable('Bump');
 				Enable('HitWall');
-				MLoc = (sHL[0] + sHL[1] + sHL[2] + sHL[3]) / 4 - 
-					(vect(0.5,0,0)*(FrontWide.X + BackWide.X) >> Rotation);
-				CrossedVect[0] = Normal(sHL[0] - sHL[3]);
-				CrossedVect[1] = Normal(sHL[1] - sHL[2]);
-				ActualGVTNormal = Normal(CrossedVect[0] cross CrossedVect[1]);
-				if (ActualGVTNormal.Z < 0)
-					ActualGVTNormal = -ActualGVTNormal;
-				GVTLoc = MLoc + ActualGVTNormal*CollisionHeight;
 				if (GVT != None)
+				{
+					MLoc = (sHL[0] + sHL[1] + sHL[2] + sHL[3]) / 4 - 
+						(vect(0.5,0,0)*(FrontWide.X + BackWide.X) >> Rotation);
+					CrossedVect[0] = Normal(sHL[0] - sHL[3]);
+					CrossedVect[1] = Normal(sHL[1] - sHL[2]);
+					ActualGVTNormal = Normal(CrossedVect[0] cross CrossedVect[1]);
+					if (ActualGVTNormal.Z < 0)
+						ActualGVTNormal = -ActualGVTNormal;
+					GVTLoc = MLoc - Normal(WZRange)*CollisionHeight;
 					GVT.PrePivot = GVTLoc - Location;
-	
-				/*isNotAble = ((sHN[0].Z > sHN[2].Z && sHN[0].Z > 0 && sHN[2].Z > 0 && (sHN[0].Z - sHN[2].Z) > 0.45
-					&& sHN[1].Z > sHN[3].Z && sHN[1].Z > 0 && sHN[3].Z > 0 && (sHN[1].Z - sHN[3].Z) > 0.45)
-						||
-					(sHN[0].Z < sHN[2].Z && sHN[0].Z > 0 && sHN[2].Z > 0 && (sHN[2].Z - sHN[0].Z) > 0.45
-					&& sHN[1].Z < sHN[3].Z && sHN[1].Z > 0 && sHN[3].Z > 0 && (sHN[3].Z - sHN[1].Z) > 0.45))
-					&& VehicleGravityScale*(Region.Zone.ZoneGravity.Z/8) < VSize(Velocity)/350;*/
-	
-				// always false :(
-				if (false && Trace(HL,HN,End,Start,False)!=None)
-				{
-					For (b=0; b<4; b++)
-					{
-						if (HN.Z - sHN[b].Z >= 0.45 && HN.Z >= 0 && sHN[b].Z >= 0)
-						//if ((HN dot sHN[b]) < 0.535)
-							isNotAble = True;
-					}
+					S = ActualGVTNormal;
+					S.Z = 0;
+					GVT.PrePivot.Z = FClamp(GVT.PrePivot.Z, -FMax(MaxObstclHeight, 
+						CollisionRadius*FMin(1.0, VSize(S)/FMax(0.707, S.Z))), 0);
 				}
 	
-				if (!isNotAble)
-				{
-					ActualFloorNormal = ActualGVTNormal;
-					ret = True;
-					ret = ActualFloorNormal.Z >= 0.7;
-				}
+				ActualFloorNormal = ActualGVTNormal;
+				ret = ActualFloorNormal.Z >= 0.7;
 			}
 		}
 		else
@@ -2293,56 +2277,23 @@ simulated function bool CheckOnGround()
 	{
 		if (bSlopedPhys && GVT != None)
 		{
-			if (true)
-			{
-				ePointsOffSet[0] = FrontWide;
-				ePointsOffSet[1] = ePointsOffSet[0];
-				ePointsOffSet[1].Y = -FrontWide.Y;
-				ePointsOffSet[2] = BackWide;
-				ePointsOffSet[3] = ePointsOffSet[2];
-				ePointsOffSet[3].Y = -BackWide.Y;
-	
-				//************************************************************************
-				//Walls climbing bug fix
-				//************************************************************************
-				WSt = Location + GVT.PrePivot;
-				WExt.X = FMax(FrontWide.Y,BackWide.Y);
-				WExt.Y = WExt.X;
-				WExt.Z = CollisionHeight - MaxObstclHeight;
-				WEnd = WSt + OldAccelD*(WExt.X + 2)*vector(Rotation);
-				WAs = Trace(WHL,WHN,WEnd,WSt,False,WExt);
-	
-				if (WAs == None)
-				{
-					if (WallHitDir == -Accel && WallHitDir!=0)
-					{
-						WEnd = WSt + WallHitDir*(WExt.X + 2)*vector(Rotation);
-						WBs = Trace(WHL,WHN,WEnd,WSt,False,WExt);
-						
-						if (WBs == None)
-						{
-							WallHitDir = 0;
-							WHN = HN;
-						}
-					}
-					else
-						WHN = HN;
-				}
-				else
-					WallHitDir = OldAccelD;
-				//************************************************************************
-				
-				WZRange.Z = -Abs(ZRange);
-				WZRange = WZRange >> Rotation;
+			ePointsOffSet[0] = FrontWide;
+			ePointsOffSet[1] = ePointsOffSet[0];
+			ePointsOffSet[1].Y = -FrontWide.Y;
+			ePointsOffSet[2] = BackWide;
+			ePointsOffSet[3] = ePointsOffSet[2];
+			ePointsOffSet[3].Y = -BackWide.Y;
+			
+			WZRange.Z = -Abs(ZRange);
+			WZRange = WZRange >> Rotation;
 
-				for (b = 0; b < 4; b++)
-				{
-					S = Location + (ePointsOffSet[b] >> Rotation);
-					E = S + WZRange;
-					Ac[b] = Trace(sHL[b], sHN[b], E, S, False);
-					if (Ac[b] != None && (sHN[b] dot WHN > 0.5) /*&& (ActualFloorNormal dot sHN[b] >= 0.3)*/)
-						AcCount++;
-				}
+			for (b = 0; b < 4; b++)
+			{
+				S = Location + (ePointsOffSet[b] >> Rotation);
+				E = S + WZRange;
+				Ac[b] = Trace(sHL[b], sHN[b], E, S, False);
+				if (Ac[b] != None)
+					AcCount++;
 			}
 	
 			if (bArcMovement && AcCount > 2)
@@ -2360,8 +2311,12 @@ simulated function bool CheckOnGround()
 				ActualGVTNormal = Normal(CrossedVect[0] cross CrossedVect[1]);
 				if (ActualGVTNormal.Z < 0)
 					ActualGVTNormal = -ActualGVTNormal;
-				GVTLoc = MLoc + ActualGVTNormal*CollisionHeight;
+				GVTLoc = MLoc - Normal(WZRange)*CollisionHeight;
 				GVT.PrePivot = GVTLoc - Location;
+				S = ActualGVTNormal;
+				S.Z = 0;
+				GVT.PrePivot.Z = FClamp(GVT.PrePivot.Z, -FMax(MaxObstclHeight, 
+					CollisionRadius*FMin(1.0, VSize(S)/FMax(0.707, S.Z))), 0);
 			}
 			else
 				ActualGVTNormal = HN;
