@@ -3761,7 +3761,12 @@ simulated function SingularBump(Actor Other)
 		
 		if (Role == ROLE_Authority && Sp > 500)
 		{
-			Dmg = (Sp - 500) / 4;
+			Dmg = (Sp - 500) / 8;
+/*
+			log(self @ Health @ Vsize(Velocity) @ "make" @ Dmg @ "damage to" @ 
+				Veh @ Veh.Health @ Vsize(Veh.Velocity) @ "via" @ Sp @ "at" $ chr(13) $ chr(10) $
+				ConsoleCommand("BackTrace"));
+// */
 			Other.TakeDamage(Dmg,RealInstigator,Location,NVelH*Mass,'Crushed');
 			TakeDamage(Dmg,RealOtherInstigator,Other.Location,NVelH*Other.Mass,'Crushed');
 		}
@@ -3787,11 +3792,11 @@ simulated function SingularBump(Actor Other)
 			{
 				Sp = VSize(NVelH) * (Mass/Other.Mass);
 				if( Sp>250 )
-					Other.TakeDamage((Sp-200)/10,RealInstigator,Location,200*Normal(Velocity)*Mass,'Crushed');
+					Other.TakeDamage((Sp-200)/20,RealInstigator,Location,200*Normal(Velocity)*Mass,'Crushed');
 		
 				Sp = VSize(NVelH) * (Other.Mass/Mass);
 				if( Sp>250 )
-					TakeDamage((Sp-200)/10,RealOtherInstigator,Other.Location,200*Normal(OtVel)*Other.Mass,'Crushed');
+					TakeDamage((Sp-200)/20,RealOtherInstigator,Other.Location,200*Normal(OtVel)*Other.Mass,'Crushed');
 			}
 	
 			NVelH = (Mass*befMyVel + Other.Mass*befOtVel) / (Mass+Other.Mass);	//Inelastic collision calculation (not the most realistic for vehicles, but good, reliable and simple enough for the main objectve)
@@ -4179,7 +4184,7 @@ function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 {
 	local bool bHadPass;
 	local int i, shldset, shldtkn;
-//	Log(self @ Level.TimeSeconds @ "TakeDamage" @ Damage @ InstigatedBy @ hitlocation @ momentum @ damageType @ InstigatedBy.DamageScaling);
+//	Log(self @ Level.TimeSeconds @ "Health" @ Health @ "TakeDamage" @ Damage @ InstigatedBy @ hitlocation @ momentum @ damageType @ InstigatedBy.DamageScaling $ chr(13) $ chr(10) $ ConsoleCommand("BackTrace"));
 
 	if (!bVehicleBlewUp && !(Level.Game != None && Level.Game.bGameEnded))
 	{
