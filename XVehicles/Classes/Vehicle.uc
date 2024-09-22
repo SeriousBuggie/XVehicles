@@ -377,7 +377,7 @@ replication
 	reliable if (Role == ROLE_Authority)
 		Driver, bDriving, Health, bVehicleBlewUp, ReplicOverlayMat, bTeamLocked, CurrentTeam, Passengers,
 		bReadyToRun, Specials, DriverGun, ServerState, bHasPassengers, SignalLightsRepl, bHeadLightInUseRepl, // new ones
-		bReplicated;
+		bReplicated, VehicleGravityScale;
 	reliable if (Role == ROLE_Authority && bNetOwner)
 		bCameraOnBehindView, MyCameraAct, WAccelRate;
 	// Functions client can call.
