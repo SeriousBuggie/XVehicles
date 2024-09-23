@@ -4,7 +4,7 @@
 class Viper expands HoverCraftPhys;
 
 /*
-#forceexec MESH  MODELIMPORT MESH=Viper MODELFILE=Z:\XV\ut3\VH_NecrisManta.psk LODSTYLE=10
+#forceexec MESH  MODELIMPORT MESH=Viper MODELFILE=Z:\XV\ut3\VH_NecrisManta_lod1.psk LODSTYLE=10
 #forceexec ANIM  IMPORT ANIM=ViperAnims ANIMFILE=Z:\XV\ut3\NecrisManta_anims.psa COMPRESS=1 MAXKEYS=999999 IMPORTSEQS=1
 #forceexec MESH ORIGIN MESH=Viper X=0 Y=0 Z=50
 #forceexec MESH  LODPARAMS MESH=Viper STRENGTH=0
