@@ -92,7 +92,8 @@ simulated static function bool IsGoodTarget(Pawn Instigator, Actor Other)
 	if (Vehicle(Other) == None || !Vehicle(Other).bCanFly)
 		return false;
 	if (Instigator == None || Instigator.PlayerReplicationInfo == None || 
-		Vehicle(Other).CurrentTeam == Instigator.PlayerReplicationInfo.Team)
+		(Instigator.PlayerReplicationInfo.TeamName != "" && 
+		Vehicle(Other).CurrentTeam == Instigator.PlayerReplicationInfo.Team))
 		return false;
 	return true;
 }
