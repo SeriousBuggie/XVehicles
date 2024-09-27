@@ -4813,10 +4813,10 @@ function PassengerLeave( byte Seat, optional bool bForcedLeave )
 			if (Bot(Passengers[Seat]) == None && (Normal(Velocity) Dot Normal(ExitVect >> Rotation)) > 0.35 && 
 				(Normal(Velocity) Dot Normal((ExitVect + vect(0,-2,0)*ExitVect.Y) >> Rotation)) <= 0.35)
 				ExitVect.Y = -ExitVect.Y;
-			if (!Passengers[Seat].SetLocation(Location+(ExitVect >> Rotation)) && !bForcedLeave)
+			if (!Passengers[Seat].Move(Location + (ExitVect >> Rotation) - Passengers[Seat].Location) && !bForcedLeave)
 			{
 				ExitVect.Y = -ExitVect.Y;
-				if (!Passengers[Seat].SetLocation(Location+(ExitVect >> Rotation)) && !bForcedLeave)
+				if (!Passengers[Seat].Move(Location + (ExitVect >> Rotation) - Passengers[Seat].Location) && !bForcedLeave)
 				{
 					ChangeCollision(Passengers[Seat], true, Seat + 1);
 					if (PlayerPawn(Passengers[Seat]) != None)
