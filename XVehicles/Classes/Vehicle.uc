@@ -2232,6 +2232,10 @@ simulated function bool CheckOnGround()
 				S = Location + (ePointsOffSet[b] >> Rotation);
 				E = S + WZRange;
 				Ac[b] = Trace(sHL[b], sHN[b], E, S, False);
+				if (Abs(int(sHL[b].X)) > 900100200.0 || // check if got nan as HitLocation
+					Abs(int(sHL[b].Y)) > 900100200.0 || // such can happen if trace start already inside mover
+					Abs(int(sHL[b].Z)) > 900100200.0)
+					Ac[b] = None;
 				if (Ac[b] != None)
 					AcCount++;
 			}
@@ -2292,6 +2296,10 @@ simulated function bool CheckOnGround()
 				S = Location + (ePointsOffSet[b] >> Rotation);
 				E = S + WZRange;
 				Ac[b] = Trace(sHL[b], sHN[b], E, S, False);
+				if (Abs(int(sHL[b].X)) > 900100200.0 || // check if got nan as HitLocation
+					Abs(int(sHL[b].Y)) > 900100200.0 || // such can happen if trace start already inside mover
+					Abs(int(sHL[b].Z)) > 900100200.0)
+					Ac[b] = None;
 				if (Ac[b] != None)
 					AcCount++;
 			}
