@@ -21,10 +21,13 @@ var byte CurrentTeamColor;
 simulated function Tick(float delta)
 {
 	Super.Tick(delta);
-	if (CurrentTeamColor != CurrentTeam)
-		ChangeColor();
-	if (bInvis && Level.TimeSeconds - InvisTime >= 13.0)
-		InvisOff();
+	if (Role == ROLE_Authority)
+	{
+		if (CurrentTeamColor != CurrentTeam)
+			ChangeColor();
+		if (bInvis && Level.TimeSeconds - InvisTime >= 13.0)
+			InvisOff();
+	}
 }
 
 singular function DriverLeft( optional bool bForcedLeave, optional coerce string Reason )
