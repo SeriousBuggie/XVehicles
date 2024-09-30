@@ -129,7 +129,12 @@ simulated function Tick(float delta)
 				if (Victim != None && (Victim.bBlockActors || Mover(Victim) != None || LevelInfo(Victim) != None))
 				{
 					if (Pawn(Victim) != None || Carcass(Victim) != None)
-						Victim.TakeDamage(1000, Instigator, HitLocation, Velocity * 100, 'Crushed');
+					{
+						Angle = 1000; // Damage
+						if (IsSameTeam(Pawn(Victim)))
+							Angle = 0;
+						Victim.TakeDamage(Angle, Instigator, HitLocation, Velocity * 100, 'Crushed');
+					}
 					else
 					{
 						BladesNotBroken = false;
