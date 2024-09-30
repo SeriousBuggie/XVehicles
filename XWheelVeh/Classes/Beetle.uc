@@ -140,7 +140,7 @@ defaultproperties
 	DamageGFX(0)=(bHaveThisGFX=True,bHaveFlames=True,DmgFXOffset=(X=-105.000000,Z=-3.500000),FXRange=13)
 	ExplosionGFX(0)=(bHaveThisExplFX=True,ExplSize=5.550000)
 	ExplosionGFX(1)=(bHaveThisExplFX=True,ExplSize=1.875000,AttachName="BeetleWheel")
-	ExplosionGFX(2)=(bHaveThisExplFX=True,ExplSize=1.875000,AttachName="JSDXTurret")
+	ExplosionGFX(2)=(bHaveThisExplFX=True,ExplSize=1.875000,AttachName="BeetleTurret")
 	UseExplosionSnd2=False
 	WreckPartColHeight=48.000000
 	bEnableShield=True
