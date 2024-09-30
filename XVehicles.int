@@ -18,6 +18,7 @@ Object=(Name=XChopVeh.XHeli2LinkCraft,Class=Class,MetaClass=Engine.Mutator,Descr
 Object=(Name=XWheelVeh.XJeepSDX2Beetle,Class=Class,MetaClass=Engine.Mutator,Description="XJeepSDX2Beetle,Replace JeepSDX with Beetle")
 Object=(Name=XHoverVeh.XManta2Viper,Class=Class,MetaClass=Engine.Mutator,Description="XManta2Viper,Replace Manta with Viper")
 Object=(Name=XHoverVeh.XManta2Ghost,Class=Class,MetaClass=Engine.Mutator,Description="XManta2Ghost,Replace Manta with Ghost")
+Object=(Name=XWheelVeh.XJeepSDX2Scorpion,Class=Class,MetaClass=Engine.Mutator,Description="XJeepSDX2Scorpion,Replace JeepSDX with Scorpion")
 
 Object=(Name=XVehicles.VehicleCTFGame,Class=Class,MetaClass=Botpack.TournamentGameInfo)
 Preferences=(Caption="Vehicle Capture the Flag",Parent="Game Types",Class=XVehicles.VehicleCTFGame,Immediate=True)
