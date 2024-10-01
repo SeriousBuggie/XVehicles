@@ -54,101 +54,122 @@ class Scorpion expands WheeledCarPhys;
 var byte CurrentTeamColor;
 var bool BladesNotBroken;
 var bool BladesPrev;
+var float AnimFrameRep;
+
+replication
+{
+	unreliable if (Role == ROLE_Authority)
+		AnimFrameRep;
+}
 
 simulated function Tick(float delta)
+{
+	Super.Tick(delta);
+	if (CurrentTeamColor != CurrentTeam)
+		ChangeColor();
+	if (Role == ROLE_Authority && (BladesNotBroken || AnimFrame > 0.0))
+		TickBlades(delta);
+	else if (Role < ROLE_Authority)
+	{
+		AnimFrame = AnimFrameRep;
+		if (GVT != None)
+		{
+			GVT.AnimFrame = AnimFrameRep;
+			GVT.AnimSequence = AnimSequence;
+		}
+	}
+}
+
+function TickBlades(float delta)
 {
 	local vector HitLocation, HitNormal, X, Y, Z, Start, End;
 	local actor Victim;
 	local float Dir, NewAnimFrame, Angle;
 	local int i;
 	
-	Super.Tick(delta);
-	if (CurrentTeamColor != CurrentTeam)
-		ChangeColor();
-	if (Role == ROLE_Authority && (BladesNotBroken || AnimFrame > 0.0))
+	Dir = -2.0;
+	if (BladesNotBroken && Driver != None)
 	{
-		Dir = -2.0;
-		if (BladesNotBroken && Driver != None)
-		{
-			if (PlayerPawn(Driver) == None)
-			{ // AI logic for use Blades
-				if (Driver.Enemy != None && Driver.Enemy.bBlockActors)
+		if (PlayerPawn(Driver) == None)
+		{ // AI logic for use Blades
+			if (Driver.Enemy != None && Driver.Enemy.bBlockActors)
+			{
+				HitLocation = Driver.Enemy.Location - Location;
+				if (VSize(HitLocation) <= 800.0 && HitLocation dot Velocity > 0.0)
 				{
-					HitLocation = Driver.Enemy.Location - Location;
-					if (VSize(HitLocation) <= 800.0 && HitLocation dot Velocity > 0.0)
+					GetAxes(Rotation, X, Y, Z);
+					if (Abs(HitLocation dot Y) < 200.0)
 					{
-						GetAxes(Rotation, X, Y, Z);
-						if (Abs(HitLocation dot Y) < 200.0)
+						End = Location + 200.0*Y + 11.5*Z;
+						if (FastTrace(End) && FastTrace(End - 400.0*Y))
 						{
-							End = Location + 200.0*Y + 11.5*Z;
-							if (FastTrace(End) && FastTrace(End - 400.0*Y))
+							Victim = Trace(HitLocation, HitNormal, End - 100.0*Y, Location, true, vect(100, 100, 0));
+							if (Victim == None || Pawn(Victim) != None)
 							{
-								Victim = Trace(HitLocation, HitNormal, End - 100.0*Y, Location, true, vect(100, 100, 0));
+								Victim = Trace(HitLocation, HitNormal, End - 300.0*Y, Location, true, vect(100, 100, 0));
 								if (Victim == None || Pawn(Victim) != None)
-								{
-									Victim = Trace(HitLocation, HitNormal, End - 300.0*Y, Location, true, vect(100, 100, 0));
-									if (Victim == None || Pawn(Victim) != None)
-										Dir = 2.0;
-								}
+									Dir = 2.0;
 							}
 						}
 					}
-				}	
-			}
-			else if (Driver.bAltFire != 0)
-				Dir = 2.0;
-			if (!BladesPrev && Dir > 0.0)
-				AnimFrame = 0.0;
+				}
+			}	
 		}
-		NewAnimFrame = FClamp(AnimFrame + Dir*delta, 0.0, 0.94); // 16/17
-		if (BladesNotBroken && AnimFrame != NewAnimFrame)
+		else if (Driver.bAltFire != 0)
+			Dir = 2.0;
+		if (!BladesPrev && Dir > 0.0)
+			AnimFrame = 0.0;
+	}
+	NewAnimFrame = FClamp(AnimFrame + Dir*delta, 0.0, 0.94); // 16/17
+	if (BladesNotBroken && AnimFrame != NewAnimFrame)
+	{
+		if (AnimFrame == 0.0)
+			PlaySound(Sound'Shing1', SLOT_Misc, 2);
+		else if (Dir < 0.0 && BladesPrev)
+			PlaySound(Sound'Shing2', SLOT_Misc, 2);
+	}
+	BladesPrev = Dir > 0.0;
+	AnimFrameRep = NewAnimFrame;
+	AnimFrame = NewAnimFrame;
+	if (GVT != None)
+	{
+		GVT.AnimFrame = NewAnimFrame;
+		GVT.AnimSequence = AnimSequence;
+	}
+	if (BladesNotBroken && AnimFrame >= 0.33)
+	{
+		GetAxes(Rotation, X, Y, Z);
+		Angle = (FMin(0.106, AnimFrame - 0.354))*19.634954; // 204800.0*PI/32768;
+		Dir = 105.5 + 80.0*Sin(Angle);
+		End = Location - (59.5 - 80.0*Cos(Angle))*X - Dir*Y + 11.5*Z;
+		
+		Start = Location - 53.0*X - 64.5*Y + 11.5*Z;
+		for (i = 0; i < 2; i++)
 		{
-			if (AnimFrame == 0.0)
-				PlaySound(Sound'Shing1', SLOT_None, 2.0);
-			else if (Dir < 0.0 && BladesPrev)
-				PlaySound(Sound'Shing2', SLOT_None, 2.0);
-		}
-		BladesPrev = Dir > 0.0;
-		AnimFrame = NewAnimFrame;
-		if (GVT != None)
-		{
-			GVT.AnimFrame = NewAnimFrame;
-			GVT.AnimSequence = AnimSequence;
-		}
-		if (BladesNotBroken && AnimFrame >= 0.33)
-		{
-			GetAxes(Rotation, X, Y, Z);
-			Angle = (FMin(0.106, AnimFrame - 0.354))*19.634954; // 204800.0*PI/32768;
-			Dir = 105.5 + 80.0*Sin(Angle);
-			End = Location - (59.5 - 80.0*Cos(Angle))*X - Dir*Y + 11.5*Z;
-			
-			Start = Location - 53.0*X - 64.5*Y + 11.5*Z;
-			for (i = 0; i < 2; i++)
+			Victim = Trace(HitLocation, HitNormal, End, Start);
+			if (Victim != None && (Victim.bBlockActors || Mover(Victim) != None || LevelInfo(Victim) != None))
 			{
-				Victim = Trace(HitLocation, HitNormal, End, Start);
-				if (Victim != None && (Victim.bBlockActors || Mover(Victim) != None || LevelInfo(Victim) != None))
+				if (Pawn(Victim) != None || Carcass(Victim) != None)
 				{
-					if (Pawn(Victim) != None || Carcass(Victim) != None)
-					{
-						Angle = 1000; // Damage
-						if (IsSameTeam(Pawn(Victim)))
-							Angle = 0;
-						Victim.TakeDamage(Angle, Instigator, HitLocation, Velocity * 100, 'Crushed');
-					}
-					else
-					{
-						BladesNotBroken = false;
-						PlaySound(Sound'RVBladeBreakOff', SLOT_None, 2.0);
-					}
+					Angle = 1000; // Damage
+					if (IsSameTeam(Pawn(Victim)))
+						Angle = 0;
+					Victim.TakeDamage(Angle, Instigator, HitLocation, Velocity * 100, 'Crushed');
 				}
-				if (i == 0)
+				else
 				{
-					End += 2*Dir*Y;
-					Start += 129*Y;
+					BladesNotBroken = false;
+					PlaySound(Sound'RVBladeBreakOff', SLOT_Misc, 2);
 				}
+			}
+			if (i == 0)
+			{
+				End += 2*Dir*Y;
+				Start += 129*Y;
 			}
 		}
 	}
+
 }
 
 simulated function ChangeColor()
