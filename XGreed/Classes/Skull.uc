@@ -3,6 +3,14 @@
 //=============================================================================
 class Skull expands TournamentPickup;
 
+/*
+#forceexec MESH  MODELIMPORT MESH=Skull MODELFILE=Z:\XV\greed\Skull_118.psk LODSTYLE=10
+#forceexec MESH ORIGIN MESH=Skull X=0 Y=-3 Z=4 YAW=128 PITCH=0 ROLL=-11
+#forceexec MESH  LODPARAMS MESH=Skull STRENGTH=0
+#forceexec MESHMAP   SCALE MESHMAP=Skull X=0.8 Y=0.8 Z=0.8
+#forceexec MESHMAP SETTEXTURE MESHMAP=Skull NUM=0 TEXTURE=Greenshield
+// */
+
 var int Amount;
 var float Scale;
 var(Collision) float SkullCollisionHeight, SkullCollisionRadius;
@@ -313,12 +321,9 @@ defaultproperties
 	PickupViewScale=0.750000
 	MaxDesireability=9999999562023526247432192.000000
 	PickupSound=Sound'SkullPickup'
-	AnimSequence="Bob"
-	AnimFrame=0.500000
 	Texture=FireTexture'UnrealShare.Belt_fx.ShieldBelt.Greenshield'
-	Mesh=Mesh'Relics.RelicSkull'
+	Mesh=SkeletalMesh'Skull'
 	DrawScale=0.750000
-	PrePivot=(X=0.000000,Y=0.000000,Z=-2.000000)
 	bMeshEnviroMap=True
 	bGameRelevant=True
 	CollisionRadius=0.000000
