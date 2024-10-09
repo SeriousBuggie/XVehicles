@@ -5,9 +5,9 @@ class Skull expands TournamentPickup;
 
 /*
 #forceexec MESH  MODELIMPORT MESH=Skull MODELFILE=Z:\XV\greed\Skull_118.psk LODSTYLE=10
-#forceexec MESH ORIGIN MESH=Skull X=0 Y=-3 Z=4 YAW=128 PITCH=0 ROLL=-11
+#forceexec MESH ORIGIN MESH=Skull X=0 Y=-3 Z=4 YAW=-64 PITCH=0 ROLL=-11
 #forceexec MESH  LODPARAMS MESH=Skull STRENGTH=0
-#forceexec MESHMAP   SCALE MESHMAP=Skull X=0.8 Y=0.8 Z=0.8
+#forceexec MESHMAP   SCALE MESHMAP=Skull X=0.82 Y=0.82 Z=0.82
 #forceexec MESHMAP SETTEXTURE MESHMAP=Skull NUM=0 TEXTURE=Greenshield
 // */
 
@@ -317,7 +317,7 @@ defaultproperties
 	SkullCollisionHeight=15.000000
 	SkullCollisionRadius=15.000000
 	PickupMessage="You pickup a Skull"
-	PickupViewMesh=Mesh'Relics.RelicSkull'
+	PickupViewMesh=SkeletalMesh'Skull'
 	PickupViewScale=0.750000
 	MaxDesireability=9999999562023526247432192.000000
 	PickupSound=Sound'SkullPickup'
