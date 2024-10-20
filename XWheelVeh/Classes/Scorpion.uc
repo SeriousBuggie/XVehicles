@@ -169,7 +169,6 @@ function TickBlades(float delta)
 			}
 		}
 	}
-
 }
 
 simulated function ChangeColor()

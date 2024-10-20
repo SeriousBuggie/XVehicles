@@ -2437,9 +2437,17 @@ simulated function UpdateDriverPos()
 		R.Yaw = MyCameraAct.GunAttachM.TurretYaw;
 	ResetPawn(Driver, R, DWeapon);
 }
-simulated function UpdatePassengerPos()
+function int GetNextFreeSeat(int start)
 {
 	local int i;
+	for (i = Arraycount(Passengers) - 1; i > start; i--)
+		if (PassengerSeats[i].bIsAvailable && PassengerSeats[i].PGun != None && Passengers[i] == None)
+			return i;
+	return -1;
+}
+simulated function UpdatePassengerPos()
+{
+	local int i, NextFreeSeat;
 	local rotator R;
 	local bool bForceExit;
 	local Bot Bot;
@@ -2466,7 +2474,10 @@ simulated function UpdatePassengerPos()
 			if (Level.NetMode < NM_Client && Bot(Passengers[i]) != None)
 			{
 				Bot = Bot(Passengers[i]);
-				if ((Bot.PlayerReplicationInfo.HasFlag != None && PlayerPawn(Driver) == None) ||
+				NextFreeSeat = GetNextFreeSeat(i);
+				if (NextFreeSeat != -1)
+					ChangeSeat(NextFreeSeat + 1, true, i);
+				else if ((Bot.PlayerReplicationInfo.HasFlag != None && PlayerPawn(Driver) == None) ||
 					(Driver == None && (WaitForDriver < Level.TimeSeconds || LastDriver == None || LastDriver == Bot ||
 					DriverWeapon(LastDriver.Weapon) != None ||
 					(Bot(LastDriver) != None && VSize(LastDriver.Location - Location) > 1000) ||
@@ -4716,19 +4727,19 @@ simulated function bool HasPassengers()
 	bHasPassengers = false;
 	Return False;
 }
-function bool HasFreePassengerSeat( optional out byte SeatNum )
+function bool HasFreePassengerSeat(optional out byte SeatNum)
 {
 	local int i;
 
-	For( i=0; i<ArrayCount(PassengerSeats); i++ )
+	for (i = ArrayCount(PassengerSeats) - 1; i >= 0; i--)
 	{
-		if( PassengerSeats[i].bIsAvailable && Passengers[i]==None )
+		if (PassengerSeats[i].bIsAvailable && Passengers[i] == None)
 		{
 			SeatNum = i;
-			Return True;
+			return true;
 		}
 	}
-	Return False;
+	return false;
 }
 function bool PassengerSeatAvailable( byte SNum )
 {

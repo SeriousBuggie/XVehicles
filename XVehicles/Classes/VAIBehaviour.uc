@@ -23,6 +23,7 @@ function float GetVehAIRating( Pawn Seeker )
 {
 	local float ret;
 	local bool bLockedAndLoaded;
+	local byte SeatNum;
 //	log(VehicleOwner @ "GetVehAIRating1" @ Seeker);
 	if (VehicleOwner.Driver == None && Level.TimeSeconds - VehicleOwner.LastFix <= 5 && 
 		Seeker.PlayerReplicationInfo != None && Seeker.PlayerReplicationInfo.Team == VehicleOwner.CurrentTeam &&
@@ -34,7 +35,8 @@ function float GetVehAIRating( Pawn Seeker )
 //	log(VehicleOwner @ "GetVehAIRating3" @ Seeker);
 	if (VehicleOwner.HealthTooLowFor(Seeker) || VehicleOwner.NeedStop(Seeker) || !VehicleOwner.CrewFit(Seeker))
 		return -1;
-	if (VehicleOwner.Driver != None && !VehicleOwner.HasFreePassengerSeat())
+	SeatNum = 255;
+	if (VehicleOwner.Driver != None && !VehicleOwner.HasFreePassengerSeat(SeatNum))
 		return -1;
 //	log(VehicleOwner @ "GetVehAIRating4" @ Seeker);
 	ret = VehicleOwner.AIRating*VehicleOwner.Health/VehicleOwner.Default.Health;
@@ -52,7 +54,7 @@ function float GetVehAIRating( Pawn Seeker )
 		else 
 		{
 			// stop use second seat, if this take gun from non-human driver
-			if (VehicleOwner.DriverGun == None && VehicleOwner.Driver != None && 
+			if (SeatNum == 0 && VehicleOwner.DriverGun == None && VehicleOwner.Driver != None && 
 				(PlayerPawn(VehicleOwner.Driver) == None || Domination(Level.Game) != None))
 				return 0.0001;
 			if (HasFlag(Seeker.Enemy) || HasFlag(Seeker.FaceTarget) ||

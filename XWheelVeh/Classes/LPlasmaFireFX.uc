@@ -13,8 +13,10 @@ replication
 
 simulated function Tick(float DeltaTime)
 {
-	DrawScale = LifeSpan * Default.DrawScale / Default.LifeSpan;
-	ScaleGlow = LifeSpan * Default.ScaleGlow / Default.LifeSpan;
+	local float Scale;
+	Scale = LifeSpan / Default.LifeSpan;
+	DrawScale = Default.DrawScale * Scale;
+	ScaleGlow = Default.ScaleGlow * Scale;
 	if (Level.NetMode != NM_DedicatedServer && Owner != None)
 		PrePivot = PrePivotRel >> Owner.Rotation;
 }
