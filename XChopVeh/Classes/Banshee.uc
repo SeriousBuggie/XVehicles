@@ -5,7 +5,7 @@ class Banshee expands ChopperPhys;
 
 /*
 #forceexec MESH  MODELIMPORT MESH=Banshee MODELFILE=Z:\XV\Halo\Banshee2_.psk LODSTYLE=10
-#forceexec MESH ORIGIN MESH=Banshee X=0 Y=0 Z=0
+#forceexec MESH ORIGIN MESH=Banshee X=0 Y=0 Z=55
 #forceexec MESH  LODPARAMS MESH=Banshee STRENGTH=0
 #forceexec MESHMAP   SCALE MESHMAP=Banshee X=1 Y=1 Z=1
 

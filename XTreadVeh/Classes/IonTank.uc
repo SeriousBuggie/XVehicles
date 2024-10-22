@@ -5,7 +5,7 @@ class IonTank expands TreadCraftPhys;
 
 /*
 #forceexec MESH  MODELIMPORT MESH=IonTank MODELFILE=Z:\XV\AS\IonTankChassisSimple.psk LODSTYLE=10
-#forceexec MESH ORIGIN MESH=IonTank X=0 Y=0 Z=0
+#forceexec MESH ORIGIN MESH=IonTank X=0 Y=0 Z=79.1
 #forceexec MESH  LODPARAMS MESH=IonTank STRENGTH=0
 #forceexec MESHMAP   SCALE MESHMAP=IonTank X=0.9 Y=0.9 Z=0.9
 
@@ -16,7 +16,7 @@ class IonTank expands TreadCraftPhys;
 
 /*
 #forceexec MESH  MODELIMPORT MESH=IonTankCanon MODELFILE=Z:\XV\AS\IonTankTurretSimple_.psk LODSTYLE=10
-#forceexec MESH ORIGIN MESH=IonTankCanon X=0 Y=0 Z=0
+#forceexec MESH ORIGIN MESH=IonTankCanon X=0 Y=0 Z=155
 #forceexec MESH  LODPARAMS MESH=IonTankCanon STRENGTH=0
 #forceexec MESHMAP   SCALE MESHMAP=IonTankCanon X=0.9 Y=0.9 Z=0.9
 
@@ -25,7 +25,7 @@ class IonTank expands TreadCraftPhys;
 
 /*
 #forceexec MESH  MODELIMPORT MESH=IonTankCanonPitch MODELFILE=Z:\XV\AS\IonTankTurretSimpleGun.psk LODSTYLE=10
-#forceexec MESH ORIGIN MESH=IonTankCanonPitch X=0 Y=0 Z=0
+#forceexec MESH ORIGIN MESH=IonTankCanonPitch X=12 Y=0 Z=146
 #forceexec MESH  LODPARAMS MESH=IonTankCanonPitch STRENGTH=0
 #forceexec MESHMAP   SCALE MESHMAP=IonTankCanonPitch X=0.9 Y=0.9 Z=0.9
 
@@ -40,7 +40,7 @@ class IonTank expands TreadCraftPhys;
 
 /*
 #forceexec MESH  MODELIMPORT MESH=IonTankMGRot MODELFILE=Z:\XV\AS\IONTankMachineGun_.psk LODSTYLE=10
-#forceexec MESH ORIGIN MESH=IonTankMGRot X=0 Y=0 Z=0
+#forceexec MESH ORIGIN MESH=IonTankMGRot X=0 Y=0 Z=10
 #forceexec MESH  LODPARAMS MESH=IonTankMGRot STRENGTH=0
 #forceexec MESHMAP   SCALE MESHMAP=IonTankMGRot X=0.9 Y=0.9 Z=0.9
 
@@ -49,7 +49,7 @@ class IonTank expands TreadCraftPhys;
 
 /*
 #forceexec MESH  MODELIMPORT MESH=IonTankMGun MODELFILE=Z:\XV\AS\IONTankMachineGunGun.psk LODSTYLE=10
-#forceexec MESH ORIGIN MESH=IonTankMGun X=0 Y=0 Z=0
+#forceexec MESH ORIGIN MESH=IonTankMGun X=19 Y=0 Z=26
 #forceexec MESH  LODPARAMS MESH=IonTankMGun STRENGTH=0
 #forceexec MESHMAP   SCALE MESHMAP=IonTankMGun X=0.9 Y=0.9 Z=0.9
 

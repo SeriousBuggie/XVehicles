@@ -5,9 +5,9 @@ class TankScorpion expands TreadCraftPhys;
 
 /*
 #forceexec MESH  MODELIMPORT MESH=TankScorpion MODELFILE=Z:\XV\Halo\SCORPION_2.psk LODSTYLE=10
-#forceexec MESH ORIGIN MESH=TankScorpion X=0 Y=0 Z=0 YAW=-64 PITCH=0 ROLL=64
+#forceexec MESH ORIGIN MESH=TankScorpion X=0 Y=33 Z=22 YAW=-64 PITCH=0 ROLL=64
 #forceexec MESH  LODPARAMS MESH=TankScorpion STRENGTH=0
-#forceexec MESHMAP   SCALE MESHMAP=TankScorpion X=1 Y=1 Z=1
+#forceexec MESHMAP   SCALE MESHMAP=TankScorpion X=0.72 Y=0.72 Z=0.72
 
 #forceexec MESHMAP SETTEXTURE MESHMAP=TankScorpion NUM=0 TEXTURE=TankScorpion
 #forceexec MESHMAP SETTEXTURE MESHMAP=TankScorpion NUM=1 TEXTURE=ETread01
@@ -16,18 +16,18 @@ class TankScorpion expands TreadCraftPhys;
 
 /*
 #forceexec MESH  MODELIMPORT MESH=TankScorpionCanon MODELFILE=Z:\XV\Halo\Scorpion_T_.psk LODSTYLE=10
-#forceexec MESH ORIGIN MESH=TankScorpionCanon X=0 Y=0 Z=0 YAW=-64 PITCH=0 ROLL=64
+#forceexec MESH ORIGIN MESH=TankScorpionCanon X=0 Y=44 Z=0 YAW=-64 PITCH=0 ROLL=64
 #forceexec MESH  LODPARAMS MESH=TankScorpionCanon STRENGTH=0
-#forceexec MESHMAP   SCALE MESHMAP=TankScorpionCanon X=1 Y=1 Z=1
+#forceexec MESHMAP   SCALE MESHMAP=TankScorpionCanon X=0.72 Y=0.72 Z=0.72
 
 #forceexec MESHMAP SETTEXTURE MESHMAP=TankScorpionCanon NUM=0 TEXTURE=TankScorpion
 // */
 
 /*
 #forceexec MESH  MODELIMPORT MESH=TankScorpionCanonPitch MODELFILE=Z:\XV\Halo\Scorpion_T_gun.psk LODSTYLE=10
-#forceexec MESH ORIGIN MESH=TankScorpionCanonPitch X=0 Y=0 Z=0 YAW=-64 PITCH=0 ROLL=64
+#forceexec MESH ORIGIN MESH=TankScorpionCanonPitch X=0 Y=67.5 Z=18 YAW=-64 PITCH=0 ROLL=64
 #forceexec MESH  LODPARAMS MESH=TankScorpionCanonPitch STRENGTH=0
-#forceexec MESHMAP   SCALE MESHMAP=TankScorpionCanonPitch X=1 Y=1 Z=1
+#forceexec MESHMAP   SCALE MESHMAP=TankScorpionCanonPitch X=0.72 Y=0.72 Z=0.72
 
 #forceexec MESHMAP SETTEXTURE MESHMAP=TankScorpionCanonPitch NUM=0 TEXTURE=TankScorpion
 // */

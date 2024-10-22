@@ -5,7 +5,7 @@ class Juggernaut expands WheeledCarPhys;
 
 /*
 #forceexec MESH  MODELIMPORT MESH=Juggernaut MODELFILE=Z:\XV\XMP\Juggernaut_chasis.psk LODSTYLE=10
-#forceexec MESH ORIGIN MESH=Juggernaut X=0 Y=0 Z=0 YAW=0 PITCH=0 ROLL=0
+#forceexec MESH ORIGIN MESH=Juggernaut X=0 Y=0 Z=10 YAW=0 PITCH=0 ROLL=0
 #forceexec MESH  LODPARAMS MESH=Juggernaut STRENGTH=0
 #forceexec MESHMAP   SCALE MESHMAP=Juggernaut X=0.55 Y=0.55 Z=0.55
 #forceexec MESHMAP SETTEXTURE MESHMAP=Juggernaut NUM=0 TEXTURE=JuggernautNone
@@ -13,7 +13,7 @@ class Juggernaut expands WheeledCarPhys;
 
 /*
 #forceexec MESH  MODELIMPORT MESH=JuggernautWheel MODELFILE=Z:\XV\XMP\Juggernaut_Wheel.psk LODSTYLE=10
-#forceexec MESH ORIGIN MESH=JuggernautWheel X=0 Y=0 Z=0 YAW=0 PITCH=0 ROLL=0
+#forceexec MESH ORIGIN MESH=JuggernautWheel X=0 Y=-31.5 Z=0 YAW=0 PITCH=0 ROLL=0
 #forceexec MESH  LODPARAMS MESH=JuggernautWheel STRENGTH=0
 #forceexec MESHMAP   SCALE MESHMAP=JuggernautWheel X=0.55 Y=0.55 Z=0.55
 #forceexec MESHMAP SETTEXTURE MESHMAP=JuggernautWheel NUM=0 TEXTURE=JuggernautNone
@@ -21,7 +21,7 @@ class Juggernaut expands WheeledCarPhys;
 
 /*
 #forceexec MESH  MODELIMPORT MESH=JuggernautGun MODELFILE=Z:\XV\XMP\JuggernautGun.psk LODSTYLE=10
-#forceexec MESH ORIGIN MESH=JuggernautGun X=0 Y=0 Z=0 YAW=0 PITCH=0 ROLL=0
+#forceexec MESH ORIGIN MESH=JuggernautGun X=80 Y=0 Z=0 YAW=0 PITCH=0 ROLL=0
 #forceexec MESH  LODPARAMS MESH=JuggernautGun STRENGTH=0
 #forceexec MESHMAP   SCALE MESHMAP=JuggernautGun X=0.55 Y=0.55 Z=0.55
 #forceexec MESHMAP SETTEXTURE MESHMAP=JuggernautGun NUM=0 TEXTURE=JuggernautNone

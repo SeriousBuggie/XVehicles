@@ -5,9 +5,9 @@ class LinkCraft expands ChopperPhys;
 
 /*
 #forceexec MESH  MODELIMPORT MESH=LinkCraft MODELFILE=Z:\XV\AS\LinkBody_.psk LODSTYLE=10
-#forceexec MESH ORIGIN MESH=LinkCraft X=0 Y=0 Z=0
+#forceexec MESH ORIGIN MESH=LinkCraft X=100 Y=0 Z=200
 #forceexec MESH  LODPARAMS MESH=LinkCraft STRENGTH=0
-#forceexec MESHMAP   SCALE MESHMAP=LinkCraft X=1 Y=1 Z=1
+#forceexec MESHMAP   SCALE MESHMAP=LinkCraft X=0.25 Y=0.25 Z=0.25
 
 #forceexec MESHMAP SETTEXTURE MESHMAP=LinkCraft NUM=0 TEXTURE=LinkTurret_skin2
 #forceexec MESHMAP SETTEXTURE MESHMAP=LinkCraft NUM=1 TEXTURE=LinkTurret_skin1

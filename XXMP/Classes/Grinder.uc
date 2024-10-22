@@ -47,7 +47,7 @@ class Grinder expands WheeledCarPhys;
 
 /*
 #forceexec MESH  MODELIMPORT MESH=GrinderRotor MODELFILE=Z:\XV\GrinderRotor.psk LODSTYLE=10
-#forceexec MESH ORIGIN MESH=GrinderRotor X=0 Y=0 Z=0 YAW=0 PITCH=0 ROLL=0
+#forceexec MESH ORIGIN MESH=GrinderRotor X=0 Y=0 Z=0 YAW=0 PITCH=64 ROLL=0
 #forceexec MESH  LODPARAMS MESH=GrinderRotor STRENGTH=0
 #forceexec MESHMAP   SCALE MESHMAP=GrinderRotor X=0.65 Y=0.65 Z=0.65
 #forceexec MESHMAP SETTEXTURE MESHMAP=GrinderRotor NUM=0 TEXTURE=GrinderNone

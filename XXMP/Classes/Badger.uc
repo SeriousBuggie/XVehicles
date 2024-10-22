@@ -5,7 +5,7 @@ class Badger expands WheeledCarPhys;
 
 /*
 #forceexec MESH  MODELIMPORT MESH=Badger MODELFILE=Z:\XV\Badger\BadgerChassis_.psk LODSTYLE=10
-#forceexec MESH ORIGIN MESH=Badger X=0 Y=0 Z=0 YAW=0 PITCH=0 ROLL=0
+#forceexec MESH ORIGIN MESH=Badger X=0 Y=0 Z=70 YAW=0 PITCH=0 ROLL=0
 #forceexec MESH  LODPARAMS MESH=Badger STRENGTH=0
 #forceexec MESHMAP   SCALE MESHMAP=Badger X=1 Y=1 Z=1
 #forceexec MESHMAP SETTEXTURE MESHMAP=Badger NUM=0 TEXTURE=BadgerRed
@@ -29,7 +29,7 @@ class Badger expands WheeledCarPhys;
 
 /*
 #forceexec MESH  MODELIMPORT MESH=BadgerGun MODELFILE=Z:\XV\Badger\BadgerTurretGun.psk LODSTYLE=10
-#forceexec MESH ORIGIN MESH=BadgerGun X=0 Y=0 Z=0 YAW=0 PITCH=0 ROLL=0
+#forceexec MESH ORIGIN MESH=BadgerGun X=36 Y=0 Z=24 YAW=0 PITCH=0 ROLL=0
 #forceexec MESH  LODPARAMS MESH=BadgerGun STRENGTH=0
 #forceexec MESHMAP   SCALE MESHMAP=BadgerGun X=1 Y=1 Z=1
 #forceexec MESHMAP SETTEXTURE MESHMAP=BadgerGun NUM=0 TEXTURE=BadgerRed
@@ -37,7 +37,7 @@ class Badger expands WheeledCarPhys;
 
 /*
 #forceexec MESH  MODELIMPORT MESH=BadgerTurret MODELFILE=Z:\XV\Badger\BadgerTurret_.psk LODSTYLE=10
-#forceexec MESH ORIGIN MESH=BadgerTurret X=0 Y=0 Z=0 YAW=0 PITCH=0 ROLL=0
+#forceexec MESH ORIGIN MESH=BadgerTurret X=0 Y=0 Z=30 YAW=0 PITCH=0 ROLL=0
 #forceexec MESH  LODPARAMS MESH=BadgerTurret STRENGTH=0
 #forceexec MESHMAP   SCALE MESHMAP=BadgerTurret X=1 Y=1 Z=1
 #forceexec MESHMAP SETTEXTURE MESHMAP=BadgerTurret NUM=0 TEXTURE=BadgerRed
@@ -45,7 +45,7 @@ class Badger expands WheeledCarPhys;
 
 /*
 #forceexec MESH  MODELIMPORT MESH=BadgerMinigunGun MODELFILE=Z:\XV\Badger\BadgerMinigunGun.psk LODSTYLE=10
-#forceexec MESH ORIGIN MESH=BadgerMinigunGun X=0 Y=0 Z=0 YAW=0 PITCH=0 ROLL=0
+#forceexec MESH ORIGIN MESH=BadgerMinigunGun X=4 Y=0 Z=9 YAW=0 PITCH=0 ROLL=0
 #forceexec MESH  LODPARAMS MESH=BadgerMinigunGun STRENGTH=0
 #forceexec MESHMAP   SCALE MESHMAP=BadgerMinigunGun X=1 Y=1 Z=1
 #forceexec MESHMAP SETTEXTURE MESHMAP=BadgerMinigunGun NUM=0 TEXTURE=BadgerRed
