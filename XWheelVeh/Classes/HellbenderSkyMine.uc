@@ -28,10 +28,19 @@ function SuperExplosion()
 
 simulated function PostBeginPlay()
 {
+	local Vehicle VehicleOwner;
+	local VehicleAttachment vat;
 	Super.PostBeginPlay();
 
-	if (OwnerGun != None)
-		OwnerGun.AddProjectile(self);
+	VehicleOwner = Vehicle(Owner);
+	if (VehicleOwner != None)
+		for (vat = VehicleOwner.AttachmentList; vat != None; vat = vat.NextAttachment)
+			if (HellbenderSideTurret(vat) != None)
+			{
+				OwnerGun = HellbenderSideTurret(vat);
+				OwnerGun.AddProjectile(self);
+				break;
+			}
 }
 
 function ChainedSuperExplosion()

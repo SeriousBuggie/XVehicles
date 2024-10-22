@@ -22,7 +22,7 @@ var rotator AdjustedAim;
 function FireTurret(byte Mode, optional bool bForceFire)
 {
 	local float CurAim, BestAim;
-	local int x;
+	local int i;
 	local Projectile BestMine;
 	local rotator OldRot;	
 	local Bot B;
@@ -106,22 +106,24 @@ function FireTurret(byte Mode, optional bool bForceFire)
 		OldRot = PitchPart.Rotation;
 		//aiming help for hitting skymines
 		BestAim = MinAim;
-		for (x = 0; x < ProjectilesCount; x++)
+		for (i = ProjectilesCount - 1; i >= 0; i--)
 		{
-			if (Projectiles[x] == None)
+			if (Projectiles[i] == None)
 				continue;
-			if (Projectiles[x].bDeleteMe || Projectiles[x].bHidden)
+			if (Projectiles[i].bDeleteMe || Projectiles[i].bHidden)
 			{
-				Projectiles[x] = None;
+				Projectiles[i] = None;
 				continue;
 			}
-			CurAim = Normal(Projectiles[x].Location - PitchPart.Location) dot vector(PitchPart.Rotation);
+			CurAim = Normal(Projectiles[i].Location - PitchPart.Location) dot vector(PitchPart.Rotation);
 			if (CurAim > BestAim)
 			{
-				BestMine = Projectiles[x];
+				BestMine = Projectiles[i];
 				BestAim = CurAim;
 			}
 		}
+		for (i = ProjectilesCount - 1; i >= 0 && Projectiles[i] == None; i--)
+			ProjectilesCount--;
 		if (BestMine != None)
 		{
 			bAdjustAim = true;
@@ -129,9 +131,7 @@ function FireTurret(byte Mode, optional bool bForceFire)
 		}
 	}
 
-	class'HellbenderSkyMine'.Default.OwnerGun = self;
 	Super.FireTurret(Mode, bForceFire);
-	class'HellbenderSkyMine'.Default.OwnerGun = none;
 	
 	bAdjustAim = false;
 }
@@ -180,7 +180,7 @@ function AddProjectile(Projectile Projectile)
 		}
 	}
 	
-	for(i = 0; i < ProjectilesCount; i++)
+	for (i = 0; i < ProjectilesCount; i++)
 		if (Projectiles[i] == None || Projectiles[i].bDeleteMe || Projectiles[i].bHidden)
 			break;
 	if (i >= ArrayCount(Projectiles))
@@ -198,7 +198,7 @@ function ChainReaction(Projectile Source)
 	local Projectile ChainTarget;
 	
 	BestDist = MaxChainReactionDist;
-	for (i = 0; i < ProjectilesCount; i++)
+	for (i = ProjectilesCount - 1; i >= 0; i--)
 	{
 		if (Projectiles[i] == None)
 			continue;
@@ -214,6 +214,8 @@ function ChainReaction(Projectile Source)
 			BestDist = Dist;
 		}
 	}
+	for (i = ProjectilesCount - 1; i >= 0 && Projectiles[i] == None; i--)
+		ProjectilesCount--;
 	
 	if (HellbenderSkyMine(ChainTarget) != None)
 	{
