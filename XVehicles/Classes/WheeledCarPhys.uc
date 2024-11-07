@@ -172,7 +172,7 @@ simulated function UpdateDriverInput( float Delta )
 		
 	if (OldWheeledRot.Yaw != Rotation.Yaw)
 	{
-		Ac.X = TractionWheelsPosition;
+		Ac.X = GetMovementDir()*TractionWheelsPosition;
 		RA.Yaw = Rotation.Yaw;
 		RB.Yaw = OldWheeledRot.Yaw;
 		MoveSmooth((Ac >> RA) - (Ac >> RB));
