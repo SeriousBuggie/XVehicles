@@ -49,6 +49,8 @@ function Mutate(string MutateString, PlayerPawn Sender)
 	if (MutateString ~= "veh 22") V = "XHoverVeh.Ghost";
 	if (MutateString ~= "veh 23") V = "XWheelVeh.Scorpion";
 	if (MutateString ~= "veh 24") V = "XWheelVeh.Hellbender";
+	if (MutateString ~= "veh 25") V = "XWheelVeh.WarthogMG";
+	if (MutateString ~= "veh 26") V = "XWheelVeh.WarthogRL";
 	
 	if (V != "")
 	{
