@@ -1,24 +1,7 @@
 //=============================================================================
 // XJeepTDX2Grinder.
 //=============================================================================
-class XJeepTDX2Grinder expands Mutator config(XVehicles);
-
-var() config float Probality;
-
-function PreBeginPlay()
-{
-	local Actor A;
-	
-	Super.PreBeginPlay();
-
-	foreach AllActors(Class, A)
-		break;
-	if (A != self)
-		return;
-
-	if (FRand() < Probality)
-		Swap();
-}
+class XJeepTDX2Grinder expands XVehiclesSwap config(XVehicles);
 
 function Swap()
 {
@@ -48,7 +31,7 @@ function Swap()
 
 defaultproperties
 {
-	Probality=0.500000
+	FromFactoryClass=Class'XWheelVeh.JeepTDXFactory'
+	ToFsctoryClass=Class'GrinderFactory'
 	bAddToPackageMap=True
-	RemoteRole=ROLE_None
 }
