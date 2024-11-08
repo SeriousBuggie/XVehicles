@@ -61,7 +61,7 @@ defaultproperties
 	PitchRange=(Max=4500,Min=-1700)
 	bAltFireZooms=True
 	TurretPitchActor=Class'ShraliCannon'
-	PitchActorOffset=(X=30.625000,Y=0.000000,Z=40.625000)
+	PitchActorOffset=(X=30.625000,Z=40.625000)
 	WeapSettings(0)=(ProjectileClass=Class'ShraliProj',FireStartOffset=(X=510.000000),RefireRate=1.000000,FireSound=Sound'XTreadVeh.Shrali.ShraliFire',FireSndRange=68,FireSndVolume=200,FireDelay=6.000000,FireDelaySnd=Sound'XTreadVeh.Shrali.ShraliLoading',FireDelaySndRange=56,FireDelaySndVolume=200)
 	bPhysicalGunAimOnly=True
 	bUseEnergyFX=True

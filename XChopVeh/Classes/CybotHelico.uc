@@ -94,8 +94,8 @@ defaultproperties
 	Health=360
 	VehicleName="Cybot Helico"
 	TranslatorDescription="This is a Cybot Helico, you can fire different firemodes using [Fire] and [AltFire] buttons. To move higher or lover use [Jump] and [Crouch] buttons and to move around use movement keys. To leave this vehicle press [ThrowWeapon] key."
-	ExitOffset=(X=0.000000,Y=140.000000)
-	BehinViewViewOffset=(X=-400.000000,Y=0.000000,Z=208.000000)
+	ExitOffset=(Y=140.000000)
+	BehinViewViewOffset=(X=-400.000000,Z=208.000000)
 	StartSound=Sound'XChopVeh.Pickups.RessurectSnd'
 	EngineSound=Sound'XChopVeh.Loop.CybHeliAmb'
 	ImpactSounds(0)=Sound'XChopVeh.Damage.CybSndArmorDmg1'
@@ -112,7 +112,7 @@ defaultproperties
 	BulletHitSounds(3)=Sound'XChopVeh.Hit.CybWreckMetalHit'
 	BulletHitSounds(4)=Sound'XChopVeh.Damage.CybSndArmorDmg1'
 	BulletHitSounds(5)=Sound'XChopVeh.Damage.CybSndArmorDmg2'
-	DriverWeapon=(WeaponClass=Class'CybBlades',WeaponOffset=(X=0.000000))
+	DriverWeapon=(WeaponClass=Class'CybBlades')
 	VehicleKeyInfoStr="Cybot Helico keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to strafe|%Jump%, %Duck% to move up/down|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%ThrowWeapon% to exit the vehicle"
 	WDeAccelRate=200.000000
 	DamageGFX(0)=(bHaveThisGFX=True,bHaveFlames=True,DmgFXOffset=(X=-32.000000,Z=20.000000),FXRange=15)
@@ -127,7 +127,7 @@ defaultproperties
 	Texture=Texture'XVehicles.Skins.CybotMetal'
 	Mesh=LodMesh'CybHeli'
 	DrawScale=8.000000
-	PrePivot=(X=0.000000,Y=0.000000,Z=-26.000000)
+	PrePivot=(Z=-26.000000)
 	AmbientGlow=17
 	MultiSkins(1)=Texture'XVehicles.Skins.CybotSk'
 	MultiSkins(4)=Texture'XVehicles.Skins.CybotCoreRed'

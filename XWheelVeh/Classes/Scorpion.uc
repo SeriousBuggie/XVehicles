@@ -211,8 +211,8 @@ defaultproperties
 	WAccelRate=515.000000
 	Health=600
 	VehicleName="Scorpion"
-	ExitOffset=(X=0.000000,Y=150.000000)
-	BehinViewViewOffset=(X=-300.000000,Y=0.000000,Z=100.000000)
+	ExitOffset=(Y=150.000000)
+	BehinViewViewOffset=(X=-300.000000,Z=100.000000)
 	StartSound=Sound'XWheelVeh.Scorpion.RVStart01'
 	EndSound=Sound'XWheelVeh.Scorpion.RVStop01'
 	EngineSound=Sound'XWheelVeh.Scorpion.RVEng01'
@@ -242,7 +242,7 @@ defaultproperties
 	HeadLights(2)=(VLightOffset=(X=94.000000,Y=28.000000,Z=0.500000),VLightTex=Texture'XVehicles.Misc.JeepHeadL',VSpriteProj=1.250000,VLightScale=0.440000)
 	HeadLights(3)=(VLightOffset=(X=94.000000,Y=-24.000000,Z=0.500000),VLightTex=Texture'XVehicles.Misc.JeepHeadL',VSpriteProj=1.250000,VLightScale=0.440000)
 	GroundPower=1.750000
-	VehicleFlagOffset=(X=0.000000,Y=0.000000,Z=-20.000000)
+	VehicleFlagOffset=(Z=-20.000000)
 	DamageGFX(0)=(bHaveThisGFX=True,bHaveFlames=True,DmgFXOffset=(X=63.000000,Y=-5.500000,Z=5.500000),FXRange=13)
 	ExplosionGFX(0)=(bHaveThisExplFX=True,ExplSize=5.550000)
 	ExplosionGFX(1)=(bHaveThisExplFX=True,ExplSize=1.875000,AttachName="ScorpionWheel")

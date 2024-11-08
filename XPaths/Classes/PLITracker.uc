@@ -56,6 +56,6 @@ defaultproperties
 	CollisionRadius=10.000000
 	CollisionHeight=10.000000
 	bFixedRotationDir=False
-	RotationRate=(Pitch=0,Yaw=0)
-	DesiredRotation=(Pitch=0,Yaw=0)
+	RotationRate=(Yaw=0)
+	DesiredRotation=(Yaw=0)
 }

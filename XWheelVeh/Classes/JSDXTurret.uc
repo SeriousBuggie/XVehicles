@@ -84,7 +84,7 @@ defaultproperties
 	RotatingSpeed=22000.000000
 	PitchRange=(Max=14000,Min=-6500)
 	TurretPitchActor=Class'JSDXGun'
-	PitchActorOffset=(X=-1.875000,Y=0.000000,Z=28.750000)
+	PitchActorOffset=(X=-1.875000,Z=28.750000)
 	WeapSettings(0)=(ProjectileClass=Class'JSDXLPlasma',FireStartOffset=(X=87.500000,Y=12.500000,Z=24.000000),RefireRate=2.750000,FireAnim1="LeftLightFire",FireAnim2="RightLightFire",FireSound=Sound'XWheelVeh.Fire.JSDXLFire',DualMode=1)
 	WeapSettings(1)=(ProjectileClass=Class'JSDXLPlasma',FireStartOffset=(X=87.500000,Y=12.500000,Z=24.000000),RefireRate=1.200000,FireAnim1="DualLightFire",FireSound=Sound'XWheelVeh.Fire.JSDXLDualFire',DualMode=2)
 	bFireRateByAnim=True

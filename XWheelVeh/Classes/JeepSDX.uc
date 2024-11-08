@@ -135,8 +135,8 @@ defaultproperties
 	WAccelRate=515.000000
 	Health=600
 	VehicleName="Jeep SDX"
-	ExitOffset=(X=0.000000,Y=150.000000)
-	BehinViewViewOffset=(X=-220.000000,Y=0.000000,Z=112.500000)
+	ExitOffset=(Y=150.000000)
+	BehinViewViewOffset=(X=-220.000000,Z=112.500000)
 	StartSound=Sound'XWheelVeh.JeepSDX.JeepStart'
 	EndSound=Sound'XWheelVeh.JeepSDX.JeepStop'
 	EngineSound=Sound'XWheelVeh.JeepSDX.JeepEng'

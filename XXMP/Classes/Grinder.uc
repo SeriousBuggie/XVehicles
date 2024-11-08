@@ -113,8 +113,8 @@ defaultproperties
 	WAccelRate=480.000000
 	Health=900
 	VehicleName="Grinder"
-	ExitOffset=(X=0.000000,Y=150.000000)
-	BehinViewViewOffset=(X=-220.000000,Y=0.000000,Z=112.500000)
+	ExitOffset=(Y=150.000000)
+	BehinViewViewOffset=(X=-220.000000,Z=112.500000)
 	StartSound=Sound'RaptorStartup'
 	EndSound=Sound'XWheelVeh.JeepSDX.JeepStop'
 	EngineSound=Sound'RaptorIdle'
@@ -138,7 +138,7 @@ defaultproperties
 	HeadLights(0)=(VLightOffset=(X=43.000000,Y=52.500000,Z=13.000000),VLightTex=Texture'XVehicles.Misc.JeepHeadL',VSpriteProj=1.250000,VLightScale=0.440000,VHeadLight=(bHaveSpotLight=True,HeadLightIntensity=80,HLightSat=255,HeadCone=64,HeadDistance=192))
 	HeadLights(1)=(VLightOffset=(X=43.000000,Y=-52.500000,Z=13.000000),VLightTex=Texture'XVehicles.Misc.JeepHeadL',VSpriteProj=1.250000,VLightScale=0.440000,VHeadLight=(bHaveSpotLight=True,HeadLightIntensity=80,HLightSat=255,HeadCone=64,HeadDistance=192))
 	GroundPower=2.100000
-	VehicleFlagOffset=(X=0.000000,Y=0.000000,Z=-15.000000)
+	VehicleFlagOffset=(Z=-15.000000)
 	DamageGFX(0)=(bHaveThisGFX=True,bHaveFlames=True,DmgFXOffset=(X=60.000000),FXRange=13)
 	ExplosionGFX(0)=(bHaveThisExplFX=True,ExplSize=5.550000)
 	ExplosionGFX(1)=(bHaveThisExplFX=True,ExplSize=1.875000,AttachName="GrinderWheel")

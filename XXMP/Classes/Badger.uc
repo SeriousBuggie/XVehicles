@@ -138,8 +138,8 @@ defaultproperties
 	WAccelRate=350.000000
 	Health=900
 	VehicleName="Badger"
-	ExitOffset=(X=0.000000,Y=140.000000)
-	BehinViewViewOffset=(X=-250.000000,Y=0.000000,Z=100.000000)
+	ExitOffset=(Y=140.000000)
+	BehinViewViewOffset=(X=-250.000000,Z=100.000000)
 	StartSound=Sound'XXMP.Badger.BadgerStart'
 	EndSound=Sound'XXMP.Badger.BadgerStop'
 	EngineSound=Sound'XXMP.Badger.BadgerEngine'

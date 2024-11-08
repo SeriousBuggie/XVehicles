@@ -37,7 +37,7 @@ defaultproperties
 	PitchRange=(Max=4500,Min=-1700)
 	bAltFireZooms=True
 	TurretPitchActor=Class'TankGKOneCannon'
-	PitchActorOffset=(X=51.250000,Y=0.000000,Z=4.375000)
+	PitchActorOffset=(X=51.250000,Z=4.375000)
 	WeapSettings(0)=(ProjectileClass=Class'TankCBullet',FireStartOffset=(X=225.000000),RefireRate=3.000000,FireSound=Sound'XTreadVeh.TankGKOne.TankGKFire01',FireSndRange=64,FireSndVolume=40)
 	bPhysicalGunAimOnly=True
 	FiringShaking(0)=(bShakeEnabled=True,ShakeRadius=365.000000,shaketime=0.350000,ShakeVertMag=88.000000,ShakeRollMag=1850.000000)

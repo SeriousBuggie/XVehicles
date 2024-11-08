@@ -52,7 +52,7 @@ defaultproperties
 	PitchRange=(Max=4600,Min=-1100)
 	bAltFireZooms=True
 	TurretPitchActor=Class'TankMLCannon'
-	PitchActorOffset=(X=79.000000,Y=0.000000,Z=-4.000000)
+	PitchActorOffset=(X=79.000000,Z=-4.000000)
 	WeapSettings(0)=(ProjectileClass=Class'TankMLProj',FireStartOffset=(X=272.000000),RefireRate=3.500000,FireSound=Sound'XTreadVeh.TankML.TankMLFire',FireSndRange=64,FireSndVolume=180,FireDelay=1.000000,FireDelaySnd=Sound'XTreadVeh.TankML.TankMLDelay',FireDelaySndRange=48,FireDelaySndVolume=235)
 	bPhysicalGunAimOnly=True
 	FiringShaking(0)=(bShakeEnabled=True,ShakeRadius=750.000000,shaketime=0.350000,ShakeVertMag=2400.000000,ShakeRollMag=3250.000000)

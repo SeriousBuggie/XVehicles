@@ -168,8 +168,8 @@ defaultproperties
 	WAccelRate=375.000000
 	Health=1800
 	VehicleName="Tank ML-102"
-	ExitOffset=(X=0.000000,Y=203.000000)
-	BehinViewViewOffset=(X=-250.000000,Y=0.000000,Z=100.000000)
+	ExitOffset=(Y=203.000000)
+	BehinViewViewOffset=(X=-250.000000,Z=100.000000)
 	StartSound=Sound'XTreadVeh.TankML.TankMLStart'
 	EndSound=Sound'XTreadVeh.TankML.TankMLEnd'
 	EngineSound=Sound'XTreadVeh.TankML.TankMLEng'
@@ -185,7 +185,7 @@ defaultproperties
 	ZRange=260.000000
 	MaxObstclHeight=44.000000
 	DriverCrosshairTex=Texture'XTreadVeh.Icons.TankMLCross'
-	DriverCrossColor=(R=255,G=0,B=0,A=0)
+	DriverCrossColor=(R=255,G=0,B=0)
 	ArmorType(7)=(ArmorLevel=0.950000,ProtectionType="Burned")
 	GroundPower=3.250000
 	DamageGFX(0)=(bHaveThisGFX=True,bHaveFlames=True,DmgFXOffset=(X=128.000000,Z=25.000000),FXRange=12)

@@ -66,8 +66,8 @@ defaultproperties
 	Health=360
 	VehicleName="Banshee"
 	TranslatorDescription="This is a Banshee, you can fire different firemodes using [Fire] and [AltFire] buttons. To move higher or lover use [Jump] and [Crouch] buttons and to move around use movement keys. To leave this vehicle press [ThrowWeapon] key."
-	ExitOffset=(X=0.000000,Y=140.000000)
-	BehinViewViewOffset=(X=-400.000000,Y=0.000000,Z=173.000000)
+	ExitOffset=(Y=140.000000)
+	BehinViewViewOffset=(X=-400.000000,Z=173.000000)
 	StartSound=Sound'XChopVeh.Banshee.BanshEngine'
 	EndSound=Sound'XChopVeh.Banshee.BanshEngine'
 	EngineSound=Sound'XChopVeh.Banshee.BanshEngine'
@@ -88,7 +88,7 @@ defaultproperties
 	bEngDynSndPitch=True
 	MinEngPitch=64
 	MaxEngPitch=96
-	DriverWeapon=(WeaponClass=Class'BansheeGun',WeaponOffset=(X=0.000000))
+	DriverWeapon=(WeaponClass=Class'BansheeGun')
 	VehicleKeyInfoStr="Banshee keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to strafe|%Jump%, %Duck% to move up/down|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%ThrowWeapon% to exit the vehicle"
 	WDeAccelRate=200.000000
 	HeadLightOn=None

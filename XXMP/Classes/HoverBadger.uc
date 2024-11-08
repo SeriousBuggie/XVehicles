@@ -140,8 +140,8 @@ defaultproperties
 	Health=700
 	VehicleName="HoverBadger"
 	TranslatorDescription="This is a HoverBadger, press [Fire] or [AltFire] to fire the different firemodes. Use your Strafe keys and Move Forward/Backward keys to strafe/accelerate/deaccelerate. To leave this vehicle, press your [ThrowWeapon] key."
-	ExitOffset=(X=0.000000,Y=140.000000)
-	BehinViewViewOffset=(X=-250.000000,Y=0.000000,Z=100.000000)
+	ExitOffset=(Y=140.000000)
+	BehinViewViewOffset=(X=-250.000000,Z=100.000000)
 	StartSound=Sound'XXMP.HoverBadger.HoverBadgerStart'
 	EndSound=Sound'XXMP.HoverBadger.HoverBadgerStop'
 	EngineSound=Sound'XXMP.HoverBadger.HoverBadgerEngine'

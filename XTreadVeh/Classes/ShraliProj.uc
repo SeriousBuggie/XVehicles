@@ -138,5 +138,5 @@ defaultproperties
 	LightRadius=16
 	bFixedRotationDir=True
 	Mass=350.000000
-	RotationRate=(Pitch=0,Yaw=0,Roll=-100000)
+	RotationRate=(Roll=-100000)
 }

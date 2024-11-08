@@ -74,8 +74,8 @@ defaultproperties
 	Health=360
 	VehicleName="LinkCraft"
 	TranslatorDescription="This is a LinkCraft, you can fire different firemodes using [Fire] and [AltFire] buttons. To move higher or lover use [Jump] and [Crouch] buttons and to move around use movement keys. To leave this vehicle press [ThrowWeapon] key."
-	ExitOffset=(X=0.000000,Y=140.000000)
-	BehinViewViewOffset=(X=-400.000000,Y=0.000000,Z=208.000000)
+	ExitOffset=(Y=140.000000)
+	BehinViewViewOffset=(X=-400.000000,Z=208.000000)
 	StartSound=Sound'AttackCraftStartUp'
 	EndSound=Sound'AttackCraftShutDown'
 	EngineSound=Sound'AttackCraftIdle'
@@ -96,7 +96,7 @@ defaultproperties
 	bEngDynSndPitch=True
 	MinEngPitch=64
 	MaxEngPitch=96
-	DriverWeapon=(WeaponClass=Class'LinkCraftGun',WeaponOffset=(X=0.000000))
+	DriverWeapon=(WeaponClass=Class'LinkCraftGun')
 	VehicleKeyInfoStr="LinkCraft keys:|%MoveForward%,%MoveBackward% to accelerate/deaccelerate|%StrafeLeft%, %StrafeRight% to strafe|%Jump%, %Duck% to move up/down|%Fire% to fire, %AltFire% to alt fire|Number keys to switch seats|%ThrowWeapon% to exit the vehicle"
 	WDeAccelRate=200.000000
 	HeadLights(0)=(VLightOffset=(X=100.000000,Y=14.000000,Z=-43.000000),VLightTex=Texture'XHoverVeh.pics.FlashFlare1',VLightScale=0.500000)

@@ -51,7 +51,7 @@ defaultproperties
 	Barrel=1
 	ShellOffset=(X=15.000000,Y=-8.000000,Z=11.000000)
 	TurretPitchActor=Class'GoliathMGun'
-	PitchActorOffset=(X=0.000000,Y=0.000000,Z=1.500000)
+	PitchActorOffset=(Z=1.500000)
 	WeapSettings(0)=(FireStartOffset=(X=77.750000,Z=9.300000))
 	Mesh=SkeletalMesh'GoliathMGRot'
 }

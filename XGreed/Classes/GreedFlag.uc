@@ -105,6 +105,6 @@ defaultproperties
 	LightType=LT_SubtlePulse
 	LightSaturation=255
 	LightRadius=7
-	RotationRate=(Pitch=0,Yaw=5000)
-	DesiredRotation=(Pitch=0,Yaw=30000)
+	RotationRate=(Pitch=0,Yaw=5000,Roll=0)
+	DesiredRotation=(Yaw=30000)
 }

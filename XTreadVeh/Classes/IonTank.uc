@@ -84,8 +84,8 @@ defaultproperties
 	WAccelRate=350.000000
 	Health=1350
 	VehicleName="Ion Tank"
-	ExitOffset=(X=0.000000,Y=203.000000)
-	BehinViewViewOffset=(X=-300.000000,Y=0.000000,Z=150.000000)
+	ExitOffset=(Y=203.000000)
+	BehinViewViewOffset=(X=-300.000000,Z=150.000000)
 	StartSound=Sound'XTreadVeh.Goliath.TankStart01'
 	EndSound=Sound'XTreadVeh.Goliath.TankStop01'
 	EngineSound=Sound'XTreadVeh.TankGKOne.TankGKOneEng'

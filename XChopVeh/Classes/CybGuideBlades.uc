@@ -16,5 +16,5 @@ defaultproperties
 	AnimSequence="Still"
 	Mesh=LodMesh'CybHeliGuideBlades'
 	DrawScale=8.000000
-	PrePivot=(X=0.000000,Y=0.000000,Z=-30.000000)
+	PrePivot=(Z=-30.000000)
 }

@@ -45,7 +45,7 @@ simulated function MakeRecoil()
 defaultproperties
 {
 	TurretPitchActor=Class'BadgerGun'
-	PitchActorOffset=(X=36.000000,Y=0.000000,Z=-6.000000)
+	PitchActorOffset=(X=36.000000,Z=-6.000000)
 	WeapSettings(0)=(FireStartOffset=(X=59.500000),FireSound=Sound'XXMP.Badger.BadgerCannon')
 	Mesh=SkeletalMesh'BadgerTurret'
 }

@@ -28,7 +28,7 @@ defaultproperties
 	Health=500
 	TranslatorDescription="This is a stationary turret. You can fire using [Fire] and zoom in and out using movement keys and toggle zoom with [AltFire]. To leave this vehicle press [ThrowWeapon] key."
 	StartSound=Sound'XStatVeh.Pickups.RessurectSnd'
-	DriverWeapon=(WeaponClass=Class'MinigunTurretWeap',WeaponOffset=(X=0.000000,Z=3.000000))
+	DriverWeapon=(WeaponClass=Class'MinigunTurretWeap',WeaponOffset=(Z=3.000000))
 	VehicleKeyInfoStr="Turret keys:|%Fire% to fire, %AltFire% to toggle zoom|%ThrowWeapon% to exit the vehicle"
 	DropFlag=DF_All
 	DestroyedExplDmg=70

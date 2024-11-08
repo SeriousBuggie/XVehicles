@@ -103,10 +103,10 @@ simulated static function bool IsGoodTarget(Pawn Instigator, Actor Other)
 
 defaultproperties
 {
-	PitchRange=(Max=4500,Min=-2800)
+	PitchRange=(Min=-2800)
 	bAltFireZooms=False
 	TurretPitchActor=Class'TankScorpionCannon'
-	PitchActorOffset=(X=9.000000,Y=0.000000,Z=17.000000)
+	PitchActorOffset=(X=9.000000,Z=17.000000)
 	WeapSettings(0)=(FireStartOffset=(X=235.000000,Z=2.500000),FireSound=Sound'XTreadVeh.TankScorpion.cannon_firing')
 	WeapSettings(1)=(FireStartOffset=(X=124.000000,Y=19.500000,Z=3.500000),RefireRate=0.100000,FireSound=Sound'XTreadVeh.TankGKOne.TankGKMGunFire',bInstantHit=True,hitdamage=17,HitType="Ballistic",HitError=0.010000,HitMomentum=10000.000000,HitHeavyness=2)
 	Mesh=SkeletalMesh'TankScorpionCanon'

@@ -104,8 +104,8 @@ defaultproperties
 	WAccelRate=350.000000
 	Health=1350
 	VehicleName="Tank Scorpion"
-	ExitOffset=(X=0.000000,Y=203.000000)
-	BehinViewViewOffset=(X=-250.000000,Y=0.000000,Z=100.000000)
+	ExitOffset=(Y=203.000000)
+	BehinViewViewOffset=(X=-250.000000,Z=100.000000)
 	StartSound=Sound'XTreadVeh.TankScorpion.engine_start'
 	EndSound=Sound'XTreadVeh.TankScorpion.engine_stop'
 	EngineSound=Sound'XTreadVeh.TankScorpion.engine_loop1'

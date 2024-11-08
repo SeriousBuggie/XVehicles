@@ -23,11 +23,11 @@ function FireTurret( byte Mode, optional bool bForceFire )
 
 defaultproperties
 {
-	ShellOffset=(X=0.000000,Y=-8.000000,Z=11.000000)
-	PitchRange=(Max=14000,Min=-3000)
+	ShellOffset=(Y=-8.000000,Z=11.000000)
+	PitchRange=(Max=14000)
 	bAltFireZooms=False
 	TurretPitchActor=Class'BadgerMGun'
-	PitchActorOffset=(X=4.000000,Y=0.000000,Z=9.000000)
+	PitchActorOffset=(X=4.000000,Z=9.000000)
 	WeapSettings(0)=(FireStartOffset=(X=35.500000,Z=3.000000),FireSound=Sound'XXMP.Badger.BadgerMinigun',hitdamage=15)
 	WeapSettings(1)=(ProjectileClass=Class'BadgerGrenade',FireStartOffset=(X=35.500000,Z=3.000000),RefireRate=2.400000,FireSound=Sound'XXMP.Badger.NewGrenadeShoot')
 	Mesh=SkeletalMesh'BadgerMinigun'

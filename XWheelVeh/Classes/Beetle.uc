@@ -108,8 +108,8 @@ defaultproperties
 	WAccelRate=515.000000
 	Health=600
 	VehicleName="Beetle"
-	ExitOffset=(X=0.000000,Y=150.000000)
-	BehinViewViewOffset=(X=-220.000000,Y=0.000000,Z=100.000000)
+	ExitOffset=(Y=150.000000)
+	BehinViewViewOffset=(X=-220.000000,Z=100.000000)
 	StartSound=Sound'XWheelVeh.Beetle.BeetleStart'
 	EndSound=Sound'XWheelVeh.Beetle.BeetleStop'
 	EngineSound=Sound'XWheelVeh.Beetle.BeetleEngine'

@@ -304,7 +304,7 @@ defaultproperties
 	RotatingSpeed=22000.000000
 	PitchRange=(Max=8400,Min=-2000)
 	TurretPitchActor=Class'HellbenderSideGun'
-	PitchActorOffset=(X=3.600000,Y=0.000000,Z=0.920000)
+	PitchActorOffset=(X=3.600000,Z=0.920000)
 	WeapSettings(0)=(ProjectileClass=Class'HellbenderSkyMine',FireStartOffset=(X=30.000000,Y=-2.000000,Z=1.500000),RefireRate=0.400000,FireSound=Sound'XWheelVeh.Hellbender.PRVFire01')
 	WeapSettings(1)=(FireStartOffset=(X=30.000000,Y=-2.000000,Z=1.500000),RefireRate=0.750000,FireSound=Sound'XWheelVeh.Hellbender.PRVFire02',bInstantHit=True,hitdamage=25,HitType="ChainReaction",HitError=0.000000)
 	CarTopRange=0.500000

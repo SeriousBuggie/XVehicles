@@ -110,8 +110,8 @@ defaultproperties
 	WAccelRate=450.000000
 	Health=1550
 	VehicleName="Kraht"
-	ExitOffset=(X=0.000000,Y=250.000000)
-	BehinViewViewOffset=(X=-225.000000,Y=0.000000,Z=75.000000)
+	ExitOffset=(Y=250.000000)
+	BehinViewViewOffset=(X=-225.000000,Z=75.000000)
 	StartSound=Sound'XTreadVeh.Kraht.KrahtStart'
 	EndSound=Sound'XTreadVeh.Kraht.KrahtEnd'
 	EngineSound=Sound'XTreadVeh.Kraht.KrahtEng'
@@ -127,7 +127,7 @@ defaultproperties
 	ZRange=250.000000
 	MaxObstclHeight=26.000000
 	DriverCrosshairTex=Texture'XTreadVeh.Icons.KrahtCross'
-	DriverCrossColor=(R=255,G=140,B=0,A=0)
+	DriverCrossColor=(R=255,G=140,B=0)
 	GroundPower=4.100000
 	RefMaxArcSpeed=150.000000
 	DamageGFX(0)=(bHaveThisGFX=True,bHaveFlames=True,DmgFXOffset=(X=96.000000,Z=9.000000),FXRange=15)

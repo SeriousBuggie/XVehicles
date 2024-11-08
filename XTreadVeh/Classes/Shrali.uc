@@ -115,8 +115,8 @@ defaultproperties
 	WAccelRate=320.000000
 	Health=2800
 	VehicleName="Shrali"
-	ExitOffset=(X=0.000000,Y=320.000000)
-	BehinViewViewOffset=(X=-312.000000,Y=0.000000,Z=150.000000)
+	ExitOffset=(Y=320.000000)
+	BehinViewViewOffset=(X=-312.000000,Z=150.000000)
 	StartSound=Sound'XTreadVeh.Shrali.ShraliStart'
 	EndSound=Sound'XTreadVeh.Shrali.ShraliEnd'
 	EngineSound=Sound'XTreadVeh.Shrali.ShraliEng'
@@ -134,7 +134,7 @@ defaultproperties
 	MaxObstclHeight=80.000000
 	DriverCrosshairTex=Texture'XTreadVeh.Icons.ShraliMainCross'
 	PassCrosshairTex(0)=Texture'XTreadVeh.Icons.ShraliPassCross'
-	DriverCrossColor=(R=255,G=0,B=0,A=0)
+	DriverCrossColor=(R=255,G=0,B=0)
 	PassCrossColor(0)=(R=255,G=140,B=0)
 	GroundPower=5.200000
 	bBigVehicle=True

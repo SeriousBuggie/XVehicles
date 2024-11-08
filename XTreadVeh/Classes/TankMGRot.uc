@@ -119,7 +119,7 @@ defaultproperties
 	PitchRange=(Max=15000,Min=-3000)
 	bAltFireZooms=True
 	TurretPitchActor=Class'TankMGun'
-	PitchActorOffset=(X=0.000000,Y=0.000000,Z=17.500000)
+	PitchActorOffset=(Z=17.500000)
 	WeapSettings(0)=(FireStartOffset=(X=32.500000),RefireRate=0.100000,FireSound=Sound'XTreadVeh.TankGKOne.TankGKMGunFire',bInstantHit=True,hitdamage=17,HitType="Ballistic",HitError=0.010000,HitMomentum=10000.000000,HitHeavyness=2)
 	bPhysicalGunAimOnly=True
 	bRotWithOtherWeap=True

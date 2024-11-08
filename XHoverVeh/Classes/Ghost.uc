@@ -99,15 +99,15 @@ defaultproperties
 	WAccelRate=1000.000000
 	VehicleName="Ghost"
 	TranslatorDescription="This is a Ghost, press [Fire] or [AltFire] to fire the different firemodes. Use your Strafe keys and Move Forward/Backward keys to strafe/accelerate/deaccelerate. To leave this vehicle, press your [ThrowWeapon] key."
-	ExitOffset=(X=0.000000,Y=130.000000)
-	BehinViewViewOffset=(X=-500.000000,Y=0.000000,Z=100.000000)
+	ExitOffset=(Y=130.000000)
+	BehinViewViewOffset=(X=-500.000000,Z=100.000000)
 	StartSound=Sound'XHoverVeh.Ghost.ghost_in'
 	EndSound=Sound'XHoverVeh.Ghost.ghost_out'
 	EngineSound=Sound'XHoverVeh.Ghost.ghost_hover'
 	bEngDynSndPitch=True
 	MinEngPitch=65
 	MaxEngPitch=100
-	DriverWeapon=(WeaponClass=Class'GhostGun',WeaponOffset=(X=0.000000))
+	DriverWeapon=(WeaponClass=Class'GhostGun')
 	WDeAccelRate=1500.000000
 	HeadLights(0)=(VLightOffset=(X=85.000000,Y=11.000000,Z=-2.000000),VLightTex=Texture'XHoverVeh.pics.FlashFlare1',VLightScale=0.500000)
 	HeadLights(1)=(VLightOffset=(X=85.000000,Y=-11.000000,Z=-2.000000),VLightTex=Texture'XHoverVeh.pics.FlashFlare1',VLightScale=0.500000)

@@ -142,5 +142,5 @@ defaultproperties
 	DrawType=DT_Mesh
 	Skin=Texture'Botpack.Skins.JpflagB'
 	Mesh=LodMesh'Botpack.newflag'
-	PrePivot=(X=0.000000,Y=0.000000,Z=70.000000)
+	PrePivot=(Z=70.000000)
 }

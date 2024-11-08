@@ -114,7 +114,7 @@ defaultproperties
 	AltProjectileClass=Class'StarterFixBolt'
 	AIRating=1.000000
 	MessageNoAmmo=" has no ammo."
-	NameColor=(R=0,G=0,B=255,A=0)
+	NameColor=(R=0,G=0,B=255)
 	PickupMessage="You got a Fixing Gun"
 	ItemName="Fixing Gun"
 	StatusIcon=Texture'FixGun.Icons.UseFix'

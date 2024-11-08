@@ -82,15 +82,15 @@ defaultproperties
 	WAccelRate=1000.000000
 	VehicleName="Manta"
 	TranslatorDescription="This is a Manta, press [Fire] or [AltFire] to fire the different firemodes. Use your Strafe keys and Move Forward/Backward keys to strafe/accelerate/deaccelerate. To leave this vehicle, press your [ThrowWeapon] key."
-	ExitOffset=(X=0.000000,Y=130.000000)
-	BehinViewViewOffset=(X=-500.000000,Y=0.000000,Z=100.000000)
+	ExitOffset=(Y=130.000000)
+	BehinViewViewOffset=(X=-500.000000,Z=100.000000)
 	StartSound=Sound'XHoverVeh.Manta.HoverBikeStart01'
 	EndSound=Sound'XHoverVeh.Manta.HoverBikeStop01'
 	EngineSound=Sound'XHoverVeh.Manta.HoverBikeEng02'
 	bEngDynSndPitch=True
 	MinEngPitch=64
 	MaxEngPitch=128
-	DriverWeapon=(WeaponClass=Class'MantaGun',WeaponOffset=(X=0.000000))
+	DriverWeapon=(WeaponClass=Class'MantaGun')
 	WDeAccelRate=1500.000000
 	HeadLights(0)=(VLightOffset=(X=85.000000,Y=11.000000,Z=-2.000000),VLightTex=Texture'XHoverVeh.pics.FlashFlare1',VLightScale=0.500000)
 	HeadLights(1)=(VLightOffset=(X=85.000000,Y=-11.000000,Z=-2.000000),VLightTex=Texture'XHoverVeh.pics.FlashFlare1',VLightScale=0.500000)
