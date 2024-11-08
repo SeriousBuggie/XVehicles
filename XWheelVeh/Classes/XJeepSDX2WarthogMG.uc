@@ -6,5 +6,5 @@ class XJeepSDX2WarthogMG expands XVehiclesSwap;
 defaultproperties
 {
 	FromFactoryClass=Class'JeepSDXFactory'
-	ToFsctoryClass=Class'WarthogMGFactory'
+	ToFactoryClass=Class'WarthogMGFactory'
 }

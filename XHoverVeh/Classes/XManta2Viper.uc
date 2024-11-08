@@ -6,5 +6,5 @@ class XManta2Viper expands XVehiclesSwap config(XVehicles);
 defaultproperties
 {
 	FromFactoryClass=Class'MantaFactory'
-	ToFsctoryClass=Class'ViperFactory'
+	ToFactoryClass=Class'ViperFactory'
 }

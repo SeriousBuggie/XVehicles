@@ -6,5 +6,5 @@ class XHeli2Banshee expands XVehiclesSwap config(XVehicles);
 defaultproperties
 {
 	FromFactoryClass=Class'CybotHelicoFactory'
-	ToFsctoryClass=Class'BansheeFactory'
+	ToFactoryClass=Class'BansheeFactory'
 }

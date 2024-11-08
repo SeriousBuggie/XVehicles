@@ -6,5 +6,5 @@ class XTankGKOne2TankScorpion expands XVehiclesSwap config(XVehicles);
 defaultproperties
 {
 	FromFactoryClass=Class'TankGKOneFactory'
-	ToFsctoryClass=Class'TankScorpionFactory'
+	ToFactoryClass=Class'TankScorpionFactory'
 }

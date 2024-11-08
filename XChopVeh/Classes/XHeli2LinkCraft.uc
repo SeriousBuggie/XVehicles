@@ -6,5 +6,5 @@ class XHeli2LinkCraft expands XVehiclesSwap config(XVehicles);
 defaultproperties
 {
 	FromFactoryClass=Class'CybotHelicoFactory'
-	ToFsctoryClass=Class'LinkCraftFactory'
+	ToFactoryClass=Class'LinkCraftFactory'
 }

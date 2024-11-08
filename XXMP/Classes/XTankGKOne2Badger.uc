@@ -6,6 +6,6 @@ class XTankGKOne2Badger expands XVehiclesSwap config(XVehicles);
 defaultproperties
 {
 	FromFactoryClass=Class'XTreadVeh.TankGKOneFactory'
-	ToFsctoryClass=Class'BadgerFactory'
+	ToFactoryClass=Class'BadgerFactory'
 	bAddToPackageMap=True
 }

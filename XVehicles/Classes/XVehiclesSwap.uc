@@ -5,7 +5,7 @@ class XVehiclesSwap expands Mutator config(XVehicles) abstract;
 
 var() config float Probability;
 var() Class<VehicleFactory> FromFactoryClass;
-var() Class<VehicleFactory> ToFsctoryClass;
+var() Class<VehicleFactory> ToFactoryClass;
 
 function PreBeginPlay()
 {
@@ -27,9 +27,9 @@ function Swap()
 	local Actor Factory;
 	
 	foreach AllActors(FromFactoryClass, Factory)
-		VehicleFactory(Factory).VehicleClass = ToFsctoryClass.default.VehicleClass;
+		VehicleFactory(Factory).VehicleClass = ToFactoryClass.default.VehicleClass;
 		
-	foreach AllActors(ToFsctoryClass, Factory)
+	foreach AllActors(ToFactoryClass, Factory)
 		VehicleFactory(Factory).VehicleClass = FromFactoryClass.default.VehicleClass;
 }
 

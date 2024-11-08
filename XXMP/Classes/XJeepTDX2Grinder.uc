@@ -27,11 +27,11 @@ function Swap()
 	if (Found == 1)
 	{ // swap JeepSDX to JeepTDX or WarthogRL, since alone JeepSDX is too weak for compete with Grinder
 		if (FRand() < WarthogRLProbability)
-			ToFsctoryClass = Class'WarthogRLFactory';
+			ToFactoryClass = Class'WarthogRLFactory';
 		else
-			ToFsctoryClass = Class'JeepTDXFactory';
+			ToFactoryClass = Class'JeepTDXFactory';
 		foreach AllActors(class'JeepSDXFactory', JeepSDXFact)
-			JeepSDXFact.VehicleClass = ToFsctoryClass.default.VehicleClass;
+			JeepSDXFact.VehicleClass = ToFactoryClass.default.VehicleClass;
 	}
 }
 
@@ -39,6 +39,6 @@ defaultproperties
 {
 	WarthogRLProbability=0.500000
 	FromFactoryClass=Class'XWheelVeh.JeepTDXFactory'
-	ToFsctoryClass=Class'GrinderFactory'
+	ToFactoryClass=Class'GrinderFactory'
 	bAddToPackageMap=True
 }
