@@ -24,7 +24,7 @@ function FireTurret(byte Mode, optional bool bForceFire)
 	local float CurAim, BestAim;
 	local int i;
 	local Projectile BestMine;
-	local rotator OldRot;	
+	local rotator OldRot;
 	local Bot B;
 	local HellbenderSkyMine NearMine;
 	

@@ -129,6 +129,7 @@ defaultproperties
 	HeadLights(2)=(VLightOffset=(X=139.600006,Y=9.500000,Z=-5.730000),VLightTex=Texture'XVehicles.Misc.JeepHeadL',VSpriteProj=1.250000,VLightScale=0.440000,VHeadLight=(bHaveSpotLight=True,HeadLightIntensity=80,HLightSat=255,HeadCone=64,HeadDistance=192))
 	HeadLights(3)=(VLightOffset=(X=139.600006,Y=-9.500000,Z=-5.730000),VLightTex=Texture'XVehicles.Misc.JeepHeadL',VSpriteProj=1.250000,VLightScale=0.440000,VHeadLight=(bHaveSpotLight=True,HeadLightIntensity=80,HLightSat=255,HeadCone=64,HeadDistance=192))
 	GroundPower=1.750000
+	VehicleFlagOffset=(X=0.000000,Y=0.000000,Z=-20.000000)
 	DamageGFX(0)=(bHaveThisGFX=True,bHaveFlames=True,DmgFXOffset=(X=122.169998,Y=-8.000000,Z=6.780000),FXRange=13)
 	ExplosionGFX(0)=(bHaveThisExplFX=True,ExplSize=5.550000)
 	ExplosionGFX(1)=(bHaveThisExplFX=True,ExplSize=1.875000,AttachName="JSDXWheel")
