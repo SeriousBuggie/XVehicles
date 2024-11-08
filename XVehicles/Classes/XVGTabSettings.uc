@@ -19,6 +19,9 @@ var UMenuRaisedButton SelectedButton;
 var int Selection;
 var bool bPolling;
 
+var() localized string OpenOnStartText;
+var UWindowCheckbox OpenOnStart;
+
 function Created()
 {
 	local int LabelWidth, LabelLeft, ButtonWidth, ButtonLeft, ButtonTop, i;
@@ -69,6 +72,16 @@ function Created()
 		
 		ButtonTop += 30;
 	}
+	
+	OpenOnStart = UWindowCheckbox(CreateControl(class'UWindowCheckbox', 20, WinHeight - 25, WinWidth - 100, 1));
+	OpenOnStart.SetText(OpenOnStartText);
+	OpenOnStart.SetFont(F_Bold);
+	SyncSettings();
+}
+
+function SyncSettings()
+{
+	OpenOnStart.bChecked = Class'XVehiclesHUD'.default.ShowBindsOnEnter;
 }
 
 /* // v469 stuff, break v436
@@ -177,6 +190,13 @@ function Notify(UWindowDialogControl C, byte E)
 	local int I;
 
 	Super.Notify(C, E);
+	
+	if (C == OpenOnStart && E == DE_Change)
+	{
+		Class'XVehiclesHUD'.default.ShowBindsOnEnter = OpenOnStart.bChecked;
+		SyncSettings();
+		return;
+	}
 
 	switch(E)
 	{
@@ -265,4 +285,5 @@ defaultproperties
 	HelpText(6)="Change the camera position for the vehicle"
 	HelpText(7)="Chat + voice command for your temmates"
 	HelpText(8)="Chat + voice command for your temmates"
+	OpenOnStartText="Open this dialog at the start of the level (you can also open it anytime by typing '!xv' in chat)"
 }

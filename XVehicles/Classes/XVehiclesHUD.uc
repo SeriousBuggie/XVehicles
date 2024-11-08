@@ -19,6 +19,8 @@ var Vehicle LastVehicleDuck;
 
 var bool bNeedCleaner;
 
+var config bool ShowBindsOnEnter;
+
 static function SpawnHUD(Actor A)
 {	
 	Local Mutator M;
@@ -218,12 +220,11 @@ simulated function PreBeginPlay()
 		return;
 	
 	Super.PreBeginPlay();
-	
-	if (Level.NetMode == NM_Client)
-		SetTimer(1, true);
 		
 	if (Level.NetMode == NM_DedicatedServer)
 		Disable('Tick');
+	else if (ShowBindsOnEnter || Level.NetMode == NM_Client)
+		SetTimer(1, true);
 
 	if (Level.NetMode == NM_Client && (default.UsedHUD == None || default.UsedHUD.Level != Level))
 		default.UsedHUD = self;
@@ -239,9 +240,18 @@ simulated function Timer()
 {
 	if (MyHUD == None || MyHUD.PlayerOwner == None)
 		return;
-	if (MyHUD.PlayerOwner.CollisionRadius == 0 && DriverWeapon(MyHUD.PlayerOwner.Weapon) == None)
+	if (Level.NetMode == NM_Client &&
+		MyHUD.PlayerOwner.CollisionRadius == 0 && DriverWeapon(MyHUD.PlayerOwner.Weapon) == None)
 		MyHUD.PlayerOwner.SetCollisionSize(MyHUD.PlayerOwner.default.CollisionRadius, 
 			MyHUD.PlayerOwner.CollisionHeight);
+			
+	if (ShowBindsOnEnter && 
+		Level.TimeSeconds > 3 && Level.TimeSeconds < 4)
+	{
+		if (Level.NetMode != NM_Client)
+			SetTimer(0, false);
+		MyHUD.PlayerOwner.ConsoleCommand("mutate XVOpenGUI");
+	}
 }
 
 simulated function Tick(float Delta)
@@ -543,6 +553,7 @@ simulated function bool TraceIdentify(canvas Canvas)
 defaultproperties
 {
 	bNeedCleaner=True
+	ShowBindsOnEnter=True
 	bHUDMutator=True
 	bAlwaysRelevant=True
 	RemoteRole=ROLE_SimulatedProxy
