@@ -194,6 +194,7 @@ function Notify(UWindowDialogControl C, byte E)
 	if (C == OpenOnStart && E == DE_Change)
 	{
 		Class'XVehiclesHUD'.default.ShowBindsOnEnter = OpenOnStart.bChecked;
+		Class'XVehiclesHUD'.static.StaticSaveConfig();
 		SyncSettings();
 		return;
 	}
