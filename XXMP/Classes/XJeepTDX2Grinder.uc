@@ -3,6 +3,8 @@
 //=============================================================================
 class XJeepTDX2Grinder expands XVehiclesSwap config(XVehicles);
 
+var() config float WarthogRLProbability;
+
 function Swap()
 {
 	local JeepTDXFactory JeepTDXFact;
@@ -23,14 +25,19 @@ function Swap()
 	}
 
 	if (Found == 1)
-	{ // swap JeepSDX to JeepTDX, since alone JeepSDX is too weak for compete with Grinder
+	{ // swap JeepSDX to JeepTDX or WarthogRL, since alone JeepSDX is too weak for compete with Grinder
+		if (FRand() < WarthogRLProbability)
+			ToFsctoryClass = Class'WarthogRLFactory';
+		else
+			ToFsctoryClass = Class'JeepTDXFactory';
 		foreach AllActors(class'JeepSDXFactory', JeepSDXFact)
-			JeepSDXFact.VehicleClass = Class'JeepTDXFactory'.default.VehicleClass;
+			JeepSDXFact.VehicleClass = ToFsctoryClass.default.VehicleClass;
 	}
 }
 
 defaultproperties
 {
+	WarthogRLProbability=0.500000
 	FromFactoryClass=Class'XWheelVeh.JeepTDXFactory'
 	ToFsctoryClass=Class'GrinderFactory'
 	bAddToPackageMap=True
