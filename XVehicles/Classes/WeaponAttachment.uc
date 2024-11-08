@@ -54,7 +54,7 @@ var() bool bLimitPitchByCarTop;
 var() float CarTopRange;
 var() IntRange CarTopAllowedPitch;
 var float ZAimOffset;	//Basically is Fireoffset.Z+PitchActorOffset.Z
-var() bool bPhysicalGunAimOnly;		//Realistic aim relative to gun position, althought it's autodisabled when Roll>50
+var() bool bPhysicalGunAimOnly;		//Realistic aim relative to gun position
 
 var() bool bRotWithOtherWeap;	//Rotate with another weapon attachment when empty
 var() byte RotWithOtherWeapPassN;	//When bRotWithOtherWeap=True, choose passenger weapon (0 = Driver weapon)
@@ -495,10 +495,7 @@ function FireTurret( byte Mode, optional bool bForceFire )
 		else Mode = 0;
 	}
 
-	if (PitchPart != None)
-		bPhysicalGunAimOnly = Default.bPhysicalGunAimOnly && (Normalize(PitchPart.Rotation).Roll < 50 && Normalize(PitchPart.Rotation).Roll > -50);
-	else
-		bPhysicalGunAimOnly = Default.bPhysicalGunAimOnly && (Normalize(Rotation).Roll < 50 && Normalize(Rotation).Roll > -50);
+	bPhysicalGunAimOnly = Default.bPhysicalGunAimOnly;
 
 	if (!bForceFire)
 	{
