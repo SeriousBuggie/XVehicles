@@ -63,10 +63,7 @@ function Created()
 		KeyNames[i].SetFont(F_Normal);
 		KeyButtons[i] = UMenuRaisedButton(CreateControl(class'UMenuRaisedButton', ButtonLeft, ButtonTop, ButtonWidth, 1));
 		KeyButtons[i].SetHelpText(HelpText[i]);
-		KeyButtons[i].bAcceptsFocus = False;
-		KeyButtons[i].bIgnoreLDoubleClick = True;
-		KeyButtons[i].bIgnoreMDoubleClick = True;
-		KeyButtons[i].bIgnoreRDoubleClick = True;
+		ResetInput(KeyButtons[i]);
 		
 		KeyButtons[i].SetText(class'KeyBindObject'.static.FindKeyBinding(AliasNames[i], PP));
 		
@@ -76,7 +73,16 @@ function Created()
 	OpenOnStart = UWindowCheckbox(CreateControl(class'UWindowCheckbox', 20, WinHeight - 25, WinWidth - 100, 1));
 	OpenOnStart.SetText(OpenOnStartText);
 	OpenOnStart.SetFont(F_Bold);
+	ResetInput(OpenOnStart);
 	SyncSettings();
+}
+
+function ResetInput(UWindowDialogControl Control)
+{
+	Control.bAcceptsFocus = False;
+	Control.bIgnoreLDoubleClick = True;
+	Control.bIgnoreMDoubleClick = True;
+	Control.bIgnoreRDoubleClick = True;
 }
 
 function SyncSettings()
