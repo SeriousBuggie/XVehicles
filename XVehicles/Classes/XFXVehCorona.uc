@@ -54,7 +54,7 @@ local CoronaVehEffect ce;
 defaultproperties
 {
 	MaxDistance=4000.000000
-	Lifetime=8.000000
+	LifeTime=8.000000
 	FadeInTime=1.000000
 	FadeOutTime=1.000000
 	EndScaleCoef=1.000000
