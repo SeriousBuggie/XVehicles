@@ -223,7 +223,7 @@ function UpdateLook(optional bool bReset)
 }
 
 // Special spawn, which ensure skull spawn in most possible cases, for not lost them.
-function Skull SpawnSkull(pawn OldHolder)
+static function Skull SpawnSkull(pawn OldHolder)
 {
 	local Skull Other;
 	// First try not fell out from the world.
@@ -309,6 +309,32 @@ function Skull Drop(pawn OldHolder, vector newVel)
 	if (Ret == None)
 		Ret = self;
 	return Ret;
+}
+
+simulated event Destroyed()
+{
+	local Pawn P, POwner;
+	local Skull Skull;
+	if (Role == ROLE_Authority && Amount > 0)
+	{
+		POwner = Pawn(Owner);
+		if (POwner != None && POwner.Base == None)
+		{
+			for (P = Level.PawnList; P != None; P = P.nextPawn)
+				if (P == POwner)
+					break;
+			if (P == None)
+			{
+				Skull = SpawnSkull(POwner);
+				if (Skull != None)
+				{
+					Skull.Amount = Amount;
+					Skull.Drop(POwner, 0.5*POwner.Velocity);
+				}
+			}
+		}
+	}
+	Super.Destroyed();
 }
 
 defaultproperties

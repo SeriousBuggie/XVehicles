@@ -84,7 +84,7 @@ function Killed( pawn Killer, pawn Other, name damageType )
 		
 		Skull = Skull(Other.FindInventoryType(Class'Skull'));
 		if (Skull == None && Bonus > 0)
-			Skull = Other.Spawn(Class'Skull');
+			Skull = Class'Skull'.static.SpawnSkull(Other);
 		if (Skull != None)
 		{
 			if (Skull.Amount >= 5 && Other.PlayerReplicationInfo != None && 
