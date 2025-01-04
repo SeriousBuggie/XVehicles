@@ -69,8 +69,8 @@ defaultproperties
 	EnergyPartsA(1)=(bHaveThisEnPartc=True,EnLnClass=Class'EnLnPartRedB',EnLnLocOffSet=(X=510.000000),RepeatDelay=0.200000,RepeatTimes=120,bProgressive=True)
 	EnergyPartsA(2)=(bHaveThisEnPartc=True,EnLnClass=Class'EnLnPartRedC',EnLnLocOffSet=(X=510.000000),RepeatDelay=0.200000,RepeatTimes=120,bProgressive=True)
 	EnergyPartsA(3)=(bHaveThisEnPartc=True,EnLnClass=Class'EnLnPartRedD',EnLnLocOffSet=(X=510.000000),RepeatDelay=0.200000,RepeatTimes=120,bProgressive=True)
-	FiringShaking(0)=(bShakeEnabled=True,bShakeByStep=True,ShakeStart=SHK_DuringFire,ShakeRadius=780.000000,shaketime=5.800000,ShakeVertMag=100.000000,ShakeRollMag=75.000000,StepInterval=0.200000)
-	FiringShaking(1)=(bShakeEnabled=True,ShakeStart=SHK_OnFire,ShakeRadius=1000.000000,shaketime=0.300000,ShakeVertMag=475.000000,ShakeRollMag=2050.000000)
+	FiringShaking(0)=(bShakeEnabled=True,bShakeByStep=True,ShakeStart=SHK_DuringFire,ShakeRadius=780.000000,ShakeTime=5.800000,ShakeVertMag=100.000000,ShakeRollMag=75.000000,StepInterval=0.200000)
+	FiringShaking(1)=(bShakeEnabled=True,ShakeStart=SHK_OnFire,ShakeRadius=1000.000000,ShakeTime=0.300000,ShakeVertMag=475.000000,ShakeRollMag=2050.000000)
 	PartMass=1
 	Mesh=LodMesh'ShraliTurret'
 	SoundRadius=150

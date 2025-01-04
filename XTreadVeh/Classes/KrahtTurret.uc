@@ -68,7 +68,7 @@ defaultproperties
 	PitchActorOffset=(X=37.000000,Z=9.500000)
 	WeapSettings(0)=(ProjectileClass=Class'KrahtProj',FireStartOffset=(X=20.000000,Z=-2.500000),RefireRate=1.500000,FireSound=Sound'XTreadVeh.Kraht.KrahtFire',FireSndRange=60,FireSndVolume=255,FireDelay=1.000000,FireDelaySnd=Sound'XTreadVeh.Kraht.KrahtChargeUp',FireDelaySndRange=48,FireDelaySndVolume=235)
 	bPhysicalGunAimOnly=True
-	FiringShaking(0)=(bShakeEnabled=True,ShakeRadius=425.000000,shaketime=0.250000,ShakeVertMag=325.000000,ShakeRollMag=1500.000000)
+	FiringShaking(0)=(bShakeEnabled=True,ShakeRadius=425.000000,ShakeTime=0.250000,ShakeVertMag=325.000000,ShakeRollMag=1500.000000)
 	PartMass=1
 	Mesh=LodMesh'KrahtTurret'
 	SoundRadius=150

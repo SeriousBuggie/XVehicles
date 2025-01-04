@@ -6,7 +6,7 @@ class ShraliCorona expands XFXVehCorona;
 defaultproperties
 {
 	MaxDistance=30000.000000
-	Lifetime=1.000000
+	LifeTime=1.000000
 	StartScaleTime=0.100000
 	EndScaleTime=0.700000
 	FadeInTime=0.000000
