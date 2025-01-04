@@ -61,7 +61,8 @@ auto state Flying
 {
 	function ProcessTouch(Actor Other, vector HitLocation)
 	{
-		if (Other == Owner || (Other != None && Other.class == Class && Other.Owner == Owner))
+		if (Other == Owner || (Other != None && Other.class == Class && Other.Owner == Owner) ||
+			!Other.bCollideActors)
 			return;
 		Super.ProcessTouch(Other, HitLocation);
 	}
