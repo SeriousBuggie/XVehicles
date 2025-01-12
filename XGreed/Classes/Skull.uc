@@ -14,6 +14,7 @@ class Skull expands TournamentPickup;
 var int Amount;
 var float Scale;
 var(Collision) float SkullCollisionHeight, SkullCollisionRadius;
+var bool bNoInventoryZone;
 
 const AmountRed = 20;
 const AmountGold = 5;
@@ -114,6 +115,72 @@ function Tick(float Delta)
 	
 	if (LifeSpan != 0.0 && LifeSpan < 2.0)
 		DrawScale = default.DrawScale*FMax(0.001, LifeSpan/2.0);
+
+	if (bNoInventoryZone)
+		TeleportSomewhere(false);
+}
+
+event FellOutOfWorld()
+{
+	TeleportSomewhere(false);
+	if (Region.ZoneNumber == 0)
+		Super.FellOutOfWorld();
+}
+
+function TeleportSomewhere(bool bRecreate)
+{
+	local Actor A;
+	local Class<Actor> Cls;
+	local int i;
+	local Skull Other;
+	
+	bNoInventoryZone = false;
+	Cls = class'PathNode';
+	foreach AllActors(Cls, A)
+		if (A.Region.Zone != None && !IsBadZone(A.Region.Zone, A.Region.ZoneNumber))
+			i++;
+	if (i == 0)		
+	{
+		Cls = class'InventorySpot';
+		foreach AllActors(Cls, A)
+			if (A.Region.Zone != None && !IsBadZone(A.Region.Zone, A.Region.ZoneNumber))
+				i++;
+		if (i == 0)		
+		{
+			Cls = class'Inventory';
+			foreach AllActors(Cls, A)
+				if (A.Region.Zone != None && !IsBadZone(A.Region.Zone, A.Region.ZoneNumber))
+					i++;
+			if (i == 0)		
+			{
+				Cls = class'NavigationPoint';
+				foreach AllActors(Cls, A)
+					if (A.Region.Zone != None && !IsBadZone(A.Region.Zone, A.Region.ZoneNumber))
+						i++;
+			}
+		}
+	}
+	if (i == 0)
+		return;
+	i = rand(i);
+	foreach AllActors(Cls, A)
+		if (A.Region.Zone != None && !IsBadZone(A.Region.Zone, A.Region.ZoneNumber) && i-- == 0)
+			break;
+	if (A == None)
+		return;
+	Velocity = 40*VRand();
+	if (bRecreate)
+	{
+		Other = SpawnSkull(A);
+		if (Other != None)
+		{
+			Other.Amount = Amount;
+			Amount = 0;
+			Other = Other.Drop(A, Velocity);
+		}
+	}
+	else if (SetLocation(A.Location))
+		UpdateLook(); // Reset LifeSpan, since zone can alter it.
 }
 
 function BecomePickup()
@@ -177,15 +244,44 @@ simulated event Landed(vector HitNormal)
 		bSimFall = false;
 }
 
-/** Slow down skulls that enter water */
-simulated event ZoneChange(ZoneInfo NewZone)
+static function bool IsBadZone(ZoneInfo NewZone, byte ZoneNumber)
+{
+	return ZoneNumber == 0 || NewZone.bNoInventory || NewZone.bKillZone || 
+		(NewZone.bPainZone && NewZone.DamagePerSec >= 20) || 
+		NewZone.IsA('VacuumZone') || NewZone.IsA('CloudZone');
+}
+
+simulated function MyZoneChange(ZoneInfo NewZone)
 {
 	if (NewZone.bWaterZone)
-	{
 		Velocity *= 0.25;
+	
+	if (Role == ROLE_Authority && Amount > 0 && IsBadZone(NewZone, 1))
+	{
+		bNoInventoryZone = true;
+		Enable('Tick');		
 	}
+}
 
+simulated event ZoneChange(ZoneInfo NewZone)
+{
+	MyZoneChange(NewZone);
 	Super.ZoneChange(NewZone);
+}
+
+auto state Pickup
+{
+	singular function ZoneChange( ZoneInfo NewZone )
+	{
+		MyZoneChange(NewZone);
+		Super.ZoneChange(NewZone);
+	}
+	
+	function Landed(Vector HitNormal)
+	{
+		Global.Landed(HitNormal);
+		Super.Landed(HitNormal);
+	}
 }
 
 function UpdateLook(optional bool bReset)
@@ -223,7 +319,7 @@ function UpdateLook(optional bool bReset)
 }
 
 // Special spawn, which ensure skull spawn in most possible cases, for not lost them.
-static function Skull SpawnSkull(pawn OldHolder)
+static function Skull SpawnSkull(Actor OldHolder)
 {
 	local Skull Other;
 	// First try not fell out from the world.
@@ -236,11 +332,16 @@ static function Skull SpawnSkull(pawn OldHolder)
 	{
 		Other.SetCollisionSize(default.SkullCollisionHeight, default.SkullCollisionHeight);
 		Other.SetCollision(true);
+		if (IsBadZone(Other.Region.Zone, Other.Region.ZoneNumber))
+		{
+			Other.bNoInventoryZone = true;
+			Other.Enable('Tick');
+		}
 	}
 	return Other;
 }
 
-function Skull Drop(pawn OldHolder, vector newVel)
+function Skull Drop(actor OldHolder, vector newVel)
 {
 	local Skull Other, Ret;
 	local rotator R;
@@ -333,6 +434,8 @@ simulated event Destroyed()
 				}
 			}
 		}
+		if (Owner == None && bNoInventoryZone)
+			TeleportSomewhere(true);
 	}
 	Super.Destroyed();
 }
