@@ -37,7 +37,10 @@ function bool RegisterTouch(Actor Other)
 	{
 		aPawn.MoveTimer = -1;
 		if (aPawn.PlayerReplicationInfo.Team == Team)
+		{
+			aPawn.ClientMessage("You must bring the skulls to the opposing base to score. This is your base.", 'CriticalEvent');
 			return false;
+		}
 		return true;
 	}
 	return false;

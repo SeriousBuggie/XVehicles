@@ -142,6 +142,8 @@ function ScoreFlag(Pawn Scorer, CTFFlag theFlag)
 			if (!bGameEnded)
 				TeleportToBase(Scorer);
 		}
+		else
+			Scorer.ClientMessage("Kill enemies, collect the skulls, and bring them here to score.", 'CriticalEvent');
 	}
 }
 
