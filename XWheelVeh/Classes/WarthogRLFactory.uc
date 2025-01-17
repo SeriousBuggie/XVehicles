@@ -9,6 +9,6 @@ defaultproperties
 	Texture=Texture'XVehicles.Skins.CybotMetal'
 	Mesh=SkeletalMesh'Warthog'
 	MultiSkins(0)=Texture'XWheelVeh.Warthog.WarthogRLBlue'
-	CollisionRadius=75.000000
-	CollisionHeight=75.000000
+	CollisionRadius=60.000000
+	CollisionHeight=60.000000
 }
