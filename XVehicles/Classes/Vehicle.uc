@@ -2774,6 +2774,22 @@ function ReadBotInput( float Delta )
 //	if (Accel == 0) log(self @ "Move" @ v @ Turning @ Accel @ (Normal(MoveDest-Location) dot vector(Rotation)));
 }
 
+function bool AtFlagBase(Pawn pDriver)
+{
+	local FlagBase FlagBase;
+	local CTFReplicationInfo CTFRI;
+	local CTFFlag CTFFlag;
+	FlagBase = FlagBase(pDriver.MoveTarget);
+	if (FlagBase == None)
+		return false;
+	CTFRI = CTFReplicationInfo(Level.Game.GameReplicationInfo);
+	if (CTFRI == None || Level.Game.IsA('OneFlagCTFGame') || Level.Game.IsA('CaptureFourFlags'))
+		return true;
+	CTFFlag = CTFRI.FlagList[FlagBase.Team];
+	if (CTFFlag == None || CTFFlag.bHome)
+		return true;
+}
+
 function bool NeedStop(Pawn pDriver)
 {
 	if (pDriver == None || PlayerPawn(pDriver) != None)
@@ -2787,10 +2803,7 @@ function bool NeedStop(Pawn pDriver)
 	{
 		if (CTFFlag(pDriver.MoveTarget) != None && pDriver.PlayerReplicationInfo.HasFlag != pDriver.MoveTarget)
 			return true;
-		if (FlagBase(pDriver.MoveTarget) != None &&
-			(CTFReplicationInfo(Level.Game.GameReplicationInfo) == None ||
-			CTFReplicationInfo(Level.Game.GameReplicationInfo).FlagList[FlagBase(pDriver.MoveTarget).Team] == None ||
-			CTFReplicationInfo(Level.Game.GameReplicationInfo).FlagList[FlagBase(pDriver.MoveTarget).Team].bHome))
+		if (AtFlagBase(pDriver))
 		{
 			if (Level.Game.IsA('OneFlagCTFGame'))
 			{
