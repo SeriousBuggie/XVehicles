@@ -272,6 +272,8 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Sw,
 					PlayerPawn(P).ClientPlaySound(Sound, , true);
 	}
 	StorePrevScore();
+	if (class'BotSpawnNotify'.default.XVehiclesCTF != None)
+		class'BotSpawnNotify'.default.XVehiclesCTF.KillCredit(self);
 }
 
 function ClientVoiceMessage(PlayerReplicationInfo Sender, PlayerReplicationInfo Recipient, name messagetype, byte messageID);

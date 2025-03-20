@@ -16,6 +16,7 @@ var Bot Bots[1024];
 var int BotsCount;
 
 var int Tmr;
+var bool bTimerOnNextTick;
 
 var DefensePointCache DPC;
 
@@ -95,6 +96,11 @@ event PreBeginPlay()
 
 event KillCredit(Actor Other) {
 	local Bot Bot;
+	if (FlagAnnouncer(Other) != None) {
+		bTimerOnNextTick = True;
+		ResetVehicles();
+		return;
+	}
 	Bot = Bot(Other);
 	if (Bot != None)
 		AddBot(Bot);
@@ -274,6 +280,7 @@ static function FixBot(Bot Bot, optional int Tmr) {
 	{
 		Bot.MoveTarget = Best;
 		Bot.MoveTimer = 1.1*VSize(Best.Location - Bot.Location)/Bot.GroundSpeed;
+		Bot.Destination = Bot.MoveTarget.Location;
 	}
 }
 
@@ -322,6 +329,23 @@ static function TryHeal(Bot Bot)
 		}
 	if (P == None && Bot.Enemy == Bot)
 		Bot.Enemy = None; // reset hack
+}
+
+function ResetVehicles() {
+	local Vehicle Veh;
+	foreach AllActors(Class'Vehicle', veh) {
+		veh.LastDriver = None;
+		veh.LastDriverTime = 0;
+	}
+}
+
+function Tick(float delta)
+{
+	if (bTimerOnNextTick) {
+		bTimerOnNextTick = false;
+		ResetVehicles();
+		Timer();
+	}
 }
 
 /*

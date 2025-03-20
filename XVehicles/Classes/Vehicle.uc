@@ -2782,6 +2782,9 @@ function bool AtFlagBase(Pawn pDriver)
 	FlagBase = FlagBase(pDriver.MoveTarget);
 	if (FlagBase == None)
 		return false;
+	if (pDriver.PlayerReplicationInfo.HasFlag == None && 
+		pDriver.PlayerReplicationInfo.Team == FlagBase.Team)
+		return false;
 	CTFRI = CTFReplicationInfo(Level.Game.GameReplicationInfo);
 	if (CTFRI == None || Level.Game.IsA('OneFlagCTFGame') || Level.Game.IsA('CaptureFourFlags'))
 		return true;
@@ -3024,11 +3027,11 @@ function float BotDesireability2(Pawn Bot)
 //	local vector L;
 //	Log(self @ "BotDesireability 1" @ Bot.GetHumanName() @ Bot.MoveTarget);
 	if (bDeleteMe )
-		Return -1;
+		Return -19;
 //	Log(self @ "BotDesireability 2" @ Bot.GetHumanName() @ CurrentTeam @ CanEnter(Bot) @ 
 //		IsTeamLockedFor(Bot) @ VehicleAI.PawnCanDrive(Bot) @ Bot.bIsPlayer);
 	if (!CanEnter(Bot, false, true) || IsTeamLockedFor(Bot) || !VehicleAI.PawnCanDrive(Bot))
-		Return -1;
+		Return -18;
 /*	if (!Bot.actorReachable(self))
 	{
 		L = Bot.Location - Location;
