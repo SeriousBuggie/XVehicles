@@ -292,6 +292,8 @@ var bool bInBump;
 var Pawn LastDriver;
 var float LastDriverTime;
 
+var bool DoChangeSeat;
+
 var float BotDriverJumpZ;
 
 var PreventEnter PreventEnter;
@@ -1162,7 +1164,7 @@ function ChangeCollision(Pawn Other, bool bInside, int Seat)
 		if (Other.Location != L)
 			Other.SetLocation(L);
 	}
-	else
+	else if (!DoChangeSeat)
 	{
 		Other.DrawScale = Other.default.DrawScale;
 		// bCollideActors necessary for collide with movers.
@@ -1394,11 +1396,13 @@ function ProcessExit(Pawn Pawn, DriverCameraActor Camera)
 				Pawn.Weapon.BringUp();
 			if (PlayerPawn(Pawn) != None && Pawn.bDuck == 1 && bCanFly)
 				PreventEnter = Spawn(class'PreventEnter', Pawn);
-			Pawn.SetCollision(True, True, True);
-			// make touch with anything here
-			SmallMove = Normal(Location - Pawn.Location);
-			if (Pawn.Move(SmallMove))
-				Pawn.Move(-SmallMove);
+			if (!DoChangeSeat) {
+				Pawn.SetCollision(True, True, True);
+				// make touch with anything here
+				SmallMove = Normal(Location - Pawn.Location);
+				if (Pawn.Move(SmallMove))
+					Pawn.Move(-SmallMove);
+			}
 		}
 	}
 	if (PlayerPawn(Pawn) != None)
@@ -4657,6 +4661,7 @@ function ChangeSeat( byte SeatNum, bool bWasPassenger, byte PassengerNum )
 		{
 			if( PlayerPawn(Driver)!=None )
 				Return;
+			DoChangeSeat = true;
 			// Allow player swap places with bots!
 			OthPawn = Driver;
 			DriverLeft(True, "ChangeSeat 1");
@@ -4665,13 +4670,16 @@ function ChangeSeat( byte SeatNum, bool bWasPassenger, byte PassengerNum )
 				PassengerSeats[PassengerNum].PassengerCam.Rotation.Pitch, 
 				PassengerSeats[PassengerNum].PassengerCam.Rotation.Yaw);
 			PassengerEnter(OthPawn,PassengerNum);
+			DoChangeSeat = false;
 		}
 		else
 		{
+			DoChangeSeat = true;
 			PassengerLeave(PassengerNum,True);
 			DriverEnter(InvPawn, 
 				PassengerSeats[PassengerNum].PassengerCam.Rotation.Pitch, 
 				PassengerSeats[PassengerNum].PassengerCam.Rotation.Yaw);
+			DoChangeSeat = false;
 		}
 	}
 	else
@@ -4682,6 +4690,7 @@ function ChangeSeat( byte SeatNum, bool bWasPassenger, byte PassengerNum )
 		{
 			if( PlayerPawn(Passengers[SeatNum-1])!=None )
 				Return;
+			DoChangeSeat = true;
 			if( bWasPassenger )
 				PassengerLeave(PassengerNum,True);
 			else DriverLeft(True, "ChangeSeat 2");
@@ -4693,15 +4702,18 @@ function ChangeSeat( byte SeatNum, bool bWasPassenger, byte PassengerNum )
 			if( bWasPassenger )
 				PassengerEnter(OthPawn,PassengerNum);
 			else DriverEnter(OthPawn);
+			DoChangeSeat = false;
 		}
 		else
 		{
+			DoChangeSeat = true;
 			if( bWasPassenger )
 				PassengerLeave(PassengerNum,True);
 			else DriverLeft(True, "ChangeSeat 3");
 			PassengerEnter(InvPawn,SeatNum-1, 
 				MyCameraAct.Rotation.Pitch, 
 				MyCameraAct.Rotation.Yaw);
+			DoChangeSeat = false;
 		}
 	}
 }
