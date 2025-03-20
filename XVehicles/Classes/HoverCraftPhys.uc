@@ -434,11 +434,15 @@ function vector BotDrive()
 			Z.Y = Z.X;
 			Z.Z = CollisionHeight;						
 			HitDuck = Trace(Y, Y, MoveDest - vect(0,0,1)*HoverDuck, Location - vect(0,0,1)*HoverDuck, true, Z);
-			if (Pawn(HitDuck) != None && Pawn(HitDuck).PlayerReplicationInfo != None && 
-				Pawn(HitDuck).PlayerReplicationInfo.Team != CurrentTeam)
+			if (!Level.Game.bTeamGame || 
+				(Pawn(HitDuck) != None && Pawn(HitDuck).PlayerReplicationInfo != None && 
+				Pawn(HitDuck).PlayerReplicationInfo.Team != CurrentTeam))
 				bNeedDuck = true; // run over enemy
 			else if (HitDuck == None && Trace(Y, Y, MoveDest, Location, true, Z) != None)
 				bNeedDuck = true; // need crouch for pass this place
+			else if (Level.Game.bTeamGame && Vehicle(HitDuck) != None && 
+				Vehicle(HitDuck).CurrentTeam == CurrentTeam)
+				Rising = 1; // need jump for pass through this friendly vehicle
 		}
 		if (bNeedDuck && !bDuckFire)
 			PlayOwnedSound(DuckSound);
