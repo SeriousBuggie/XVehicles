@@ -82,9 +82,15 @@ simulated function Tick(float Delta)
 		class'VActor'.Default.StaticPP.Actor.ViewTarget != None &&
 		class'VActor'.Default.StaticPP.Actor.ViewTarget.Owner == Owner &&
 		!class'VActor'.Default.StaticPP.Actor.bBehindView)))
+	{
 		Style = STY_Translucent;
+		ScaleGlow = 0.25;
+	}
 	else
+	{
 		Style = STY_Normal;
+		ScaleGlow = 1.0;
+	}
 }
 
 function Destroyed()
