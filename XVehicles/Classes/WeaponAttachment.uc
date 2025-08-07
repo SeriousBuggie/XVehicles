@@ -1370,7 +1370,7 @@ simulated function bool AimingIsOK()
 }
 simulated function WRenderOverlay( Canvas C )
 {
-	local vector HL, HN, CamLoc;
+	local vector HL, HN, HitLocation, CamLoc;
 	local rotator CamRot;
 	local Actor ViewActor;
 	local float X, Y;
@@ -1391,10 +1391,11 @@ simulated function WRenderOverlay( Canvas C )
 	HN.Z = X;
 	HN = ViewActor.Location + (HN >> ViewActor.Rotation);
 	HL = HN + CamLoc*40000;
-	OwnerVehicle.Trace(HL, HN, HL, HN, true);
+	if (OwnerVehicle.Trace(HitLocation, HN, HL, HN, true) == None)
+		HitLocation = HL;
 	
 	C.ViewPort.Actor.PlayerCalcView(ViewActor, CamLoc, CamRot);
-	WorldToScreen(HL, C.ViewPort.Actor, CamLoc, CamRot, C.ClipX, C.ClipY, X, Y);
+	WorldToScreen(HitLocation, C.ViewPort.Actor, CamLoc, CamRot, C.ClipX, C.ClipY, X, Y);
 
 	Crossh = Texture'Botpack.Crosshair6';
 	C.SetPos(X - Crossh.USize/2, Y - Crossh.VSize/2);
