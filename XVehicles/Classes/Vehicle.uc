@@ -4192,7 +4192,16 @@ function FixDamage(int Damage, Pawn EventInstigator, vector HitLocation, vector 
 	
 	if (LifeSpan != 0)
 		LifeSpan = FMax(LifeSpan, 5);
-	if (Health <= 0 || Health >= FirstHealth)
+	
+	if (Health >= FirstHealth)
+	{
+		if (DamageType == 'zapped' && EventInstigator != None && PulseGun(EventInstigator.Weapon) != None && 
+			PulseGun(EventInstigator.Weapon).IsInState('AltFiring') && EventInstigator.Weapon.AmmoType != None)
+			EventInstigator.Weapon.AmmoType.AddAmmo(1);
+		return;
+	}
+	
+	if (Health <= 0)
 		return;
 	Health += Damage;
 	if (Health > FirstHealth)
