@@ -55,25 +55,25 @@ State PendingJump
 {
 	function Actor SpecialHandling(Pawn Other)
 	{
-		if ( PendingBot != None )
+		if (PendingBot != None && PendingBot.Health > 0)
 		{
 			PreserveAmbushSpot(PendingBot);
 			PendingBot.BigJump(self);
 			TryToDuck(Location - PendingBot.Location, FRand() < 0.5);
-			PendingBot = None;
 		}
+		PendingBot = None;
 		return Super(LiftCenter).SpecialHandling(Other);
 	}
 
 	function Tick(float DeltaTime)
 	{
-		if ( PendingBot != None )
+		if (PendingBot != None && PendingBot.Health > 0)
 		{
 			PreserveAmbushSpot(PendingBot);
 			PendingBot.BigJump(self);
 			TryToDuck(Normal(Location - PendingBot.Location), FRand() < 0.5);
-			PendingBot = None;
 		}
+		PendingBot = None;
 		GotoState('');
 	}
 }
