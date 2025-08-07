@@ -1381,13 +1381,15 @@ function ProcessExit(Pawn Pawn, DriverCameraActor Camera)
 				VSize(FlagGoal.Location - Bot.Location) < 
 				(Class'CTFFlag'.Default.CollisionRadius + Bot.CollisionRadius))
 			{
-				Bot.Velocity += Normal(Location - Bot.Location)*Bot.GroundSpeed; // try enter back
+				if (!Pawn.IsInState('GameEnded') && (Level.Game == None || !Level.Game.bGameEnded))
+					Bot.Velocity += Normal(Location - Bot.Location)*Bot.GroundSpeed; // try enter back
 				Bot.MoveTarget = self;
 				Bot.Destination = Location;
 			}
 		}
 		Pawn.MoveTimer = -1; // time to refresh paths
-		Pawn.Velocity += Velocity; // inertial exit
+		if (!Pawn.IsInState('GameEnded') && (Level.Game == None || !Level.Game.bGameEnded))
+			Pawn.Velocity += Velocity; // inertial exit
 		Pawn.Weapon = Pawn.PendingWeapon;
 		Pawn.ChangedWeapon();
 		if (Pawn != none)
