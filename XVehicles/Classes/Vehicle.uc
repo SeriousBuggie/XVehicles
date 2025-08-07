@@ -1168,7 +1168,8 @@ function ChangeCollision(Pawn Other, bool bInside, int Seat)
 	{
 		Other.DrawScale = Other.default.DrawScale;
 		// bCollideActors necessary for collide with movers.
-		Other.SetCollision(True,False,False); // after move be set to true
+		if (Health > 0)
+			Other.SetCollision(True,False,False); // after move be set to true
 		Other.bCollideWorld = True;
 		Other.SetCollisionSize(Other.default.CollisionRadius, Other.default.CollisionHeight);
 		if (Other.Region.Zone == None)
@@ -1401,9 +1402,12 @@ function ProcessExit(Pawn Pawn, DriverCameraActor Camera)
 			if (!DoChangeSeat) {
 				Pawn.SetCollision(True, True, True);
 				// make touch with anything here
-				SmallMove = Normal(Location - Pawn.Location);
-				if (Pawn.Move(SmallMove))
-					Pawn.Move(-SmallMove);
+				if (Health > 0)
+				{
+					SmallMove = Normal(Location - Pawn.Location);
+					if (Pawn.Move(SmallMove))
+						Pawn.Move(-SmallMove);
+				}
 			}
 		}
 	}
