@@ -185,7 +185,6 @@ defaultproperties
 	ZRange=260.000000
 	MaxObstclHeight=44.000000
 	DriverCrosshairTex=Texture'XTreadVeh.Icons.TankMLCross'
-	DriverCrossColor=(R=255,G=0,B=0)
 	ArmorType(7)=(ArmorLevel=0.950000,ProtectionType="Burned")
 	GroundPower=3.250000
 	DamageGFX(0)=(bHaveThisGFX=True,bHaveFlames=True,DmgFXOffset=(X=128.000000,Z=25.000000),FXRange=12)

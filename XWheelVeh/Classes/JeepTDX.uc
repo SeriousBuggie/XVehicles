@@ -45,7 +45,6 @@ defaultproperties
 	bDriverHorn=True
 	HornTimeInterval=2.000000
 	PassCrosshairTex(0)=Texture'XWheelVeh.Icons.JeepSDXTurretCross'
-	PassCrossColor(0)=(R=255,G=0,B=0)
 	ArmorType(7)=(ArmorLevel=0.300000,ProtectionType="Burned")
 	bUseVehicleLights=True
 	bUseSignalLights=True

@@ -132,7 +132,6 @@ defaultproperties
 	bDriverHorn=True
 	HornTimeInterval=2.000000
 	PassCrosshairTex(0)=Texture'XWheelVeh.Icons.JeepSDXTurretCross'
-	PassCrossColor(0)=(R=255,G=0,B=0)
 	ArmorType(7)=(ArmorLevel=0.300000,ProtectionType="Burned")
 	bUseVehicleLights=True
 	HeadLights(0)=(VLightOffset=(X=43.000000,Y=52.500000,Z=13.000000),VLightTex=Texture'XVehicles.Misc.JeepHeadL',VSpriteProj=1.250000,VLightScale=0.440000,VHeadLight=(bHaveSpotLight=True,HeadLightIntensity=80,HLightSat=255,HeadCone=64,HeadDistance=192))

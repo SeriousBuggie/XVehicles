@@ -134,8 +134,6 @@ defaultproperties
 	MaxObstclHeight=80.000000
 	DriverCrosshairTex=Texture'XTreadVeh.Icons.ShraliMainCross'
 	PassCrosshairTex(0)=Texture'XTreadVeh.Icons.ShraliPassCross'
-	DriverCrossColor=(R=255,G=0,B=0)
-	PassCrossColor(0)=(R=255,G=140,B=0)
 	GroundPower=5.200000
 	bBigVehicle=True
 	DamageGFX(0)=(bHaveThisGFX=True,bHaveFlames=True,DmgFXOffset=(X=-81.250000,Y=122.500000,Z=10.000000),FXRange=25)
