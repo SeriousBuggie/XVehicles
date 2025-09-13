@@ -2,7 +2,7 @@ Class KeyBindObject extends Object;
 
 var string KeyNames[255], Aliases[ArrayCount(KeyNames)], Cache[20];
 var bool bKeysInit;
-var LevelInfo Level;
+var int LevelStartTime;
 var int CachePos;
 
 static function string GetKeyName(int KeyCode)
@@ -28,13 +28,25 @@ static function Refresh(Actor Other)
 	}
 }
 
+static function int GetLevelStartTime(LevelInfo Level)
+{
+	local int ret;
+	ret = Level.Month;
+	ret = ret*31 + Level.Day;
+	ret = ret*24 + Level.Hour;
+	ret = ret*60 + Level.Minute;
+	ret = ret*60 + Level.Second - Level.TimeSeconds/Level.TimeDilation;
+	return ret;
+}
+
 static function string FindKeyBinding(string KBName, Actor Other)
 {
 	local PlayerPawn PL;
-	local int i, k, m, j;
+	local int i, k, m, j, CurLevelStartTime;
 	local string Alias, ch, KBNameCaps;
 	
-	if (default.Level != Other.Level)
+	CurLevelStartTime = GetLevelStartTime(Other.Level);
+	if (Abs(default.LevelStartTime - CurLevelStartTime) > 5)
 	{
 		default.CachePos = 0;
 		default.bKeysInit = false;
@@ -44,7 +56,7 @@ static function string FindKeyBinding(string KBName, Actor Other)
 		if (Default.Cache[j] ~= KBName)
 			return Default.Cache[j + 1];
 	
-	default.Level = Other.Level;
+	default.LevelStartTime = CurLevelStartTime;
 
 	if (!Default.bKeysInit)
 		Refresh(Other);
