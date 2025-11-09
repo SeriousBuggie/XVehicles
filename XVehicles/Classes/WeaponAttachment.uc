@@ -1341,9 +1341,13 @@ function bool SeeEnemy(Actor Enemy)
 			
 			if (V > V1*V1)
 			{
-				RepAimPos += Enemy.Velocity * VSize(Dir)/(Sqrt(V) - V1);
-				if ( !FastTrace(RepAimPos))
-					RepAimPos = 0.5 * (RepAimPos + EnemyLocation);
+				V = Sqrt(V) - V1;
+				if (V > 0)
+				{
+					RepAimPos += Enemy.Velocity * VSize(Dir)/V;
+					if (!FastTrace(RepAimPos))
+						RepAimPos = 0.5 * (RepAimPos + EnemyLocation);
+				}
 			}
 		}
 	}
