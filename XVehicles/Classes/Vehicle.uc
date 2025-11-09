@@ -2688,7 +2688,8 @@ function ReadBotInput( float Delta )
 			Bot.EnemyDropped = None; // prevent dumb moves
 			if (!HasPassengers())
 				foreach RadiusActors(class'Bot', Bot, 800)
-					if (Bot.PlayerReplicationInfo.Team != CurrentTeam)
+					if ((!Level.Game.bTeamGame || Bot.PlayerReplicationInfo.Team != CurrentTeam) && 
+						DriverWeapon(Bot.Weapon) == None && BotDesireability2(Bot) > 0)
 						Bot.EnemyDropped = DWeapon; // enemy bots wanna steal vehicle
 		}
 	}
