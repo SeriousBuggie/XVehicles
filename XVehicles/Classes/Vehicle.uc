@@ -1156,6 +1156,13 @@ function ChangeCollision(Pawn Other, bool bInside, int Seat)
 	if (bInside)
 	{
 		Other.DrawScale = SmallDrawScale;
+		if (Other.Weapon == Other.PendingWeapon) // Restore back for enable XVehiclesHUD.HandlePickupQuery blocker.
+		{
+			if (Seat == 0)
+				Other.Weapon = DWeapon;
+			else
+				Other.Weapon = PassengerSeats[Seat - 1].PHGun;
+		}
 		Other.SetCollision(GetCollideActors(Other), False, False);
 		L = Location;
 		L.Z += Other.default.CollisionHeight - CollisionHeight;
@@ -1169,7 +1176,10 @@ function ChangeCollision(Pawn Other, bool bInside, int Seat)
 		Other.DrawScale = Other.default.DrawScale;
 		// bCollideActors necessary for collide with movers.
 		if (Health > 0)
+		{
+			Other.Weapon = Other.PendingWeapon; // Need set here for disable XVehiclesHUD.HandlePickupQuery blocker.
 			Other.SetCollision(True,False,False); // after move be set to true
+		}
 		Other.bCollideWorld = True;
 		Other.SetCollisionSize(Other.default.CollisionRadius, Other.default.CollisionHeight);
 		if (Other.Region.Zone == None)
@@ -1355,14 +1365,23 @@ function Actor GetFlagGoal(Pawn Pawn)
 		(FlagBase(FlagGoal).Team == Pawn.PlayerReplicationInfo.Team) ==
 		(Pawn.PlayerReplicationInfo.HasFlag == None))
 		return None;
+	if (FlagGoal == None && TravelToInventory(Pawn))
+		return Pawn.MoveTarget;
 	return FlagGoal;
 }
 
 function bool NeedReturnBackAfter(Actor FlagGoal)
 {
-	return (DropFlag == DF_None || 
+	return (Inventory(FlagGoal) != None || DropFlag == DF_None || 
 		(CTFFlag(FlagGoal) != None && CurrentTeam == CTFFlag(FlagGoal).Team)) &&
 		!HealthTooLowFor(Driver);
+}
+
+function float GetGoalCollisionRadius(Actor FlagGoal)
+{
+	if (Inventory(FlagGoal) != None)
+		return FlagGoal.CollisionRadius;
+	return Class'CTFFlag'.Default.CollisionRadius;
 }
 
 function ProcessExit(Pawn Pawn, DriverCameraActor Camera)
@@ -1380,7 +1399,7 @@ function ProcessExit(Pawn Pawn, DriverCameraActor Camera)
 			FlagGoal = GetFlagGoal(Bot);
 			if (FlagGoal != None && NeedReturnBackAfter(FlagGoal) &&
 				VSize(FlagGoal.Location - Bot.Location) < 
-				(Class'CTFFlag'.Default.CollisionRadius + Bot.CollisionRadius))
+				(GetGoalCollisionRadius(FlagGoal) + Bot.CollisionRadius))
 			{
 				if (!Pawn.IsInState('GameEnded') && (Level.Game == None || !Level.Game.bGameEnded))
 					Bot.Velocity += Normal(Location - Bot.Location)*Bot.GroundSpeed; // try enter back
@@ -1407,6 +1426,8 @@ function ProcessExit(Pawn Pawn, DriverCameraActor Camera)
 					SmallMove = Normal(Location - Pawn.Location);
 					if (Pawn.Move(SmallMove))
 						Pawn.Move(-SmallMove);
+					else if (Pawn.Move(-SmallMove))
+						Pawn.Move(SmallMove);
 				}
 			}
 		}
@@ -2845,6 +2866,25 @@ function bool NeedStop(Pawn pDriver)
 		return true;
 	if (Driver == pDriver && IsImportantMoveTarget(pDriver.MoveTarget))
 		return true;
+	if (Driver == pDriver && TravelToInventory(pDriver))
+		return true;
+	return false;
+}
+
+function bool TravelToInventory(Pawn pDriver) 
+{
+	local int i;
+	if (Inventory(pDriver.MoveTarget) != None && 
+		(pDriver.Enemy == None || VSize(pDriver.Enemy.Location - pDriver.Location) > 8000 || 
+		!pDriver.FastTrace(pDriver.Enemy.Location)))
+	{
+		if (pDriver.RouteCache[0] == None)
+			return true;
+		for (i = ArrayCount(pDriver.RouteCache) - 1; i > 0 && pDriver.RouteCache[i] == None; i--);
+		if (i < ArrayCount(pDriver.RouteCache) - 1 && InventorySpot(pDriver.RouteCache[i]) != None &&
+			InventorySpot(pDriver.RouteCache[i]).markedItem == pDriver.MoveTarget)
+			return true;
+	}
 	return false;
 }
 
