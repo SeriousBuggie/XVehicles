@@ -1365,7 +1365,7 @@ function Actor GetFlagGoal(Pawn Pawn)
 		(FlagBase(FlagGoal).Team == Pawn.PlayerReplicationInfo.Team) ==
 		(Pawn.PlayerReplicationInfo.HasFlag == None))
 		return None;
-	if (FlagGoal == None && TravelToInventory(Pawn))
+	if (FlagGoal == None && (IsImportantMoveTarget(Pawn.MoveTarget) || TravelToInventory(Pawn)))
 		return Pawn.MoveTarget;
 	return FlagGoal;
 }
