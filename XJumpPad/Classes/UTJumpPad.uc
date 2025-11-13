@@ -110,6 +110,8 @@ var rotator R;
 var vector X, Y, Z, jVelocityN;
 var Texture GridTexture, StreakTexture;
 var rotator jVelocityR;
+var JPadEmitGrid Grids;
+var JPadEmitPrtc Streaks;
 
 var enum EParticleColor
 {
@@ -666,7 +668,18 @@ local JPadEmitGrid JGrid;
 			rX = (Rand(57) - 28) * DrawScale;
 			rY = (Rand(57) - 28) * DrawScale;
 	
-			JStreak = Spawn(Class'JPadEmitPrtc',,, X + rX*Z + rY*Y, jVelocityR);
+			if (Streaks == None)
+				JStreak = Spawn(Class'JPadEmitPrtc', self,, X + rX*Z + rY*Y, jVelocityR);
+			else
+			{
+				JStreak = Streaks;
+				Streaks = JStreak.Next;
+				JStreak.SetLocation(X + rX*Z + rY*Y);
+				JStreak.SetRotation(jVelocityR);
+				JStreak.bHidden = false;
+				JStreak.Enable('Tick');
+				JStreak.PostBeginPlay();
+			}
 			JStreak.Velocity = jVelocityN * FRand() * ParticlesSpeed * DrawScale;
 	
 			JStreak.DrawScale = DrawScale;
@@ -678,7 +691,18 @@ local JPadEmitGrid JGrid;
 	{
 		TCountB = 0;
 
-		JGrid = Spawn(Class'JPadEmitGrid',,, X);
+		if (Grids == None)
+			JGrid = Spawn(Class'JPadEmitGrid', self,, X);
+		else
+		{
+			JGrid = Grids;
+			Grids = JGrid.Next;
+			JGrid.SetLocation(X);
+			JGrid.SetRotation(Rotation);
+			JGrid.LifeSpan = JGrid.default.LifeSpan;
+			JGrid.bHidden = false;
+			JGrid.Enable('Tick');
+		}	
 		
 		JGrid.Velocity = jVelocityN * GridsSpeed * DrawScale;
 

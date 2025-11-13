@@ -12,22 +12,35 @@ class JPadEmitPrtc expands Effects;
 #exec MESHMAP SETTEXTURE MESHMAP=JPadEmitPrtc NUM=1 TEXTURE=YellowStreak
 
 var float Count, Ratio1, Ratio2;
+var JPadEmitPrtc Next;
 
 simulated function PostBeginPlay()
 {
 local rotator RRo;
 
+	RRo = Rotation;
 	RRo.Roll = 2 * Rand(16384);
-	RRo.Yaw = Rotation.Yaw;
-	RRo.Pitch = Rotation.Pitch;
 	SetRotation(RRo);
-	LifeSpan = 0.5 + FRand();
+	LifeSpan = 1.5 + FRand();
 	
 	Ratio1 = Default.ScaleGlow / 0.1;
 }
 
 simulated function Tick( float DeltaTime)
 {
+	local UTJumpPad Host;
+	if (LifeSpan < 1.0)
+	{
+		bHidden = true;
+		Disable('Tick');
+		Host = UTJumpPad(Owner);
+		if (Host != None)
+		{
+			Next = Host.Streaks;
+			Host.Streaks = self;
+		}
+		return;
+	}
 	if (Count < 0.1)
 	{
 		Count += DeltaTime;
@@ -36,9 +49,9 @@ simulated function Tick( float DeltaTime)
 	else
 	{
 		if (Ratio2 <= 0)
-			Ratio2 = Default.ScaleGlow / LifeSpan;
+			Ratio2 = Default.ScaleGlow / (LifeSpan - 1.0);
 		else
-			ScaleGlow = LifeSpan * Ratio2;
+			ScaleGlow = (LifeSpan - 1.0) * Ratio2;
 	}
 }
 
