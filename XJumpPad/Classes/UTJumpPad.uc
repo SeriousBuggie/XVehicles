@@ -677,6 +677,8 @@ local JPadEmitGrid JGrid;
 				JStreak.SetLocation(X + rX*Z + rY*Y);
 				JStreak.SetRotation(jVelocityR);
 				JStreak.bHidden = false;
+				JStreak.Count = 0.0;
+				JStreak.Ratio2 = 0.0;
 				JStreak.Enable('Tick');
 				JStreak.PostBeginPlay();
 			}
@@ -701,6 +703,7 @@ local JPadEmitGrid JGrid;
 			JGrid.SetRotation(Rotation);
 			JGrid.LifeSpan = JGrid.default.LifeSpan;
 			JGrid.bHidden = false;
+			JGrid.Count = 0.0;
 			JGrid.Enable('Tick');
 		}	
 		

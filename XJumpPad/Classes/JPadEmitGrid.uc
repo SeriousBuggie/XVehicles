@@ -23,7 +23,7 @@ simulated function PostBeginPlay()
 simulated function Tick( float DeltaTime)
 {
 	local UTJumpPad Host;
-	if (LifeSpan < 1.0)
+	if (LifeSpan <= 1.0)
 	{
 		bHidden = true;
 		Disable('Tick');
