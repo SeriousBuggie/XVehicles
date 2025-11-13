@@ -11,17 +11,23 @@ class JPadEmitGrid expands Effects;
 #exec TEXTURE IMPORT NAME=YellowGrid FILE=JParticles\YellowGrid.bmp GROUP=Skins FLAGS=2
 #exec MESHMAP SETTEXTURE MESHMAP=JPadEmitGrid NUM=1 TEXTURE=YellowGrid
 
-var float Count;
+var float Count, Ratio1, Ratio2;
+
+simulated function PostBeginPlay()
+{
+	Ratio1 = Default.ScaleGlow / 0.1;
+	Ratio2 = Default.ScaleGlow / (Default.LifeSpan - 0.1);
+}
 
 simulated function Tick( float DeltaTime)
 {
 	if (Count < 0.1)
 	{
 		Count += DeltaTime;
-		ScaleGlow = Count * Default.ScaleGlow / 0.1;
+		ScaleGlow = Count * Ratio1;
 	}
 	else
-		ScaleGlow = LifeSpan * Default.ScaleGlow / (Default.LifeSpan - 0.1);
+		ScaleGlow = LifeSpan * Ratio2;
 }
 
 defaultproperties

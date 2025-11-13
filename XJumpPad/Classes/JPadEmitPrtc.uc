@@ -11,8 +11,7 @@ class JPadEmitPrtc expands Effects;
 #exec TEXTURE IMPORT NAME=YellowStreak FILE=JParticles\YellowStreak.bmp GROUP=Particles FLAGS=2
 #exec MESHMAP SETTEXTURE MESHMAP=JPadEmitPrtc NUM=1 TEXTURE=YellowStreak
 
-var float Count;
-var float LifeF;
+var float Count, Ratio1, Ratio2;
 
 simulated function PostBeginPlay()
 {
@@ -23,6 +22,8 @@ local rotator RRo;
 	RRo.Pitch = Rotation.Pitch;
 	SetRotation(RRo);
 	LifeSpan = 0.5 + FRand();
+	
+	Ratio1 = Default.ScaleGlow / 0.1;
 }
 
 simulated function Tick( float DeltaTime)
@@ -30,14 +31,14 @@ simulated function Tick( float DeltaTime)
 	if (Count < 0.1)
 	{
 		Count += DeltaTime;
-		ScaleGlow = Count * Default.ScaleGlow / 0.1;
+		ScaleGlow = Count * Ratio1;
 	}
 	else
 	{
-		if (LifeF <= 0)
-			LifeF = LifeSpan;
+		if (Ratio2 <= 0)
+			Ratio2 = Default.ScaleGlow / LifeSpan;
 		else
-			ScaleGlow = LifeSpan * Default.ScaleGlow / LifeF;
+			ScaleGlow = LifeSpan * Ratio2;
 	}
 }
 
