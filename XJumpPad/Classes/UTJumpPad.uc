@@ -105,7 +105,11 @@ class UTJumpPad expands Teleporter;
 #exec TEXTURE IMPORT NAME=WhiteStreak FILE=JParticles\WhiteStreak.bmp GROUP=Particles FLAGS=2
 #exec TEXTURE IMPORT NAME=WhiteGrid FILE=JParticles\WhiteGrid.bmp GROUP=Particles FLAGS=2
 
-var float TCountA, TCountB;
+var float TCountA, TCountB, TCountC;
+var rotator R;
+var vector X, Y, Z, jVelocityN;
+var Texture GridTexture, StreakTexture;
+var rotator jVelocityR;
 
 var enum EParticleColor
 {
@@ -203,6 +207,8 @@ simulated function PostBeginPlay()
     Super(NavigationPoint).PostBeginPlay();
     
     bGame = true;
+    
+    InitParticles();
     
     if( Role!=ROLE_Authority )
     {
@@ -599,54 +605,72 @@ function Actor SpecialHandling( Pawn Other )
 
 // ---------------- swJumpPad source --------------------------------
 
+simulated function InitParticles()
+{
+	R = Rotation + rot(16384,0,0);
+	GetAxes(R, X, Y, Z);
+	X = Location + 4*X;
+	
+	jVelocityN = Normal(jVelocity);
+	jVelocityR = rotator(jVelocity);
+	
+	switch (ParticlesColor)
+	{
+		case PCLR_Red: StreakTexture = Texture'RedStreak'; break;
+		case PCLR_Blue: StreakTexture = Texture'BlueStreak'; break;
+		case PCLR_Green: StreakTexture = Texture'GreenStreak'; break;
+		case PCLR_Purple: StreakTexture = Texture'PurpleStreak'; break;
+		case PCLR_Orange: StreakTexture = Texture'OrangeStreak'; break;
+		case PCLR_White: StreakTexture = Texture'WhiteStreak'; break;
+	}
+	
+	switch (GridsColor)
+	{
+		case PCLR_Red: GridTexture = Texture'RedGrid'; break;
+		case PCLR_Blue: GridTexture = Texture'BlueGrid'; break;
+		case PCLR_Green: GridTexture = Texture'GreenGrid'; break;
+		case PCLR_Purple: GridTexture = Texture'PurpleGrid'; break;
+		case PCLR_Orange: GridTexture = Texture'OrangeGrid'; break;
+		case PCLR_White: GridTexture = Texture'WhiteGrid'; break;
+	}
+}
 
 simulated function Tick(float DeltaTime)
 {
-local vector X, Y, Z;
-local int rX, rY;
+local int rX, rY, j;
 local JPadEmitPrtc JStreak;
 local JPadEmitGrid JGrid;
-local byte j;
-local rotator R;
 
 	Super.Tick(DeltaTime);
 
-	if (bDisabled || Level.NetMode == NM_DedicatedServer || bHidden)
+	if (bHidden || bDisabled || Level.NetMode == NM_DedicatedServer)
 		return;
-		
-	R = Rotation + rot(16384,0,0);
 
 	TCountA += DeltaTime;
 	TCountB += DeltaTime;
+	TCountC += DeltaTime;
+	
+	if (TCountC >= 1.0)
+	{
+		TCountC = 0;
+		
+		InitParticles();
+	}
 
 	if (TCountA >= 0.15)
 	{
 		TCountA = 0;
-
-		GetAxes(R, X, Y, Z);
 		
 		For (j=0; j<4; j++)
 		{
 			rX = (Rand(57) - 28) * DrawScale;
 			rY = (Rand(57) - 28) * DrawScale;
 	
-			JStreak = Spawn(Class'JPadEmitPrtc',,, Location + rX*Z + rY*Y + 4*X, rotator(jVelocity));
-			JStreak.Velocity = Normal(jVelocity) * FRand() * ParticlesSpeed * DrawScale;
+			JStreak = Spawn(Class'JPadEmitPrtc',,, X + rX*Z + rY*Y, jVelocityR);
+			JStreak.Velocity = jVelocityN * FRand() * ParticlesSpeed * DrawScale;
 	
 			JStreak.DrawScale = DrawScale;
-	
-			if (ParticlesColor == PCLR_Red)
-				JStreak.MultiSkins[1] = Texture'RedStreak';
-			else if (ParticlesColor == PCLR_Blue)
-				JStreak.MultiSkins[1] = Texture'BlueStreak';
-			else if (ParticlesColor == PCLR_Green)
-				JStreak.MultiSkins[1] = Texture'GreenStreak';
-			else if (ParticlesColor == PCLR_Purple)
-				JStreak.MultiSkins[1] = Texture'PurpleStreak';
-			else if (ParticlesColor == PCLR_Orange)
-				JStreak.MultiSkins[1] = Texture'OrangeStreak';
-			else if (ParticlesColor == PCLR_White)
-				JStreak.MultiSkins[1] = Texture'WhiteStreak';
+			JStreak.MultiSkins[1] = StreakTexture;
 		}
 	}
 
@@ -654,25 +678,12 @@ local rotator R;
 	{
 		TCountB = 0;
 
-		GetAxes(R, X, Y, Z);
-		JGrid = Spawn(Class'JPadEmitGrid',,, Location + 4*X);
+		JGrid = Spawn(Class'JPadEmitGrid',,, X);
 		
-		JGrid.Velocity = Normal(jVelocity) * GridsSpeed * DrawScale;
+		JGrid.Velocity = jVelocityN * GridsSpeed * DrawScale;
 
 		JGrid.DrawScale = DrawScale;
-
-		if (GridsColor == PCLR_Red)
-			JGrid.MultiSkins[1] = Texture'RedGrid';
-		else if (GridsColor == PCLR_Blue)
-			JGrid.MultiSkins[1] = Texture'BlueGrid';
-		else if (GridsColor == PCLR_Green)
-			JGrid.MultiSkins[1] = Texture'GreenGrid';
-		else if (GridsColor == PCLR_Purple)
-			JGrid.MultiSkins[1] = Texture'PurpleGrid';
-		else if (GridsColor == PCLR_Orange)
-			JGrid.MultiSkins[1] = Texture'OrangeGrid';
-		else if (GridsColor == PCLR_White)
-			JGrid.MultiSkins[1] = Texture'WhiteGrid';
+		JGrid.MultiSkins[1] = GridTexture;
 	}
 }
 
