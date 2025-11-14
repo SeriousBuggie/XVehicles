@@ -17,13 +17,13 @@ var JPadEmitGrid Next;
 simulated function PostBeginPlay()
 {
 	Ratio1 = Default.ScaleGlow / 0.1;
-	Ratio2 = Default.ScaleGlow / (Default.LifeSpan - 1.1);
+	Ratio2 = Default.ScaleGlow / (Default.LifeSpan - 5.1);
 }
 
 simulated function Tick( float DeltaTime)
 {
 	local UTJumpPad Host;
-	if (LifeSpan <= 1.0)
+	if (LifeSpan <= 5.0)
 	{
 		bHidden = true;
 		Disable('Tick');
@@ -41,14 +41,14 @@ simulated function Tick( float DeltaTime)
 		ScaleGlow = Count * Ratio1;
 	}
 	else
-		ScaleGlow = (LifeSpan - 1.0) * Ratio2;
+		ScaleGlow = (LifeSpan - 5.0) * Ratio2;
 }
 
 defaultproperties
 {
 	Physics=PHYS_Projectile
 	RemoteRole=ROLE_None
-	LifeSpan=2.000000
+	LifeSpan=6.000000
 	DrawType=DT_Mesh
 	Style=STY_Translucent
 	Mesh=LodMesh'JPadEmitGrid'

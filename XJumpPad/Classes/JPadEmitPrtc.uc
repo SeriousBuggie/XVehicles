@@ -21,7 +21,7 @@ local rotator RRo;
 	RRo = Rotation;
 	RRo.Roll = 2 * Rand(16384);
 	SetRotation(RRo);
-	LifeSpan = 1.5 + FRand();
+	LifeSpan = 5.5 + FRand();
 	
 	Ratio1 = Default.ScaleGlow / 0.1;
 }
@@ -29,7 +29,7 @@ local rotator RRo;
 simulated function Tick( float DeltaTime)
 {
 	local UTJumpPad Host;
-	if (LifeSpan <= 1.0)
+	if (LifeSpan <= 5.0)
 	{
 		bHidden = true;
 		Disable('Tick');
@@ -49,9 +49,9 @@ simulated function Tick( float DeltaTime)
 	else
 	{
 		if (Ratio2 <= 0)
-			Ratio2 = Default.ScaleGlow / (LifeSpan - 1.0);
+			Ratio2 = Default.ScaleGlow / (LifeSpan - 5.0);
 		else
-			ScaleGlow = (LifeSpan - 1.0) * Ratio2;
+			ScaleGlow = (LifeSpan - 5.0) * Ratio2;
 	}
 }
 
