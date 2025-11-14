@@ -741,6 +741,7 @@ function RestoreAmbushSpot(Bot Bot) {
 
 defaultproperties
 {
+	TCountC=42.000000
 	ParticlesColor=PCLR_Yellow
 	GridsColor=PCLR_Yellow
 	ParticlesSpeed=160.000000
