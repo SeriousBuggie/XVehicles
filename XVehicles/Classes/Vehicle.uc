@@ -3117,6 +3117,11 @@ Auto State EmptyVehicle
 			if (P.bIsPlayer && PlayerPawn(P) != None && VSize(P.Location - Location) < (CollisionRadius + 100 + P.CollisionRadius) && 
 				CanEnter(P, True) && !IsTeamLockedFor(P))
 				P.ReceiveLocalizedMessage(class'EnterMessagePlus', 0, None, None, self);
+			if (P.bIsPlayer && Bot(P) != None && VSize(P.Location - Location) < Min(CollisionRadius, CollisionHeight) && CanEnter(P)) {
+				Bump(P);
+				if (!IsInState('EmptyVehicle'))
+					break;
+			}
 		}
 	}
 	singular function Bump(Actor Other)
@@ -3149,8 +3154,11 @@ Auto State EmptyVehicle
 		local PlayerPawn PP;
 		Global.Timer();
 		foreach RadiusActors(class'PlayerPawn', PP, CollisionRadius + 100)
-			if (CanEnter(PP))
+			if (CanEnter(PP)) {
 				Bump(PP);
+				if (!IsInState('EmptyVehicle'))
+					break;
+			}
 	}
 	function BeginState()
 	{
