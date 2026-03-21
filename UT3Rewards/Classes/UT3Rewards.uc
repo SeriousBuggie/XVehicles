@@ -10,6 +10,25 @@ var int Counter[ArrayCount(Sounds)];
 
 var Pawn LastKilled, LastKiller;
 var int LastMessage, Offset, LastNew;
+var bool DriverChecked;
+
+simulated function CheckDriver() {
+	local string AudioDriverClassName;
+	local int i;
+	local Sound Snd;
+	if (DriverChecked)
+		return;
+	DriverChecked = true;
+	
+	AudioDriverClassName = Level.ConsoleCommand("get ini:Engine.Engine.AudioDevice Class");
+	if (InStr(AudioDriverClassName, "Galaxy") != -1) {
+		for (i = 0; i < ArrayCount(Sounds); i++) {
+			Snd = Sound(DynamicLoadObject(Class.Outer.Name $ "." $ Sounds[i].Name $ "_mono", class'Sound'));
+			if (Snd != None)
+				Sounds[i] = Snd;	
+		}
+	}
+}
 
 simulated function string GetString(
 	optional int Sw,
@@ -34,8 +53,10 @@ simulated function string GetString(
 				else
 					Sw = 10 + (Counter[Sw] % 4);
 			}
-			if (bNewMessage)
+			if (bNewMessage) {
+				CheckDriver();
 				PlayReward(Sounds[Sw]);
+			}
 			return Strings[Sw];
 		}
 	}

@@ -23,6 +23,6 @@ static function string GetString(
 defaultproperties
 {
 	bBeep=False
-	DrawColor=(R=255,G=128,B=255,A=0)
+	DrawColor=(R=255)
 	YPos=160.000000
 }
