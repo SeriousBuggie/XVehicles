@@ -2508,7 +2508,8 @@ simulated function UpdatePassengerPos()
 				NextFreeSeat = GetNextFreeSeat(i);
 				if (NextFreeSeat != -1)
 					ChangeSeat(NextFreeSeat + 1, true, i);
-				else if ((Bot.PlayerReplicationInfo.HasFlag != None && PlayerPawn(Driver) == None) ||
+				else if ((Bot.PlayerReplicationInfo.HasFlag != None && PlayerPawn(Driver) == None && 
+					(Driver == None || Driver.PlayerReplicationInfo.HasFlag == None)) ||
 					(Driver == None && (WaitForDriver < Level.TimeSeconds || LastDriver == None || LastDriver == Bot ||
 					DriverWeapon(LastDriver.Weapon) != None ||
 					(Bot(LastDriver) != None && VSize(LastDriver.Location - Location) > 1000) ||
