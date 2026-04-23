@@ -3118,7 +3118,8 @@ Auto State EmptyVehicle
 			if (P.bIsPlayer && PlayerPawn(P) != None && VSize(P.Location - Location) < (CollisionRadius + 100 + P.CollisionRadius) && 
 				CanEnter(P, True) && !IsTeamLockedFor(P))
 				P.ReceiveLocalizedMessage(class'EnterMessagePlus', 0, None, None, self);
-			if (P.bIsPlayer && Bot(P) != None && VSize(P.Location - Location) < Min(CollisionRadius, CollisionHeight) && CanEnter(P)) {
+			if (P.bIsPlayer && Bot(P) != None && VSize(P.Location - Location) < Min(CollisionRadius, CollisionHeight) && 
+				BotDesireability2(Bot(P)) > 0) {
 				Bump(P);
 				if (!IsInState('EmptyVehicle'))
 					break;
