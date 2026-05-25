@@ -1365,7 +1365,7 @@ function Actor GetFlagGoal(Pawn Pawn)
 		(FlagBase(FlagGoal).Team == Pawn.PlayerReplicationInfo.Team) ==
 		(Pawn.PlayerReplicationInfo.HasFlag == None))
 		return None;
-	if (FlagGoal == None && (IsImportantMoveTarget(Pawn.MoveTarget) || TravelToInventory(Pawn)))
+	if (FlagGoal == None && (IsImportantMoveTarget(Pawn) || TravelToInventory(Pawn)))
 		return Pawn.MoveTarget;
 	return FlagGoal;
 }
@@ -2865,7 +2865,7 @@ function bool NeedStop(Pawn pDriver)
 		UTJumpPad(pDriver.RouteCache[1]) != None && 
 		string(pDriver.RouteCache[1].Tag) ~= UTJumpPad(pDriver.RouteCache[0]).URL)
 		return true;
-	if (Driver == pDriver && IsImportantMoveTarget(pDriver.MoveTarget))
+	if (Driver == pDriver && IsImportantMoveTarget(pDriver))
 		return true;
 	if (Driver == pDriver && TravelToInventory(pDriver))
 		return true;
@@ -2889,10 +2889,14 @@ function bool TravelToInventory(Pawn pDriver)
 	return false;
 }
 
-static function bool IsImportantMoveTarget(Actor MoveTarget)
+static function bool IsImportantMoveTarget(Pawn Seeker)
 {
+	local Actor MoveTarget;
+	MoveTarget = Seeker.MoveTarget;
 	if (MoveTarget != None && (
-		(MoveTarget.bGameRelevant && DriverWeapon(MoveTarget) == None && BotAttractInv(MoveTarget) == None) ||
+		(MoveTarget.bGameRelevant && DriverWeapon(MoveTarget) == None && BotAttractInv(MoveTarget) == None &&
+		// Ensure it is not a transit nav point.
+		(MoveTarget != Seeker.RouteCache[0] || Seeker.RouteCache[1] == None)) ||
 		(FortStandard(MoveTarget) != None && FortStandard(MoveTarget).bTriggerOnly)
 		))
 		return true;
