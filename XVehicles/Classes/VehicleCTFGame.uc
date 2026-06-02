@@ -5,6 +5,7 @@ class VehicleCTFGame expands CTFGame;
 
 defaultproperties
 {
+	GoalTeamScore=3.000000
 	TimeLimit=0
 	bCoopWeaponMode=True
 	MapListType=Class'VCTFMapList'
