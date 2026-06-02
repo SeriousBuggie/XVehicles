@@ -64,6 +64,7 @@ var WeaponAttachment WAtt;
 var float firec;
 var byte bInFiringProcess;
 
+var float LastPointingTime;
 
 //Gathering energy effect
 var(EnergyParticles) bool bUseEnergyFX;
@@ -581,6 +582,10 @@ function FireTurret( byte Mode, optional bool bForceFire )
 	}
 
 	SpawnFireEffects(Mode);
+	
+	LastPointingTime = Level.TimeSeconds + 1;
+	if (DriverWeapon(WeaponController.Weapon) != None)
+		WeaponController.Weapon.bPointing = true;
 
 	if (!bPhysicalGunAimOnly)
 	{
@@ -867,8 +872,9 @@ simulated function Tick( float Delta )
 		AmbientSound = Default.AmbientSound;
 		Return;
 	}
-	if (DriverWeapon(WeaponController.Weapon) != None)
-		WeaponController.Weapon.bPointing = WeaponController.bFire != 0 || WeaponController.bAltFire != 0;
+	if (DriverWeapon(WeaponController.Weapon) != None && WeaponController.Weapon.bPointing &&
+		WeaponController.bFire + WeaponController.bAltFire == 0 && LastPointingTime < Level.TimeSeconds)
+		WeaponController.Weapon.bPointing = false;
 	if (Level.NetMode != NM_Client || (WeaponController != None && IsNetOwner(WeaponController)))
 	{
 		if (PlayerPawn(WeaponController) == None)
