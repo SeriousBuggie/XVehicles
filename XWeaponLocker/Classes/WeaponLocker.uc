@@ -129,7 +129,7 @@ function Inventory SpawnCopy( pawn P )
 					InvK.GiveAmmo(P);
 					InvK.SetSwitchPriority(P);
 					if (InvK.AmmoType != None)
-						InvK.AmmoType.AmmoAmount += Weapons[i].ExtraAmmo;
+						AddAmmoBumpMax(InvK.AmmoType, InvK.AmmoType.AmmoAmount, Weapons[i].ExtraAmmo);
 					if ( !P.bNeverSwitchOnPickup )
 						InvK.WeaponSet(P);
 					InvK.AmbientGlow = 0;
@@ -161,10 +161,16 @@ function bool RefillAmmo(Pawn P, class<Weapon> WeaponClass, int ExtraAmmo)
 	If (InvK != None)
 	{
 		If( InvK.AmmoType != None && InvK.AmmoType.AmmoAmount < InvK.PickupAmmoCount + ExtraAmmo)
-			InvK.AmmoType.AmmoAmount = InvK.PickupAmmoCount + ExtraAmmo;
+			AddAmmoBumpMax(InvK.AmmoType, InvK.PickupAmmoCount, ExtraAmmo);
 		return true;
 	}
 	return false;
+}
+
+function AddAmmoBumpMax(Ammo A, int BaseCount, int AddAmount) {
+	A.AmmoAmount = BaseCount + AddAmount;
+	if (A.AmmoAmount > A.MaxAmmo)
+		A.MaxAmmo = A.AmmoAmount;
 }
 
 simulated function PostBeginPlay()
