@@ -1390,10 +1390,11 @@ function ProcessExit(Pawn Pawn, DriverCameraActor Camera)
 {
 	local Bot Bot;
 	local Actor FlagGoal;
-	local Vector SmallMove;
+	local Vector SmallMove, OrigVelocity;
 	
 	if (Pawn != None)
 	{
+		OrigVelocity = Pawn.Velocity;
 		Bot = Bot(Pawn);
 		if (Bot != None)
 		{
@@ -1410,7 +1411,7 @@ function ProcessExit(Pawn Pawn, DriverCameraActor Camera)
 			}
 		}
 		Pawn.MoveTimer = -1; // time to refresh paths
-		if (!Pawn.IsInState('GameEnded') && (Level.Game == None || !Level.Game.bGameEnded))
+		if (!Pawn.IsInState('GameEnded') && (Level.Game == None || !Level.Game.bGameEnded) && OrigVelocity != Velocity && Pawn.Base != self)
 			Pawn.Velocity += Velocity; // inertial exit
 		Pawn.Weapon = Pawn.PendingWeapon;
 		Pawn.ChangedWeapon();
