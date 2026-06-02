@@ -1156,6 +1156,7 @@ function ChangeCollision(Pawn Other, bool bInside, int Seat)
 	if (bInside)
 	{
 		Other.DrawScale = SmallDrawScale;
+		Other.Visibility = 255;
 		if (Other.Weapon == Other.PendingWeapon) // Restore back for enable XVehiclesHUD.HandlePickupQuery blocker.
 		{
 			if (Seat == 0)
@@ -1181,6 +1182,7 @@ function ChangeCollision(Pawn Other, bool bInside, int Seat)
 			Other.SetCollision(True,False,False); // after move be set to true
 		}
 		Other.bCollideWorld = True;
+		Other.Visibility = Other.default.Visibility;
 		Other.SetCollisionSize(Other.default.CollisionRadius, Other.default.CollisionHeight);
 		if (Other.Region.Zone == None)
 			; // skip
@@ -2432,6 +2434,7 @@ simulated function ResetPawn(Pawn Other, rotator R, Weapon Weap)
 		SwitchWeapon(Other, Weap);
 
 	Other.Velocity = Velocity;
+	Other.Visibility = 255;
 	if (Level.NetMode < NM_Client)
 	{
 		CollideActors = GetCollideActors(Other);
