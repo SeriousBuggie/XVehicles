@@ -867,6 +867,8 @@ simulated function Tick( float Delta )
 		AmbientSound = Default.AmbientSound;
 		Return;
 	}
+	if (DriverWeapon(WeaponController.Weapon) != None)
+		WeaponController.Weapon.bPointing = WeaponController.bFire != 0 || WeaponController.bAltFire != 0;
 	if (Level.NetMode != NM_Client || (WeaponController != None && IsNetOwner(WeaponController)))
 	{
 		if (PlayerPawn(WeaponController) == None)
