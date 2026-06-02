@@ -287,8 +287,6 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Sw,
 			case 35: Sound = Sound'NewRoundIn';                       break;
 			case 36: Sound = Sound'Red_team_controls_all_powernodes'; break;
 			case 37: Sound = Sound'Blue_team_controls_all_powernodes';break;
-			case 38: Sound = Sound'Red_powerchain_severed';           break;
-			case 39: Sound = Sound'Blue_powerchain_severed';          break;
 		}
 		if (RelatedPRI_2 != None) // Jammed by request.
 			Sound = None;
