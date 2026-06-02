@@ -13,6 +13,7 @@ simulated event PostRender(canvas Canvas) {
 
 defaultproperties
 {
+	bAddToPackageMap=True
 	RemoteRole=ROLE_None
 	bGameRelevant=True
 }

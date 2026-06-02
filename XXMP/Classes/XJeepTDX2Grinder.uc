@@ -40,5 +40,4 @@ defaultproperties
 	WarthogRLProbability=0.500000
 	FromFactoryClass=Class'XWheelVeh.JeepTDXFactory'
 	ToFactoryClass=Class'GrinderFactory'
-	bAddToPackageMap=True
 }

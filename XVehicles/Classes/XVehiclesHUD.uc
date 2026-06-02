@@ -555,6 +555,7 @@ defaultproperties
 	bNeedCleaner=True
 	ShowBindsOnEnter=True
 	bHUDMutator=True
+	bAddToPackageMap=True
 	bAlwaysRelevant=True
 	RemoteRole=ROLE_SimulatedProxy
 }

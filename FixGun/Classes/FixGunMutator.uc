@@ -56,4 +56,5 @@ function Timer()
 
 defaultproperties
 {
+	bAddToPackageMap=True
 }

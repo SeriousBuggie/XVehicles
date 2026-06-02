@@ -7,5 +7,4 @@ defaultproperties
 {
 	FromFactoryClass=Class'XTreadVeh.TankGKOneFactory'
 	ToFactoryClass=Class'JuggernautFactory'
-	bAddToPackageMap=True
 }

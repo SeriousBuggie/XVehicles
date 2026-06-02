@@ -121,4 +121,5 @@ function SetupVehicleClass(Class<vehicle> cl)
 
 defaultproperties
 {
+	bAddToPackageMap=True
 }

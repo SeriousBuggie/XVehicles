@@ -152,4 +152,5 @@ function bool ReplaceWith(actor Other, string aClassName) {
 defaultproperties
 {
 	ZonesPackName="xZones"
+	bAddToPackageMap=True
 }

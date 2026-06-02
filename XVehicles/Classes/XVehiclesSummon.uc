@@ -64,4 +64,5 @@ function Mutate(string MutateString, PlayerPawn Sender)
 
 defaultproperties
 {
+	bAddToPackageMap=True
 }

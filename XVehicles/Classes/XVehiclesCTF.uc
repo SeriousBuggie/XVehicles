@@ -359,4 +359,5 @@ function Tick(float delta)
 defaultproperties
 {
 	bShowFlagBase=True
+	bAddToPackageMap=True
 }

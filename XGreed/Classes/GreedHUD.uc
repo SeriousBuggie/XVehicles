@@ -285,6 +285,7 @@ defaultproperties
 	GreenColor=(G=255)
 	YellowColor=(R=255,G=255)
 	WhiteColor=(R=255,G=255,B=255)
+	bAddToPackageMap=True
 	bAlwaysRelevant=True
 	RemoteRole=ROLE_SimulatedProxy
 	bGameRelevant=True

@@ -36,5 +36,6 @@ function Swap()
 defaultproperties
 {
 	Probability=0.500000
+	bAddToPackageMap=True
 	RemoteRole=ROLE_None
 }
