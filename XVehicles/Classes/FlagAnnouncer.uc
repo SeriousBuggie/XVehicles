@@ -290,6 +290,8 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Sw,
 			case 38: Sound = Sound'Red_powerchain_severed';           break;
 			case 39: Sound = Sound'Blue_powerchain_severed';          break;
 		}
+		if (RelatedPRI_2 != None) // Jammed by request.
+			Sound = None;
 	}
 	if (bPlaySound && Sound != None)
 	{
