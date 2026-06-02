@@ -267,8 +267,8 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Sw,
 			case  1: Sound = Sound'blue_team_is_the_winner';          break;
 			case  7: Sound = Sound'Red_Powercore_under_attack';       break;
 			case  8: Sound = Sound'Blue_Powercore_under_attack';      break;
-			case  9: Sound = Sound'PowerNode_is_under_attack';        break;
-			case 10: Sound = Sound'PowerNode_is_under_attack';        break;
+//			case  9: Sound = Sound'PowerNode_is_under_attack';        break; // Too spammy.
+//			case 10: Sound = Sound'PowerNode_is_under_attack';        break; // Too spammy.
 			case 14: Sound = Sound'Red_Powercore_destroyed';          break;
 			case 15: Sound = Sound'Blue_Powercore_destroyed';         break;
 			case 16: Sound = Sound'Red_powernode_destroyed';          break;
