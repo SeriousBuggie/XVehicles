@@ -64,6 +64,44 @@ static function Update(Actor Source)
 	default.Instance.Store();
 }
 
+static function Init(Actor Source, XVehiclesCTF.EPulseForHeal PulseForHeal)
+{
+	local bool bPulseAltHeal;
+	Local PulseGun Pulse;
+	local Mutator M;
+
+	if (!class'VehiclesConfig'.default.bDisableFastWarShell)
+		Source.Spawn(class'FastWSNotify'); // Fast WarShell
+		
+	if (!class'VehiclesConfig'.default.bAllowTranslocator && DeathMatchPlus(Source.Level.Game) != None)
+		DeathMatchPlus(Source.Level.Game).bUseTranslocator = false;
+	
+	if (TeamGamePlus(Source.Level.Game) != None)
+		Source.Spawn(class'FlagAnnouncer');
+		
+	class'XVehiclesHUD'.static.SpawnHUD(Source);
+	
+	if (PulseForHeal == PFH_Yes)
+		bPulseAltHeal = true;
+	else if (PulseForHeal == PFH_Auto)
+	{
+		foreach Source.AllActors(class'PulseGun', Pulse)
+			if (Pulse.isA('FixGun'))
+				break;
+		if (Pulse == None) // on map no any Fixgun?
+		{
+			foreach Source.AllActors(class'Mutator', M)
+				if (M.isA('FixGunMutator'))
+					break;
+			if (M == None) // FixGunMutator not loaded? (able give FixGun on enter to vehicle)
+				bPulseAltHeal = true;
+		}
+	}
+	
+	class'VehiclesConfig'.default.bPulseAltHeal = bPulseAltHeal;
+	class'VehiclesConfig'.static.Update(Source);
+}
+
 defaultproperties
 {
 	bPulseAltHeal=True

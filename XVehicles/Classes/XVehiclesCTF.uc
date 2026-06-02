@@ -23,9 +23,6 @@ var DefensePointCache DPC;
 event PreBeginPlay()
 {
 	local Actor A;
-	local bool bPulseAltHeal;
-	Local PulseGun Pulse;
-	local Mutator M;
 	local FlagBase FB;
 	Local XFlagBase xFB;
 	Local vector HL, HN, dir;
@@ -38,36 +35,7 @@ event PreBeginPlay()
 	if (A != self)
 		return;
 
-	if (!class'VehiclesConfig'.default.bDisableFastWarShell)
-		Spawn(class'FastWSNotify'); // Fast WarShell
-		
-	if (!class'VehiclesConfig'.default.bAllowTranslocator && DeathMatchPlus(Level.Game) != None)
-		DeathMatchPlus(Level.Game).bUseTranslocator = false;
-	
-	if (TeamGamePlus(Level.Game) != None)
-		Spawn(class'FlagAnnouncer');
-		
-	class'XVehiclesHUD'.static.SpawnHUD(self);
-	
-	if (PulseForHeal == PFH_Yes)
-		bPulseAltHeal = true;
-	else if (PulseForHeal == PFH_Auto)
-	{
-		foreach AllActors(class'PulseGun', Pulse)
-			if (Pulse.isA('FixGun'))
-				break;
-		if (Pulse == None) // on map no any Fixgun?
-		{
-			foreach AllActors(class'Mutator', M)
-				if (M.isA('FixGunMutator'))
-					break;
-			if (M == None) // FixGunMutator not loaded? (able give FixGun on enter to vehicle)
-				bPulseAltHeal = true;
-		}
-	}
-	
-	class'VehiclesConfig'.default.bPulseAltHeal = bPulseAltHeal;
-	class'VehiclesConfig'.static.Update(self);
+	class'VehiclesConfig'.static.Init(self, PulseForHeal);
 	
 	if (bShowFlagBase)
 		foreach AllActors(class'FlagBase', FB)
