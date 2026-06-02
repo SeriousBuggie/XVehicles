@@ -1123,7 +1123,7 @@ function bool FindEnemy()
 	local float Dist, BestDist;
 	local Actor Hit, Best;
 	local vector HL, HN, Extent;
-	local name BotState;
+	local name BotState, BotOrders;
 	local Vehicle Veh;
 	local int i;
 	
@@ -1150,6 +1150,8 @@ function bool FindEnemy()
 		Extent.X = OwnerVehicle.CollisionRadius;
 		Extent.Y = Extent.X;
 		Extent.Z = OwnerVehicle.CollisionHeight;
+		BotOrders = Bot.Orders;
+		Bot.Orders = 'Freelance';
 		foreach OwnerVehicle.TraceActors(class'Vehicle', Veh, HL, HN, OwnerVehicle.MoveDest, OwnerVehicle.Location, Extent)
 			// Other can be LevelInfo in v436
 			if (Veh.IsA('Vehicle') && Veh != OwnerVehicle && Veh.HealthTooLowFor(Bot) && 
@@ -1159,6 +1161,7 @@ function bool FindEnemy()
 				Best = Veh;
 				break;
 			}
+		Bot.Orders = BotOrders;
 	}		
 	if (Best == None)
 		for( P=Level.PawnList; P!=None; P=P.NextPawn )
