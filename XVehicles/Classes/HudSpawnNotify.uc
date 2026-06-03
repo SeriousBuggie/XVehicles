@@ -3,11 +3,12 @@
 //=============================================================================
 class HudSpawnNotify expands SpawnNotify;
 
-var XVehiclesHUD HUDMutator;
+var Mutator HUDMutator;
 
 event Actor SpawnNotification(Actor A)
 {
 	local Mutator M;
+	local ENetRole OldRole;
 	if (ChallengeHUD(A) != None)
 	{
 		M = ChallengeHUD(A).HUDMutator;
@@ -20,7 +21,10 @@ event Actor SpawnNotification(Actor A)
 			if (XVHUDProxy(M) == None)
 				M.NextHUDMutator = Spawn(class'XVHUDProxy', HUDMutator);
 		}
-		HUDMutator.FoundHuds++;
+		OldRole = HUDMutator.Role;
+		HUDMutator.Role = ROLE_Authority;
+		HUDMutator.SetPropertyText("FoundHuds", string(int(HUDMutator.GetPropertyText("FoundHuds")) + 1));
+		HUDMutator.Role = OldRole;
 	}
 	return A;
 }
