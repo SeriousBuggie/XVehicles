@@ -61,14 +61,14 @@ defaultproperties
 	ProjAccel=24000.000000
 	bDirectHit=True
 	ExplosionNoise=1.000000
-	DmgRadius=64.000000
+	DmgRadius=200.000000
 	bNeverHurtInstigator=True
 	bNoHurtTeam=True
 	bDirectionalBlow=True
 	speed=1500.000000
 	MaxSpeed=12500.000000
 	Damage=25.000000
-	MomentumTransfer=25500
+	MomentumTransfer=4000
 	MyDamageType="CybotLaser"
 	ExplosionDecal=Class'CybProjDecal'
 	Style=STY_Translucent
