@@ -16,9 +16,9 @@ event Actor SpawnNotification(Actor A)
 			ChallengeHUD(A).HUDMutator = Spawn(class'XVHUDProxy', HUDMutator);
 		else
 		{
-			while (XVHUDProxy(M) == None && M.NextHUDMutator != None)
+			while (M.NextHUDMutator != None && (XVHUDProxy(M) == None || M.Owner != HUDMutator))
 				M = M.NextHUDMutator;
-			if (XVHUDProxy(M) == None)
+			if (XVHUDProxy(M) == None || M.Owner != HUDMutator)
 				M.NextHUDMutator = Spawn(class'XVHUDProxy', HUDMutator);
 		}
 		OldRole = HUDMutator.Role;
