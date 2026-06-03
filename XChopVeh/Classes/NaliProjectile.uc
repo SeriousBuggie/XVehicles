@@ -67,6 +67,7 @@ var bool HealthGiver;
 var byte savedTeam;
 var string ownerName;
 
+var Actor LastDirectVictim;
 
 function BeginPlay()
 {
@@ -326,10 +327,15 @@ simulated function ProcessTouch (Actor Other, Vector HitLocation)
 	if (Other.IsA('Projectile') && !Other.bProjTarget)
 		return;
 	
+	LastDirectVictim = None;
 	if (bDirectHit)
+	{
 		DirectHurtProcess( Other, HitLocation);
+		LastDirectVictim = Other;
+	}
 
 	ExplodeX( HitLocation, Normal(HitLocation-Other.Location), Other);
+	LastDirectVictim = None;
 }
 
 simulated function SetWallDecal( vector HitNormal, actor Wall)
@@ -465,7 +471,7 @@ local float tempKick;
 
 function bool ProcessHurtRadiusVictim(Actor Victim)
 {
-	return False;
+	return Victim == LastDirectVictim;
 }
 
 function PostProcessVictim(Actor Victim);
