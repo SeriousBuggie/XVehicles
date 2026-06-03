@@ -230,6 +230,7 @@ simulated function PlaySelect()
 
 function Fire(float F)
 {
+	bPointing = false; // undo PlayerPawn.Fire's set - FireTurret will re-True it on actual fire
 	if( bPassengerGun )
 		VehicleOwner.PassengerFireWeapon(False,SeatNumber);
 	else
@@ -237,6 +238,7 @@ function Fire(float F)
 }
 function AltFire(float F) 
 {
+	bPointing = false; // undo PlayerPawn.AltFire's set
 	if( bPassengerGun )
 		VehicleOwner.PassengerFireWeapon(True,SeatNumber);
 	else

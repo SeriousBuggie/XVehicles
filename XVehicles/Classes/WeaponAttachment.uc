@@ -584,7 +584,7 @@ function FireTurret( byte Mode, optional bool bForceFire )
 	SpawnFireEffects(Mode);
 	
 	LastPointingTime = Level.TimeSeconds + 1;
-	if (DriverWeapon(WeaponController.Weapon) != None)
+	if (WeaponController != None && DriverWeapon(WeaponController.Weapon) != None)
 		WeaponController.Weapon.bPointing = true;
 
 	if (!bPhysicalGunAimOnly)
@@ -873,7 +873,7 @@ simulated function Tick( float Delta )
 		Return;
 	}
 	if (DriverWeapon(WeaponController.Weapon) != None && WeaponController.Weapon.bPointing &&
-		WeaponController.bFire + WeaponController.bAltFire == 0 && LastPointingTime < Level.TimeSeconds)
+		LastPointingTime < Level.TimeSeconds && WeaponController.bFire + WeaponController.bAltFire == 0)
 		WeaponController.Weapon.bPointing = false;
 	if (Level.NetMode != NM_Client || (WeaponController != None && IsNetOwner(WeaponController)))
 	{
