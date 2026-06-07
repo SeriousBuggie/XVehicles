@@ -260,36 +260,15 @@ event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Sw,
 			}
 		}
 	}
-	if (Message != None && Message.Name == 'ONSMessage')
+	// Generic interface for obtain Sound from specific class.
+	if (Message != None && Message.default.bAnimNotify)
 	{
-		switch (Sw) {
-			case  0: Sound = Sound'red_team_is_the_winner';           break;
-			case  1: Sound = Sound'blue_team_is_the_winner';          break;
-			case  7: Sound = Sound'Red_Powercore_under_attack';       break;
-			case  8: Sound = Sound'Blue_Powercore_under_attack';      break;
-//			case  9: Sound = Sound'PowerNode_is_under_attack';        break; // Too spammy.
-//			case 10: Sound = Sound'PowerNode_is_under_attack';        break; // Too spammy.
-			case 14: Sound = Sound'Red_Powercore_destroyed';          break;
-			case 15: Sound = Sound'Blue_Powercore_destroyed';         break;
-			case 16: Sound = Sound'Red_powernode_destroyed';          break;
-			case 17: Sound = Sound'Blue_powernode_destroyed';         break;
-			case 18: Sound = Sound'Red_Powercore_critical';           break;
-			case 19: Sound = Sound'Blue_Powercore_critical';          break;
-			case 20: Sound = Sound'Red_PowerCore_vulnerable';         break;
-			case 21: Sound = Sound'Blue_Powercore_vulnerable';        break;
-			case 23: Sound = Sound'Red_powernode_under_construction'; break;
-			case 24: Sound = Sound'Blue_powernode_under_construction';break;
-			case 25: Sound = Sound'Red_Powercore_damaged';            break;
-			case 26: Sound = Sound'Blue_Powercore_damaged';           break;
-			case 27: Sound = Sound'Red_powernode_isolated';           break;
-			case 28: Sound = Sound'Blue_powernode_isolated';          break;
-			case 29: Sound = Sound'sudden_death';                     break;
-			case 35: Sound = Sound'NewRoundIn';                       break;
-			case 36: Sound = Sound'Red_team_controls_all_powernodes'; break;
-			case 37: Sound = Sound'Blue_team_controls_all_powernodes';break;
-		}
-		if (RelatedPRI_2 != None) // Jammed by request.
-			Sound = None;
+		Message.default.bAnimByOwner = true;
+		Message.default.AmbientSound = None;
+		if (Message.static.GetString(Sw, RelatedPRI_1, RelatedPRI_2, OptionalObject) == "Result in AmbientSound field")
+			Sound = Message.default.AmbientSound;
+		Message.default.bAnimByOwner = false;
+		Message.default.AmbientSound = None;
 	}
 	if (bPlaySound && Sound != None)
 	{
