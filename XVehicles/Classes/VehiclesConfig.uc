@@ -64,11 +64,15 @@ static function Update(Actor Source)
 	default.Instance.Store();
 }
 
-static function Init(Actor Source, XVehiclesCTF.EPulseForHeal PulseForHeal)
+static function bool Init(Actor Source, XVehiclesCTF.EPulseForHeal PulseForHeal)
 {
 	local bool bPulseAltHeal;
 	Local PulseGun Pulse;
 	local Mutator M;
+	local FlagAnnouncer Announcer;
+	
+	foreach Source.AllActors(class'FlagAnnouncer', Announcer)
+		return false;
 
 	if (!class'VehiclesConfig'.default.bDisableFastWarShell)
 		Source.Spawn(class'FastWSNotify'); // Fast WarShell
@@ -100,6 +104,7 @@ static function Init(Actor Source, XVehiclesCTF.EPulseForHeal PulseForHeal)
 	
 	class'VehiclesConfig'.default.bPulseAltHeal = bPulseAltHeal;
 	class'VehiclesConfig'.static.Update(Source);
+	return true;
 }
 
 defaultproperties

@@ -30,12 +30,22 @@ event PreBeginPlay()
 	
 	Super.PreBeginPlay();
 	
+	if (Level.Game != None && Level.Game.IsA('Onslaught')) {
+		Destroy();
+		return;
+	}
+	
 	foreach AllActors(Class, A)
 		break;
-	if (A != self)
+	if (A != self) {
+		Destroy();
 		return;
+	}
 
-	class'VehiclesConfig'.static.Init(self, PulseForHeal);
+	if (!class'VehiclesConfig'.static.Init(self, PulseForHeal)) {
+		Destroy();
+		return;
+	}
 	
 	if (bShowFlagBase)
 		foreach AllActors(class'FlagBase', FB)
