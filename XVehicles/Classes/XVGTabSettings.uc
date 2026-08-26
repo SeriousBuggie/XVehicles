@@ -3,7 +3,7 @@
 //=============================================================================
 class XVGTabSettings expands XVGTabPage;
 
-const BindCount = 9;
+const BindCount = 10;
 
 var() localized string HeadText;
 var() localized string ClearText;
@@ -274,6 +274,7 @@ defaultproperties
 	AliasNames(6)="mutate VehicleCamera"
 	AliasNames(7)="TeamSay Taxi!"
 	AliasNames(8)="TeamSay Get in the vehicle!"
+	AliasNames(9)="mutate ONS BOARD"
 	LabelList(0)="Crouch (Enter Vehicle)"
 	LabelList(1)="Throw Weapon (Exit Vehicle)"
 	LabelList(2)="Enter Vehicle"
@@ -283,6 +284,7 @@ defaultproperties
 	LabelList(6)="Camera"
 	LabelList(7)="Say Taxi!"
 	LabelList(8)="Say Get In Vehicle!"
+	LabelList(9)="Hoverboard"
 	HelpText(0)="Allow enter to the vehicle"
 	HelpText(1)="Exit from the vehicle"
 	HelpText(2)="Enter to the vehicle without crouch, can't be hold"
@@ -292,5 +294,6 @@ defaultproperties
 	HelpText(6)="Change the camera position for the vehicle"
 	HelpText(7)="Chat + voice command for your temmates"
 	HelpText(8)="Chat + voice command for your temmates"
+	HelpText(9)="Deploy or stow the hoverboard. Firing steps you off."
 	OpenOnStartText="Open this dialog at the start of the level (you can also open it anytime by typing '!xv' in chat)"
 }
