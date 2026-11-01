@@ -201,6 +201,8 @@ static function FixBot(Bot Bot, optional int Tmr) {
 	local float Dist, BestDist;
 	if (class'VehiclesConfig'.default.bPulseAltHeal && PulseGun(Bot.Weapon) != None)
 		TryHeal(Bot);
+	if (Tmr % 5 == 0 && DriverWeapon(Bot.Weapon) != None)
+		DriveCarrierHome(Bot, DriverWeapon(Bot.Weapon).VehicleOwner);
 	if (DriverWeapon(Bot.Weapon) != None || Bot.PlayerReplicationInfo == None)
 		return;
 	if (Vehicle(Bot.MoveTarget) != None)
@@ -260,6 +262,26 @@ static function FixBot(Bot Bot, optional int Tmr) {
 		Bot.MoveTimer = 1.1*VSize(Best.Location - Bot.Location)/Bot.GroundSpeed;
 		Bot.Destination = Bot.MoveTarget.Location;
 	}
+}
+
+// Bot driving a human flag carrier takes them home and waits there
+static function DriveCarrierHome(Bot Bot, Vehicle Veh)
+{
+	local CTFReplicationInfo CTFRI;
+	local CTFFlag Home;
+
+	if (Veh == None || Veh.Driver != Bot || Bot.PlayerReplicationInfo == None || Veh.FlagPassenger() == None)
+		return;
+	CTFRI = CTFReplicationInfo(Bot.Level.Game.GameReplicationInfo);
+	if (CTFRI == None || Bot.PlayerReplicationInfo.Team >= ArrayCount(CTFRI.FlagList))
+		return;
+	Home = CTFRI.FlagList[Bot.PlayerReplicationInfo.Team];
+	if (Home == None || VSize(Home.HomeBase.Location - Veh.Location) < 800 ||
+		Bot.IsInState('RangedAttack') || Bot.IsInState('FallingState') || Bot.IsInState('TakeHit'))
+		return;
+	Bot.MoveTarget = Bot.FindPathToward(Home.HomeBase);
+	if (Bot.MoveTarget != None)
+		SetAttractionStateFor(Bot);
 }
 
 static function TryHeal(Bot Bot)

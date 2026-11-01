@@ -2685,6 +2685,36 @@ function bool CrewFit(Pawn Other)
 	// Defend, Hold and other unknown possible orders
 	return DBot.Orders == Bot.Orders && Bot.OrderObject == DBot.OrderObject;
 }
+// Passenger holding a flag that the driver does not hold.
+function Pawn FlagPassenger()
+{
+	local int i;
+	if (Driver != None && Driver.PlayerReplicationInfo != None && Driver.PlayerReplicationInfo.HasFlag != None)
+		return None;
+	for (i = 0; i < ArrayCount(Passengers); i++)
+		if (Passengers[i] != None && Passengers[i].PlayerReplicationInfo != None &&
+			Passengers[i].PlayerReplicationInfo.HasFlag != None)
+			return Passengers[i];
+	return None;
+}
+
+// Flag carrier riding with a bot is home and just has to get out
+function bool CarrierIsHome()
+{
+	local CTFReplicationInfo R;
+	local Pawn P;
+	local byte Team;
+
+	P = FlagPassenger();
+	if (P == None || Driver.PlayerReplicationInfo == None)
+		return false;
+	R = CTFReplicationInfo(Level.Game.GameReplicationInfo);
+	Team = Driver.PlayerReplicationInfo.Team;
+	if (R == None || Team >= ArrayCount(R.FlagList) || R.FlagList[Team] == None)
+		return false;
+	return VSize(R.FlagList[Team].HomeBase.Location - Location) < 800;
+}
+
 // Figure out a good move for bots
 function ReadBotInput( float Delta )
 {
@@ -2730,6 +2760,14 @@ function ReadBotInput( float Delta )
 	Bot = Bot(Driver);
 	if (Bot != None && Bot.EnemyDropped != None)
 		Bot.EnemyDropped = None; // Driver not chase for dropped weapons
+
+	if (CarrierIsHome())
+	{
+		Accel = 0;
+		Turning = 0;
+		Rising = 0;
+		return;
+	}
 	
 	S = Min(100, CollisionRadius - 20);
 
