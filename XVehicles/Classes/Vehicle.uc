@@ -338,6 +338,7 @@ var vector BodyNormal, BodyNormalRate;
 var vector BodyVelocity, BodyAccel;
 var float BodyZ, BodyZRate, BodyTargetZ, BodyTargetRate;
 var float RideZ;			// lagged RideOffset.Z, it steps when wheels leave or find the ground
+var DriverCameraActor GunnerView;	// the local player's view from a passenger seat
 var float BodyPitch, BodyPitchRate, BodyRoll, BodyRollRate;
 var bool bBodyReady;
 var vector BodyLean, BodyLeanRate;	// tilt of a flying craft
@@ -2190,6 +2191,13 @@ simulated function Tick( float Delta )
 		else
 			GVT.PrePivot = RideOffset; // guns fire from the body, so it has to be where clients see it
 	}
+	if (GunnerView != None)
+	{
+		if (GunnerView.bDeleteMe || GunnerView.VehicleOwner != self)
+			GunnerView = None;
+		else
+			GunnerView.UpdateView(0);
+	}
 
 	if (bHasPassengers && !bDeleteMe)
 		UpdatePassengerPos();
@@ -2768,6 +2776,14 @@ simulated function float ArcAmount(vector VelArc)
 	return VehicleGravityScale*Abs(Region.Zone.ZoneGravity.Z/950)*RefMaxArcSpeed/FMax(VSize(VelArc),MinArcSpeed*VehicleGravityScale);
 }
 
+// Where a gun is this frame, guns move after the camera has run
+simulated function vector GunPlace(WeaponAttachment Gun)
+{
+	if (bSlopedPhys && GVT != None)
+		return GVT.PrePivot + Location + (Gun.TurretOffset >> Rotation);
+	return Location + (Gun.TurretOffset >> Rotation);
+}
+
 simulated function UpdateAttachment(WeaponAttachment vat, float Delta)
 {
 local vector WPosA;
@@ -2782,10 +2798,7 @@ local Actor AttachBase;
 //	if (Vat.base != AttachBase)
 //		Log(self @ vat @ Vat.base @ AttachBase @ vat.bRotWithOtherWeap);
 
-	if (bSlopedPhys && GVT!=None)
-		WPosA = GVT.PrePivot + Location + (vat.TurretOffset >> Rotation);
-	else
-		WPosA = Location + (vat.TurretOffset >> Rotation);
+	WPosA = GunPlace(vat);
 	//log(self @ vat @ WPosA @ vat.Location @ "|" @ GVT.PrePivot @ Location @ vat.TurretOffset @ Rotation @ "|" @ (vat.TurretOffset >> Rotation));
 	if (WPosA != vat.Location && !vat.Move(WPosA - vat.Location))
 		vat.SetLocation(WPosA);
@@ -3970,8 +3983,17 @@ simulated function vector FixCameraPos(vector V, vector S)
 {
 	local vector HL,HN,X,Y,Z;
 	local float P;
-	if( Trace(HL,HN,V,S,False) != None )
-		V = HL+HN*5;
+	const ViewGap = 20.0;
+
+	// trace past the view so it eases in before the wall
+	X = Normal(V - S)*ViewGap;
+	if( Trace(HL,HN,V + X,S,False) != None )
+	{
+		if (VSize(HL - S) > ViewGap + 5)
+			V = HL - X;
+		else
+			V = HL+HN*5;
+	}
 	GetAxes(Rotation, X, Y, Z);
 	P = (V - S) dot Z;
 	if (P < 0)
@@ -4008,7 +4030,11 @@ simulated function CalcCameraPos( out vector Pos, out rotator Rot, float Mult, o
 		else
 			S = Location+((PassengerSeats[SeatNumber].PassengerWOffset+PassengerSeats[SeatNumber].CameraOffset*Mult) >> Rotation);
 		V = S+((PassengerSeats[SeatNumber].CamBehindviewOffset*Mult) >> Rot);
+		if (Cam != None)
+			V.Z += Cam.HeightLag;
 		Pos = FixCameraPos(V, S);
+		if (Cam != None)
+			Pos = Cam.EaseDistance(Pos, S);
 		Return;
 	}
 	Gun = DriverGun;
@@ -4048,20 +4074,12 @@ simulated function CalcCameraPos( out vector Pos, out rotator Rot, float Mult, o
 		Return;
 	}
 	bOwnerNoSee = False;
-	if (bSlopedPhys && GVT!=None)
-	{
-		if (!bDriverWOffset || Gun == None)
-			V = GVT.PrePivot + Location+((BehinViewViewOffset*Mult) >> Rot);
-		else
-			V = GVT.PrePivot + Gun.Location+((BehinViewViewOffset*Mult) >> Rot);
-	}
+	if (bDriverWOffset && Gun != None)
+		V = GunPlace(Gun)+((BehinViewViewOffset*Mult) >> Rot);
+	else if (bSlopedPhys && GVT!=None)
+		V = GVT.PrePivot + Location+((BehinViewViewOffset*Mult) >> Rot);
 	else
-	{
-		if (!bDriverWOffset || Gun == None)
-			V = Location+((BehinViewViewOffset*Mult) >> Rot);
-		else
-			V = Gun.Location+((BehinViewViewOffset*Mult) >> Rot);
-	}
+		V = Location+((BehinViewViewOffset*Mult) >> Rot);
 	if (Cam != None)
 		V.Z += Cam.HeightLag;
 	Pos = FixCameraPos(V, Location);

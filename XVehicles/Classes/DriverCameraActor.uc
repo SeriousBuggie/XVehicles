@@ -8,6 +8,8 @@ var float DesiredViewMult, CurrentViewMult, OldDesiredViewMult, KeepWait;
 
 // Chase view: height lags a bit, a view pulled in by a wall comes back out slowly
 var float HeightLag, SmoothHeight, ViewDistance, LastDelta;
+var vector SafeView;		// where the view goes if the eased one would end up inside a wall
+var float SafeDistance, ViewRate;
 
 replication
 {
@@ -64,28 +66,29 @@ function ChangeView()
 simulated function vector EaseDistance(vector Pos, vector Focus)
 {
 	local vector Dir;
-	local float Dist;
+	local float Dist, Rate, Off, Part;
 
 	Dir = Pos - Focus;
 	Dist = VSize(Dir);
-	if (ViewDistance <= 0 || Dist < ViewDistance)
+	SafeView = Pos;
+	SafeDistance = Dist;
+	if (ViewDistance <= 0)
 		ViewDistance = Dist;
-	else
-		ViewDistance += (Dist - ViewDistance)*(1.0 - Exp(-5.0*LastDelta));
 	if (Dist <= 0)
 		return Pos;
+	// critically damped, quick in and slow out
+	Rate = 5.0;
+	if (Dist < ViewDistance)
+		Rate = 30.0;
+	Off = ViewDistance - Dist;
+	Part = (ViewRate + Off*Rate)*LastDelta;
+	ViewRate = (ViewRate - Part*Rate)*Exp(-Rate*LastDelta);
+	ViewDistance = Dist + (Off + Part)*Exp(-Rate*LastDelta);
 	return Focus + Dir*(ViewDistance/Dist);
 }
 
 simulated function Tick( float Delta )
 {
-	local vector V;
-	local rotator R;
-	local float RRoll, Height;
-	local Pawn P;
-	local PlayerPawn PP;
-	local bool bPasengerCam;
-	
 	if (KeepWait <= 0)
 	{
 		if (CurrentViewMult != DesiredViewMult)
@@ -105,8 +108,28 @@ simulated function Tick( float Delta )
 	else
 		KeepWait -= Delta;
 
+	if (Class != Class'DriverCameraActor' && VehicleOwner != None)
+	{
+		if (PlayerPawn(Owner) != None && Viewport(PlayerPawn(Owner).Player) != None)
+			VehicleOwner.GunnerView = self;
+		else if (VehicleOwner.GunnerView == self)
+			VehicleOwner.GunnerView = None;
+	}
+	UpdateView(Delta);
+}
+
+// Moves the view, with Delta 0 it just follows what moved since
+simulated function UpdateView(float Delta)
+{
+	local vector V;
+	local rotator R;
+	local float RRoll, Height;
+	local Pawn P;
+	local PlayerPawn PP;
+	local bool bPasengerCam;
+
 	RRoll = Rotation.Roll;
-	
+
 	bPasengerCam = Class != Class'DriverCameraActor';
 
 	if (bPasengerCam)
@@ -152,6 +175,12 @@ simulated function Tick( float Delta )
 	HeightLag = SmoothHeight - Height;
 	VehicleOwner.CalcCameraPos(V,R,CurrentViewMult,SeatNum,self);
 	Move(V-Location);
+	if (Region.iLeaf == -1 && ViewDistance > SafeDistance)
+	{
+		ViewDistance = SafeDistance;
+		ViewRate = 0;
+		Move(SafeView-Location);
+	}
 
 	//Vertical shake support
 	if (PP != None)
