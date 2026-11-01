@@ -328,12 +328,14 @@ var float SimDelta;			// length of the step in hand
 
 const SimStep = 0.0166667;
 const WalkableZ = 0.7;
+const NormalDone = 0.99999;	// floor normal this close to its target has arrived, ~0.25 degrees
 
 // Visible ride, see UpdateBody. Doesn't touch collision or movement
 var vector RideOffset;		// where the ground puts the body, from Location
 var vector BodyNormal, BodyNormalRate;
 var vector BodyVelocity, BodyAccel;
 var float BodyZ, BodyZRate, BodyTargetZ, BodyTargetRate;
+var float RideZ;			// lagged RideOffset.Z, it steps when wheels leave or find the ground
 var float BodyPitch, BodyPitchRate, BodyRoll, BodyRollRate;
 var bool bBodyReady;
 var vector BodyLean, BodyLeanRate;	// tilt of a flying craft
@@ -2223,7 +2225,7 @@ simulated function SimulateStep(float Delta, bool bHere)
 		else
 			FloorNormal = NormalWeightSum(6*f*Delta, ActualFloorNormal, FloorNormal);
 
-		if ( (ActualFloorNormal Dot FloorNormal) > 0.999 )
+		if ( (ActualFloorNormal Dot FloorNormal) > NormalDone )
 			FloorNormal = ActualFloorNormal;
 	}
 	//Arc movement physics
@@ -2257,7 +2259,7 @@ simulated function SimulateStep(float Delta, bool bHere)
 		if (ActualFloorNormal!=FloorNormal && (Velocity dot Velocity) > 0)
 		{
 			FloorNormal = NormalWeightSum(ArcAmount(Velocity)*f*Delta, ActualFloorNormal, FloorNormal);
-			if ( (ActualFloorNormal Dot FloorNormal) > 0.999 )
+			if ( (ActualFloorNormal Dot FloorNormal) > NormalDone )
 				FloorNormal = ActualFloorNormal;
 		}
 
@@ -2277,7 +2279,7 @@ simulated function SimulateStep(float Delta, bool bHere)
 			if (GVTNormal!=ActualGVTNormal)
 			{
 				GVTNormal = NormalWeightSum(ArcAmount(Velocity)*f*Delta, ActualGVTNormal, GVTNormal);
-				if ( (ActualGVTNormal Dot GVTNormal) > 0.999 )
+				if ( (ActualGVTNormal Dot GVTNormal) > NormalDone )
 					GVTNormal = ActualGVTNormal;
 			}
 		}
@@ -2290,7 +2292,7 @@ simulated function SimulateStep(float Delta, bool bHere)
 		else
 			GVTNormal = NormalWeightSum(14*f*Delta, ActualGVTNormal, GVTNormal);
 
-		if ( (ActualGVTNormal Dot GVTNormal) > 0.999 )
+		if ( (ActualGVTNormal Dot GVTNormal) > NormalDone )
 			GVTNormal = ActualGVTNormal;
 	}
 	bOwnerNoSee = False;
@@ -2340,9 +2342,15 @@ simulated function AirMove(float Delta)
 		if (A == None)
 			return;
 		HitWall(HN, A);
-		if (bDeleteMe || (bGroundSim && bOnGround))
+		if (bDeleteMe)
 			return;
 		Delta *= 1 - Done;
+		// landed: the rest of the step goes on along the ground, or the car stands still for a frame
+		if (bGroundSim && bOnGround)
+		{
+			GroundMove(Delta);
+			return;
+		}
 	}
 }
 
@@ -2653,6 +2661,7 @@ simulated function UpdateBody(float Delta)
 	{
 		bBodyReady = true;
 		BodyZ = Location.Z + RideOffset.Z;
+		RideZ = RideOffset.Z;
 		BodyTargetZ = BodyZ;
 		BodyZRate = 0;
 		BodyTargetRate = 0;
@@ -2665,7 +2674,8 @@ simulated function UpdateBody(float Delta)
 	TrackAccel(Delta, 14.0);
 	Target.X = GVT.PrePivot.X + (RideOffset.X - GVT.PrePivot.X)*(1.0 - Exp(-20.0*Delta));
 	Target.Y = GVT.PrePivot.Y + (RideOffset.Y - GVT.PrePivot.Y)*(1.0 - Exp(-20.0*Delta));
-	W = Location.Z + RideOffset.Z;
+	RideZ += (RideOffset.Z - RideZ)*(1.0 - Exp(-25.0*Delta));
+	W = Location.Z + RideZ;
 	BodyTargetRate += ((W - BodyTargetZ)/Delta - BodyTargetRate)*(1.0 - Exp(-30.0*Delta));
 	BodyTargetZ = W;
 	Long = FClamp(BodyAccel dot X, -1500, 1500);
