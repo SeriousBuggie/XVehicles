@@ -304,7 +304,7 @@ function vector GetNextMoveTargetInternal()
 		}
 		if (bDebug) log(VehicleOwner.Driver @ 2 @ dbg);
 		
-		if (i >= 14) // too old?
+		if (best >= 14) // too old?
 			VehicleOwner.Driver.MoveTimer = -1f; // time to refresh path
 		else if (VehicleOwner.bCanFly && Closest >= 400f)
 			VehicleOwner.Driver.MoveTimer = 1f; // prevent refresh path in air

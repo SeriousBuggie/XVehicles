@@ -1578,18 +1578,23 @@ simulated function Destroyed()
 		VehicleState.Destroy();
 	if (Shadow != None)
 		Shadow.Destroy();
-	while (FreeMoves != None)
-	{
-		FreeMoves.Destroy();
-		FreeMoves = FreeMoves.NextMove;
-	}
-	while (SavedMoves != None)
-	{
-		SavedMoves.Destroy();
-		SavedMoves = SavedMoves.NextMove;
-	}
+	DestroyMoves(FreeMoves);
+	DestroyMoves(SavedMoves);
+	FreeMoves = None;
+	SavedMoves = None;
 	Super.Destroyed();
 }
+simulated function DestroyMoves(SavedMoveXV Move)
+{
+	local SavedMoveXV Next;
+	while (Move != None)
+	{
+		Next = Move.NextMove;
+		Move.Destroy();
+		Move = Next;
+	}
+}
+
 // Client update vehicle pos/rot/vel
 simulated function ClientUpdateState(float Delta)
 {
@@ -4821,7 +4826,8 @@ simulated function bool HasPassengers()
 	{
 		if( PassengerSeats[i].bIsAvailable && Passengers[i]!=None )
 		{
-			CurrentTeam = Passengers[i].PlayerReplicationInfo.Team;
+			if (Passengers[i].PlayerReplicationInfo != None)
+				CurrentTeam = Passengers[i].PlayerReplicationInfo.Team;
 			bHasPassengers = true;
 			Return True;
 		}
