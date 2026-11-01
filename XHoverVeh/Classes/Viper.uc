@@ -83,7 +83,8 @@ defaultproperties
 	MaxHoverSpeed=2500.000000
 	VehicleTurnSpeed=16000.000000
 	HoveringHeight=160.000000
-	JumpingHeight=730.000000
+	RideHeight=127.500000
+	JumpingHeight=790.000000
 	MaxPushUpDiff=3.000000
 	bCanDuck=True
 	Repulsor(0)=(X=95.000000,Z=-7.000000)
@@ -93,7 +94,7 @@ defaultproperties
 	JumpSound=Sound'XHoverVeh.Viper.Jump'
 	DuckSound=Sound'XHoverVeh.Manta.HoverBikeTurbo01'
 	AIRating=6.000000
-	WAccelRate=1000.000000
+	WAccelRate=1300.000000
 	VehicleName="Viper"
 	TranslatorDescription="This is a Viper, press [Fire] or [AltFire] to fire the different firemodes. Use your Strafe keys and Move Forward/Backward keys to strafe/accelerate/deaccelerate. To leave this vehicle, press your [ThrowWeapon] key."
 	ExitOffset=(Y=130.000000)
