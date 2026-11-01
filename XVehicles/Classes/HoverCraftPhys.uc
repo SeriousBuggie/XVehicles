@@ -22,9 +22,11 @@ var bool bDuck, bDuckFire;
 var RepulsorTracker RepulsorTracker;
 
 var vector BotAccelDir;
+var float RepulsorZ;		// average height of the repulsors on the craft
 
 const HoverGap = 50.0f;
 const HoverDuck = 30.0f;
+const LookAhead = 0.14f;	// seconds
 
 replication
 {
@@ -73,9 +75,8 @@ simulated function bool CheckOnGround()
 			R.Pitch = 0;
 			R.Roll = 0;
 			
-			// this need for save repulsor location outside collision cylinder
+			// outside the collision cylinder and level, leaning doesn't change the ground under it
 			Rep = Repulsor[i] >> R;
-			Rep.Z = (Repulsor[i] >> Rotation).Z;
 			Rep += Location;
 			
 			RepPos[i] = Rep;
@@ -206,8 +207,8 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 simulated function UpdateDriverInput( float Delta )
 {
 	local byte PitchDif;
-	local vector Ac, X, Y, Z;
-	local float EngP, GoDown, DesiredHoverHeight, Scale, BigScale, Vel;
+	local vector Ac, X, Y, Z, Flat, Push, Ahead, HL, HN;
+	local float EngP, GoDown, DesiredHoverHeight, Climb, Spring, Most, Damp, Rise;
 	local rotator R;
 
 	if (bEngDynSndPitch && Level.NetMode != NM_DedicatedServer)
@@ -220,7 +221,22 @@ simulated function UpdateDriverInput( float Delta )
 	if (!bDriving)
 		DriveFrom = Level.TimeSeconds;
 
-	R = TransformForGroundRot(VehicleYaw, FloorNormal);
+	if (Level.NetMode != NM_DedicatedServer)
+	{
+		if (Delta > 0)
+		{
+			BodyAccel += ((Velocity - BodyVelocity)/Delta - BodyAccel)*(1.0 - Exp(-11.0*Delta));
+			BodyVelocity = Velocity;
+		}
+		Push = BodyAccel*0.00011;
+		Push.Z = 0;
+		if (VSize(Push) > 0.38)
+			Push = Normal(Push)*0.38;
+		if (!bDriving)
+			Push = vect(0,0,0);
+		UpdateLean(Push, Delta);
+	}
+	R = TransformForGroundRot(VehicleYaw, Normal(FloorNormal + BodyLean));
 	if (Rotation != R)
 		SetRotation(R);
 
@@ -229,8 +245,9 @@ simulated function UpdateDriverInput( float Delta )
 	{
 		DesiredHoverHeight = HoveringHeight - HoverGap;
 		GoDown = 0.75;
-		Scale = 1000;
-		BigScale = 0.2;
+		Spring = 13;
+		Damp = 0.8;
+		Most = 4500;
 		
 		if (PlayerPawn(Driver) != None && (Level.NetMode != NM_Client || IsNetOwner(Owner)) && 
 			!Driver.IsInState('GameEnded') && !(Level.Game != None && Level.Game.bGameEnded))
@@ -247,25 +264,29 @@ simulated function UpdateDriverInput( float Delta )
 		{				
 			DesiredHoverHeight -= HoverDuck;
 			GoDown = 8;
-			Scale *= 3;
-			BigScale *= 3;
+			Spring = 20;
+			Most = 9000;
 		}
 		if (bOnGround && LastJumpTime < Level.TimeSeconds - 0.4)
 		{
-			DesiredHoverHeight -= ActualHoverHeight;
-			Vel = VSize(Velocity);
-			Velocity.Z = 0;
-			if (bCanDuck && (bDuck || bDuckFire))
-				Vel *= 0.1;
-			Velocity.Z -= Vel*(ActualFloorNormal dot Normal(Velocity));
-			Vel = Velocity.Z;
-			if (Abs(DesiredHoverHeight) > 2)
-				Velocity.Z += DesiredHoverHeight*FMax(DesiredHoverHeight*DesiredHoverHeight*BigScale, Scale)*0.01/
-					(1 + (Delta - 0.01)*25);
-			BigScale = 5;
-			if (Level.TimeSeconds - DriveFrom < 0.4)
-				BigScale = 2.5; // *2.5 = /0.4
-			Velocity.Z = FMin(Velocity.Z, Vel + HoveringHeight*BigScale);
+			// a spring under the craft: it pushes against the height it should hold, and lifts with the
+			// ground going by underneath, so slopes need no error to follow
+			Flat = Velocity;
+			Flat.Z = 0;
+			Climb = -(Flat dot ActualFloorNormal)/FMax(0.4, ActualFloorNormal.Z);
+			// the body is wider than the repulsors are apart: start to lift before the ground gets here
+			Ahead = Location + Flat*LookAhead;
+			Ahead.Z += CollisionHeight;
+			if (Trace(HL, HN, Ahead - vect(0,0,1)*(CollisionHeight + HoveringHeight + 64), Ahead, false) != None)
+			{
+				Rise = (HL.Z - (Location.Z + RepulsorZ - ActualHoverHeight))/LookAhead;
+				if (Rise > Climb)
+					Climb = Rise;
+			}
+			if (Level.TimeSeconds - DriveFrom < 0.5)
+				Most = 1800;
+			Velocity.Z += FClamp(Spring*Spring*(DesiredHoverHeight - ActualHoverHeight) +
+				2*Damp*Spring*(Climb - Velocity.Z), -Most, Most)*Delta;
 		}
 	}
 	else if (bOnGround)
@@ -296,7 +317,7 @@ simulated function UpdateDriverInput( float Delta )
 		}
 		else
 		*/
-			VehicleYaw = CalcTurnSpeed(VehicleTurnSpeed*Delta, VehicleYaw, Driver.ViewRotation.Yaw);
+			FollowYaw(Driver.ViewRotation.Yaw, VehicleTurnSpeed, Delta);
 	}
 	// Update vehicle speed
 	if (Rising > 0 && bOnGround && LastJumpTime < Level.TimeSeconds - JumpDelay)
@@ -336,6 +357,39 @@ simulated function UpdateDriverInput( float Delta )
 	Velocity += Ac*Delta;
 	if (VSize(Velocity) > MaxHoverSpeed)
 		Velocity = Normal(Velocity)*MaxHoverSpeed;
+}
+
+// Ground under it or a wall beside it: the craft glances off and keeps flying. It never climbs by a jump.
+simulated singular function HitWall( vector HitNormal, Actor Wall )
+{
+	local vector Old;
+	local float Into, Speed, Along;
+
+	Into = Velocity dot HitNormal;
+	if (Into >= 0)
+		return;
+	Old = Velocity;
+	Speed = VSize(Old);
+	if (HitNormal.Z >= WalkableZ)
+	{
+		Velocity -= HitNormal*Into;
+		if (Speed > 0 && bDriving)
+			Velocity = Normal(Velocity)*FMax(VSize(Velocity), Speed*0.97);
+		return;
+	}
+	Velocity -= HitNormal*Into*1.3;
+	if (Wall != Level && Wall.Brush == None)
+		return;
+	Along = Normal(Old) dot Normal(Velocity);
+	if (Speed > 500 && Along < -0.2)
+		TakeImpactDamage((Speed - 500)/2, None, "HoverHit_1");
+	else if (Speed > 600 && Along < 0)
+		TakeImpactDamage((Speed - 600)/4, None, "HoverHit_2");
+	else if (NextScrapeTime < Level.TimeSeconds)
+	{
+		NextScrapeTime = Level.TimeSeconds + 0.4;
+		TakeImpactDamage(0, None, "HoverHit_3");
+	}
 }
 
 function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
@@ -465,11 +519,13 @@ simulated function PostBeginPlay()
 	local float Avg;
 	bScriptMove = True;
 	Super.PostBeginPlay();
+	for (i = 0; i < RepulsorCount; i++)
+		Avg += Repulsor[i].Z;
+	if (RepulsorCount > 0)
+		RepulsorZ = Avg/RepulsorCount;
 	if (VehicleAI != None)
 	{
-		for (i = 0; i < RepulsorCount; i++)
-			Avg += Repulsor[i].Z;
-		VehicleAI.AirFlyScale = (HoveringHeight - HoverGap - 
+		VehicleAI.AirFlyScale = (HoveringHeight - HoverGap -
 			Avg/RepulsorCount - class'NavigationPoint'.default.CollisionHeight)/CollisionHeight;
 	}
 }

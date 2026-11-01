@@ -328,6 +328,7 @@ var vector BodyVelocity, BodyAccel;
 var float BodyZ, BodyZRate, BodyTargetZ, BodyTargetRate;
 var float BodyPitch, BodyPitchRate, BodyRoll, BodyRollRate;
 var bool bBodyReady;
+var vector BodyLean, BodyLeanRate;	// tilt of a flying craft
 var float TurnRate;			// yaw per second now
 var float CornerZ[4];		// ground under each corner
 
@@ -2249,7 +2250,8 @@ simulated function AirMove(float Delta)
 		Done = ((Location - Start) dot Want)/(Want dot Want);
 		if (Done >= 0.995)
 			return;
-		A = Trace(HL, HN, Location + Normal(Want)*10, Location, true, Ex);
+		// same sweep the move failed on, a short trace can miss what it grazes
+		A = Trace(HL, HN, Location + Want*(1 - Done) + Normal(Want)*10, Location, true, Ex);
 		if (A == None)
 			return;
 		HitWall(HN, A);
@@ -2504,6 +2506,26 @@ simulated function GroundDrive(float Delta, float TopSpeed, float Friction, floa
 		S += Brake;
 
 	Velocity = X*F + Y*S;
+}
+
+// Turn towards a heading, speed builds and fades so it doesn't move like a turret
+simulated function FollowYaw(int WantYaw, float MaxRate, float Delta)
+{
+	local float Want;
+
+	Want = FClamp(((WantYaw - VehicleYaw) << 16 >> 16)*7.0, -MaxRate, MaxRate);
+	TurnRate += (Want - TurnRate)*(1.0 - Exp(-13.0*Delta));
+	AddYaw(TurnRate*Delta);
+}
+
+// Lean towards the push through a spring
+simulated function UpdateLean(vector Target, float Delta)
+{
+	const CraftFreq = 8.0;
+	const CraftDamp = 0.65;
+
+	BodyLeanRate += (CraftFreq*CraftFreq*(Target - BodyLean) - 2*CraftDamp*CraftFreq*BodyLeanRate)*Delta;
+	BodyLean += BodyLeanRate*Delta;
 }
 
 // Body on springs: follows the ground, squats under power, dives under brakes, leans out of corners
