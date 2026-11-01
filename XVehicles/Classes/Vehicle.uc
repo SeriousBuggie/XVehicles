@@ -1810,6 +1810,8 @@ simulated function ClientUpdateState(float Delta)
 			SetLocation(ServerState.Location);
 		else if ((Step dot Step) > 1)
 			MoveSmooth(Step*(1.0 - Exp(-6.3*Delta)));
+		if (bScriptMove)
+			Move(Velocity*Delta); // nothing else moves it now
 		if (bShouldRepVehYaw)
 			VehicleYaw = ServerState.YawLow + (ServerState.YawHigh << 8);
 	}
@@ -2137,7 +2139,7 @@ simulated function Tick( float Delta )
 	{
 		Step = Left;
 		if (bScriptMove && bHere && Step > SimStep*1.25)
-			Step = SimStep;
+			Step = FMax(SimStep, Delta/8); // a long hitch must not cost more time to catch up on
 		Left -= Step;
 		SimulateStep(Step, bHere);
 	} until (Left <= 0 || bDeleteMe);
@@ -2152,8 +2154,13 @@ simulated function Tick( float Delta )
 	}
 	if (Level.NetMode < NM_Client) // NM_StandAlone included for demorec support
 		ServerPackState(Delta);
-	if (Level.NetMode != NM_DedicatedServer && GVT != None)
-		UpdateBody(Delta);
+	if (GVT != None)
+	{
+		if (Level.NetMode != NM_DedicatedServer)
+			UpdateBody(Delta);
+		else
+			GVT.PrePivot = RideOffset; // guns fire from the body, so it has to be where clients see it
+	}
 
 	if (bHasPassengers && !bDeleteMe)
 		UpdatePassengerPos();
@@ -2512,6 +2519,12 @@ simulated function GroundDrive(float Delta, float TopSpeed, float Friction, floa
 
 	// plane it really rests on, speed out of that plane gets lost every step
 	Z = ActualFloorNormal;
+	// a blast can throw it, anything less stays on the ground
+	if ((Velocity dot Z) > LaunchSpeed()*1.5)
+	{
+		bOnGround = false;
+		return;
+	}
 	R.Yaw = VehicleYaw;
 	X = vector(R);
 	X = Normal(X - Z*(X dot Z));
@@ -2573,12 +2586,11 @@ simulated function GroundDrive(float Delta, float TopSpeed, float Friction, floa
 			SetSignalLights(SL_None);
 	}
 
-	Brake = SideGrip*Grip*Delta;
+	// Grip grows with slip up to what the tires can give, so corners have some weight
+	Brake = FMin(SideGrip*Grip*Delta, Abs(S)*(1.0 - Exp(-11.0*Delta)));
 	if (bHandbrake)
 		Brake *= 0.2;
-	if (Abs(S) <= Brake)
-		S = 0;
-	else if (S > 0)
+	if (S > 0)
 		S -= Brake;
 	else
 		S += Brake;
@@ -3110,6 +3122,12 @@ simulated function ReadDriverInput( PlayerPawn Other, float DeltaTime )
 		{
 			Other.bPressedJump = False;
 			Rising = -1;
+		}
+		else if (bGroundSim)
+		{
+			// held, not pressed, the press stays set in this state and locks the handbrake on
+			Other.bPressedJump = False;
+			Rising = int(Other.aUp > 0);
 		}
 		else if( Other.bPressedJump )
 			Rising = 1;

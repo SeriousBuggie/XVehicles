@@ -54,8 +54,6 @@ simulated singular function HitWall( vector HitNormal, Actor Wall )
 		(bOnGround && !CanYawUpTo(Rotation, TransformForGroundRot(VehicleYaw, HitNormal), 1500)))
 	{
 		Velocity = SetUpNewMVelocity(Velocity, HitNormal, Bounce);
-		if (bOnGround && VSize(SetUpNewMVelocity(Velocity, HitNormal, 0)) > 100 && CanGetOver(35, 0.85))
-			Return;
 		bOnGround = False;
 	}
 	else
