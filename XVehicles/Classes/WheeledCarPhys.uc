@@ -66,6 +66,8 @@ simulated function PostBeginPlay()
 {
 	local int i;
 
+	bScriptMove = True;
+	bGroundSim = True;
 	Super.PostBeginPlay();
 
 	if( Level.NetMode!=NM_DedicatedServer )
@@ -135,11 +137,11 @@ simulated function FellToGround()
 
 simulated function UpdateDriverInput( float Delta )
 {
-	local vector Ac,NVeloc, X, Y, Z;
-	local float DesTurn,DesTurnVis,DeAcc,DeAccRat;
+	local vector Ac, X, Y, Z;
+	local float DesTurn, DesTurnVis, Friction, Forward, YawRate, Rate;
 	local rotator R, RA, RB;
 	local rotator OldWheeledRot;
-	local bool bDirectVis;
+	local bool bDirectVis, bHandbrake;
 	local int YawStep;
 	
 	if (Driver == None)
@@ -171,12 +173,12 @@ simulated function UpdateDriverInput( float Delta )
 	if (Rotation != R)
 		SetRotation(R);
 		
-	if (OldWheeledRot.Yaw != Rotation.Yaw)
+	if (OldWheeledRot.Yaw != Rotation.Yaw && bOnGround)
 	{
 		Ac.X = GetMovementDir()*TractionWheelsPosition;
 		RA.Yaw = Rotation.Yaw;
 		RB.Yaw = OldWheeledRot.Yaw;
-		MoveSmooth((Ac >> RA) - (Ac >> RB));
+		PivotShift += (Ac >> RA) - (Ac >> RB);
 	}
 
 	bDirectVis = Driver == None || PlayerPawn(Driver) != None;
@@ -193,10 +195,13 @@ simulated function UpdateDriverInput( float Delta )
 	}
 	if (WheelYawVis != DesTurnVis)
 	{
+		Rate = WheelTurnSpeed*Delta;
+		if (bDirectVis && DesTurnVis*WheelYawVis <= 0)
+			Rate *= 2.5; // wheels come back to the middle faster than they go out
 		if (WheelYawVis < DesTurnVis)
-			WheelYawVis += FMin(WheelTurnSpeed*Delta, DesTurnVis - WheelYawVis);
+			WheelYawVis += FMin(Rate, DesTurnVis - WheelYawVis);
 		else
-			WheelYawVis -= FMin(WheelTurnSpeed*Delta, WheelYawVis - DesTurnVis);
+			WheelYawVis -= FMin(Rate, WheelYawVis - DesTurnVis);
 		if (Abs(WheelYawVis) > WheelMaxYaw)
 			WheelYawVis = WheelMaxYaw*WheelYawVis/Abs(WheelYawVis);
 	}
@@ -221,178 +226,33 @@ simulated function UpdateDriverInput( float Delta )
 			Velocity += Region.Zone.ZoneGravity*Delta*VehicleGravityScale*0.35;
 		else
 			Velocity += Region.Zone.ZoneGravity*Delta*VehicleGravityScale;
-		DeAcc = OldLocation.Z - Location.Z;
-		if (DeAcc > 0)
-			FallingLenghtZ += DeAcc;
+		if (Velocity.Z < 0)
+			FallingLenghtZ -= Velocity.Z*Delta;
 		Return;
 	}
 	if (FallingLenghtZ > 0 && ActualFloorNormal.Z > 0.65)
 		FellToGround();
 	FallingLenghtZ = 0;
-	
-	Velocity += CalcGravityStrength(Region.Zone.ZoneGravity*(VehicleGravityScale/GroundPower), FloorNormal)*
-		Delta/(FMax(Region.Zone.ZoneGroundFriction, WheelsTraction)/8.f + 1.f);
 
-	// X dot X == VSize(X)*VSize(X)
-	DesTurn = (Velocity dot Velocity);
-	if (DesTurn > 0)
-	{
-		if (FMax(Region.Zone.ZoneGroundFriction, WheelsTraction) > 4.0)
-			DesTurn = VSize(Velocity)*WheelYaw*Delta/400*GetMovementDir();
-		else
-			DesTurn = VSize(Velocity)*WheelYaw*Delta/400*GetMovementDir()*
-				FMin(FMax(Region.Zone.ZoneGroundFriction, WheelsTraction), 1.0);
-		if (DesTurn != 0)
-		{
-			YawStep = AddYaw(DesTurn);
-			if (!bCameraOnBehindView && Driver!=None)
-				Driver.ViewRotation.Yaw += YawStep;
-		}
-	}
-	
-	if (!bOldOnGround && bOnGround) // Landed just now
-	{ // clear velocity part which orthogonal to floor
-		Velocity -= ActualFloorNormal*(Velocity dot ActualFloorNormal);
-	}
+	Friction = FMax(Region.Zone.ZoneGroundFriction, WheelsTraction);
+	bHandbrake = bDirectVis && Rising > 0;
+	GroundDrive(Delta, MaxGroundSpeed, Friction, 2600, bHandbrake);
 
-	// Update vehicle speed
-	if (Accel != 0)
-	{
-		//Braking, so reduce speed 3x superior to normal deacceleration
-		// X dot X == VSize(X)*VSize(X)
-		if (OldAccelD == -Accel && (Velocity dot Velocity) > 256 /* 16 * 16 */)
-		{
-			DeAcc = VSize(Velocity);
-			DeAccRat = Delta*WDeAccelRate*3*FMax(Region.Zone.ZoneGroundFriction,WheelsTraction);
-			if( DeAccRat>DeAcc )
-				DeAccRat = DeAcc;
-			if (FMax(Region.Zone.ZoneGroundFriction,WheelsTraction) <= 4.0)
-			{	
-				if( DeAcc>0 )
-				{
-					DeAcc-=WDeAccelRate*Delta;
-					if( DeAcc<0 )
-						DeAcc = 0;
-				}
-				else DeAcc-=WDeAccelRate*3*Delta/100;
-
-				Ac = GetAccelDir(Turning,Rising,OldAccelD);
-				NVeloc = Normal(Velocity);
-				if( DeAcc>50 && (Ac Dot NVeloc)<0.4 )
-				{
-					Velocity-=Ac*FMax(Region.Zone.ZoneGroundFriction,WheelsTraction)*WDeAccelRate*3*Delta*2.f;
-					Return;
-				}
-				Ac = Ac*MaxGroundSpeed*FMax(Region.Zone.ZoneGroundFriction,WheelsTraction)/10;
-				Velocity = Normal(Velocity+Ac)*DeAcc;
-			}
-			else
-			{
-				if (DeAccRat >= DeAcc)
-					Velocity = vect(0,0,0);
-				else
-				{
-					Ac = GetAccelDir(Turning,Rising,OldAccelD);
-					Velocity-=Normal(Velocity)*DeAccRat;
-					if (Velocity dot Ac > 0)
-						Velocity = VSize(Velocity)*Normal(Ac);
-					else
-						OldAccelD = -OldAccelD;
-				}
-
-				if (SignalLights != SL_Stop)
-					SetSignalLights(SL_Stop);
-			}
-			Return;
-		}
-		else
-		{
-			if (FMax(Region.Zone.ZoneGroundFriction,WheelsTraction) > 4.0)
-			{
-				if (Accel == -1)
-				{
-					if (SignalLights != SL_Backwards)
-						SetSignalLights(SL_Backwards);
-				}
-				else
-				{
-					if (SignalLights != SL_None)
-						SetSignalLights(SL_None);
-				}
-			}
-			OldAccelD = Accel;
-		}
-	}
-
-	//If no braking, and no accel, deaccel smoothly
-	if (Accel == 0)
-	{
-		DeAcc = VSize(Velocity);
-		DeAccRat = WDeAccelRate*FMax(Region.Zone.ZoneGroundFriction, WheelsTraction)*Delta;
-		if (DeAccRat > DeAcc)
-			DeAccRat = DeAcc;
-		if (FMax(Region.Zone.ZoneGroundFriction, WheelsTraction) <= 4.0)
-		{
-			if( DeAcc>0 )
-			{
-				DeAcc-=WDeAccelRate*Delta;
-				if( DeAcc<0 )
-					DeAcc = 0;
-			}
-			else DeAcc-=WDeAccelRate*Delta/100;
-
-			Ac = GetAccelDir(Turning,Rising,OldAccelD);
-			NVeloc = Normal(Velocity);
-			if( DeAcc>50 && (Ac Dot NVeloc)<0.4 )
-			{
-				Velocity-=Ac*FMax(Region.Zone.ZoneGroundFriction,WheelsTraction)*WDeAccelRate*Delta*2.f;
-				Return;
-			}
-			Ac = Ac*MaxGroundSpeed*FMax(Region.Zone.ZoneGroundFriction,WheelsTraction)/10;
-			Velocity = Normal(Velocity+Ac)*DeAcc;
-		}
-		else
-		{
-			if (DeAccRat >= DeAcc)
-				Velocity = vect(0,0,0);
-			else
-			{
-				Ac = GetAccelDir(Turning,Rising,OldAccelD);
-				Velocity -= Normal(Velocity)*DeAccRat;
-				if (Velocity dot Ac > 0)
-					Velocity = VSize(Velocity)*Normal(Ac);
-				// X dot X == VSize(X)*VSize(X)
-				else if ((Velocity dot Velocity) > 0)
-					OldAccelD = -OldAccelD;
-			}
-			
-			if (SignalLights != SL_None)
-				SetSignalLights(SL_None);
-		}
-		Return;
-	}
-	DeAcc = VSize(Velocity);
-	
-	if (DeAcc < MaxGroundSpeed)
-	{
-		DeAcc+=WAccelRate*Delta;
-		if (DeAcc > MaxGroundSpeed)
-			DeAcc = MaxGroundSpeed;
-	}
-	else 
-		DeAcc += WAccelRate*Delta/100;
-
-	Ac = GetAccelDir(Turning, Rising, Accel);
-	NVeloc = Normal(Velocity);
-
-	if (DeAcc > 50 && (Ac dot NVeloc) < 0.4)
-	{
-		Velocity += Ac*FMax(Region.Zone.ZoneGroundFriction, WheelsTraction)*WAccelRate*2.f*Delta;
-		Return;
-	}
-
-	Ac = Ac*MaxGroundSpeed*FMax(Region.Zone.ZoneGroundFriction, WheelsTraction)/10;
-	Velocity = Normal(Velocity + Ac)*DeAcc;
+	// Steering sets the turn radius, full lock at walking pace, under half at 1500uu/s
+	R = rot(0,0,0);
+	R.Yaw = VehicleYaw;
+	Forward = Velocity dot vector(R);
+	YawRate = Forward*WheelYaw/400;
+	if (bDirectVis)
+		YawRate *= 1.0 - 0.56*FMin(Abs(Forward)/1500.0, 1.0);
+	if (Friction <= 4.0)
+		YawRate *= FMin(Friction, 1.0);
+	if (bHandbrake && Abs(Forward) > 200)
+		YawRate *= 1.35;
+	TurnRate += (YawRate - TurnRate)*(1.0 - Exp(-18.0*Delta));
+	YawStep = AddYaw(TurnRate*Delta);
+	if (YawStep != 0 && !bCameraOnBehindView && Driver != None)
+		Driver.ViewRotation.Yaw += YawStep;
 }
 
 simulated function int GetIcedMovementDir()
@@ -555,7 +415,7 @@ local vector Ac;
 		if( DeAcc>MaxGroundSpeed )
 			DeAcc = MaxGroundSpeed;
 	}
-	else DeAcc+=WAccelRate*Delta/100;
+	else DeAcc = FMax(MaxGroundSpeed, DeAcc - WAccelRate*Delta/100);
 
 	Ac = Accel*MaxGroundSpeed*8/10*vector(Rotation);
 	VelFriction = Normal(VelFriction+Ac)*DeAcc;
@@ -620,7 +480,7 @@ simulated function AttachmentsTick( float Delta )
 		BaseLoc = Location;
 		if (bSlopedPhys && GVT != None)
 			BaseLoc += GVT.PrePivot;
-		LocSame = Location == OldLocation;
+		LocSame = Location == LastLocation;
 		For( i=0; i<NumWheels; i++ )
 		{
 			MyWheel = MyWheels[i];
@@ -672,8 +532,8 @@ simulated function AttachmentsTick( float Delta )
 					else
 						FootZoneSpeed = 0;
 
-					FootSndVol = FClamp(VWaterTi.WaveSize*3, 8, 255) * ((VSize(Location - OldLocation)/Delta + FootZoneSpeed)/ RefMaxWaterSpeed);
-					FootSndPitch = 32 + ((VSize(Location - OldLocation)/Delta + FootZoneSpeed)/ RefMaxWaterSpeed) * 96;
+					FootSndVol = FClamp(VWaterTi.WaveSize*3, 8, 255) * ((VSize(Location - LastLocation)/Delta + FootZoneSpeed)/ RefMaxWaterSpeed);
+					FootSndPitch = 32 + ((VSize(Location - LastLocation)/Delta + FootZoneSpeed)/ RefMaxWaterSpeed) * 96;
 					FootAmbSnd = VWaterTi.Region.Zone.AmbientSound;
 
 					if (VWaterTi.SoundPitch != FootSndPitch)
@@ -692,9 +552,9 @@ simulated function AttachmentsTick( float Delta )
 					}
 
 					if ((Velocity dot vector(Rotation)) > 0)
-						VWaterTi.WaveLenght += VSize(Location - OldLocation);
+						VWaterTi.WaveLenght += VSize(Location - LastLocation);
 					else
-						VWaterTi.WaveLenght -= VSize(Location - OldLocation);
+						VWaterTi.WaveLenght -= VSize(Location - LastLocation);
 
 				}
 				else

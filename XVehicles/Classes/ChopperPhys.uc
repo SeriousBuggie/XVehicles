@@ -14,6 +14,7 @@ var vector BotAccelDir;
 
 simulated function PostBeginPlay()
 {
+	bScriptMove = True;
 	Super.PostBeginPlay();
 	if( Level.NetMode!=NM_DedicatedServer && ChopperRotorClass!=None )
 		MyRotor = ChopperRotor(AddAttachment(ChopperRotorClass));

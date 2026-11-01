@@ -463,6 +463,7 @@ simulated function PostBeginPlay()
 {
 	local int i;
 	local float Avg;
+	bScriptMove = True;
 	Super.PostBeginPlay();
 	if (VehicleAI != None)
 	{

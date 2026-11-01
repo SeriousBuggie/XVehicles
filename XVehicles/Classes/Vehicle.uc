@@ -310,6 +310,27 @@ const BotBanSeconds = 90.0;	// longer than the factory reset, so a wedged vehicl
 
 var float YawRemainder;		// part of a turn that the int yaw has not taken yet
 
+// Moved by script in steps of at most SimStep, so a 20 Hz server and a 165 fps client stay on one path
+var bool bScriptMove;		// moved by SimMove, not by native physics
+var bool bGroundSim;		// on the ground it keeps to the floor, see GroundMove
+var vector PivotShift;		// part of the next move that comes from turning about the rear axle
+var vector LastLocation;	// where the last frame started, OldLocation needs native physics
+var float NextScrapeTime;
+var float SimDelta;			// length of the step in hand
+
+const SimStep = 0.0166667;
+const WalkableZ = 0.7;
+
+// Visible ride, see UpdateBody. Doesn't touch collision or movement
+var vector RideOffset;		// where the ground puts the body, from Location
+var vector BodyNormal, BodyNormalRate;
+var vector BodyVelocity, BodyAccel;
+var float BodyZ, BodyZRate, BodyTargetZ, BodyTargetRate;
+var float BodyPitch, BodyPitchRate, BodyRoll, BodyRollRate;
+var bool bBodyReady;
+var float TurnRate;			// yaw per second now
+var float CornerZ[4];		// ground under each corner
+
 // Leaving
 var Pawn LastExitPawn;
 var float LastExitTime;
@@ -1739,22 +1760,6 @@ simulated function ClientUpdateState(float Delta)
 		else
 			Velocity = ServerState.Velocity;
 	}
-	if (ServerStateTime == 0)
-	{ // demoplay from demo recorded on client
-		ServerPredictLocation = ServerState.Location;
-		Velocity = ServerState.Velocity;
-		bNeedUpdateYaw = true;
-	}
-	else
-		ServerPredictLocation = ServerState.Location + (Level.TimeSeconds - ServerStateTime)*ServerState.Velocity;
-		
-	if (bNeedUpdateYaw && bShouldRepVehYaw)
-	{
-		ServerState_Yaw = ServerState.YawLow + (ServerState.YawHigh << 8);
-		if (bFPRepYawUpdatesView && !bCameraOnBehindView && Driver != None && IsNetOwner(Driver))
-			Driver.ViewRotation.Yaw += (ServerState_Yaw - VehicleYaw) & 0xffff;
-		VehicleYaw = ServerState_Yaw;
-	}
 		
 	Diff = ServerPredictLocation - Location;
 	Dist = Diff dot Diff; // squared VSize
@@ -1848,10 +1853,9 @@ simulated function AfterTeleport(float YawChange)
 // Main tick
 simulated function Tick( float Delta )
 {
-	local bool bSlopedG, bIsNetOwner, bGameEnded;
-	local float f, ArcRatio;
+	local bool bIsNetOwner, bGameEnded, bHere;
+	local float Left, Step;
 	local SavedMoveXV NewMove;
-	const ArcMovementScale = 2.5;
 
 	if (Pawn(Base) != None)
 		SetBase(None);
@@ -1909,8 +1913,9 @@ simulated function Tick( float Delta )
 	}
 
 	PendingBump = None;
-	
-	bSlopedG = CheckOnGround();
+	LastLocation = Location;
+	if (bScriptMove && Physics != PHYS_None)
+		SetPhysics(PHYS_None);
 
 	VeryOldVel[1] = VeryOldVel[0];
 	VeryOldVel[0] = Velocity;
@@ -1975,11 +1980,8 @@ simulated function Tick( float Delta )
 			NewMove = SavedMoves;
 			while (NewMove.NextMove != None)
 				NewMove = NewMove.NextMove;
-				
-			// store previous data after physics apply	
-			NewMove.SavedLocation = Location;
 		}
-		
+
 		ClientUpdateState(Delta);
 		
 		if (bIsNetOwner)
@@ -2036,6 +2038,85 @@ simulated function Tick( float Delta )
 			ReadDriverInput(PlayerPawn(Driver),Delta);
 	}
 
+	if (NewMove != None)
+	{
+		NewMove.TimeStamp = Level.TimeSeconds;
+		NewMove.Delta = Delta;
+		NewMove.Velocity = Velocity;
+		NewMove.Acceleration = Location;
+		NewMove.Yaw = VehicleYaw;
+		NewMove.Rise = Rising;
+		NewMove.Turn = Turning;
+		NewMove.Accel = Accel;
+	}
+
+	bHere = Level.NetMode < NM_Client || IsNetOwner(Driver);
+	Left = Delta;
+	do
+	{
+		Step = Left;
+		if (bScriptMove && bHere && Step > SimStep*1.25)
+			Step = SimStep;
+		Left -= Step;
+		SimulateStep(Step, bHere);
+	} until (Left <= 0 || bDeleteMe);
+	if (bDeleteMe)
+		return;
+
+	if (NewMove != None)
+	{
+		NewMove.SavedVelocity = Velocity;
+		NewMove.SavedYaw = VehicleYaw;
+		NewMove.SavedLocation = Location;
+	}
+	if (Level.NetMode < NM_Client) // NM_StandAlone included for demorec support
+		ServerPackState(Delta);
+	if (Level.NetMode != NM_DedicatedServer && GVT != None)
+		UpdateBody(Delta);
+
+	if (bHasPassengers && !bDeleteMe)
+		UpdatePassengerPos();
+	if (Region.Zone.bWaterZone && !bIsWaterResistant && NextWaterDamageTime<Level.TimeSeconds &&
+		Region.Zone.DamagePerSec <= 0)
+	{
+		NextWaterDamageTime = Level.TimeSeconds+0.25;
+		TakeDamage(25,None,Location,vect(0,0,0),'drowned');
+	}
+	//Further zone support
+	if (Region.Zone.bKillZone)
+		TakeDamage(Health*3,None,Location,vect(0,0,0),'FuckedUp');
+	else if (Region.Zone.DamagePerSec > 0 && NextZoneDmgTime<Level.TimeSeconds)
+	{
+		NextZoneDmgTime = Level.TimeSeconds + 1;
+		TakeDamage(Region.Zone.DamagePerSec,None,Location,vect(0,0,0),Region.Zone.DamageType);
+	}
+
+	if (AttachmentList == None)
+		AttachmentsTick(Delta);
+
+	if ((VehicleStateNextCheck < Level.TimeSeconds) ||
+		(VehicleFlag != None && VehicleFlag.LastCheck < Level.TimeSeconds - 1))
+		ShowState(true);
+
+	if (SignalLights != SignalLightsRepl)
+		SetSignalLights(SignalLightsRepl);
+	if (bHeadLightInUse != bHeadLightInUseRepl)
+		UpdateVehicleLights(bHeadLightInUseRepl);
+
+}
+
+// One step of a frame: floor, driver input, then the move
+simulated function SimulateStep(float Delta, bool bHere)
+{
+	local bool bSlopedG;
+	local float f, ArcRatio;
+	const ArcMovementScale = 2.5;
+
+	SimDelta = Delta;
+	bSlopedG = CheckOnGround();
+	if (bGroundSim)
+		bSlopedG = bOnGround;
+
 	if (ArcGroundTime > 0)
 		ArcGroundTime -= Delta;
 
@@ -2048,7 +2129,7 @@ simulated function Tick( float Delta )
 	{
 		if (bArcMovement && !bOldOnGround)
 			ArcGroundTime = 0.8;
-		
+
 		if (ArcGroundTime > 0)
 			FloorNormal = NormalWeightSum(35*f*Delta, ActualFloorNormal, FloorNormal);
 		else
@@ -2084,14 +2165,6 @@ simulated function Tick( float Delta )
 			ActualFloorNormal.Z = 0.1;
 			ActualFloorNormal = Normal(ActualFloorNormal);
 		}
-/*
-		// X dot X == VSize(X)*VSize(X)
-		if (bOldOnGround && (Velocity dot Velocity) > MinArcSpeed*MinArcSpeed*6.25) //2.5*2.5
-		{
-			FloorNormal = ArcInitDir[0];
-			GVTNormal = ArcInitDir[1];
-		}
-*/			
 		// X dot X == VSize(X)*VSize(X)
 		if (ActualFloorNormal!=FloorNormal && (Velocity dot Velocity) > 0)
 		{
@@ -2121,7 +2194,7 @@ simulated function Tick( float Delta )
 			}
 		}
 	}
-	if (bSlopedPhys && bSlopedG && GVTNormal!=ActualGVTNormal)
+	if (bSlopedPhys && bSlopedG && GVTNormal!=ActualGVTNormal && (!bGroundSim || Level.NetMode == NM_DedicatedServer))
 	{
 		// smoothly change floor if not sloped and on the ground
 		if (ArcGroundTime > 0)
@@ -2133,58 +2206,382 @@ simulated function Tick( float Delta )
 			GVTNormal = ActualGVTNormal;
 	}
 	bOwnerNoSee = False;
-	bOnGround = bSlopedG;
-	if (NewMove != None)
-	{
-		NewMove.TimeStamp = Level.TimeSeconds;
-		NewMove.Delta = Delta;
-		NewMove.Velocity = Velocity;
-		NewMove.Acceleration = Location;
-		NewMove.Yaw = VehicleYaw;
-		NewMove.Rise = Rising;
-		NewMove.Turn = Turning;
-		NewMove.Accel = Accel;
-	}
+	if (!bGroundSim)
+		bOnGround = bSlopedG;
 
-	if (Level.NetMode < NM_Client) // NM_StandAlone included for demorec support
-		ServerPackState(Delta);
 	UpdateDriverInput(Delta);
-	if (NewMove != None)
-	{
-		NewMove.SavedVelocity = Velocity;
-		NewMove.SavedYaw = VehicleYaw;
-	}
-	if (bHasPassengers && !bDeleteMe)
-		UpdatePassengerPos();
-	if (Region.Zone.bWaterZone && !bIsWaterResistant && NextWaterDamageTime<Level.TimeSeconds && 
-		Region.Zone.DamagePerSec <= 0)
-	{
-		NextWaterDamageTime = Level.TimeSeconds+0.25;
-		TakeDamage(25,None,Location,vect(0,0,0),'drowned');
-	}
-	//Further zone support
-	if (Region.Zone.bKillZone)
-		TakeDamage(Health*3,None,Location,vect(0,0,0),'FuckedUp');
-	else if (Region.Zone.DamagePerSec > 0 && NextZoneDmgTime<Level.TimeSeconds)
-	{
-		NextZoneDmgTime = Level.TimeSeconds + 1;
-		TakeDamage(Region.Zone.DamagePerSec,None,Location,vect(0,0,0),Region.Zone.DamageType);
-	}
 
+	if (bDeleteMe)
+		return;
+	if (bScriptMove)
+	{
+		if (!bHere)
+			Move(Velocity*Delta);
+		else if (bGroundSim && bOnGround)
+			GroundMove(Delta);
+		else
+			AirMove(Delta);
+	}
 	bOldOnGround = bSlopedG;
+}
 
-	if (AttachmentList == None)
-		AttachmentsTick(Delta);
+// Not on the floor: keep moving after each hit for the rest of the step
+simulated function AirMove(float Delta)
+{
+	local vector Want, Start, Ex, HL, HN;
+	local float Done;
+	local Actor A;
+	local int i;
 
-	if ((VehicleStateNextCheck < Level.TimeSeconds) ||
-		(VehicleFlag != None && VehicleFlag.LastCheck < Level.TimeSeconds - 1))
-		ShowState(true);
-		
-	if (SignalLights != SignalLightsRepl)
-		SetSignalLights(SignalLightsRepl);
-	if (bHeadLightInUse != bHeadLightInUseRepl)
-		UpdateVehicleLights(bHeadLightInUseRepl);
-		
+	Ex.X = CollisionRadius;
+	Ex.Y = CollisionRadius;
+	Ex.Z = CollisionHeight;
+	for (i = 0; i < 3 && Delta > 0.0001; i++)
+	{
+		Want = Velocity*Delta;
+		// X dot X == VSize(X)*VSize(X)
+		if ((Want dot Want) < 0.0001)
+			return;
+		Start = Location;
+		Move(Want);
+		if (bDeleteMe)
+			return;
+		Done = ((Location - Start) dot Want)/(Want dot Want);
+		if (Done >= 0.995)
+			return;
+		A = Trace(HL, HN, Location + Normal(Want)*10, Location, true, Ex);
+		if (A == None)
+			return;
+		HitWall(HN, A);
+		if (bDeleteMe || (bGroundSim && bOnGround))
+			return;
+		Delta *= 1 - Done;
+	}
+}
+
+// Off a crest it only leaves the ground if the springs can't take the hop
+simulated function float LaunchSpeed()
+{
+	return Sqrt(2*10*Abs(Region.Zone.ZoneGravity.Z)*VehicleGravityScale);
+}
+
+// Go up and along, then set down on the floor, so only a wall counts as a hit
+simulated function GroundMove(float Delta)
+{
+	local vector Flat, Start, Ex, HL, HN, Up;
+	local float Z0, Len, Done, Part, Reach, Free, Speed;
+	local Actor A;
+	local int i;
+
+	Up = vect(0,0,1);
+	Ex.X = CollisionRadius;
+	Ex.Y = CollisionRadius;
+	Ex.Z = CollisionHeight;
+	Z0 = Location.Z;
+	Flat = Velocity*Delta + PivotShift;
+	Flat.Z = 0;
+	PivotShift = vect(0,0,0);
+	Len = VSize(Flat);
+	Part = 1;
+	for (i = 0; i < 3 && (Flat dot Flat) > 0.0001; i++)
+	{
+		Start = Location;
+		Move(Flat + Up*(VSize(Flat)*1.25 + 2));
+		if (bDeleteMe)
+			return;
+		Done = ((Location - Start) dot Flat)/(Flat dot Flat);
+		if (Done >= 0.99)
+			break;
+		Flat *= 1 - Done;
+		Part *= 1 - Done;
+		// a low ceiling stops the lift, not the car
+		Start = Location;
+		Move(Flat);
+		if (bDeleteMe)
+			return;
+		Done = ((Location - Start) dot Flat)/(Flat dot Flat);
+		if (Done >= 0.99)
+			break;
+		Flat *= 1 - Done;
+		Part *= 1 - Done;
+		A = Trace(HL, HN, Location + Normal(Flat)*10, Location, true, Ex);
+		if (A == None)
+			break;
+		if (Pawn(A) != None || Vehicle(A) != None)
+			break; // Bump has dealt with it
+		if (HN.Z < WalkableZ && StepOver(Flat))
+			break;
+		GroundHit(HN, A);
+		if (bDeleteMe)
+			return;
+		Flat = Velocity*Delta*Part;
+		Flat.Z = 0;
+	}
+
+	Reach = Location.Z - Z0 + 6 + Len*0.75;
+	A = Trace(HL, HN, Location - Up*Reach, Location, false, Ex);
+	if (A != None && HN.Z >= WalkableZ)
+	{
+		Free = Velocity dot HN;
+		if (Free <= LaunchSpeed())
+		{
+			Move(Up*(HL.Z - Location.Z));
+			Speed = VSize(Velocity);
+			Velocity -= HN*Free;
+			if (Speed > 0)
+				Velocity = Normal(Velocity)*Speed;
+			ActualFloorNormal = HN;
+			return;
+		}
+	}
+	bOnGround = false;
+	Move(Up*(Z0 + Velocity.Z*Delta - Location.Z));
+}
+
+// Up and along, GroundMove sets it down after and the ride hides the height change
+simulated function bool StepOver(vector Flat)
+{
+	local vector Start;
+
+	if (MaxObstclHeight <= 0)
+		return false;
+	Start = Location;
+	Move(vect(0,0,1)*MaxObstclHeight);
+	Move(Flat);
+	return ((Location - Start) dot Flat) > 0.5*(Flat dot Flat);
+}
+
+// Wall hit on the ground: speed along the wall stays, the rest goes
+simulated function GroundHit(vector HitNormal, Actor Wall)
+{
+	local vector N, Old, Way;
+	local float Hit, Speed, Along;
+	local rotator R;
+	local int Turn;
+
+	N = HitNormal;
+	N.Z = 0;
+	if (N == vect(0,0,0))
+		return;
+	N = Normal(N);
+	Hit = Velocity dot N;
+	if (Hit >= 0)
+		return;
+	Old = Velocity;
+	Speed = VSize(Old);
+	Velocity -= N*Hit*1.05;
+	if (Wall != Level && Wall.Brush == None)
+		return;
+	Along = Normal(Old) dot Normal(Velocity);
+	// glancing hit turns the nose along the wall
+	R.Yaw = VehicleYaw;
+	Way = vector(R);
+	Way -= N*(Way dot N);
+	if ((Way dot Way) > 0.01)
+	{
+		Turn = (rotator(Way).Yaw - VehicleYaw) << 16 >> 16;
+		if (Abs(Turn) < 14000)
+		{
+			Turn = AddYaw(FClamp(Turn*5, -15000, 15000)*SimDelta);
+			if (Turn != 0 && !bCameraOnBehindView && Driver != None)
+				Driver.ViewRotation.Yaw += Turn;
+		}
+	}
+	if (Speed > 500 && Along < -0.2)
+		TakeImpactDamage((Speed - 500)/2, None, "GroundHit_1");
+	else if (Speed > 600 && Along < 0)
+		TakeImpactDamage((Speed - 600)/4, None, "GroundHit_2");
+	else if (Speed > 1300 && Along < 0.3)
+		TakeImpactDamage((Speed - 1300)/5, None, "GroundHit_3");
+	else if (NextScrapeTime < Level.TimeSeconds && -Hit > 120)
+	{
+		NextScrapeTime = Level.TimeSeconds + 0.4;
+		TakeImpactDamage(0, None, "GroundHit_4");
+	}
+}
+
+// In the air and something got in the way.
+simulated function AirContact(vector HitNormal, Actor Wall)
+{
+	local float Into;
+
+	Into = Velocity dot HitNormal;
+	if (HitNormal.Z >= WalkableZ && Into <= 0)
+	{
+		FellToGround();
+		Velocity -= HitNormal*Into;
+		ActualFloorNormal = HitNormal;
+		bOnGround = true;
+		return;
+	}
+	if (Into < 0)
+	{
+		GroundHit(HitNormal, Wall);
+		Into = Velocity dot HitNormal;
+		if (Into < 0)
+			Velocity -= HitNormal*Into;
+	}
+}
+
+// Ground speed, all per second so the path doesn't depend on the step
+simulated function GroundDrive(float Delta, float TopSpeed, float Friction, float SideGrip, bool bHandbrake)
+{
+	local vector X, Y, Z, Slope;
+	local rotator R;
+	local float F, S, Cur, Top, Grip, Brake;
+
+	// plane it really rests on, speed out of that plane gets lost every step
+	Z = ActualFloorNormal;
+	R.Yaw = VehicleYaw;
+	X = vector(R);
+	X = Normal(X - Z*(X dot Z));
+	Y = Normal(Z cross X);
+	F = Velocity dot X;
+	S = Velocity dot Y;
+	Grip = FClamp(Friction/8.0, 0.03, 1.25);
+
+	if (ActualGVTNormal.Z >= 0.5)
+		Slope = CalcGravityStrength(Region.Zone.ZoneGravity*(VehicleGravityScale/GroundPower), ActualGVTNormal);
+	else
+		Slope = CalcGravityStrength(Region.Zone.ZoneGravity*(VehicleGravityScale/GroundPower), Z);
+	Slope /= Friction/8.f + 1.f;
+	F += (Slope dot X)*Delta;
+	S += (Slope dot Y)*Delta;
+
+	if (Accel != 0 && F*Accel < -16)
+	{
+		Brake = WDeAccelRate*3*Friction*Delta;
+		if (Abs(F) <= Brake)
+			F = 0;
+		else if (F > 0)
+			F -= Brake;
+		else
+			F += Brake;
+		if (SignalLights != SL_Stop)
+			SetSignalLights(SL_Stop);
+	}
+	else if (Accel != 0)
+	{
+		OldAccelD = Accel;
+		Top = TopSpeed;
+		Cur = F*Accel;
+		if (Cur < Top)
+			Cur = FMin(Top, Cur + WAccelRate*FMin(1.0, Grip*1.5)*(1.3 - 0.6*FMax(0, Cur)/Top)*Delta);
+		else
+			Cur += WAccelRate*Delta/100; // a hill gave it this, stays until a climb or corner takes it
+		F = Cur*Accel;
+		if (Accel < 0)
+		{
+			if (SignalLights != SL_Backwards)
+				SetSignalLights(SL_Backwards);
+		}
+		else if (SignalLights != SL_None)
+			SetSignalLights(SL_None);
+	}
+	else
+	{
+		Brake = WDeAccelRate*Friction*Delta;
+		if (bHandbrake)
+			Brake *= 1.5;
+		if (Abs(F) <= Brake)
+			F = 0;
+		else if (F > 0)
+			F -= Brake;
+		else
+			F += Brake;
+		if (SignalLights != SL_None)
+			SetSignalLights(SL_None);
+	}
+
+	Brake = SideGrip*Grip*Delta;
+	if (bHandbrake)
+		Brake *= 0.2;
+	if (Abs(S) <= Brake)
+		S = 0;
+	else if (S > 0)
+		S -= Brake;
+	else
+		S += Brake;
+
+	Velocity = X*F + Y*S;
+}
+
+// Body on springs: follows the ground, squats under power, dives under brakes, leans out of corners
+simulated function UpdateBody(float Delta)
+{
+	local vector Y, X, Target, N;
+	local rotator R;
+	local float Step, W, Long, Lat, Top;
+	const HeaveFreq = 15.0;		// rad/s, a bit over 2 Hz
+	const HeaveDamp = 0.55;
+	const TiltFreq = 13.0;
+	const TiltDamp = 0.5;
+	const LeanFreq = 10.0;
+	const LeanDamp = 0.55;
+
+	R.Yaw = VehicleYaw;
+	X = vector(R);
+	Y = vect(0,0,1) cross X;
+	if (!bBodyReady || Abs(Location.Z + RideOffset.Z - BodyZ) > 250)
+	{
+		bBodyReady = true;
+		BodyZ = Location.Z + RideOffset.Z;
+		BodyTargetZ = BodyZ;
+		BodyZRate = 0;
+		BodyTargetRate = 0;
+		BodyNormal = GVTNormal;
+		BodyNormalRate = vect(0,0,0);
+		BodyVelocity = Velocity;
+	}
+	if (Delta <= 0)
+		return;
+	BodyAccel += ((Velocity - BodyVelocity)/Delta - BodyAccel)*(1.0 - Exp(-14.0*Delta));
+	BodyVelocity = Velocity;
+	Target.X = GVT.PrePivot.X + (RideOffset.X - GVT.PrePivot.X)*(1.0 - Exp(-20.0*Delta));
+	Target.Y = GVT.PrePivot.Y + (RideOffset.Y - GVT.PrePivot.Y)*(1.0 - Exp(-20.0*Delta));
+	W = Location.Z + RideOffset.Z;
+	BodyTargetRate += ((W - BodyTargetZ)/Delta - BodyTargetRate)*(1.0 - Exp(-30.0*Delta));
+	BodyTargetZ = W;
+	Long = FClamp(BodyAccel dot X, -1500, 1500);
+	Lat = FClamp(BodyAccel dot Y, -1500, 1500);
+	if (!bOnGround)
+	{
+		Long = 0;
+		Lat = 0;
+	}
+	Top = 2500.0/FMax(2500, Mass);
+	while (Delta > 0)
+	{
+		Step = FMin(Delta, SimStep);
+		Delta -= Step;
+		BodyZRate += (HeaveFreq*HeaveFreq*(BodyTargetZ - BodyZ) + 2*HeaveDamp*HeaveFreq*(BodyTargetRate - BodyZRate))*Step;
+		BodyZ += BodyZRate*Step;
+		BodyPitchRate += (LeanFreq*LeanFreq*(-Long*0.000085*Top - BodyPitch) - 2*LeanDamp*LeanFreq*BodyPitchRate)*Step;
+		BodyPitch += BodyPitchRate*Step;
+		BodyRollRate += (LeanFreq*LeanFreq*(-Lat*0.0001*Top - BodyRoll) - 2*LeanDamp*LeanFreq*BodyRollRate)*Step;
+		BodyRoll += BodyRollRate*Step;
+		if (bOnGround)
+		{
+			BodyNormalRate += (TiltFreq*TiltFreq*(ActualGVTNormal - BodyNormal) - 2*TiltDamp*TiltFreq*BodyNormalRate)*Step;
+			BodyNormal += BodyNormalRate*Step;
+		}
+	}
+	if (BodyZ > BodyTargetZ + 32)
+		BodyZ = BodyTargetZ + 32;
+	else if (BodyZ < BodyTargetZ - 32)
+		BodyZ = BodyTargetZ - 32;
+	if (bOnGround)
+	{
+		N = Normal(BodyNormal);
+		GVTNormal = Normal(N + X*BodyPitch + Y*BodyRoll);
+	}
+	else
+	{
+		BodyNormal = GVTNormal;
+		BodyNormalRate = vect(0,0,0);
+	}
+	Target.Z = BodyZ - Location.Z;
+	GVT.PrePivot = Target;
 }
 
 simulated function SavedMoveXV GetFreeMove()
@@ -2266,7 +2663,7 @@ local VehicleAttachment vat;
 			UpdateAttachment(WeaponAttachment(vat), Delta);
 	}
 
-	if (VehFoot != None && Location != OldLocation)
+	if (VehFoot != None && Location != LastLocation)
 	{
 		if (bSlopedPhys && GVT!=None)
 			VehFoot.SetLocation(Location + GVT.PrePivot);
@@ -2317,19 +2714,61 @@ simulated function CheckBase(Actor PossibleBase, optional Actor Ac[4])
 		SetBase(PossibleBase);
 }
 
+// Ground under the four corners, places and tilts the body
+simulated function SampleCorners()
+{
+	local vector S, E, sHL[4], sHN[4], Off[4], Range, MLoc, CrossedVect[2], GVTLoc;
+	local actor Ac;
+	local int b;
+	local float Low, High;
+
+	Off[0] = FrontWide;
+	Off[1] = FrontWide;
+	Off[1].Y = -FrontWide.Y;
+	Off[2] = BackWide;
+	Off[3] = BackWide;
+	Off[3].Y = -BackWide.Y;
+	Range.Z = -Abs(ZRange);
+	Range = Range >> Rotation;
+	High = Location.Z - CollisionHeight + 6;
+	Low = High - 6 - CollisionRadius*0.9;
+	for (b = 0; b < 4; b++)
+	{
+		S = Location + (Off[b] >> Rotation);
+		E = S + Range;
+		Ac = Trace(sHL[b], sHN[b], E, S, False);
+		if (Abs(int(sHL[b].X)) > 900100200.0 || // check if got nan as HitLocation
+			Abs(int(sHL[b].Y)) > 900100200.0 || // such can happen if trace start already inside mover
+			Abs(int(sHL[b].Z)) > 900100200.0)
+			Ac = None;
+		if (Ac == None)
+			sHL[b] = E;
+		sHL[b].Z = FClamp(sHL[b].Z, Low, High);
+		CornerZ[b] = sHL[b].Z;
+	}
+	MLoc = (sHL[0] + sHL[1] + sHL[2] + sHL[3]) / 4 -
+		(vect(0.5,0,0)*(FrontWide.X + BackWide.X) >> Rotation);
+	CrossedVect[0] = Normal(sHL[0] - sHL[3]);
+	CrossedVect[1] = Normal(sHL[1] - sHL[2]);
+	ActualGVTNormal = Normal(CrossedVect[0] cross CrossedVect[1]);
+	if (ActualGVTNormal.Z < 0)
+		ActualGVTNormal = -ActualGVTNormal;
+	GVTLoc = MLoc - Normal(Range)*CollisionHeight;
+	RideOffset = GVTLoc - Location;
+	S = ActualGVTNormal;
+	S.Z = 0;
+	RideOffset.Z = FClamp(RideOffset.Z, -FMax(MaxObstclHeight,
+		CollisionRadius*FMin(1.0, VSize(S)/FMax(0.707, S.Z))), 0);
+}
+
 // Vehicle is currently on ground?
 simulated function bool CheckOnGround()
 {
 	local vector End,Start,Ex,HL,HN;
-
-	local vector S, E, sHL[4],sHN[4], ePointsOffSet[4], MLoc, CrossedVect[2], GVTLoc;
-	local actor Ac[4];
-	local int b, AcCount;
 	local actor PossibleBase;
-	local vector WZRange;
 	local bool ret;
-	
-	if (Location == LastCheckOnGroundLocation && 
+
+	if (Location == LastCheckOnGroundLocation &&
 		Level.TimeSeconds < LastCheckOnGroundTime + 0.2 && Mover(Base) == None)
 		return bLastCheckOnGroundResult;
 
@@ -2343,126 +2782,27 @@ simulated function bool CheckOnGround()
 	PossibleBase = Trace(HL, HN, End, Start, False, Ex);
 	if (PossibleBase == None)
 	{
-		End.Z -= CollisionHeight;
-		if (Trace(HL, HN, End, Start, False, Ex) != None)
+		if (bGroundSim)
 		{
-			ePointsOffSet[0] = FrontWide;
-			ePointsOffSet[1] = ePointsOffSet[0];
-			ePointsOffSet[1].Y = -FrontWide.Y;
-			ePointsOffSet[2] = BackWide;
-			ePointsOffSet[3] = ePointsOffSet[2];
-			ePointsOffSet[3].Y = -BackWide.Y;
-			
-			WZRange.Z = -Abs(ZRange);
-			WZRange = WZRange >> Rotation;
-	
-			for (b = 0; b < 4; b++)
-			{
-				S = Location + (ePointsOffSet[b] >> Rotation);
-				E = S + WZRange;
-				Ac[b] = Trace(sHL[b], sHN[b], E, S, False);
-				if (Abs(int(sHL[b].X)) > 900100200.0 || // check if got nan as HitLocation
-					Abs(int(sHL[b].Y)) > 900100200.0 || // such can happen if trace start already inside mover
-					Abs(int(sHL[b].Z)) > 900100200.0)
-					Ac[b] = None;
-				if (Ac[b] != None)
-					AcCount++;
-			}
-	
-			if (AcCount == 4)
-			{
-				Disable('Bump');
-				Disable('HitWall');
-				MoveSmooth(vect(0,0,-1));
-				Enable('Bump');
-				Enable('HitWall');
-				if (GVT != None)
-				{
-					MLoc = (sHL[0] + sHL[1] + sHL[2] + sHL[3]) / 4 - 
-						(vect(0.5,0,0)*(FrontWide.X + BackWide.X) >> Rotation);
-					CrossedVect[0] = Normal(sHL[0] - sHL[3]);
-					CrossedVect[1] = Normal(sHL[1] - sHL[2]);
-					ActualGVTNormal = Normal(CrossedVect[0] cross CrossedVect[1]);
-					if (ActualGVTNormal.Z < 0)
-						ActualGVTNormal = -ActualGVTNormal;
-					GVTLoc = MLoc - Normal(WZRange)*CollisionHeight;
-					GVT.PrePivot = GVTLoc - Location;
-					S = ActualGVTNormal;
-					S.Z = 0;
-					GVT.PrePivot.Z = FClamp(GVT.PrePivot.Z, -FMax(MaxObstclHeight, 
-						CollisionRadius*FMin(1.0, VSize(S)/FMax(0.707, S.Z))), 0);
-				}
-	
-				ActualFloorNormal = ActualGVTNormal;
-				ret = ActualFloorNormal.Z >= 0.7;
-			}
+			if (bOnGround && bSlopedPhys && GVT != None)
+				SampleCorners();
+			else
+				RideOffset = vect(0,0,0);
 		}
-		else
+		else if (bLastCheckOnGroundResult)
 		{ // No ground - preserve old vehicle rotation in air.
-			if (bLastCheckOnGroundResult)
-			{
-				ActualFloorNormal = NormalWeightSum(0.1, ActualFloorNormal, FloorNormal);
-				ActualGVTNormal = NormalWeightSum(0.1, ActualGVTNormal, GVTNormal);
-			}
+			ActualFloorNormal = NormalWeightSum(0.1, ActualFloorNormal, FloorNormal);
+			ActualGVTNormal = NormalWeightSum(0.1, ActualGVTNormal, GVTNormal);
 		}
 	}
 	else
 	{
 		if (bSlopedPhys && GVT != None)
-		{
-			ePointsOffSet[0] = FrontWide;
-			ePointsOffSet[1] = ePointsOffSet[0];
-			ePointsOffSet[1].Y = -FrontWide.Y;
-			ePointsOffSet[2] = BackWide;
-			ePointsOffSet[3] = ePointsOffSet[2];
-			ePointsOffSet[3].Y = -BackWide.Y;
-			
-			WZRange.Z = -Abs(ZRange);
-			WZRange = WZRange >> Rotation;
-
-			for (b = 0; b < 4; b++)
-			{
-				S = Location + (ePointsOffSet[b] >> Rotation);
-				E = S + WZRange;
-				Ac[b] = Trace(sHL[b], sHN[b], E, S, False);
-				if (Abs(int(sHL[b].X)) > 900100200.0 || // check if got nan as HitLocation
-					Abs(int(sHL[b].Y)) > 900100200.0 || // such can happen if trace start already inside mover
-					Abs(int(sHL[b].Z)) > 900100200.0)
-					Ac[b] = None;
-				if (Ac[b] != None)
-					AcCount++;
-			}
-	
-			if (bArcMovement && AcCount > 2)
-			{
-				ArcInitDir[0] = FloorNormal;
-				ArcInitDir[1] = GVTNormal;
-			}
-	
-			if (AcCount == 4)
-			{
-				MLoc = (sHL[0] + sHL[1] + sHL[2] + sHL[3]) / 4 - 
-					(vect(0.5,0,0)*(FrontWide.X + BackWide.X) >> Rotation);
-				CrossedVect[0] = Normal(sHL[0] - sHL[3]);
-				CrossedVect[1] = Normal(sHL[1] - sHL[2]);
-				ActualGVTNormal = Normal(CrossedVect[0] cross CrossedVect[1]);
-				if (ActualGVTNormal.Z < 0)
-					ActualGVTNormal = -ActualGVTNormal;
-				GVTLoc = MLoc - Normal(WZRange)*CollisionHeight;
-				GVT.PrePivot = GVTLoc - Location;
-				S = ActualGVTNormal;
-				S.Z = 0;
-				GVT.PrePivot.Z = FClamp(GVT.PrePivot.Z, -FMax(MaxObstclHeight, 
-					CollisionRadius*FMin(1.0, VSize(S)/FMax(0.707, S.Z))), 0);
-			}
-			else
-				ActualGVTNormal = HN;
-		}
-	
+			SampleCorners();
 		ActualFloorNormal = HN;
-		ret = ActualFloorNormal.Z >= 0.7;
+		ret = ActualFloorNormal.Z >= WalkableZ;
 	}
-	CheckBase(PossibleBase, Ac);
+	CheckBase(PossibleBase);
 	LastCheckOnGroundLocation = Location;
 	LastCheckOnGroundTime = Level.TimeSeconds;
 	bLastCheckOnGroundResult = ret;
@@ -4072,12 +4412,12 @@ simulated function SingularBump(Actor Other)
 		else if (Other.Mass/Mass >= 2.0 || StationaryPhys(Other) != None)
 		{
 			Velocity = Other.Velocity * 1.15;
-			Move((Other.Location - Other.OldLocation)*1.5);
+			Move((Veh.Location - Veh.LastLocation)*1.5);
 		}
 		else if ((Mass/Other.Mass >= 2.0 && (Velocity Dot Dir) > 0) || StationaryPhys(self) != None)
 		{
 			Other.Velocity = Velocity * 1.15;
-			Other.Move((Location - OldLocation)*1.5);
+			Other.Move((Location - LastLocation)*1.5);
 			bHitASmallerVehicle = True;
 		}
 		else if (Mass/Other.Mass >= 2.0)
@@ -4341,6 +4681,12 @@ simulated singular function HitWall( vector HitNormal, Actor Wall )
 		return;
 	}
 */
+
+	if (bGroundSim)
+	{
+		AirContact(HitNormal, Wall);
+		return;
+	}
 
 	if (!bOnGround && HitNormal.Z > 0.65)
 		FellToGround();
