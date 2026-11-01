@@ -308,6 +308,8 @@ const BotMinProgress = 250.0;	// net uu from the last place it counted as moving
 const BotMaxStrikes = 4;
 const BotBanSeconds = 90.0;	// longer than the factory reset, so a wedged vehicle goes home
 
+var float YawRemainder;		// part of a turn that the int yaw has not taken yet
+
 var PreventEnter PreventEnter;
 
 enum EDropFlag
@@ -1714,6 +1716,17 @@ function ServerPackState(float Delta)
 	ServerState.ClientTime = ClientLastTime;
 	if (PlayerPawn(Driver) != None && Level.TimeSeconds != ServerLastTime)
 		ServerState.ClientTime += Level.TimeSeconds - ServerLastTime;
+}
+
+// Turn the vehicle without losing the fraction of a unit each tick. Returns the whole units applied.
+simulated function int AddYaw(float Change)
+{
+	local int Whole;
+	YawRemainder += Change;
+	Whole = YawRemainder;
+	YawRemainder -= Whole;
+	VehicleYaw += Whole;
+	return Whole;
 }
 
 simulated function DmgFXGen(byte Mode)

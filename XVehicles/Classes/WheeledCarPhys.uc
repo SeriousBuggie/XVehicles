@@ -140,6 +140,7 @@ simulated function UpdateDriverInput( float Delta )
 	local rotator R, RA, RB;
 	local rotator OldWheeledRot;
 	local bool bDirectVis;
+	local int YawStep;
 	
 	if (Driver == None)
 		bWasStuckOnW = false;
@@ -243,9 +244,9 @@ simulated function UpdateDriverInput( float Delta )
 				FMin(FMax(Region.Zone.ZoneGroundFriction, WheelsTraction), 1.0);
 		if (DesTurn != 0)
 		{
-			VehicleYaw += DesTurn;
+			YawStep = AddYaw(DesTurn);
 			if (!bCameraOnBehindView && Driver!=None)
-				Driver.ViewRotation.Yaw += DesTurn;
+				Driver.ViewRotation.Yaw += YawStep;
 		}
 	}
 	
