@@ -310,6 +310,10 @@ const BotBanSeconds = 90.0;	// longer than the factory reset, so a wedged vehicl
 
 var float YawRemainder;		// part of a turn that the int yaw has not taken yet
 
+// Leaving
+var Pawn LastExitPawn;
+var float LastExitTime;
+
 var PreventEnter PreventEnter;
 
 enum EDropFlag
@@ -1404,6 +1408,59 @@ function float GetGoalCollisionRadius(Actor FlagGoal)
 	return Class'CTFFlag'.Default.CollisionRadius;
 }
 
+// Room for this pawn at Offset from the vehicle? Moves nothing
+function bool ExitSpotFree(Pawn P, vector Offset, out vector Spot)
+{
+	local vector Ex, Start, End, HL, HN, Up;
+	local int k;
+
+	Ex.X = P.default.CollisionRadius;
+	Ex.Y = Ex.X;
+	Ex.Z = P.default.CollisionHeight;
+	Up = vect(0,0,1);
+	Offset.Z = 0;
+	// higher tries are for ground that rises on this side
+	for (k = 0; k < 3; k++)
+	{
+		Start = Location + Up*(45*k);
+		End = Start + Offset;
+		if (FastTrace(Start, Location) && Trace(HL, HN, End, Start, true, Ex) == None)
+		{
+			if (Trace(HL, HN, End - Up*300, End, false, Ex) != None)
+				End = HL + Up;
+			Spot = End;
+			return true;
+		}
+	}
+	return false;
+}
+
+// Asked side, then all the way around, then the roof
+function bool FindExitSpot(Pawn P, vector ExitVect, out vector Spot)
+{
+	local rotator R, Turn;
+	local vector Way;
+	local float Reach;
+	local int i;
+
+	R.Yaw = VehicleYaw;
+	Way = ExitVect;
+	Reach = FMax(VSize(ExitVect), CollisionRadius + P.default.CollisionRadius + 12);
+	Way.Z = 0;
+	if (Way == vect(0,0,0))
+		Way = vect(0,1,0);
+	Way = Normal(Way)*Reach;
+	for (i = 0; i < 16; i++)
+	{
+		// 0, 180, 90, 270, then the diagonals, then all of it again further out
+		Turn.Yaw = (i & 1)*32768 + ((i >> 1) & 1)*16384 + ((i >> 2) & 1)*8192;
+		if (ExitSpotFree(P, ((Way*(1.0 + 0.45*(i >> 3))) >> Turn) >> R, Spot))
+			return true;
+	}
+	Spot = Location + vect(0,0,1)*(CollisionHeight + P.default.CollisionHeight + 12);
+	return FastTrace(Spot, Location);
+}
+
 function ProcessExit(Pawn Pawn, DriverCameraActor Camera)
 {
 	local Bot Bot;
@@ -1437,18 +1494,16 @@ function ProcessExit(Pawn Pawn, DriverCameraActor Camera)
 		{
 			if (Pawn.Weapon != None && Pawn.Weapon.Owner != None)
 				Pawn.Weapon.BringUp();
-			if (PlayerPawn(Pawn) != None && Pawn.bDuck == 1 && bCanFly)
+			if (PlayerPawn(Pawn) != None && Pawn.bDuck != 0)
 				PreventEnter = Spawn(class'PreventEnter', Pawn);
 			if (!DoChangeSeat) {
 				Pawn.SetCollision(True, True, True);
 				// make touch with anything here
 				if (Health > 0)
 				{
-					SmallMove = Normal(Location - Pawn.Location);
+					SmallMove = Normal(Pawn.Location - Location);
 					if (Pawn.Move(SmallMove))
 						Pawn.Move(-SmallMove);
-					else if (Pawn.Move(-SmallMove))
-						Pawn.Move(SmallMove);
 				}
 			}
 		}
@@ -1466,10 +1521,26 @@ function ProcessExit(Pawn Pawn, DriverCameraActor Camera)
 
 singular function DriverLeft( optional bool bForcedLeave, optional coerce string Reason )
 {
-	local vector ExitVect;
+	local vector ExitVect, Spot;
+	local bool bFree;
 
 	if( Driver!=None )
 	{
+		if (!Driver.bDeleteMe && !DoChangeSeat)
+		{
+			// decide first, a refused exit has to leave the driver as seated
+			ExitVect = GetExitOffset(Driver);
+			if (Bot(Driver) == None && (Normal(Velocity) Dot Normal(ExitVect >> Rotation)) > 0.35 &&
+				(Normal(Velocity) Dot Normal((ExitVect + vect(0,-2,0)*ExitVect.Y) >> Rotation)) <= 0.35)
+				ExitVect.Y = -ExitVect.Y;
+			bFree = FindExitSpot(Driver, ExitVect, Spot);
+			if (!bFree && !bForcedLeave)
+			{
+				if (PlayerPawn(Driver) != None)
+					Driver.ClientMessage("No room to get out here.", 'CriticalEvent');
+				return;
+			}
+		}
 		PlaySound(EndSound,SLOT_Misc);
 
 		if( Driver.bDeleteMe )
@@ -1486,28 +1557,18 @@ singular function DriverLeft( optional bool bForcedLeave, optional coerce string
 			RestartPawn(Driver);
 			ChangeCollision(Driver, false, 0);
 
-			ExitVect = GetExitOffset(Driver);
-			if (Bot(Driver) == None && (Normal(Velocity) Dot Normal(ExitVect >> Rotation)) > 0.35 && 
-				(Normal(Velocity) Dot Normal((ExitVect + vect(0,-2,0)*ExitVect.Y) >> Rotation)) <= 0.35)
-				ExitVect.Y = -ExitVect.Y;
-			if (!Driver.Move(Location+(ExitVect >> Rotation) - Driver.Location) && !bForcedLeave)
-			{
-				ExitVect.Y = -ExitVect.Y;
-				if (!Driver.Move(Location+(ExitVect >> Rotation) - Driver.Location) && !bForcedLeave)
-				{
-//					Log("Failed exit Driver for" @ Driver);
-					ChangeCollision(Driver, true, 0);
-					if (PlayerPawn(Driver) != None)
-						Driver.GoToState('PlayerFlying');
-					if (!bDeleteMe && Health > 0)
-						CheckForEmpty();
-					ShowState();
-					Return;
-				}
-			}
+			if (DoChangeSeat)
+				; // stays aboard, ChangeSeat puts the pawn in its new seat
+			else if (!bFree || !Driver.SetLocation(Spot))
+				Driver.Move(Location + (ExitVect >> Rotation) - Driver.Location);
 			ProcessExit(Driver, MyCameraAct);
 			LastDriver = Driver;
 			LastDriverTime = Level.TimeSeconds;
+			if (!DoChangeSeat)
+			{
+				LastExitPawn = Driver;
+				LastExitTime = Level.TimeSeconds;
+			}
 		}
 	}
 	if( DriverGun!=None )
@@ -3184,8 +3245,9 @@ function bool CanEnter(Pawn Other, optional bool bIgnoreDuck, optional bool bIgn
 		Other.IsInState('PlayerWaiting') || 
 		Other.IsInState('GameEnded') || 
 		Level.Game.bGameEnded || 
-		!Other.bCollideActors || 
-		(!bIgnoreDuck && PlayerPawn(Other) != None && (Other.bDuck == 0 || 
+		!Other.bCollideActors ||
+		(Other == LastExitPawn && Level.TimeSeconds < LastExitTime + 0.75) || // just got out, on purpose
+		(!bIgnoreDuck && PlayerPawn(Other) != None && (Other.bDuck == 0 ||
 		(PreventEnter != None && PreventEnter.Instigator == Other))))
 		return false;
 	if (bIgnoreTrace)
@@ -5045,11 +5107,26 @@ function PassengerEnter( Pawn Other, byte Seat, optional int MyPitch, optional i
 }
 function PassengerLeave( byte Seat, optional bool bForcedLeave )
 {
-	local vector ExitVect;
+	local vector ExitVect, Spot;
 	local Pawn Other;
+	local bool bFree;
 
 	if (Passengers[Seat] != None)
 	{
+		if (!Passengers[Seat].bDeleteMe && !DoChangeSeat)
+		{
+			ExitVect = GetExitOffset(Passengers[Seat]);
+			if (Bot(Passengers[Seat]) == None && (Normal(Velocity) Dot Normal(ExitVect >> Rotation)) > 0.35 &&
+				(Normal(Velocity) Dot Normal((ExitVect + vect(0,-2,0)*ExitVect.Y) >> Rotation)) <= 0.35)
+				ExitVect.Y = -ExitVect.Y;
+			bFree = FindExitSpot(Passengers[Seat], ExitVect, Spot);
+			if (!bFree && !bForcedLeave)
+			{
+				if (PlayerPawn(Passengers[Seat]) != None)
+					Passengers[Seat].ClientMessage("No room to get out here.", 'CriticalEvent');
+				return;
+			}
+		}
 		if (Passengers[Seat].bDeleteMe)
 			Passengers[Seat] = None;
 		else
@@ -5061,26 +5138,16 @@ function PassengerLeave( byte Seat, optional bool bForcedLeave )
 			RestartPawn(Passengers[Seat]);
 			ChangeCollision(Passengers[Seat], false, Seat + 1);
 
-			ExitVect = GetExitOffset(Passengers[Seat]);
-			if (Bot(Passengers[Seat]) == None && (Normal(Velocity) Dot Normal(ExitVect >> Rotation)) > 0.35 && 
-				(Normal(Velocity) Dot Normal((ExitVect + vect(0,-2,0)*ExitVect.Y) >> Rotation)) <= 0.35)
-				ExitVect.Y = -ExitVect.Y;
-			if (!Passengers[Seat].Move(Location + (ExitVect >> Rotation) - Passengers[Seat].Location) && !bForcedLeave)
-			{
-				ExitVect.Y = -ExitVect.Y;
-				if (!Passengers[Seat].Move(Location + (ExitVect >> Rotation) - Passengers[Seat].Location) && !bForcedLeave)
-				{
-					ChangeCollision(Passengers[Seat], true, Seat + 1);
-					if (PlayerPawn(Passengers[Seat]) != None)
-						Passengers[Seat].GoToState('PlayerFlying');
-						
-					HasPassengers();
-					CheckForEmpty();
-					ShowState();
-					Return;
-				}
-			}
+			if (DoChangeSeat)
+				; // stays aboard, ChangeSeat puts the pawn in its new seat
+			else if (!bFree || !Passengers[Seat].SetLocation(Spot))
+				Passengers[Seat].Move(Location + (ExitVect >> Rotation) - Passengers[Seat].Location);
 			ProcessExit(Passengers[Seat], PassengerSeats[Seat].PassengerCam);
+			if (!DoChangeSeat)
+			{
+				LastExitPawn = Passengers[Seat];
+				LastExitTime = Level.TimeSeconds;
+			}
 		}
 	}
 	if (PassengerSeats[Seat].PGun != None)
