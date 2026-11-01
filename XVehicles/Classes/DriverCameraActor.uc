@@ -6,6 +6,9 @@ var WeaponAttachment GunAttachM;
 
 var float DesiredViewMult, CurrentViewMult, OldDesiredViewMult, KeepWait;
 
+// Chase view: height lags a bit, a view pulled in by a wall comes back out slowly
+var float HeightLag, SmoothHeight, ViewDistance, LastDelta;
+
 replication
 {
 	// Variables the server should send to the client.
@@ -57,11 +60,28 @@ function ChangeView()
 	}
 }
 
+// Called from CalcCameraPos with the place the view wants to be.
+simulated function vector EaseDistance(vector Pos, vector Focus)
+{
+	local vector Dir;
+	local float Dist;
+
+	Dir = Pos - Focus;
+	Dist = VSize(Dir);
+	if (ViewDistance <= 0 || Dist < ViewDistance)
+		ViewDistance = Dist;
+	else
+		ViewDistance += (Dist - ViewDistance)*(1.0 - Exp(-5.0*LastDelta));
+	if (Dist <= 0)
+		return Pos;
+	return Focus + Dir*(ViewDistance/Dist);
+}
+
 simulated function Tick( float Delta )
 {
 	local vector V;
 	local rotator R;
-	local float RRoll;
+	local float RRoll, Height;
 	local Pawn P;
 	local PlayerPawn PP;
 	local bool bPasengerCam;
@@ -122,6 +142,14 @@ simulated function Tick( float Delta )
 		else if( bPasengerCam && PP.bBehindView && PP.ViewTarget==Self )
 			PP.bBehindView = False;
 	}
+	LastDelta = Delta;
+	Height = VehicleOwner.Location.Z;
+	if (VehicleOwner.GVT != None)
+		Height += VehicleOwner.GVT.PrePivot.Z;
+	if (SmoothHeight == 0 || Abs(Height - SmoothHeight) > 300)
+		SmoothHeight = Height;
+	SmoothHeight += (Height - SmoothHeight)*(1.0 - Exp(-14.0*Delta));
+	HeightLag = SmoothHeight - Height;
 	VehicleOwner.CalcCameraPos(V,R,CurrentViewMult,SeatNum,self);
 	Move(V-Location);
 

@@ -34,6 +34,7 @@ var() float WheelsRadius;
 var() float TractionWheelsPosition;
 
 var VehWaterAttach VWaterT[8];
+var float WheelLift[8];		// suspension travel each wheel shows, up is positive
 
 replication
 {
@@ -255,6 +256,8 @@ simulated function UpdateDriverInput( float Delta )
 		Driver.ViewRotation.Yaw += YawStep;
 }
 
+const WheelTravel = 16.0;
+
 simulated function int GetIcedMovementDir()
 {
 	if( (Normal(VelFriction) dot vector(Rotation))>0 )
@@ -428,6 +431,8 @@ simulated function AttachmentsTick( float Delta )
 	local int i, bSet[4];
 	local rotator R, SR[ArrayCount(bSet)];
 	local Quat VehQ;
+	local vector WheelUp, WheelPos;
+	local float Rest, Lift;
 	local byte PitchDif, TurnType;
 	local float EngP;
 	local vector BaseLoc;
@@ -481,10 +486,21 @@ simulated function AttachmentsTick( float Delta )
 		if (bSlopedPhys && GVT != None)
 			BaseLoc += GVT.PrePivot;
 		LocSame = Location == LastLocation;
+		WheelUp = vect(0,0,1) >> Rotation;
+		Rest = WheelsRadius;
+		if (Rest <= 0)
+			Rest = 20;
 		For( i=0; i<NumWheels; i++ )
 		{
 			MyWheel = MyWheels[i];
-			MyWheel.SetLocation(BaseLoc + (MyWheel.WheelOffset >> Rotation)*DrawScale);
+			WheelPos = BaseLoc + (MyWheel.WheelOffset >> Rotation)*DrawScale;
+			// wheel keeps to the ground, the body moves for the rest
+			Lift = -WheelTravel;
+			if (bOnGround)
+				Lift = FClamp(CornerZ[int(MyWheel.WheelOffset.X < 0)*2 + int(MyWheel.WheelOffset.Y < 0)] + Rest - WheelPos.Z,
+					-WheelTravel, WheelTravel*1.3);
+			WheelLift[i] += (Lift - WheelLift[i])*(1.0 - Exp(-45.0*Delta));
+			MyWheel.SetLocation(WheelPos + WheelUp*WheelLift[i]);
 
 			TurnType = MyWheel.TurnType;
 			if (TurnType == WheelTypeType.TT_Rotor)

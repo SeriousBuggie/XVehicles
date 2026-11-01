@@ -3891,7 +3891,11 @@ simulated function CalcCameraPos( out vector Pos, out rotator Rot, float Mult, o
 		else
 			V = Gun.Location+((BehinViewViewOffset*Mult) >> Rot);
 	}
+	if (Cam != None)
+		V.Z += Cam.HeightLag;
 	Pos = FixCameraPos(V, Location);
+	if (Cam != None)
+		Pos = Cam.EaseDistance(Pos, Location);
 }
 function rotator GetFiringRot( float ProjSpeed, bool bInstantHit, vector PStartPos, optional byte SeatN )
 {
