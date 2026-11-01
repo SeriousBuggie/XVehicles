@@ -240,6 +240,8 @@ function vector BotDrive()
 	if (Driver.IsInState('GameEnded') || Driver.IsInState('Dying') || 
 		(Level.Game != None && Level.Game.bGameEnded))
 		return vect(0,0,0);
+	if (Reverse != 0 && ReverseTime > Level.TimeSeconds)
+		return Normal(Normal((Location - MoveDest)*vect(1,1,0)) + vect(0,0,1));
 	Dir = MoveDest - Location;
 	// dont slow down if run over
 	if (Driver.Enemy == None || VSize(Driver.Enemy.Location - MoveDest) > 40)

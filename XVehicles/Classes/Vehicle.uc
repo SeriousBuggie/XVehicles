@@ -296,6 +296,18 @@ var bool DoChangeSeat;
 
 var float BotDriverJumpZ;
 
+// Bot progress watchdog
+var vector BotCheckPos;
+var float BotCheckTime;
+var byte BotStrikes;		// checks in a row without progress
+var byte BotIdle;			// same, but also counts bots with a reason to wait
+var float BotBanTime;		// bots stay out of this vehicle until then
+
+const BotCheckDelay = 2.0;
+const BotMinProgress = 250.0;	// net uu from the last place it counted as moving
+const BotMaxStrikes = 4;
+const BotBanSeconds = 90.0;	// longer than the factory reset, so a wedged vehicle goes home
+
 var PreventEnter PreventEnter;
 
 enum EDropFlag
@@ -1134,6 +1146,10 @@ function DriverEnter( Pawn Other, optional int MyPitch, optional int MyYaw )
 	ShowState();
 	Other.ClearPaths();
 	ChangeProps(Other, true, 0, WA);
+	BotCheckPos = Location;
+	BotCheckTime = Level.TimeSeconds;
+	BotStrikes = 0;
+	BotIdle = 0;
 }
 
 function DebugDump(coerce string Place) {
@@ -2685,6 +2701,61 @@ function bool CrewFit(Pawn Other)
 	// Defend, Hold and other unknown possible orders
 	return DBot.Orders == Bot.Orders && Bot.OrderObject == DBot.OrderObject;
 }
+// True when a bot has no reason to be moving right now.
+function bool BotIsBusy(Bot B)
+{
+	if (B.IsInState('RangedAttack') || (B.Enemy != None && B.LineOfSightTo(B.Enemy)))
+		return true;
+	if ((B.Orders == 'Hold' || B.Orders == 'Defend') && B.OrderObject != None &&
+		VSize(B.OrderObject.Location - Location) < 1500)
+		return true;
+	if (B.Orders == 'Follow' && B.OrderObject != None && VSize(B.OrderObject.Location - Location) < 1000)
+		return true;
+	return FlagPassenger() != None && VSize(Velocity) < 50;
+}
+
+// A bot driver that stops getting anywhere first repaths, then backs off, then gets out.
+function CheckBotProgress()
+{
+	local Bot B;
+	local float Moved;
+
+	B = Bot(Driver);
+	if (B == None || StationaryPhys(self) != None || Level.TimeSeconds < BotCheckTime + BotCheckDelay)
+		return;
+	Moved = VSize(Location - BotCheckPos);
+	BotCheckTime = Level.TimeSeconds;
+	if (Moved >= BotMinProgress)
+		BotIdle = 0;
+	else if (BotIdle < 255)
+		BotIdle++;
+	if (Moved >= BotMinProgress || BotIsBusy(B))
+	{
+		BotCheckPos = Location;
+		BotStrikes = 0;
+		return;
+	}
+	BotStrikes++;
+	if (BotStrikes >= BotMaxStrikes)
+	{
+		BotStrikes = 0;
+		BotBanTime = Level.TimeSeconds + BotBanSeconds;
+		DriverLeft(False, "Stuck");
+		if (Driver != None)
+			DriverLeft(True, "Stuck forced");
+	}
+	else if (BotStrikes == 1)
+	{
+		B.MoveTimer = -1;
+		bHasMoveTarget = False;
+	}
+	else
+	{
+		Reverse = -GetMovementDir();
+		ReverseTime = Level.TimeSeconds + 1.5;
+	}
+}
+
 // Passenger holding a flag that the driver does not hold.
 function Pawn FlagPassenger()
 {
@@ -2722,7 +2793,8 @@ function ReadBotInput( float Delta )
 	local float S;
 	local int Dir;
 	local Bot Bot;
-	
+	local bool bFits;
+
 	if ((Driver != None && (Driver.IsInState('GameEnded') || Driver.IsInState('Dying'))) || Level.Game.bGameEnded)
 		return;
 	
@@ -2802,10 +2874,11 @@ function ReadBotInput( float Delta )
 					
 					Driver.SetCollisionSize(CollisionRadius, CollisionHeight);
 					//log(self @ driver @ MoveDest @ Driver.PointReachable(MoveDest));
-					if (!Driver.PointReachable(MoveDest))
+					bFits = Driver.PointReachable(MoveDest);
+					Driver.SetCollisionSize(Driver.default.CollisionRadius, Driver.default.CollisionHeight);
+					// next to a wall nothing that size reaches anything, so only leave if stuck
+					if (!bFits && BotIdle >= 2)
 						DriverLeft(False, "PointReachable");
-					else
-						Driver.SetCollisionSize(Driver.default.CollisionRadius, Driver.default.CollisionHeight);
 					if (Driver == None)
 						return;
 				}
@@ -3272,6 +3345,7 @@ State VehicleDriving
 			// sometimes wrong order of events produce pickup flag after pass enter check, so it fixed here
 			if (DropFlag != DF_None)
 				TryDropFlag(Driver);
+			CheckBotProgress();
 		}
 		if (DropFlag == DF_All)
 			for (i = 0; i < ArrayCount(Passengers); i++)

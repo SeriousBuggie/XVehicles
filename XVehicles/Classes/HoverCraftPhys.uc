@@ -377,6 +377,8 @@ function vector BotDrive()
 	if (Driver.IsInState('GameEnded') || Driver.IsInState('Dying') || 
 		(Level.Game != None && Level.Game.bGameEnded))
 		return vect(0,0,0);
+	if (Reverse != 0 && ReverseTime > Level.TimeSeconds)
+		return Normal((Location - MoveDest)*vect(1,1,0));
 	Dir = MoveDest - Location;
 	bNeedDuck = false;
 	Accel = 1; // always accelerate
