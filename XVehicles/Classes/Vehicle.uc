@@ -155,6 +155,7 @@ var DriverCameraActor MyCameraAct;
 
 // Someone else's vehicle: last update's path plus a fading error, so updates don't show as jumps
 var vector NetPos, NetVel, NetError, NetAccel;
+var vector NetVelError;		// shown velocity minus the server's, fades with NetError
 var float NetTime, NetYawRate, NetYawError;
 var int NetYaw;
 // Own vehicle: how far it is from where the server says it should be
@@ -328,6 +329,7 @@ var float SimDelta;			// length of the step in hand
 
 const SimStep = 0.0166667;
 const WalkableZ = 0.7;
+const NetSettle = 10.0;		// per second, how fast a remote vehicle returns to the server's path
 const NormalDone = 0.99999;	// floor normal this close to its target has arrived, ~0.25 degrees
 
 // Visible ride, see UpdateBody. Doesn't touch collision or movement
@@ -1763,7 +1765,7 @@ simulated function ClientUpdateState(float Delta)
 			}
 			ServerStateTime = Level.TimeSeconds;
 			Step = Pos - Location;
-			if ((Step dot Step) > 122500) // 350*350
+			if (VSize(Step) > SnapDistance(Vel))
 			{
 				SetLocation(Pos);
 				Velocity = Vel;
@@ -1776,6 +1778,14 @@ simulated function ClientUpdateState(float Delta)
 			{
 				if (bGroundSim && bOnGround)
 					Step.Z = 0; // both ends are set down on the same floor
+				// states are stamped to a server tick, a small error along the way of travel may just be the clock
+				Part = VSize(Vel);
+				if (Part > 100)
+				{
+					T = Step dot Normal(Vel);
+					if (Abs(T) < Part*0.06)
+						Step -= Normal(Vel)*T*0.75;
+				}
 				PendingMove = Step;
 				PendingVel = Vel - Velocity;
 				PendingYaw = (Yaw - VehicleYaw) << 16 >> 16;
@@ -1789,14 +1799,21 @@ simulated function ClientUpdateState(float Delta)
 				NetAccel = (ServerState.Velocity - NetVel)/FMax(T, 0.03);
 				NetYawRate += (float((ServerState_Yaw - NetYaw) << 16 >> 16)/T - NetYawRate)*0.5;
 			}
+			NetVelError += NetVel - ServerState.Velocity;
 			NetPos = ServerState.Location;
 			NetVel = ServerState.Velocity;
 			NetYaw = ServerState_Yaw;
+			// a crash really does stop it, smooth only so much
+			if (VSize(NetVelError) > 500)
+				NetVelError = Normal(NetVelError)*500;
 			// this frame's travel is still to come, restarting at now loses it on every update
 			NetTime = Level.TimeSeconds - Delta;
 			NetError = Location - NetPos;
-			if ((NetError dot NetError) > 122500) // 350*350
+			if (VSize(NetError) > SnapDistance(NetVel))
+			{
 				NetError = vect(0,0,0);
+				NetVelError = vect(0,0,0);
+			}
 			NetYawError = (VehicleYaw - NetYaw) << 16 >> 16;
 			if (Abs(NetYawError) > 8192)
 				NetYawError = 0;
@@ -1839,7 +1856,11 @@ simulated function ClientUpdateState(float Delta)
 	else if (NetTime > 0)
 	{
 		T = FMin(Level.TimeSeconds - NetTime, 0.35);
-		NetError *= Exp(-7.0*Delta);
+		// critically damped spring back to the server's path, same at any frame time
+		Step = (NetVelError + NetError*NetSettle)*Delta;
+		Part = Exp(-NetSettle*Delta);
+		NetVelError = (NetVelError - Step*NetSettle)*Part;
+		NetError = (NetError + Step)*Part;
 		Pos = NetPos + NetVel*T + NetError;
 		if (Pos != Location)
 			Move(Pos - Location);
@@ -1850,6 +1871,12 @@ simulated function ClientUpdateState(float Delta)
 		}
 	}
 }
+// Past this a correction gives up and teleports, grows with speed
+simulated function float SnapDistance(vector Speed)
+{
+	return 350 + VSize(Speed)*0.2;
+}
+
 // Server send to client vehicle pos/rot/vel
 function ServerPackState(float Delta)
 {
