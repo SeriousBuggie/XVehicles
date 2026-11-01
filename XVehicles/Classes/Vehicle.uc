@@ -152,6 +152,14 @@ var VehState ServerState;
 var int ServerState_Yaw;
 var float ServerStateTime;
 var DriverCameraActor MyCameraAct;
+
+// Someone else's vehicle: last update's path plus a fading error, so updates don't show as jumps
+var vector NetPos, NetVel, NetError, NetAccel;
+var float NetTime, NetYawRate, NetYawError;
+var int NetYaw;
+// Own vehicle: how far it is from where the server says it should be
+var vector PendingMove, PendingVel;
+var float PendingYaw;
 var OverlayMatDispRep ReplicOverlayMat;
 
 var float ClientLastTime;
@@ -1699,41 +1707,41 @@ simulated function DestroyMoves(SavedMoveXV Move)
 // Client update vehicle pos/rot/vel
 simulated function ClientUpdateState(float Delta)
 {
-	local vector ServerPredictLocation, Diff;
-	local float Dist;
+	local vector Pos, Vel, Step;
+	local float T, Part;
+	local int Yaw, Turn;
 	local SavedMoveXV CurrentMove;
 	local PlayerPawn LocalPlayer;
-	local bool bNeedUpdateYaw;
-	
+	local bool bMine;
+
 	if (class'VActor'.Default.StaticPP != None)
 		LocalPlayer = class'VActor'.Default.StaticPP.Actor;
 	else
 		LocalPlayer = FindNetOwner(self);
+	bMine = LocalPlayer != None && LocalPlayer == Driver;
 
-	bNeedUpdateYaw = ServerState.ClientTime != 0;
-	if (bNeedUpdateYaw)
+	if (ServerState.ClientTime != 0)
 	{
 		if (ServerState.ClientTime > 0)
 		{ // ignore specal init value -1, which need for set VehicleYaw initially
 			ServerStateTime = Level.TimeSeconds;
-			if (LocalPlayer == Driver)
+			if (bMine)
 				ServerStateTime = ServerState.ClientTime;
-			/* // linear prediction is not good enough
-			else if (LocalPlayer != None && LocalPlayer.PlayerReplicationInfo != None)
-				ServerStateTime -= 0.001*LocalPlayer.PlayerReplicationInfo.Ping;
-			*/
 		}
 		ServerState_Yaw = ServerState.YawLow + (ServerState.YawHigh << 8);
 		ServerState.ClientTime = 0;
 		ServerState.Velocity /= 15.f;
-		
-		if (LocalPlayer != None && LocalPlayer == Driver)
+
+		if (bMine)
 		{
-			// replay last moves
+			// replay moves since the server's state, then work the difference off
+			Pos = ServerState.Location;
+			Vel = ServerState.Velocity;
+			Yaw = ServerState_Yaw;
 			CurrentMove = SavedMoves;
 			while (CurrentMove != None)
 			{
-				if (CurrentMove.TimeStamp <= ServerStateTime )
+				if (CurrentMove.TimeStamp <= ServerStateTime)
 				{
 					SavedMoves = CurrentMove.NextMove;
 					CurrentMove.NextMove = FreeMoves;
@@ -1745,30 +1753,98 @@ simulated function ClientUpdateState(float Delta)
 				{
 					// try real replay can screwed non-linear calls and need hardly rework all physics to stateless
 					// replay via simple assumptions
-					
-					ServerState.Velocity += CurrentMove.SavedVelocity - CurrentMove.Velocity;
-					ServerState_Yaw += CurrentMove.SavedYaw - CurrentMove.Yaw;						
-					ServerState.Location += CurrentMove.SavedLocation - CurrentMove.Acceleration;
-					
+					Vel += CurrentMove.SavedVelocity - CurrentMove.Velocity;
+					Yaw += CurrentMove.SavedYaw - CurrentMove.Yaw;
+					Pos += CurrentMove.SavedLocation - CurrentMove.Acceleration;
 					CurrentMove = CurrentMove.NextMove;
 				}
 			}
-			
-			ServerState.YawLow = byte(ServerState_Yaw);
-			ServerState.YawHigh = byte(ServerState_Yaw >> 8);
 			ServerStateTime = Level.TimeSeconds;
+			Step = Pos - Location;
+			if ((Step dot Step) > 122500) // 350*350
+			{
+				SetLocation(Pos);
+				Velocity = Vel;
+				VehicleYaw = Yaw;
+				PendingMove = vect(0,0,0);
+				PendingVel = vect(0,0,0);
+				PendingYaw = 0;
+			}
+			else
+			{
+				if (bGroundSim && bOnGround)
+					Step.Z = 0; // both ends are set down on the same floor
+				PendingMove = Step;
+				PendingVel = Vel - Velocity;
+				PendingYaw = (Yaw - VehicleYaw) << 16 >> 16;
+			}
 		}
 		else
-			Velocity = ServerState.Velocity;
+		{
+			T = Level.TimeSeconds - NetTime;
+			if (NetTime > 0 && T > 0.005)
+			{
+				NetAccel = (ServerState.Velocity - NetVel)/FMax(T, 0.03);
+				NetYawRate += (float((ServerState_Yaw - NetYaw) << 16 >> 16)/T - NetYawRate)*0.5;
+			}
+			NetPos = ServerState.Location;
+			NetVel = ServerState.Velocity;
+			NetYaw = ServerState_Yaw;
+			// this frame's travel is still to come, restarting at now loses it on every update
+			NetTime = Level.TimeSeconds - Delta;
+			NetError = Location - NetPos;
+			if ((NetError dot NetError) > 122500) // 350*350
+				NetError = vect(0,0,0);
+			NetYawError = (VehicleYaw - NetYaw) << 16 >> 16;
+			if (Abs(NetYawError) > 8192)
+				NetYawError = 0;
+			Velocity = NetVel;
+		}
 	}
-		
-	Diff = ServerPredictLocation - Location;
-	Dist = Diff dot Diff; // squared VSize
-	
-	if (Dist > 122500) // 350*350
-		SetLocation(ServerPredictLocation);
-	else if (Dist > 1)
-		MoveSmooth(Diff*0.1);
+
+	if (ServerStateTime == 0)
+	{ // demoplay from demo recorded on client
+		Velocity = ServerState.Velocity;
+		Step = ServerState.Location - Location;
+		if ((Step dot Step) > 122500) // 350*350
+			SetLocation(ServerState.Location);
+		else if ((Step dot Step) > 1)
+			MoveSmooth(Step*(1.0 - Exp(-6.3*Delta)));
+		if (bShouldRepVehYaw)
+			VehicleYaw = ServerState.YawLow + (ServerState.YawHigh << 8);
+	}
+	else if (bMine)
+	{
+		Part = 1.0 - Exp(-9.0*Delta);
+		Step = PendingMove*Part;
+		PendingMove -= Step;
+		if ((Step dot Step) > 0.0001)
+			Move(Step);
+		Vel = PendingVel*Part;
+		PendingVel -= Vel;
+		Velocity += Vel;
+		if (bShouldRepVehYaw)
+		{
+			T = PendingYaw*Part;
+			PendingYaw -= T;
+			Turn = AddYaw(T);
+			if (Turn != 0 && bFPRepYawUpdatesView && !bCameraOnBehindView && Driver != None)
+				Driver.ViewRotation.Yaw += Turn;
+		}
+	}
+	else if (NetTime > 0)
+	{
+		T = FMin(Level.TimeSeconds - NetTime, 0.35);
+		NetError *= Exp(-7.0*Delta);
+		Pos = NetPos + NetVel*T + NetError;
+		if (Pos != Location)
+			Move(Pos - Location);
+		if (bShouldRepVehYaw)
+		{
+			NetYawError *= Exp(-12.0*Delta);
+			VehicleYaw = NetYaw + NetYawRate*FMin(T, 0.2) + NetYawError;
+		}
+	}
 }
 // Server send to client vehicle pos/rot/vel
 function ServerPackState(float Delta)
@@ -1783,6 +1859,8 @@ function ServerPackState(float Delta)
 	ServerState.ClientTime = ClientLastTime;
 	if (PlayerPawn(Driver) != None && Level.TimeSeconds != ServerLastTime)
 		ServerState.ClientTime += Level.TimeSeconds - ServerLastTime;
+	else if (ClientLastTime < 0 && PlayerPawn(Driver) == None && Velocity != vect(0,0,0))
+		ServerState.ClientTime = 1; // not the initial state: clients predict from arrival
 }
 
 // Turn the vehicle without losing the fraction of a unit each tick. Returns the whole units applied.
@@ -2052,6 +2130,8 @@ simulated function Tick( float Delta )
 	}
 
 	bHere = Level.NetMode < NM_Client || IsNetOwner(Driver);
+	if (Level.NetMode == NM_Client && bScriptMove)
+		bCollideWorld = bHere; // remote vehicles just follow the server
 	Left = Delta;
 	do
 	{
@@ -2115,7 +2195,7 @@ simulated function SimulateStep(float Delta, bool bHere)
 
 	SimDelta = Delta;
 	bSlopedG = CheckOnGround();
-	if (bGroundSim)
+	if (bGroundSim && bHere)
 		bSlopedG = bOnGround;
 
 	if (ArcGroundTime > 0)
@@ -2207,18 +2287,16 @@ simulated function SimulateStep(float Delta, bool bHere)
 			GVTNormal = ActualGVTNormal;
 	}
 	bOwnerNoSee = False;
-	if (!bGroundSim)
+	if (!bGroundSim || !bHere)
 		bOnGround = bSlopedG;
 
 	UpdateDriverInput(Delta);
 
 	if (bDeleteMe)
 		return;
-	if (bScriptMove)
+	if (bScriptMove && bHere)
 	{
-		if (!bHere)
-			Move(Velocity*Delta);
-		else if (bGroundSim && bOnGround)
+		if (bGroundSim && bOnGround)
 			GroundMove(Delta);
 		else
 			AirMove(Delta);
@@ -2508,6 +2586,21 @@ simulated function GroundDrive(float Delta, float TopSpeed, float Friction, floa
 	Velocity = X*F + Y*S;
 }
 
+// How hard the vehicle is pushed, the body leans against this
+simulated function TrackAccel(float Delta, float Rate)
+{
+	local vector Now;
+
+	if (Delta <= 0)
+		return;
+	if (Level.NetMode == NM_Client && !IsNetOwner(Driver))
+		Now = NetAccel;
+	else
+		Now = (Velocity - BodyVelocity)/Delta;
+	BodyVelocity = Velocity;
+	BodyAccel += (Now - BodyAccel)*(1.0 - Exp(-Rate*Delta));
+}
+
 // Turn towards a heading, speed builds and fades so it doesn't move like a turret
 simulated function FollowYaw(int WantYaw, float MaxRate, float Delta)
 {
@@ -2557,8 +2650,7 @@ simulated function UpdateBody(float Delta)
 	}
 	if (Delta <= 0)
 		return;
-	BodyAccel += ((Velocity - BodyVelocity)/Delta - BodyAccel)*(1.0 - Exp(-14.0*Delta));
-	BodyVelocity = Velocity;
+	TrackAccel(Delta, 14.0);
 	Target.X = GVT.PrePivot.X + (RideOffset.X - GVT.PrePivot.X)*(1.0 - Exp(-20.0*Delta));
 	Target.Y = GVT.PrePivot.Y + (RideOffset.Y - GVT.PrePivot.Y)*(1.0 - Exp(-20.0*Delta));
 	W = Location.Z + RideOffset.Z;
@@ -2798,6 +2890,8 @@ simulated function bool CheckOnGround()
 	Start.Z -= CollisionHeight - 1;
 	End = Start;
 	End.Z -= 6;
+	if (Level.NetMode == NM_Client && !bCollideWorld)
+		End.Z -= 18; // someone else's vehicle is only near the floor here
 	Ex.X = CollisionRadius;
 	Ex.Y = Ex.X;
 

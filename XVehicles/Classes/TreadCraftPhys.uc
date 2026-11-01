@@ -374,13 +374,12 @@ simulated function UpdateDriverInput( float Delta )
 		if( CurTurnSpeed>0 )
 			CurTurnSpeed = 0;
 	}
-	YawStep = AddYaw(CurTurnSpeed*Delta);
-	
 	if (Level.NetMode == NM_Client && !IsNetOwner(Driver))
 	{
 		UpdateTreads(Delta);
 		Return;
 	}
+	YawStep = AddYaw(CurTurnSpeed*Delta);
 	
 	if( !bCameraOnBehindView && Driver!=None )
 		Driver.ViewRotation.Yaw+=YawStep;

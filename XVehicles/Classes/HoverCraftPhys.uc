@@ -223,11 +223,7 @@ simulated function UpdateDriverInput( float Delta )
 
 	if (Level.NetMode != NM_DedicatedServer)
 	{
-		if (Delta > 0)
-		{
-			BodyAccel += ((Velocity - BodyVelocity)/Delta - BodyAccel)*(1.0 - Exp(-11.0*Delta));
-			BodyVelocity = Velocity;
-		}
+		TrackAccel(Delta, 11.0);
 		Push = BodyAccel*0.00011;
 		Push.Z = 0;
 		if (VSize(Push) > 0.38)
@@ -267,7 +263,7 @@ simulated function UpdateDriverInput( float Delta )
 			Spring = 20;
 			Most = 9000;
 		}
-		if (bOnGround && LastJumpTime < Level.TimeSeconds - 0.4)
+		if (bOnGround && LastJumpTime < Level.TimeSeconds - 0.4 && (Level.NetMode != NM_Client || IsNetOwner(Owner)))
 		{
 			// a spring under the craft: it pushes against the height it should hold, and lifts with the
 			// ground going by underneath, so slopes need no error to follow
@@ -292,11 +288,11 @@ simulated function UpdateDriverInput( float Delta )
 	else if (bOnGround)
 		Velocity -= ActualFloorNormal*(ActualFloorNormal dot Velocity);
 
-	if (!bOnGround)
-		Velocity += Region.Zone.ZoneGravity*Delta*VehicleGravityScale*GoDown;
-
 	if (Level.NetMode == NM_Client && !IsNetOwner(Owner))
 		Return;
+
+	if (!bOnGround)
+		Velocity += Region.Zone.ZoneGravity*Delta*VehicleGravityScale*GoDown;
 
 	// Update vehicle yaw.
 	if (bDriving && Driver != None && !Driver.IsInState('GameEnded') && 

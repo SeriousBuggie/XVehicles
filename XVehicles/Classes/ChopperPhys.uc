@@ -151,13 +151,16 @@ simulated function UpdateDriverInput( float Delta )
 	}
 	if (!bDriving && !bOnGround)
 	{
-		Velocity += Region.Zone.ZoneGravity*Delta*VehicleGravityScale;
+		if (Level.NetMode != NM_Client || IsNetOwner(Owner))
+			Velocity += Region.Zone.ZoneGravity*Delta*VehicleGravityScale;
 		if (Rotation != R)
 			SetRotation(R);
 		return;
 	}
 	if (Rotation != R)
 		SetRotation(R);
+	if (Level.NetMode == NM_Client && !IsNetOwner(Owner))
+		Return;
 	if (!bDriving)
 	{
 		DeAcc = VSize(Velocity);
