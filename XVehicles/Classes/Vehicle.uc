@@ -2734,12 +2734,13 @@ simulated function UpdateBody(float Delta)
 	local vector Y, X, Target, N;
 	local rotator R;
 	local float Step, W, Long, Lat, Top;
-	const HeaveFreq = 15.0;		// rad/s, a bit over 2 Hz
-	const HeaveDamp = 0.55;
-	const TiltFreq = 13.0;
-	const TiltDamp = 0.5;
-	const LeanFreq = 10.0;
-	const LeanDamp = 0.55;
+	// dead beat and firm: the original set the body straight on the ground, this only takes the steps out
+	const HeaveFreq = 30.0;		// rad/s
+	const HeaveDamp = 1.0;
+	const TiltFreq = 20.0;
+	const TiltDamp = 1.0;
+	const LeanFreq = 12.0;
+	const LeanDamp = 1.0;
 
 	R.Yaw = VehicleYaw;
 	X = vector(R);
@@ -2779,9 +2780,9 @@ simulated function UpdateBody(float Delta)
 		Delta -= Step;
 		BodyZRate += (HeaveFreq*HeaveFreq*(BodyTargetZ - BodyZ) + 2*HeaveDamp*HeaveFreq*(BodyTargetRate - BodyZRate))*Step;
 		BodyZ += BodyZRate*Step;
-		BodyPitchRate += (LeanFreq*LeanFreq*(-Long*0.000085*Top - BodyPitch) - 2*LeanDamp*LeanFreq*BodyPitchRate)*Step;
+		BodyPitchRate += (LeanFreq*LeanFreq*(-Long*0.00003*Top - BodyPitch) - 2*LeanDamp*LeanFreq*BodyPitchRate)*Step;
 		BodyPitch += BodyPitchRate*Step;
-		BodyRollRate += (LeanFreq*LeanFreq*(-Lat*0.0001*Top - BodyRoll) - 2*LeanDamp*LeanFreq*BodyRollRate)*Step;
+		BodyRollRate += (LeanFreq*LeanFreq*(-Lat*0.00003*Top - BodyRoll) - 2*LeanDamp*LeanFreq*BodyRollRate)*Step;
 		BodyRoll += BodyRollRate*Step;
 		if (bOnGround)
 		{
