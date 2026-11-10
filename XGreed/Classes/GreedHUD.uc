@@ -1,7 +1,11 @@
 //=============================================================================
 // GreedHUD.
 //=============================================================================
-class GreedHUD expands Mutator;
+class GreedHUD expands Mutator config(User);
+
+// Client-side preference, stored in User.ini [XGreed.GreedHUD].
+// Toggle from console: set GreedHUD bHideHealth True
+var config bool bHideHealth;
 
 var float LastRender;
 var int LastSkulls;
@@ -235,7 +239,11 @@ simulated function DrawLabel(Canvas C, PlayerPawn me, Pawn actor[144], int cnt) 
 				}
 			}
 			
-			DrawTextClipped(C, PenX, PenY, StrHealth, outline);
+			// Hidden health: drop the name onto the health line, no gap.
+			if (bHideHealth)
+				PenY += TextHeight;
+			else
+				DrawTextClipped(C, PenX, PenY, StrHealth, outline);
 
 			C.TextSize(StrMonstername, f, dummy);
 			PenX += dx/2 - f/2;
