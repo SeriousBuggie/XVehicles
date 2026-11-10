@@ -14,6 +14,7 @@ var vector BotAccelDir;
 
 simulated function PostBeginPlay()
 {
+	bScriptMove = True;
 	Super.PostBeginPlay();
 	if( Level.NetMode!=NM_DedicatedServer && ChopperRotorClass!=None )
 		MyRotor = ChopperRotor(AddAttachment(ChopperRotorClass));
@@ -53,8 +54,6 @@ simulated singular function HitWall( vector HitNormal, Actor Wall )
 		(bOnGround && !CanYawUpTo(Rotation, TransformForGroundRot(VehicleYaw, HitNormal), 1500)))
 	{
 		Velocity = SetUpNewMVelocity(Velocity, HitNormal, Bounce);
-		if (bOnGround && VSize(SetUpNewMVelocity(Velocity, HitNormal, 0)) > 100 && CanGetOver(35, 0.85))
-			Return;
 		bOnGround = False;
 	}
 	else
@@ -85,9 +84,9 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 simulated function UpdateDriverInput( float Delta )
 {
 	local byte PitchDif;
-	local vector Ac,X,Y,Z,HL,HN,En;
-	local rotator R,Rr;
-	local float EngP, Changed,DeAcc,DeAccRat;
+	local vector Ac,X,Y,Z,HL,HN,En,Tilt;
+	local rotator R;
+	local float EngP,DeAcc,DeAccRat;
 	local Actor A;
 	local int i;
 	
@@ -127,42 +126,39 @@ simulated function UpdateDriverInput( float Delta )
 			}
 		}
 	}
+	// leans with its speed, tail up going forward, into the side it slides to
+	if (Level.NetMode != NM_DedicatedServer)
+	{
+		if (!bOnGround && bDriving)
+		{
+			Tilt = Velocity*MaxYawRates[0]/MaxAirSpeed/10430.0;
+			Tilt.Z = 0;
+			// an angle so far, the lean is a slope
+			Tilt = Normal(Tilt)*Tan(FMin(VSize(Tilt), 0.65));
+		}
+		UpdateLean(Tilt, Delta);
+	}
 	if( bOnGround )
-		R = TransformForGroundRot(VehicleYaw,FloorNormal);
+		R = TransformForGroundRot(VehicleYaw, Normal(FloorNormal + BodyLean));
 	else
 	{
-		R = Normalize(Rotation);
-		R.Yaw = VehicleYaw;
-		R.Roll/=2;
-		R.Pitch/=2;
-	}
-	if (!bDriving && !bOnGround)
-	{
-		Velocity += Region.Zone.ZoneGravity*Delta*VehicleGravityScale;
-		return;
-	}
-	if( Level.NetMode!=NM_DedicatedServer && !bOnGround && bDriving )
-	{
-		Rr.Yaw = VehicleYaw;
-		Ac = (Velocity << Rr)*MaxYawRates[0]/MaxAirSpeed;
-		if( Ac.Y>MaxYawRates[0] )
-			Ac.Y = MaxYawRates[0];
-		else if( Ac.Y<MaxYawRates[1] )
-			Ac.Y = MaxYawRates[1];
-		if( Ac.X>MaxYawRates[0] )
-			Ac.X = MaxYawRates[0];
-		else if( Ac.X<MaxYawRates[1] )
-			Ac.X = MaxYawRates[1];
-		if( Abs(R.Roll)<Abs(Ac.Y) )
-			R.Roll = Ac.Y;
-		if( Abs(R.Pitch)<Abs(Ac.X) )
-			R.Pitch = -Ac.X;
+		R = TransformForGroundRot(VehicleYaw, Normal(vect(0,0,1) + BodyLean));
 		GetAxes(R,X,Y,Z);
 		ActualFloorNormal = Z;
 		FloorNormal = Z;
 	}
+	if (!bDriving && !bOnGround)
+	{
+		if (Level.NetMode != NM_Client || IsNetOwner(Owner))
+			Velocity += Region.Zone.ZoneGravity*Delta*VehicleGravityScale;
+		if (Rotation != R)
+			SetRotation(R);
+		return;
+	}
 	if (Rotation != R)
 		SetRotation(R);
+	if (Level.NetMode == NM_Client && !IsNetOwner(Owner))
+		Return;
 	if (!bDriving)
 	{
 		DeAcc = VSize(Velocity);
@@ -176,18 +172,13 @@ simulated function UpdateDriverInput( float Delta )
 		Return;
 	if (Driver != None && !Driver.IsInState('GameEnded') && (Level.Game == None || !Level.Game.bGameEnded))
 	{
-		Changed = CalcTurnSpeed(FMax(1, CurrentYawSpeed*Delta),VehicleYaw,Driver.ViewRotation.Yaw);
-		Changed -= VehicleYaw;
-		if (Changed == 0)
+		// turn builds up over two seconds, as it always did
+		if (Abs((Driver.ViewRotation.Yaw - VehicleYaw) << 16 >> 16) < 16)
 			CurrentYawSpeed = 5;
-		else if (CurrentYawSpeed < YawTurnSpeed)
-		{
-			CurrentYawSpeed += Delta*0.5*YawTurnSpeed;
-			if (CurrentYawSpeed > YawTurnSpeed)
-				CurrentYawSpeed = YawTurnSpeed;
-		}
-		VehicleYaw += Changed;
-	}	
+		else
+			CurrentYawSpeed = FMin(YawTurnSpeed, CurrentYawSpeed + Delta*0.5*YawTurnSpeed);
+		FollowYaw(Driver.ViewRotation.Yaw, CurrentYawSpeed, Delta);
+	}
 	Ac = WAccelRate*Delta*GetAccelDir(Turning, Rising, Accel);
 /*	
 	if( VSize(Velocity)>MaxAirSpeed && VSize(Normal(Velocity)-Normal(Ac))<0.85 )
@@ -202,11 +193,11 @@ simulated function UpdateDriverInput( float Delta )
 	if (PlayerPawn(Driver) != None)
 	{
 		if( Rising==0)
-			Velocity.Z*=FMax(0f, 1.f-Delta);
+			Velocity.Z*=Exp(-Delta);
 		if( Turning==0 && Accel==0 )
 		{
-			Velocity.X*=FMax(0f, 1.f-Delta);
-			Velocity.Y*=FMax(0f, 1.f-Delta);
+			Velocity.X*=Exp(-Delta);
+			Velocity.Y*=Exp(-Delta);
 		}
 	}
 }
@@ -240,6 +231,8 @@ function vector BotDrive()
 	if (Driver.IsInState('GameEnded') || Driver.IsInState('Dying') || 
 		(Level.Game != None && Level.Game.bGameEnded))
 		return vect(0,0,0);
+	if (Reverse != 0 && ReverseTime > Level.TimeSeconds)
+		return Normal(Normal((Location - MoveDest)*vect(1,1,0)) + vect(0,0,1));
 	Dir = MoveDest - Location;
 	// dont slow down if run over
 	if (Driver.Enemy == None || VSize(Driver.Enemy.Location - MoveDest) > 40)

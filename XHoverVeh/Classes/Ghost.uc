@@ -86,6 +86,7 @@ defaultproperties
 	MaxHoverSpeed=2500.000000
 	VehicleTurnSpeed=16000.000000
 	HoveringHeight=160.000000
+	RideHeight=144.500000
 	JumpingHeight=730.000000
 	MaxPushUpDiff=3.000000
 	bCanDuck=True

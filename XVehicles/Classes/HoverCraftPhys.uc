@@ -11,6 +11,7 @@ var() bool bHoverWhenNotDriving;
 var() bool bCanDuck;
 var() vector Repulsor[8]; // used only 3, since Manta really one vehicle for it
 var() int RepulsorCount;
+var() float RideHeight;	// repulsors over the ground when hovering, from HoveringHeight if not set
 var() Sound JumpSound, DuckSound;
 
 var   float LastJumpTime,
@@ -22,9 +23,24 @@ var bool bDuck, bDuckFire;
 var RepulsorTracker RepulsorTracker;
 
 var vector BotAccelDir;
+var float RepulsorZ;		// average height of the repulsors on the craft
+var vector GroundLook;		// real ground plane under the repulsors
+var vector HoverTilt, HoverTiltRate;	// body tilt, a spring onto part of that plane
 
 const HoverGap = 50.0f;
-const HoverDuck = 30.0f;
+const HoverDuck = 40.0f;
+const LookAhead = 0.14f;	// seconds
+const Clearance = 12.0f;	// kept under the collision cylinder
+const ClimbShare = 0.1f;	// part of the ground the spring follows, the craft rides low on a climb
+const NoseUp = 0.85f;		// part of a slope the nose takes going up
+const NoseMost = 0.27f;		// ~15 degrees
+const NoseDown = 0.25f;		// same going down
+const RollShare = 0.60f;	// same for a side slope
+const RollMost = 0.2f;		// ~11 degrees
+const RestNose = 0.028f;	// ~1.6 degrees nose up when parked, gone at speed
+const WallDrag = 0.05f;		// speed lost along a wall for each uu/s into it
+const BankDrag = 0.05f;		// same along a bank
+const WallZ = 0.35f;		// steeper than this is a wall, not a bank
 
 replication
 {
@@ -36,10 +52,10 @@ replication
 // detect if hover above ground or no
 simulated function bool CheckOnGround()
 {
-	local vector RepPos[ArrayCount(Repulsor)], Rep, Dest, HL, HN;
-	local int i, PushUpMax;
+	local vector RepPos[ArrayCount(Repulsor)], Under[ArrayCount(Repulsor)], Rep, Dest, HL, HN;
+	local int i, PushUpMax, Count;
 	local rotator R;
-	local float Dist, Delta, Prev, PushUp[ArrayCount(Repulsor)];
+	local float Dist, Delta, Prev, Sum, PushUp[ArrayCount(Repulsor)];
 	local bool bIsOnGround;
 	local Actor PossibleBase;
 	
@@ -73,9 +89,8 @@ simulated function bool CheckOnGround()
 			R.Pitch = 0;
 			R.Roll = 0;
 			
-			// this need for save repulsor location outside collision cylinder
+			// outside the collision cylinder and level, leaning doesn't change the ground under it
 			Rep = Repulsor[i] >> R;
-			Rep.Z = (Repulsor[i] >> Rotation).Z;
 			Rep += Location;
 			
 			RepPos[i] = Rep;
@@ -129,12 +144,19 @@ simulated function bool CheckOnGround()
 					Velocity.Z = PossibleBase.Velocity.Z;
 			}
 			RepDist[i] = Dist;
+			Under[i] = Rep;
+			Under[i].Z -= Dist;
+			Sum += Dist;
+			Count++;
 			PushUp[i] = HoveringHeight - Dist;
 			if (PushUpMax != i && PushUp[PushUpMax] < PushUp[i])
 				PushUpMax = i;
 		}
 		if (!bIsOnGround)
+		{
 			ActualFloorNormal = vect(0,0,1);
+			GroundLook = vect(0,0,1);
+		}
 		else
 		{
 			// Manta specific: not pitch down, only up
@@ -154,12 +176,21 @@ simulated function bool CheckOnGround()
 				else if (PushUpMax != i && PushUp[PushUpMax] - PushUp[i] > MaxPushUpDiff)
 					PushUp[i] = PushUp[PushUpMax] - MaxPushUpDiff;
 				RepPos[i].Z += PushUp[i];
-				ActualHoverHeight += PushUp[i];
 			}
+			// thrust stays near level with these limits, the body uses the real ground
 			ActualFloorNormal = Normal((RepPos[1] - RepPos[0]) cross (RepPos[2] - RepPos[0]));
 			if (ActualFloorNormal.Z < 0)
 				ActualFloorNormal = -ActualFloorNormal;
-			ActualHoverHeight = HoveringHeight - ActualHoverHeight/RepulsorCount;
+			ActualHoverHeight = Sum/Count;
+			for (i = 0; i < 3; i++)
+				if (RepDist[i] == -1)
+				{
+					Under[i] = Location + (Repulsor[i] >> R);
+					Under[i].Z -= ActualHoverHeight;
+				}
+			GroundLook = Normal((Under[1] - Under[0]) cross (Under[2] - Under[0]));
+			if (GroundLook.Z < 0)
+				GroundLook = -GroundLook;
 		}
 	}
 	
@@ -203,11 +234,56 @@ simulated function vector GetAccelDir( int InTurn, int InRise, int InAccel )
 		Return SetUpNewMVelocity(Z,ActualFloorNormal,0);
 	else Return Z;
 }
+// Rise speed needed for the front edge of the cylinder to clear the ground ahead
+simulated function float ClearAhead(vector Flat, float Run, float Time)
+{
+	local vector Ahead, HL, HN;
+
+	Ahead = Location + Flat*(Time + CollisionRadius/Run);
+	Ahead.Z += CollisionHeight;
+	if (Trace(HL, HN, Ahead - vect(0,0,1)*(CollisionHeight + HoveringHeight + 64), Ahead, false) == None)
+		return 0;
+	return (HL.Z + CollisionHeight + Clearance - Location.Z)/Time;
+}
+
+// Body takes only part of a slope, through a spring
+simulated function UpdateTilt(float Delta)
+{
+	local vector X, Y, Z, Want;
+	local float Along, Across, Freq;
+	const HoverFreq = 9.0;
+	const AirFreq = 3.5;
+	const HoverDamp = 0.7;
+
+	if (HoverTilt == vect(0,0,0))
+		HoverTilt = Normal(FloorNormal);
+	if (!bDriving && !bHoverWhenNotDriving)
+		Want = ActualFloorNormal;
+	else
+	{
+		GetAxes(rot(0, 1, 0)*VehicleYaw, X, Y, Z);
+		Along = -(GroundLook dot X)/FMax(0.4, GroundLook.Z);
+		Across = -(GroundLook dot Y)/FMax(0.4, GroundLook.Z);
+		if (Along > 0)
+			Along = FMin(Along*NoseUp, NoseMost);
+		else
+			Along *= NoseDown;
+		if (bDriving)
+			Along += RestNose*(1.0 - FMin(1.0, VSize(Velocity)/1000.0));
+		Want = vect(0,0,1) - X*Along - Y*FClamp(Across*RollShare, -RollMost, RollMost);
+	}
+	Freq = HoverFreq;
+	if (!bOnGround)
+		Freq = AirFreq;
+	HoverTiltRate += (Freq*Freq*(Want - HoverTilt) - 2*HoverDamp*Freq*HoverTiltRate)*Delta;
+	HoverTilt += HoverTiltRate*Delta;
+}
+
 simulated function UpdateDriverInput( float Delta )
 {
 	local byte PitchDif;
-	local vector Ac, X, Y, Z;
-	local float EngP, GoDown, DesiredHoverHeight, Scale, BigScale, Vel;
+	local vector Ac, X, Y, Z, Flat, Push;
+	local float EngP, GoDown, DesiredHoverHeight, Climb, Spring, Most, Least, Damp, Run, Slope;
 	local rotator R;
 
 	if (bEngDynSndPitch && Level.NetMode != NM_DedicatedServer)
@@ -220,17 +296,29 @@ simulated function UpdateDriverInput( float Delta )
 	if (!bDriving)
 		DriveFrom = Level.TimeSeconds;
 
-	R = TransformForGroundRot(VehicleYaw, FloorNormal);
+	if (Level.NetMode != NM_DedicatedServer)
+	{
+		TrackAccel(Delta, 11.0);
+		// barely any pitch from thrust, turning and strafing do most of the lean
+		GetAxes(rot(0, 1, 0)*VehicleYaw, X, Y, Z);
+		Push = X*FClamp((BodyAccel dot X)*0.000015, -0.12, 0.12) + Y*FClamp((BodyAccel dot Y)*0.00015, -0.18, 0.18);
+		if (!bDriving)
+			Push = vect(0,0,0);
+		UpdateLean(Push, Delta);
+	}
+	UpdateTilt(Delta);
+	R = TransformForGroundRot(VehicleYaw, Normal(HoverTilt + BodyLean));
 	if (Rotation != R)
 		SetRotation(R);
 
 	GoDown = 1;
 	if (bDriving || bHoverWhenNotDriving)
 	{
-		DesiredHoverHeight = HoveringHeight - HoverGap;
+		DesiredHoverHeight = RideHeight;
 		GoDown = 0.75;
-		Scale = 1000;
-		BigScale = 0.2;
+		Spring = 11;
+		Damp = 0.8;
+		Most = 1500;
 		
 		if (PlayerPawn(Driver) != None && (Level.NetMode != NM_Client || IsNetOwner(Owner)) && 
 			!Driver.IsInState('GameEnded') && !(Level.Game != None && Level.Game.bGameEnded))
@@ -247,35 +335,40 @@ simulated function UpdateDriverInput( float Delta )
 		{				
 			DesiredHoverHeight -= HoverDuck;
 			GoDown = 8;
-			Scale *= 3;
-			BigScale *= 3;
+			Spring = 20;
+			Most = 9000;
 		}
-		if (bOnGround && LastJumpTime < Level.TimeSeconds - 0.4)
+		if (bOnGround && LastJumpTime < Level.TimeSeconds - 0.4 && (Level.NetMode != NM_Client || IsNetOwner(Owner)))
 		{
-			DesiredHoverHeight -= ActualHoverHeight;
-			Vel = VSize(Velocity);
-			Velocity.Z = 0;
-			if (bCanDuck && (bDuck || bDuckFire))
-				Vel *= 0.1;
-			Velocity.Z -= Vel*(ActualFloorNormal dot Normal(Velocity));
-			Vel = Velocity.Z;
-			if (Abs(DesiredHoverHeight) > 2)
-				Velocity.Z += DesiredHoverHeight*FMax(DesiredHoverHeight*DesiredHoverHeight*BigScale, Scale)*0.01/
-					(1 + (Delta - 0.01)*25);
-			BigScale = 5;
-			if (Level.TimeSeconds - DriveFrom < 0.4)
-				BigScale = 2.5; // *2.5 = /0.4
-			Velocity.Z = FMin(Velocity.Z, Vel + HoveringHeight*BigScale);
+			// spring that only pushes and follows part of the ground, gravity brings the craft down
+			Flat = Velocity;
+			Flat.Z = 0;
+			Slope = -(Flat dot GroundLook)/FMax(0.4, GroundLook.Z);
+			Climb = Slope*ClimbShare;
+			// cylinder is wider than the repulsors, its front edge has to clear what's coming
+			Run = VSize(Flat);
+			if (Run > 1)
+			{
+				Climb = FMax(Climb, ClearAhead(Flat, Run, LookAhead/2));
+				Climb = FMax(Climb, ClearAhead(Flat, Run, LookAhead));
+			}
+			if (Velocity.Z < -200)
+				Most = FMax(Most, 5200); // falling lands hard on the repulsors
+			if (Level.TimeSeconds - DriveFrom < 0.5)
+				Most = FMin(Most, 1500);
+			Least = -Abs(Region.Zone.ZoneGravity.Z)*VehicleGravityScale*GoDown;
+			Velocity.Z += FClamp(Spring*Spring*(DesiredHoverHeight - ActualHoverHeight) +
+				2*Damp*Spring*(Climb - Velocity.Z), Least, Most)*Delta;
 		}
 	}
 	else if (bOnGround)
 		Velocity -= ActualFloorNormal*(ActualFloorNormal dot Velocity);
 
-	if (!bOnGround)
-		Velocity += Region.Zone.ZoneGravity*Delta*VehicleGravityScale*GoDown;
-
 	if (Level.NetMode == NM_Client && !IsNetOwner(Owner))
 		Return;
+
+	if (!bOnGround || LastJumpTime >= Level.TimeSeconds - 0.4)
+		Velocity += Region.Zone.ZoneGravity*Delta*VehicleGravityScale*GoDown;
 
 	// Update vehicle yaw.
 	if (bDriving && Driver != None && !Driver.IsInState('GameEnded') && 
@@ -296,7 +389,7 @@ simulated function UpdateDriverInput( float Delta )
 		}
 		else
 		*/
-			VehicleYaw = CalcTurnSpeed(VehicleTurnSpeed*Delta, VehicleYaw, Driver.ViewRotation.Yaw);
+			FollowYaw(Driver.ViewRotation.Yaw, VehicleTurnSpeed, Delta);
 	}
 	// Update vehicle speed
 	if (Rising > 0 && bOnGround && LastJumpTime < Level.TimeSeconds - JumpDelay)
@@ -338,6 +431,59 @@ simulated function UpdateDriverInput( float Delta )
 		Velocity = Normal(Velocity)*MaxHoverSpeed;
 }
 
+// Ground: glance off and keep flying. Wall: no bounce, drag along it and swing the nose in
+simulated singular function HitWall( vector HitNormal, Actor Wall )
+{
+	local vector X, Y, Z, Along;
+	local float Into, Speed, Square, Swing;
+
+	Into = Velocity dot HitNormal;
+	if (Into >= 0)
+		return;
+	Speed = VSize(Velocity);
+	if (HitNormal.Z >= WalkableZ)
+	{
+		Velocity -= HitNormal*Into;
+		if (Speed > 0 && bDriving)
+			Velocity = Normal(Velocity)*FMax(VSize(Velocity), Speed*0.97);
+		return;
+	}
+	if (Pawn(Wall) != None)
+	{
+		Velocity -= HitNormal*Into*1.3;
+		return;
+	}
+	Velocity -= HitNormal*Into;
+	Along = Velocity;
+	Square = BankDrag;
+	if (HitNormal.Z < WallZ)
+	{
+		Along.Z = FMax(0, Along.Z); // pressing on a wall doesn't hold the craft up
+		Square = WallDrag;
+	}
+	if (VSize(Along) > 0)
+		Velocity -= Along*FMin(1.0, -Square*Into/VSize(Along));
+	if (HitNormal.Z < WallZ && bDriving && Into < -150)
+	{
+		GetAxes(rot(0, 1, 0)*VehicleYaw, X, Y, Z);
+		Swing = X.X*HitNormal.Y - X.Y*HitNormal.X;
+		if ((X dot HitNormal) < 0)
+			TurnRate += FClamp(Swing*Into/30.0, -60, 60)*1000.0;
+	}
+	if (Wall != Level && Wall.Brush == None)
+		return;
+	Square = -Into/FMax(1.0, Speed);
+	if (Speed > 500 && Square > 0.97)
+		TakeImpactDamage((Speed - 500)/2, None, "HoverHit_1");
+	else if (Speed > 600 && Square > 0.877)
+		TakeImpactDamage((Speed - 600)/4, None, "HoverHit_2");
+	else if (NextScrapeTime < Level.TimeSeconds)
+	{
+		NextScrapeTime = Level.TimeSeconds + 0.4;
+		TakeImpactDamage(0, None, "HoverHit_3");
+	}
+}
+
 function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation,
 						Vector momentum, name damageType)
 {
@@ -377,6 +523,8 @@ function vector BotDrive()
 	if (Driver.IsInState('GameEnded') || Driver.IsInState('Dying') || 
 		(Level.Game != None && Level.Game.bGameEnded))
 		return vect(0,0,0);
+	if (Reverse != 0 && ReverseTime > Level.TimeSeconds)
+		return Normal((Location - MoveDest)*vect(1,1,0));
 	Dir = MoveDest - Location;
 	bNeedDuck = false;
 	Accel = 1; // always accelerate
@@ -461,12 +609,17 @@ simulated function PostBeginPlay()
 {
 	local int i;
 	local float Avg;
+	bScriptMove = True;
+	if (RideHeight <= 0)
+		RideHeight = (HoveringHeight - HoverGap)/0.75;
 	Super.PostBeginPlay();
+	for (i = 0; i < RepulsorCount; i++)
+		Avg += Repulsor[i].Z;
+	if (RepulsorCount > 0)
+		RepulsorZ = Avg/RepulsorCount;
 	if (VehicleAI != None)
 	{
-		for (i = 0; i < RepulsorCount; i++)
-			Avg += Repulsor[i].Z;
-		VehicleAI.AirFlyScale = (HoveringHeight - HoverGap - 
+		VehicleAI.AirFlyScale = (HoveringHeight - HoverGap -
 			Avg/RepulsorCount - class'NavigationPoint'.default.CollisionHeight)/CollisionHeight;
 	}
 }

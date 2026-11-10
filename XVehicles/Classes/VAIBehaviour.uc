@@ -32,6 +32,8 @@ function float GetVehAIRating( Pawn Seeker )
 //	log(VehicleOwner @ "GetVehAIRating2" @ Seeker @ VehicleOwner.LastDriver @ Level.TimeSeconds - VehicleOwner.LastDriverTime);
 	if (VehicleOwner.LastDriver == Seeker && Level.TimeSeconds - VehicleOwner.LastDriverTime < 1)
 		return -11; // for avoid bot loops exit/enter
+	if (Level.TimeSeconds < VehicleOwner.BotBanTime)
+		return -11; // a bot just gave up on this one
 //	log(VehicleOwner @ "GetVehAIRating3" @ Seeker);
 	if (VehicleOwner.HealthTooLowFor(Seeker) || VehicleOwner.NeedStop(Seeker) || !VehicleOwner.CrewFit(Seeker))
 		return -12;
@@ -304,7 +306,7 @@ function vector GetNextMoveTargetInternal()
 		}
 		if (bDebug) log(VehicleOwner.Driver @ 2 @ dbg);
 		
-		if (i >= 14) // too old?
+		if (best >= 14) // too old?
 			VehicleOwner.Driver.MoveTimer = -1f; // time to refresh path
 		else if (VehicleOwner.bCanFly && Closest >= 400f)
 			VehicleOwner.Driver.MoveTimer = 1f; // prevent refresh path in air
@@ -355,6 +357,8 @@ function bool PawnCanDrive(Pawn Other, optional bool bForce)
 	if (Other.IsInState('Dying'))
 		return false;
 	if (PlayerPawn(Other) == None && HasFlag(Other) && VehicleOwner.DropFlag != VehicleOwner.EDropFlag.DF_None)
+		return false;
+	if (PlayerPawn(Other) == None && Level.TimeSeconds < VehicleOwner.BotBanTime)
 		return false;
 	return true;
 }

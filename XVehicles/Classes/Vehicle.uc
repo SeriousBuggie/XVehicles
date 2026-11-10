@@ -152,10 +152,24 @@ var VehState ServerState;
 var int ServerState_Yaw;
 var float ServerStateTime;
 var DriverCameraActor MyCameraAct;
+
+// Someone else's vehicle: last update's path plus a fading error, so updates don't show as jumps
+var vector NetPos, NetVel, NetError, NetAccel;
+var vector NetVelError;		// shown velocity minus the server's, fades with NetError
+var float NetTime, NetYawRate, NetYawError;
+var int NetYaw;
+// Own vehicle: how far it is from where the server says it should be
+var vector PendingMove, PendingVel;
+var float PendingYaw;
 var OverlayMatDispRep ReplicOverlayMat;
 
 var float ClientLastTime;
 var float ServerLastTime;
+// Server's idea of the driver's clock: the driver's time minus ours, from the move that got here quickest
+var float ClientClock;
+var Pawn ClockDriver;
+var bool bNewMove;			// a move came in since the last tick
+var int HeldKeys;			// keys before that move, packed and one added, 0 if they didn't change
 
 var SavedMoveXV SavedMoves;
 var SavedMoveXV FreeMoves;
@@ -295,6 +309,52 @@ var float LastDriverTime;
 var bool DoChangeSeat;
 
 var float BotDriverJumpZ;
+
+// Bot progress watchdog
+var vector BotCheckPos;
+var float BotCheckTime;
+var byte BotStrikes;		// checks in a row without progress
+var byte BotIdle;			// same, but also counts bots with a reason to wait
+var float BotBanTime;		// bots stay out of this vehicle until then
+
+const BotCheckDelay = 2.0;
+const BotMinProgress = 250.0;	// net uu from the last place it counted as moving
+const BotMaxStrikes = 4;
+const BotBanSeconds = 90.0;	// longer than the factory reset, so a wedged vehicle goes home
+
+var float YawRemainder;		// part of a turn that the int yaw has not taken yet
+
+// Moved by script in steps of at most SimStep, so a 20 Hz server and a 165 fps client stay on one path
+var bool bScriptMove;		// moved by SimMove, not by native physics
+var bool bGroundSim;		// on the ground it keeps to the floor, see GroundMove
+var vector PivotShift;		// part of the next move that comes from turning about the rear axle
+var vector LastLocation;	// where the last frame started, OldLocation needs native physics
+var float NextScrapeTime;
+var float SimDelta;			// length of the step in hand
+var vector DriveVel;		// speed GroundDrive left it with, anything on top of that came from outside
+var bool bDriveVel;
+
+const SimStep = 0.0166667;
+const WalkableZ = 0.7;
+const NetSettle = 10.0;		// per second, how fast a remote vehicle returns to the server's path
+const NormalDone = 0.99999;	// floor normal this close to its target has arrived, ~0.25 degrees
+
+// Visible ride, see UpdateBody. Doesn't touch collision or movement
+var vector RideOffset;		// where the ground puts the body, from Location
+var vector BodyNormal, BodyNormalRate;
+var vector BodyVelocity, BodyAccel;
+var float BodyZ, BodyZRate, BodyTargetZ, BodyTargetRate;
+var float RideZ;			// lagged RideOffset.Z, it steps when wheels leave or find the ground
+var DriverCameraActor GunnerView;	// the local player's view from a passenger seat
+var float BodyPitch, BodyPitchRate, BodyRoll, BodyRollRate;
+var bool bBodyReady;
+var vector BodyLean, BodyLeanRate;	// tilt of a flying craft
+var float TurnRate;			// yaw per second now
+var float CornerZ[4];		// ground under each corner
+
+// Leaving
+var Pawn LastExitPawn;
+var float LastExitTime;
 
 var PreventEnter PreventEnter;
 
@@ -884,16 +944,44 @@ simulated function ServerPerformMove(int InRise, int InTurn, int InAccel)
 
 function ServerPerformPackedMove(float InClientTime, XVEnums.E28 Bits)
 {
-	local int i;
-	i = int(Bits);
+	// the tick about to run still owes the old keys the time before this move was made
+	if (HeldKeys == 0 && PackKeys() != int(Bits))
+		HeldKeys = PackKeys() + 1;
+	UnpackKeys(int(Bits));
+
+	ClientLastTime = InClientTime;
+	ServerLastTime = Level.TimeSeconds;
+	bNewMove = true;
+}
+
+function int PackKeys()
+{
+	return (Rising + 1)*9 + (Turning + 1)*3 + Accel + 1;
+}
+
+function UnpackKeys(int i)
+{
 	Accel = (i % 3) - 1;
 	i /= 3;
 	Turning = (i % 3) - 1;
 	i /= 3;
 	Rising = (i % 3) - 1;
+}
 
-	ClientLastTime = InClientTime;
-	ServerLastTime = Level.TimeSeconds;
+// How long the newest keys have been down by now, on the driver's clock
+function float MoveAge()
+{
+	local float Sample;
+
+	// a move is at least as old as it looks, so the youngest looking one sets the clock
+	Sample = ClientLastTime - Level.TimeSeconds;
+	if (ClockDriver != Driver || Sample > ClientClock || ClientClock - Sample > 0.5)
+	{
+		ClientClock = Sample;
+		ClockDriver = Driver;
+	}
+	// keys read in a frame count from the start of that frame
+	return Level.TimeSeconds + ClientClock - ClientLastTime + 0.008;
 }
 
 simulated function string GetWeaponName(byte Seat)
@@ -1134,6 +1222,10 @@ function DriverEnter( Pawn Other, optional int MyPitch, optional int MyYaw )
 	ShowState();
 	Other.ClearPaths();
 	ChangeProps(Other, true, 0, WA);
+	BotCheckPos = Location;
+	BotCheckTime = Level.TimeSeconds;
+	BotStrikes = 0;
+	BotIdle = 0;
 }
 
 function DebugDump(coerce string Place) {
@@ -1386,6 +1478,59 @@ function float GetGoalCollisionRadius(Actor FlagGoal)
 	return Class'CTFFlag'.Default.CollisionRadius;
 }
 
+// Room for this pawn at Offset from the vehicle? Moves nothing
+function bool ExitSpotFree(Pawn P, vector Offset, out vector Spot)
+{
+	local vector Ex, Start, End, HL, HN, Up;
+	local int k;
+
+	Ex.X = P.default.CollisionRadius;
+	Ex.Y = Ex.X;
+	Ex.Z = P.default.CollisionHeight;
+	Up = vect(0,0,1);
+	Offset.Z = 0;
+	// higher tries are for ground that rises on this side
+	for (k = 0; k < 3; k++)
+	{
+		Start = Location + Up*(45*k);
+		End = Start + Offset;
+		if (FastTrace(Start, Location) && Trace(HL, HN, End, Start, true, Ex) == None)
+		{
+			if (Trace(HL, HN, End - Up*300, End, false, Ex) != None)
+				End = HL + Up;
+			Spot = End;
+			return true;
+		}
+	}
+	return false;
+}
+
+// Asked side, then all the way around, then the roof
+function bool FindExitSpot(Pawn P, vector ExitVect, out vector Spot)
+{
+	local rotator R, Turn;
+	local vector Way;
+	local float Reach;
+	local int i;
+
+	R.Yaw = VehicleYaw;
+	Way = ExitVect;
+	Reach = FMax(VSize(ExitVect), CollisionRadius + P.default.CollisionRadius + 12);
+	Way.Z = 0;
+	if (Way == vect(0,0,0))
+		Way = vect(0,1,0);
+	Way = Normal(Way)*Reach;
+	for (i = 0; i < 16; i++)
+	{
+		// 0, 180, 90, 270, then the diagonals, then all of it again further out
+		Turn.Yaw = (i & 1)*32768 + ((i >> 1) & 1)*16384 + ((i >> 2) & 1)*8192;
+		if (ExitSpotFree(P, ((Way*(1.0 + 0.45*(i >> 3))) >> Turn) >> R, Spot))
+			return true;
+	}
+	Spot = Location + vect(0,0,1)*(CollisionHeight + P.default.CollisionHeight + 12);
+	return FastTrace(Spot, Location);
+}
+
 function ProcessExit(Pawn Pawn, DriverCameraActor Camera)
 {
 	local Bot Bot;
@@ -1419,18 +1564,16 @@ function ProcessExit(Pawn Pawn, DriverCameraActor Camera)
 		{
 			if (Pawn.Weapon != None && Pawn.Weapon.Owner != None)
 				Pawn.Weapon.BringUp();
-			if (PlayerPawn(Pawn) != None && Pawn.bDuck == 1 && bCanFly)
+			if (PlayerPawn(Pawn) != None && Pawn.bDuck != 0)
 				PreventEnter = Spawn(class'PreventEnter', Pawn);
 			if (!DoChangeSeat) {
 				Pawn.SetCollision(True, True, True);
 				// make touch with anything here
 				if (Health > 0)
 				{
-					SmallMove = Normal(Location - Pawn.Location);
+					SmallMove = Normal(Pawn.Location - Location);
 					if (Pawn.Move(SmallMove))
 						Pawn.Move(-SmallMove);
-					else if (Pawn.Move(-SmallMove))
-						Pawn.Move(SmallMove);
 				}
 			}
 		}
@@ -1448,10 +1591,26 @@ function ProcessExit(Pawn Pawn, DriverCameraActor Camera)
 
 singular function DriverLeft( optional bool bForcedLeave, optional coerce string Reason )
 {
-	local vector ExitVect;
+	local vector ExitVect, Spot;
+	local bool bFree;
 
 	if( Driver!=None )
 	{
+		if (!Driver.bDeleteMe && !DoChangeSeat)
+		{
+			// decide first, a refused exit has to leave the driver as seated
+			ExitVect = GetExitOffset(Driver);
+			if (Bot(Driver) == None && (Normal(Velocity) Dot Normal(ExitVect >> Rotation)) > 0.35 &&
+				(Normal(Velocity) Dot Normal((ExitVect + vect(0,-2,0)*ExitVect.Y) >> Rotation)) <= 0.35)
+				ExitVect.Y = -ExitVect.Y;
+			bFree = FindExitSpot(Driver, ExitVect, Spot);
+			if (!bFree && !bForcedLeave)
+			{
+				if (PlayerPawn(Driver) != None)
+					Driver.ClientMessage("No room to get out here.", 'CriticalEvent');
+				return;
+			}
+		}
 		PlaySound(EndSound,SLOT_Misc);
 
 		if( Driver.bDeleteMe )
@@ -1468,28 +1627,18 @@ singular function DriverLeft( optional bool bForcedLeave, optional coerce string
 			RestartPawn(Driver);
 			ChangeCollision(Driver, false, 0);
 
-			ExitVect = GetExitOffset(Driver);
-			if (Bot(Driver) == None && (Normal(Velocity) Dot Normal(ExitVect >> Rotation)) > 0.35 && 
-				(Normal(Velocity) Dot Normal((ExitVect + vect(0,-2,0)*ExitVect.Y) >> Rotation)) <= 0.35)
-				ExitVect.Y = -ExitVect.Y;
-			if (!Driver.Move(Location+(ExitVect >> Rotation) - Driver.Location) && !bForcedLeave)
-			{
-				ExitVect.Y = -ExitVect.Y;
-				if (!Driver.Move(Location+(ExitVect >> Rotation) - Driver.Location) && !bForcedLeave)
-				{
-//					Log("Failed exit Driver for" @ Driver);
-					ChangeCollision(Driver, true, 0);
-					if (PlayerPawn(Driver) != None)
-						Driver.GoToState('PlayerFlying');
-					if (!bDeleteMe && Health > 0)
-						CheckForEmpty();
-					ShowState();
-					Return;
-				}
-			}
+			if (DoChangeSeat)
+				; // stays aboard, ChangeSeat puts the pawn in its new seat
+			else if (!bFree || !Driver.SetLocation(Spot))
+				Driver.Move(Location + (ExitVect >> Rotation) - Driver.Location);
 			ProcessExit(Driver, MyCameraAct);
 			LastDriver = Driver;
 			LastDriverTime = Level.TimeSeconds;
+			if (!DoChangeSeat)
+			{
+				LastExitPawn = Driver;
+				LastExitTime = Level.TimeSeconds;
+			}
 		}
 	}
 	if( DriverGun!=None )
@@ -1578,56 +1727,61 @@ simulated function Destroyed()
 		VehicleState.Destroy();
 	if (Shadow != None)
 		Shadow.Destroy();
-	while (FreeMoves != None)
-	{
-		FreeMoves.Destroy();
-		FreeMoves = FreeMoves.NextMove;
-	}
-	while (SavedMoves != None)
-	{
-		SavedMoves.Destroy();
-		SavedMoves = SavedMoves.NextMove;
-	}
+	DestroyMoves(FreeMoves);
+	DestroyMoves(SavedMoves);
+	FreeMoves = None;
+	SavedMoves = None;
 	Super.Destroyed();
 }
+simulated function DestroyMoves(SavedMoveXV Move)
+{
+	local SavedMoveXV Next;
+	while (Move != None)
+	{
+		Next = Move.NextMove;
+		Move.Destroy();
+		Move = Next;
+	}
+}
+
 // Client update vehicle pos/rot/vel
 simulated function ClientUpdateState(float Delta)
 {
-	local vector ServerPredictLocation, Diff;
-	local float Dist;
+	local vector Pos, Vel, Step;
+	local float T, Part;
+	local int Yaw, Turn;
 	local SavedMoveXV CurrentMove;
 	local PlayerPawn LocalPlayer;
-	local bool bNeedUpdateYaw;
-	
+	local bool bMine;
+
 	if (class'VActor'.Default.StaticPP != None)
 		LocalPlayer = class'VActor'.Default.StaticPP.Actor;
 	else
 		LocalPlayer = FindNetOwner(self);
+	bMine = LocalPlayer != None && LocalPlayer == Driver;
 
-	bNeedUpdateYaw = ServerState.ClientTime != 0;
-	if (bNeedUpdateYaw)
+	if (ServerState.ClientTime != 0)
 	{
 		if (ServerState.ClientTime > 0)
 		{ // ignore specal init value -1, which need for set VehicleYaw initially
 			ServerStateTime = Level.TimeSeconds;
-			if (LocalPlayer == Driver)
+			if (bMine)
 				ServerStateTime = ServerState.ClientTime;
-			/* // linear prediction is not good enough
-			else if (LocalPlayer != None && LocalPlayer.PlayerReplicationInfo != None)
-				ServerStateTime -= 0.001*LocalPlayer.PlayerReplicationInfo.Ping;
-			*/
 		}
 		ServerState_Yaw = ServerState.YawLow + (ServerState.YawHigh << 8);
 		ServerState.ClientTime = 0;
 		ServerState.Velocity /= 15.f;
-		
-		if (LocalPlayer != None && LocalPlayer == Driver)
+
+		if (bMine)
 		{
-			// replay last moves
+			// replay moves since the server's state, then work the difference off
+			Pos = ServerState.Location;
+			Vel = ServerState.Velocity;
+			Yaw = ServerState_Yaw;
 			CurrentMove = SavedMoves;
 			while (CurrentMove != None)
 			{
-				if (CurrentMove.TimeStamp <= ServerStateTime )
+				if (CurrentMove.TimeStamp <= ServerStateTime)
 				{
 					SavedMoves = CurrentMove.NextMove;
 					CurrentMove.NextMove = FreeMoves;
@@ -1639,47 +1793,126 @@ simulated function ClientUpdateState(float Delta)
 				{
 					// try real replay can screwed non-linear calls and need hardly rework all physics to stateless
 					// replay via simple assumptions
-					
-					ServerState.Velocity += CurrentMove.SavedVelocity - CurrentMove.Velocity;
-					ServerState_Yaw += CurrentMove.SavedYaw - CurrentMove.Yaw;						
-					ServerState.Location += CurrentMove.SavedLocation - CurrentMove.Acceleration;
-					
+					Vel += CurrentMove.SavedVelocity - CurrentMove.Velocity;
+					Yaw += CurrentMove.SavedYaw - CurrentMove.Yaw;
+					Pos += CurrentMove.SavedLocation - CurrentMove.Acceleration;
 					CurrentMove = CurrentMove.NextMove;
 				}
 			}
-			
-			ServerState.YawLow = byte(ServerState_Yaw);
-			ServerState.YawHigh = byte(ServerState_Yaw >> 8);
 			ServerStateTime = Level.TimeSeconds;
+			Step = Pos - Location;
+			if (VSize(Step) > SnapDistance(Vel))
+			{
+				SetLocation(Pos);
+				Velocity = Vel;
+				VehicleYaw = Yaw;
+				PendingMove = vect(0,0,0);
+				PendingVel = vect(0,0,0);
+				PendingYaw = 0;
+			}
+			else
+			{
+				if (bGroundSim && bOnGround)
+					Step.Z = 0; // both ends are set down on the same floor
+				// states are stamped to a server tick, a small error along the way of travel may just be the clock
+				Part = VSize(Vel);
+				if (Part > 100)
+				{
+					T = Step dot Normal(Vel);
+					if (Abs(T) < Part*0.06)
+						Step -= Normal(Vel)*T*0.75;
+				}
+				PendingMove = Step;
+				PendingVel = Vel - Velocity;
+				PendingYaw = (Yaw - VehicleYaw) << 16 >> 16;
+			}
 		}
 		else
-			Velocity = ServerState.Velocity;
+		{
+			T = Level.TimeSeconds - NetTime;
+			if (NetTime > 0 && T > 0.005)
+			{
+				NetAccel = (ServerState.Velocity - NetVel)/FMax(T, 0.03);
+				NetYawRate += (float((ServerState_Yaw - NetYaw) << 16 >> 16)/T - NetYawRate)*0.5;
+			}
+			NetVelError += NetVel - ServerState.Velocity;
+			NetPos = ServerState.Location;
+			NetVel = ServerState.Velocity;
+			NetYaw = ServerState_Yaw;
+			// a crash really does stop it, smooth only so much
+			if (VSize(NetVelError) > 500)
+				NetVelError = Normal(NetVelError)*500;
+			// this frame's travel is still to come, restarting at now loses it on every update
+			NetTime = Level.TimeSeconds - Delta;
+			NetError = Location - NetPos;
+			if (VSize(NetError) > SnapDistance(NetVel))
+			{
+				NetError = vect(0,0,0);
+				NetVelError = vect(0,0,0);
+			}
+			NetYawError = (VehicleYaw - NetYaw) << 16 >> 16;
+			if (Abs(NetYawError) > 8192)
+				NetYawError = 0;
+			Velocity = NetVel;
+		}
 	}
+
 	if (ServerStateTime == 0)
 	{ // demoplay from demo recorded on client
-		ServerPredictLocation = ServerState.Location;
 		Velocity = ServerState.Velocity;
-		bNeedUpdateYaw = true;
+		Step = ServerState.Location - Location;
+		if ((Step dot Step) > 122500) // 350*350
+			SetLocation(ServerState.Location);
+		else if ((Step dot Step) > 1)
+			MoveSmooth(Step*(1.0 - Exp(-6.3*Delta)));
+		if (bScriptMove)
+			Move(Velocity*Delta); // nothing else moves it now
+		if (bShouldRepVehYaw)
+			VehicleYaw = ServerState.YawLow + (ServerState.YawHigh << 8);
 	}
-	else
-		ServerPredictLocation = ServerState.Location + (Level.TimeSeconds - ServerStateTime)*ServerState.Velocity;
-		
-	if (bNeedUpdateYaw && bShouldRepVehYaw)
+	else if (bMine)
 	{
-		ServerState_Yaw = ServerState.YawLow + (ServerState.YawHigh << 8);
-		if (bFPRepYawUpdatesView && !bCameraOnBehindView && Driver != None && IsNetOwner(Driver))
-			Driver.ViewRotation.Yaw += (ServerState_Yaw - VehicleYaw) & 0xffff;
-		VehicleYaw = ServerState_Yaw;
+		Part = 1.0 - Exp(-9.0*Delta);
+		Step = PendingMove*Part;
+		PendingMove -= Step;
+		if ((Step dot Step) > 0.0001)
+			Move(Step);
+		Vel = PendingVel*Part;
+		PendingVel -= Vel;
+		Velocity += Vel;
+		if (bShouldRepVehYaw)
+		{
+			T = PendingYaw*Part;
+			PendingYaw -= T;
+			Turn = AddYaw(T);
+			if (Turn != 0 && bFPRepYawUpdatesView && !bCameraOnBehindView && Driver != None)
+				Driver.ViewRotation.Yaw += Turn;
+		}
 	}
-		
-	Diff = ServerPredictLocation - Location;
-	Dist = Diff dot Diff; // squared VSize
-	
-	if (Dist > 122500) // 350*350
-		SetLocation(ServerPredictLocation);
-	else if (Dist > 1)
-		MoveSmooth(Diff*0.1);
+	else if (NetTime > 0)
+	{
+		T = FMin(Level.TimeSeconds - NetTime, 0.35);
+		// critically damped spring back to the server's path, same at any frame time
+		Step = (NetVelError + NetError*NetSettle)*Delta;
+		Part = Exp(-NetSettle*Delta);
+		NetVelError = (NetVelError - Step*NetSettle)*Part;
+		NetError = (NetError + Step)*Part;
+		Pos = NetPos + NetVel*T + NetError;
+		if (Pos != Location)
+			Move(Pos - Location);
+		if (bShouldRepVehYaw)
+		{
+			NetYawError *= Exp(-12.0*Delta);
+			VehicleYaw = NetYaw + NetYawRate*FMin(T, 0.2) + NetYawError;
+		}
+	}
 }
+// Past this a correction gives up and teleports, grows with speed
+simulated function float SnapDistance(vector Speed)
+{
+	return 350 + VSize(Speed)*0.2;
+}
+
 // Server send to client vehicle pos/rot/vel
 function ServerPackState(float Delta)
 {
@@ -1691,8 +1924,23 @@ function ServerPackState(float Delta)
 		ServerState.YawHigh = byte(VehicleYaw >> 8);
 	}
 	ServerState.ClientTime = ClientLastTime;
-	if (PlayerPawn(Driver) != None && Level.TimeSeconds != ServerLastTime)
+	if (PlayerPawn(Driver) != None && ClientLastTime >= 0 && ClockDriver == Driver)
+		ServerState.ClientTime = Level.TimeSeconds + ClientClock;
+	else if (PlayerPawn(Driver) != None && Level.TimeSeconds != ServerLastTime)
 		ServerState.ClientTime += Level.TimeSeconds - ServerLastTime;
+	else if (ClientLastTime < 0 && PlayerPawn(Driver) == None && Velocity != vect(0,0,0))
+		ServerState.ClientTime = 1; // not the initial state: clients predict from arrival
+}
+
+// Turn the vehicle without losing the fraction of a unit each tick. Returns the whole units applied.
+simulated function int AddYaw(float Change)
+{
+	local int Whole;
+	YawRemainder += Change;
+	Whole = YawRemainder;
+	YawRemainder -= Whole;
+	VehicleYaw += Whole;
+	return Whole;
 }
 
 simulated function DmgFXGen(byte Mode)
@@ -1753,10 +2001,10 @@ simulated function AfterTeleport(float YawChange)
 // Main tick
 simulated function Tick( float Delta )
 {
-	local bool bSlopedG, bIsNetOwner, bGameEnded;
-	local float f, ArcRatio;
+	local bool bIsNetOwner, bGameEnded, bHere, bSplit;
+	local float Left, Step, OldFor;
+	local int NewKeys;
 	local SavedMoveXV NewMove;
-	const ArcMovementScale = 2.5;
 
 	if (Pawn(Base) != None)
 		SetBase(None);
@@ -1814,8 +2062,9 @@ simulated function Tick( float Delta )
 	}
 
 	PendingBump = None;
-	
-	bSlopedG = CheckOnGround();
+	LastLocation = Location;
+	if (bScriptMove && Physics != PHYS_None)
+		SetPhysics(PHYS_None);
 
 	VeryOldVel[1] = VeryOldVel[0];
 	VeryOldVel[0] = Velocity;
@@ -1880,11 +2129,8 @@ simulated function Tick( float Delta )
 			NewMove = SavedMoves;
 			while (NewMove.NextMove != None)
 				NewMove = NewMove.NextMove;
-				
-			// store previous data after physics apply	
-			NewMove.SavedLocation = Location;
 		}
-		
+
 		ClientUpdateState(Delta);
 		
 		if (bIsNetOwner)
@@ -1941,6 +2187,132 @@ simulated function Tick( float Delta )
 			ReadDriverInput(PlayerPawn(Driver),Delta);
 	}
 
+	if (NewMove != None)
+	{
+		NewMove.TimeStamp = Level.TimeSeconds;
+		NewMove.Delta = Delta;
+		NewMove.Velocity = Velocity;
+		NewMove.Acceleration = Location;
+		NewMove.Yaw = VehicleYaw;
+		NewMove.Rise = Rising;
+		NewMove.Turn = Turning;
+		NewMove.Accel = Accel;
+	}
+
+	bHere = Level.NetMode < NM_Client || IsNetOwner(Driver);
+	if (Level.NetMode == NM_Client && bScriptMove)
+		bCollideWorld = bHere; // remote vehicles just follow the server
+	Left = Delta;
+	if (Level.NetMode != NM_Client && Level.NetMode != NM_Standalone)
+	{
+		// clocks drift, let the estimate come down slowly
+		ClientClock -= 0.005*Delta;
+		if (bNewMove)
+		{
+			OldFor = Delta - MoveAge();
+			if (HeldKeys != 0 && OldFor > 0.002 && bDriving && !bGameEnded && bScriptMove)
+			{
+				// the old keys held until part way through this tick
+				bSplit = true;
+				NewKeys = PackKeys();
+				UnpackKeys(HeldKeys - 1);
+			}
+		}
+		bNewMove = false;
+		HeldKeys = 0;
+	}
+	do
+	{
+		Step = Left;
+		if (bScriptMove && bHere && Step > SimStep*1.25)
+			Step = FMax(SimStep, Delta/8); // a long hitch must not cost more time to catch up on
+		if (bSplit)
+		{
+			if (OldFor > 0.002)
+			{
+				Step = FMin(Step, OldFor);
+				OldFor -= Step;
+			}
+			else
+			{
+				UnpackKeys(NewKeys);
+				bSplit = false;
+			}
+		}
+		Left -= Step;
+		SimulateStep(Step, bHere);
+	} until (Left <= 0 || bDeleteMe);
+	if (bSplit)
+		UnpackKeys(NewKeys);
+	if (bDeleteMe)
+		return;
+
+	if (NewMove != None)
+	{
+		NewMove.SavedVelocity = Velocity;
+		NewMove.SavedYaw = VehicleYaw;
+		NewMove.SavedLocation = Location;
+	}
+	if (Level.NetMode < NM_Client) // NM_StandAlone included for demorec support
+		ServerPackState(Delta);
+	if (GVT != None)
+	{
+		if (Level.NetMode != NM_DedicatedServer)
+			UpdateBody(Delta);
+		else
+			GVT.PrePivot = RideOffset; // guns fire from the body, so it has to be where clients see it
+	}
+	if (GunnerView != None)
+	{
+		if (GunnerView.bDeleteMe || GunnerView.VehicleOwner != self)
+			GunnerView = None;
+		else
+			GunnerView.UpdateView(0);
+	}
+
+	if (bHasPassengers && !bDeleteMe)
+		UpdatePassengerPos();
+	if (Region.Zone.bWaterZone && !bIsWaterResistant && NextWaterDamageTime<Level.TimeSeconds &&
+		Region.Zone.DamagePerSec <= 0)
+	{
+		NextWaterDamageTime = Level.TimeSeconds+0.25;
+		TakeDamage(25,None,Location,vect(0,0,0),'drowned');
+	}
+	//Further zone support
+	if (Region.Zone.bKillZone)
+		TakeDamage(Health*3,None,Location,vect(0,0,0),'FuckedUp');
+	else if (Region.Zone.DamagePerSec > 0 && NextZoneDmgTime<Level.TimeSeconds)
+	{
+		NextZoneDmgTime = Level.TimeSeconds + 1;
+		TakeDamage(Region.Zone.DamagePerSec,None,Location,vect(0,0,0),Region.Zone.DamageType);
+	}
+
+	if (AttachmentList == None)
+		AttachmentsTick(Delta);
+
+	if ((VehicleStateNextCheck < Level.TimeSeconds) ||
+		(VehicleFlag != None && VehicleFlag.LastCheck < Level.TimeSeconds - 1))
+		ShowState(true);
+
+	if (SignalLights != SignalLightsRepl)
+		SetSignalLights(SignalLightsRepl);
+	if (bHeadLightInUse != bHeadLightInUseRepl)
+		UpdateVehicleLights(bHeadLightInUseRepl);
+
+}
+
+// One step of a frame: floor, driver input, then the move
+simulated function SimulateStep(float Delta, bool bHere)
+{
+	local bool bSlopedG;
+	local float f, ArcRatio;
+	const ArcMovementScale = 2.5;
+
+	SimDelta = Delta;
+	bSlopedG = CheckOnGround();
+	if (bGroundSim && bHere)
+		bSlopedG = bOnGround;
+
 	if (ArcGroundTime > 0)
 		ArcGroundTime -= Delta;
 
@@ -1953,13 +2325,13 @@ simulated function Tick( float Delta )
 	{
 		if (bArcMovement && !bOldOnGround)
 			ArcGroundTime = 0.8;
-		
+
 		if (ArcGroundTime > 0)
 			FloorNormal = NormalWeightSum(35*f*Delta, ActualFloorNormal, FloorNormal);
 		else
 			FloorNormal = NormalWeightSum(6*f*Delta, ActualFloorNormal, FloorNormal);
 
-		if ( (ActualFloorNormal Dot FloorNormal) > 0.999 )
+		if ( (ActualFloorNormal Dot FloorNormal) > NormalDone )
 			FloorNormal = ActualFloorNormal;
 	}
 	//Arc movement physics
@@ -1989,19 +2361,11 @@ simulated function Tick( float Delta )
 			ActualFloorNormal.Z = 0.1;
 			ActualFloorNormal = Normal(ActualFloorNormal);
 		}
-/*
-		// X dot X == VSize(X)*VSize(X)
-		if (bOldOnGround && (Velocity dot Velocity) > MinArcSpeed*MinArcSpeed*6.25) //2.5*2.5
-		{
-			FloorNormal = ArcInitDir[0];
-			GVTNormal = ArcInitDir[1];
-		}
-*/			
 		// X dot X == VSize(X)*VSize(X)
 		if (ActualFloorNormal!=FloorNormal && (Velocity dot Velocity) > 0)
 		{
 			FloorNormal = NormalWeightSum(ArcAmount(Velocity)*f*Delta, ActualFloorNormal, FloorNormal);
-			if ( (ActualFloorNormal Dot FloorNormal) > 0.999 )
+			if ( (ActualFloorNormal Dot FloorNormal) > NormalDone )
 				FloorNormal = ActualFloorNormal;
 		}
 
@@ -2021,12 +2385,12 @@ simulated function Tick( float Delta )
 			if (GVTNormal!=ActualGVTNormal)
 			{
 				GVTNormal = NormalWeightSum(ArcAmount(Velocity)*f*Delta, ActualGVTNormal, GVTNormal);
-				if ( (ActualGVTNormal Dot GVTNormal) > 0.999 )
+				if ( (ActualGVTNormal Dot GVTNormal) > NormalDone )
 					GVTNormal = ActualGVTNormal;
 			}
 		}
 	}
-	if (bSlopedPhys && bSlopedG && GVTNormal!=ActualGVTNormal)
+	if (bSlopedPhys && bSlopedG && GVTNormal!=ActualGVTNormal && (!bGroundSim || Level.NetMode == NM_DedicatedServer))
 	{
 		// smoothly change floor if not sloped and on the ground
 		if (ArcGroundTime > 0)
@@ -2034,62 +2398,483 @@ simulated function Tick( float Delta )
 		else
 			GVTNormal = NormalWeightSum(14*f*Delta, ActualGVTNormal, GVTNormal);
 
-		if ( (ActualGVTNormal Dot GVTNormal) > 0.999 )
+		if ( (ActualGVTNormal Dot GVTNormal) > NormalDone )
 			GVTNormal = ActualGVTNormal;
 	}
 	bOwnerNoSee = False;
-	bOnGround = bSlopedG;
-	if (NewMove != None)
-	{
-		NewMove.TimeStamp = Level.TimeSeconds;
-		NewMove.Delta = Delta;
-		NewMove.Velocity = Velocity;
-		NewMove.Acceleration = Location;
-		NewMove.Yaw = VehicleYaw;
-		NewMove.Rise = Rising;
-		NewMove.Turn = Turning;
-		NewMove.Accel = Accel;
-	}
+	if (!bGroundSim || !bHere)
+		bOnGround = bSlopedG;
 
-	if (Level.NetMode < NM_Client) // NM_StandAlone included for demorec support
-		ServerPackState(Delta);
 	UpdateDriverInput(Delta);
-	if (NewMove != None)
-	{
-		NewMove.SavedVelocity = Velocity;
-		NewMove.SavedYaw = VehicleYaw;
-	}
-	if (bHasPassengers && !bDeleteMe)
-		UpdatePassengerPos();
-	if (Region.Zone.bWaterZone && !bIsWaterResistant && NextWaterDamageTime<Level.TimeSeconds && 
-		Region.Zone.DamagePerSec <= 0)
-	{
-		NextWaterDamageTime = Level.TimeSeconds+0.25;
-		TakeDamage(25,None,Location,vect(0,0,0),'drowned');
-	}
-	//Further zone support
-	if (Region.Zone.bKillZone)
-		TakeDamage(Health*3,None,Location,vect(0,0,0),'FuckedUp');
-	else if (Region.Zone.DamagePerSec > 0 && NextZoneDmgTime<Level.TimeSeconds)
-	{
-		NextZoneDmgTime = Level.TimeSeconds + 1;
-		TakeDamage(Region.Zone.DamagePerSec,None,Location,vect(0,0,0),Region.Zone.DamageType);
-	}
 
+	if (bDeleteMe)
+		return;
+	if (bScriptMove && bHere)
+	{
+		if (bGroundSim && bOnGround)
+			GroundMove(Delta);
+		else
+			AirMove(Delta);
+	}
 	bOldOnGround = bSlopedG;
+}
 
-	if (AttachmentList == None)
-		AttachmentsTick(Delta);
+// Not on the floor: keep moving after each hit for the rest of the step
+simulated function AirMove(float Delta)
+{
+	local vector Want, Start, Ex, HL, HN;
+	local float Done;
+	local Actor A;
+	local int i;
 
-	if ((VehicleStateNextCheck < Level.TimeSeconds) ||
-		(VehicleFlag != None && VehicleFlag.LastCheck < Level.TimeSeconds - 1))
-		ShowState(true);
-		
-	if (SignalLights != SignalLightsRepl)
-		SetSignalLights(SignalLightsRepl);
-	if (bHeadLightInUse != bHeadLightInUseRepl)
-		UpdateVehicleLights(bHeadLightInUseRepl);
-		
+	Ex.X = CollisionRadius;
+	Ex.Y = CollisionRadius;
+	Ex.Z = CollisionHeight;
+	bDriveVel = false;
+	for (i = 0; i < 3 && Delta > 0.0001; i++)
+	{
+		Want = Velocity*Delta;
+		// X dot X == VSize(X)*VSize(X)
+		if ((Want dot Want) < 0.0001)
+			return;
+		Start = Location;
+		Move(Want);
+		if (bDeleteMe)
+			return;
+		Done = ((Location - Start) dot Want)/(Want dot Want);
+		if (Done >= 0.995)
+			return;
+		// same sweep the move failed on, a short trace can miss what it grazes
+		A = Trace(HL, HN, Location + Want*(1 - Done) + Normal(Want)*10, Location, true, Ex);
+		if (A == None)
+			return;
+		HitWall(HN, A);
+		if (bDeleteMe)
+			return;
+		Delta *= 1 - Done;
+		// landed: the rest of the step goes on along the ground, or the car stands still for a frame
+		if (bGroundSim && bOnGround)
+		{
+			GroundMove(Delta);
+			return;
+		}
+	}
+}
+
+// Upward speed from outside the drive that throws it off the ground
+simulated function float LaunchSpeed()
+{
+	return Sqrt(2*10*Abs(Region.Zone.ZoneGravity.Z)*VehicleGravityScale);
+}
+
+// Go up and along, then set down on the floor, so only a wall counts as a hit
+simulated function GroundMove(float Delta)
+{
+	local vector Flat, Start, Ex, HL, HN, Up, Lost;
+	local float Z0, Len, Done, Part, Reach, Into;
+	local Actor A;
+	local int i;
+
+	Up = vect(0,0,1);
+	Ex.X = CollisionRadius;
+	Ex.Y = CollisionRadius;
+	Ex.Z = CollisionHeight;
+	Z0 = Location.Z;
+	Flat = Velocity*Delta + PivotShift;
+	Flat.Z = 0;
+	PivotShift = vect(0,0,0);
+	Len = VSize(Flat);
+	Part = 1;
+	for (i = 0; i < 3 && (Flat dot Flat) > 0.0001; i++)
+	{
+		Start = Location;
+		Move(Flat + Up*(VSize(Flat)*1.25 + 2));
+		if (bDeleteMe)
+			return;
+		Done = ((Location - Start) dot Flat)/(Flat dot Flat);
+		if (Done >= 0.99)
+			break;
+		Flat *= 1 - Done;
+		Part *= 1 - Done;
+		// a low ceiling stops the lift, not the car
+		Start = Location;
+		Move(Flat);
+		if (bDeleteMe)
+			return;
+		Done = ((Location - Start) dot Flat)/(Flat dot Flat);
+		if (Done >= 0.99)
+			break;
+		Flat *= 1 - Done;
+		Part *= 1 - Done;
+		A = Trace(HL, HN, Location + Normal(Flat)*10, Location, true, Ex);
+		if (A == None)
+		{
+			// running along a wall it touches: the sweep finds nothing, so slide and work the wall out from what was lost
+			Start = Location;
+			MoveSmooth(Flat);
+			if (bDeleteMe)
+				return;
+			Lost = Flat - (Location - Start);
+			Lost.Z = 0;
+			if ((Lost dot Lost) > 0.01*(Flat dot Flat))
+				GroundHit(-Normal(Lost), Level);
+			break;
+		}
+		if (Pawn(A) != None || Vehicle(A) != None)
+			break; // Bump has dealt with it
+		if (HN.Z < WalkableZ && StepOver(Flat, Z0))
+			break;
+		GroundHit(HN, A);
+		if (bDeleteMe)
+			return;
+		Flat = Velocity*Delta*Part;
+		Flat.Z = 0;
+	}
+
+	// any floor it could have rolled down to keeps it, only a drop lets go
+	Reach = Location.Z - Z0 + 6 + FMax(4, Len*1.5);
+	A = Trace(HL, HN, Location - Up*Reach, Location, false, Ex);
+	if (A != None && HN.Z >= WalkableZ)
+	{
+		Move(Up*(HL.Z - Location.Z));
+		if (HN != ActualFloorNormal)
+		{
+			// running into a rise costs the speed that went into it, as it always did. A crest costs none
+			Lost = Velocity - ActualFloorNormal*(Velocity dot ActualFloorNormal);
+			Into = Normal(Lost) dot HN;
+			if (Into < -0.01)
+				Velocity *= Sqrt(FMax(0, 1.0 - 0.4*Into*Into));
+		}
+		ActualFloorNormal = HN;
+		return;
+	}
+	bOnGround = false;
+	Move(Up*(Z0 + Velocity.Z*Delta - Location.Z));
+}
+
+// Up and along, GroundMove sets it down after and the ride hides the height change
+simulated function bool StepOver(vector Flat, float Floor)
+{
+	local vector Start;
+	local float Rise;
+
+	// from the floor the move began on, so what it can climb doesn't depend on the frame
+	Rise = Floor + MaxObstclHeight*1.05 + 1 - Location.Z;
+	if (MaxObstclHeight <= 0 || Rise <= 0)
+		return false;
+	Start = Location;
+	Move(vect(0,0,1)*Rise);
+	Move(Flat);
+	if (((Location - Start) dot Flat) > 0.5*(Flat dot Flat))
+		return true;
+	// too high: back down now, or it hangs there for a frame
+	SetLocation(Start);
+	return false;
+}
+
+// Wall hit on the ground: speed along the wall stays, the rest goes
+simulated function GroundHit(vector HitNormal, Actor Wall)
+{
+	local vector N, Old, Way;
+	local float Hit, Speed, Along;
+	local rotator R;
+	local int Turn;
+
+	N = HitNormal;
+	N.Z = 0;
+	if (N == vect(0,0,0))
+		return;
+	N = Normal(N);
+	Hit = Velocity dot N;
+	if (Hit >= 0)
+		return;
+	Old = Velocity;
+	Speed = VSize(Old);
+	// a real hit comes off the wall a little, leaning on it doesn't, or it hammers
+	if (Hit < -150)
+		Velocity -= N*Hit*1.05;
+	else
+		Velocity -= N*Hit;
+	if (Wall != Level && Wall.Brush == None)
+		return;
+	Along = Normal(Old) dot Normal(Velocity);
+	// glancing hit turns the nose along the wall
+	R.Yaw = VehicleYaw;
+	Way = vector(R);
+	Way -= N*(Way dot N);
+	if ((Way dot Way) > 0.01)
+	{
+		// a touch past the wall's line, or it leans on the wall for good
+		Way = Normal(Way) + N*0.03;
+		Turn = (rotator(Way).Yaw - VehicleYaw) << 16 >> 16;
+		if (Abs(Turn) < 14000)
+		{
+			Turn = AddYaw(FClamp(Turn*5, -15000, 15000)*SimDelta);
+			if (Turn != 0 && !bCameraOnBehindView && Driver != None)
+				Driver.ViewRotation.Yaw += Turn;
+		}
+	}
+	if (Speed > 500 && Along < -0.2)
+		TakeImpactDamage((Speed - 500)/2, None, "GroundHit_1");
+	else if (Speed > 600 && Along < 0)
+		TakeImpactDamage((Speed - 600)/4, None, "GroundHit_2");
+	else if (Speed > 1300 && Along < 0.3)
+		TakeImpactDamage((Speed - 1300)/5, None, "GroundHit_3");
+	else if (NextScrapeTime < Level.TimeSeconds && -Hit > 120)
+	{
+		NextScrapeTime = Level.TimeSeconds + 0.4;
+		TakeImpactDamage(0, None, "GroundHit_4");
+	}
+}
+
+// In the air and something got in the way.
+simulated function AirContact(vector HitNormal, Actor Wall)
+{
+	local float Into;
+
+	Into = Velocity dot HitNormal;
+	if (HitNormal.Z >= WalkableZ && Into <= 0)
+	{
+		FellToGround();
+		Velocity -= HitNormal*Into;
+		ActualFloorNormal = HitNormal;
+		bOnGround = true;
+		return;
+	}
+	if (Into < 0)
+	{
+		GroundHit(HitNormal, Wall);
+		Into = Velocity dot HitNormal;
+		if (Into < 0)
+			Velocity -= HitNormal*Into;
+	}
+}
+
+// Plane the speed lies in: the four corners where it has them, so a crest turns it over the length of the car
+simulated function vector DrivePlane()
+{
+	if (bSlopedPhys && GVT != None && ActualGVTNormal.Z >= WalkableZ)
+		return ActualGVTNormal;
+	return ActualFloorNormal;
+}
+
+// Ground speed as the original drove it: one speed, aimed where the wheels point. Per second, so the step doesn't matter
+simulated function GroundDrive(float Delta, float TopSpeed, float Friction, int SteerYaw, bool bHandbrake)
+{
+	local vector X, Y, Z, Slope, Flat;
+	local rotator R;
+	local float F, S, Cur, Brake, Speed, Rate;
+
+	// a blast can throw it, anything less stays on the ground
+	if (bDriveVel && ((Velocity - DriveVel) dot ActualFloorNormal) > LaunchSpeed()*1.5)
+	{
+		bOnGround = false;
+		bDriveVel = false;
+		return;
+	}
+	Z = DrivePlane();
+	R.Yaw = VehicleYaw + SteerYaw;
+	X = vector(R);
+	X = Normal(X - Z*(X dot Z));
+	Y = Normal(Z cross X);
+	// the plane turned under it: the speed turns too, none is lost. A push off the ground isn't speed
+	Flat = Velocity - Z*(Velocity dot Z);
+	Speed = VSize(Flat);
+	if (bDriveVel)
+		Speed = FMin(VSize(Velocity), FMax(Speed, VSize(DriveVel)));
+	if ((Flat dot Flat) > 0.01)
+		Flat = Normal(Flat)*Speed;
+	F = Flat dot X;
+	S = Flat dot Y;
+
+	if (ActualGVTNormal.Z >= 0.5)
+		Slope = CalcGravityStrength(Region.Zone.ZoneGravity*(VehicleGravityScale/GroundPower), ActualGVTNormal);
+	else
+		Slope = CalcGravityStrength(Region.Zone.ZoneGravity*(VehicleGravityScale/GroundPower), Z);
+	Slope /= Friction/8.f + 1.f;
+	F += (Slope dot X)*Delta;
+	S += (Slope dot Y)*Delta;
+
+	// the original turned its speed to the wheels a frame at a time, this is that at 100 frames a second
+	Rate = 100.0*Loge(1.0 + TopSpeed*Friction/10.0/FMax(50.0, Abs(F) + Abs(S)));
+	if (bHandbrake)
+		Rate *= 0.05;
+	Cur = S*Exp(-Rate*Delta);
+	// what the slide gives up goes back into the speed, a turn costs none
+	if (Abs(F) > Abs(S))
+	{
+		Brake = Sqrt(F*F + S*S - Cur*Cur);
+		if (F < 0)
+			F = -Brake;
+		else
+			F = Brake;
+	}
+	S = Cur;
+
+	if (Accel != 0 && F*Accel < -16)
+	{
+		Brake = WDeAccelRate*3*Friction*Delta;
+		if (Abs(F) <= Brake)
+			F = 0;
+		else if (F > 0)
+			F -= Brake;
+		else
+			F += Brake;
+		if (SignalLights != SL_Stop)
+			SetSignalLights(SL_Stop);
+	}
+	else if (Accel != 0)
+	{
+		OldAccelD = Accel;
+		Cur = F*Accel;
+		// a slide is part of the speed too
+		Brake = Sqrt(FMax(0, TopSpeed*TopSpeed - S*S));
+		if (Cur < Brake)
+			Cur = FMin(Brake, Cur + WAccelRate*Delta);
+		else if (Abs(S) < 50)
+			Cur += WAccelRate*Delta/100; // a hill gave it this, stays until a climb takes it
+		F = Cur*Accel;
+		if (Accel < 0)
+		{
+			if (SignalLights != SL_Backwards)
+				SetSignalLights(SL_Backwards);
+		}
+		else if (SignalLights != SL_None)
+			SetSignalLights(SL_None);
+	}
+	else
+	{
+		Brake = WDeAccelRate*Friction*Delta;
+		if (bHandbrake)
+			Brake *= 1.5;
+		if (Abs(F) <= Brake)
+			F = 0;
+		else if (F > 0)
+			F -= Brake;
+		else
+			F += Brake;
+		if (SignalLights != SL_None)
+			SetSignalLights(SL_None);
+	}
+
+	Velocity = X*F + Y*S;
+	DriveVel = Velocity;
+	bDriveVel = true;
+}
+
+// How hard the vehicle is pushed, the body leans against this
+simulated function TrackAccel(float Delta, float Rate)
+{
+	local vector Now;
+
+	if (Delta <= 0)
+		return;
+	if (Level.NetMode == NM_Client && !IsNetOwner(Driver))
+		Now = NetAccel;
+	else
+		Now = (Velocity - BodyVelocity)/Delta;
+	BodyVelocity = Velocity;
+	BodyAccel += (Now - BodyAccel)*(1.0 - Exp(-Rate*Delta));
+}
+
+// Turn towards a heading, speed builds and fades so it doesn't move like a turret
+simulated function FollowYaw(int WantYaw, float MaxRate, float Delta)
+{
+	local float Want;
+
+	Want = FClamp(((WantYaw - VehicleYaw) << 16 >> 16)*12.0, -MaxRate, MaxRate);
+	TurnRate += (Want - TurnRate)*(1.0 - Exp(-22.0*Delta));
+	AddYaw(TurnRate*Delta);
+}
+
+// Lean towards the push through a spring
+simulated function UpdateLean(vector Target, float Delta)
+{
+	const CraftFreq = 8.0;
+	const CraftDamp = 0.65;
+
+	BodyLeanRate += (CraftFreq*CraftFreq*(Target - BodyLean) - 2*CraftDamp*CraftFreq*BodyLeanRate)*Delta;
+	BodyLean += BodyLeanRate*Delta;
+}
+
+// Body on springs: follows the ground, squats under power, dives under brakes, leans out of corners
+simulated function UpdateBody(float Delta)
+{
+	local vector Y, X, Target, N;
+	local rotator R;
+	local float Step, W, Long, Lat, Top;
+	// dead beat and firm: the original set the body straight on the ground, this only takes the steps out
+	const HeaveFreq = 30.0;		// rad/s
+	const HeaveDamp = 1.0;
+	const TiltFreq = 20.0;
+	const TiltDamp = 1.0;
+	const LeanFreq = 12.0;
+	const LeanDamp = 1.0;
+
+	R.Yaw = VehicleYaw;
+	X = vector(R);
+	Y = vect(0,0,1) cross X;
+	if (!bBodyReady || Abs(Location.Z + RideOffset.Z - BodyZ) > 250)
+	{
+		bBodyReady = true;
+		BodyZ = Location.Z + RideOffset.Z;
+		RideZ = RideOffset.Z;
+		BodyTargetZ = BodyZ;
+		BodyZRate = 0;
+		BodyTargetRate = 0;
+		BodyNormal = GVTNormal;
+		BodyNormalRate = vect(0,0,0);
+		BodyVelocity = Velocity;
+	}
+	if (Delta <= 0)
+		return;
+	TrackAccel(Delta, 14.0);
+	Target.X = GVT.PrePivot.X + (RideOffset.X - GVT.PrePivot.X)*(1.0 - Exp(-20.0*Delta));
+	Target.Y = GVT.PrePivot.Y + (RideOffset.Y - GVT.PrePivot.Y)*(1.0 - Exp(-20.0*Delta));
+	RideZ += (RideOffset.Z - RideZ)*(1.0 - Exp(-25.0*Delta));
+	W = Location.Z + RideZ;
+	BodyTargetRate += ((W - BodyTargetZ)/Delta - BodyTargetRate)*(1.0 - Exp(-30.0*Delta));
+	BodyTargetZ = W;
+	Long = FClamp(BodyAccel dot X, -1500, 1500);
+	Lat = FClamp(BodyAccel dot Y, -1500, 1500);
+	if (!bOnGround)
+	{
+		Long = 0;
+		Lat = 0;
+	}
+	Top = 2500.0/FMax(2500, Mass);
+	while (Delta > 0)
+	{
+		Step = FMin(Delta, SimStep);
+		Delta -= Step;
+		BodyZRate += (HeaveFreq*HeaveFreq*(BodyTargetZ - BodyZ) + 2*HeaveDamp*HeaveFreq*(BodyTargetRate - BodyZRate))*Step;
+		BodyZ += BodyZRate*Step;
+		BodyPitchRate += (LeanFreq*LeanFreq*(-Long*0.00003*Top - BodyPitch) - 2*LeanDamp*LeanFreq*BodyPitchRate)*Step;
+		BodyPitch += BodyPitchRate*Step;
+		BodyRollRate += (LeanFreq*LeanFreq*(-Lat*0.00003*Top - BodyRoll) - 2*LeanDamp*LeanFreq*BodyRollRate)*Step;
+		BodyRoll += BodyRollRate*Step;
+		if (bOnGround)
+		{
+			BodyNormalRate += (TiltFreq*TiltFreq*(ActualGVTNormal - BodyNormal) - 2*TiltDamp*TiltFreq*BodyNormalRate)*Step;
+			BodyNormal += BodyNormalRate*Step;
+		}
+	}
+	if (BodyZ > BodyTargetZ + 32)
+		BodyZ = BodyTargetZ + 32;
+	else if (BodyZ < BodyTargetZ - 32)
+		BodyZ = BodyTargetZ - 32;
+	if (bOnGround)
+	{
+		N = Normal(BodyNormal);
+		GVTNormal = Normal(N + X*BodyPitch + Y*BodyRoll);
+	}
+	else
+	{
+		BodyNormal = GVTNormal;
+		BodyNormalRate = vect(0,0,0);
+	}
+	Target.Z = BodyZ - Location.Z;
+	GVT.PrePivot = Target;
 }
 
 simulated function SavedMoveXV GetFreeMove()
@@ -2113,6 +2898,14 @@ simulated function float ArcAmount(vector VelArc)
 	return VehicleGravityScale*Abs(Region.Zone.ZoneGravity.Z/950)*RefMaxArcSpeed/FMax(VSize(VelArc),MinArcSpeed*VehicleGravityScale);
 }
 
+// Where a gun is this frame, guns move after the camera has run
+simulated function vector GunPlace(WeaponAttachment Gun)
+{
+	if (bSlopedPhys && GVT != None)
+		return GVT.PrePivot + Location + (Gun.TurretOffset >> Rotation);
+	return Location + (Gun.TurretOffset >> Rotation);
+}
+
 simulated function UpdateAttachment(WeaponAttachment vat, float Delta)
 {
 local vector WPosA;
@@ -2127,10 +2920,7 @@ local Actor AttachBase;
 //	if (Vat.base != AttachBase)
 //		Log(self @ vat @ Vat.base @ AttachBase @ vat.bRotWithOtherWeap);
 
-	if (bSlopedPhys && GVT!=None)
-		WPosA = GVT.PrePivot + Location + (vat.TurretOffset >> Rotation);
-	else
-		WPosA = Location + (vat.TurretOffset >> Rotation);
+	WPosA = GunPlace(vat);
 	//log(self @ vat @ WPosA @ vat.Location @ "|" @ GVT.PrePivot @ Location @ vat.TurretOffset @ Rotation @ "|" @ (vat.TurretOffset >> Rotation));
 	if (WPosA != vat.Location && !vat.Move(WPosA - vat.Location))
 		vat.SetLocation(WPosA);
@@ -2171,7 +2961,7 @@ local VehicleAttachment vat;
 			UpdateAttachment(WeaponAttachment(vat), Delta);
 	}
 
-	if (VehFoot != None && Location != OldLocation)
+	if (VehFoot != None && Location != LastLocation)
 	{
 		if (bSlopedPhys && GVT!=None)
 			VehFoot.SetLocation(Location + GVT.PrePivot);
@@ -2222,19 +3012,81 @@ simulated function CheckBase(Actor PossibleBase, optional Actor Ac[4])
 		SetBase(PossibleBase);
 }
 
+// Ground under the four corners, places and tilts the body
+simulated function SampleCorners()
+{
+	local vector S, E, sHL[4], sHN[4], Off[4], Range, MLoc, CrossedVect[2], GVTLoc, Foot;
+	local actor Ac;
+	local int b, Stand;
+	local byte bHang[4];
+	local float Low, High;
+
+	Off[0] = FrontWide;
+	Off[1] = FrontWide;
+	Off[1].Y = -FrontWide.Y;
+	Off[2] = BackWide;
+	Off[3] = BackWide;
+	Off[3].Y = -BackWide.Y;
+	Range.Z = -Abs(ZRange);
+	Range = Range >> Rotation;
+	High = Location.Z - CollisionHeight + 6;
+	Low = High - 6 - CollisionRadius*0.9;
+	for (b = 0; b < 4; b++)
+	{
+		S = Location + (Off[b] >> Rotation);
+		E = S + Range;
+		Ac = Trace(sHL[b], sHN[b], E, S, False);
+		if (Abs(int(sHL[b].X)) > 900100200.0 || // check if got nan as HitLocation
+			Abs(int(sHL[b].Y)) > 900100200.0 || // such can happen if trace start already inside mover
+			Abs(int(sHL[b].Z)) > 900100200.0)
+			Ac = None;
+		if (Ac == None || sHL[b].Z < Low)
+		{
+			// nothing it could stand on, the wheel hangs
+			sHL[b] = E;
+			bHang[b] = 1;
+			CornerZ[b] = Low;
+			continue;
+		}
+		sHL[b].Z = FMin(sHL[b].Z, High);
+		CornerZ[b] = sHL[b].Z;
+		Foot += sHL[b];
+		Stand++;
+	}
+	// a hanging corner goes with the floor through the ones that stand: level over an edge, full tilt on a steep slope
+	if (Stand > 0)
+		Foot /= Stand;
+	else
+	{
+		Foot = Location;
+		Foot.Z -= CollisionHeight;
+	}
+	for (b = 0; b < 4; b++)
+		if (bHang[b] != 0)
+			sHL[b].Z = Foot.Z - ((sHL[b].X - Foot.X)*ActualFloorNormal.X + (sHL[b].Y - Foot.Y)*ActualFloorNormal.Y)/FMax(0.5, ActualFloorNormal.Z);
+	MLoc = (sHL[0] + sHL[1] + sHL[2] + sHL[3]) / 4 -
+		(vect(0.5,0,0)*(FrontWide.X + BackWide.X) >> Rotation);
+	CrossedVect[0] = Normal(sHL[0] - sHL[3]);
+	CrossedVect[1] = Normal(sHL[1] - sHL[2]);
+	ActualGVTNormal = Normal(CrossedVect[0] cross CrossedVect[1]);
+	if (ActualGVTNormal.Z < 0)
+		ActualGVTNormal = -ActualGVTNormal;
+	GVTLoc = MLoc - Normal(Range)*CollisionHeight;
+	RideOffset = GVTLoc - Location;
+	S = ActualGVTNormal;
+	S.Z = 0;
+	RideOffset.Z = FClamp(RideOffset.Z, -FMax(MaxObstclHeight,
+		CollisionRadius*FMin(1.0, VSize(S)/FMax(0.707, S.Z))), 0);
+}
+
 // Vehicle is currently on ground?
 simulated function bool CheckOnGround()
 {
 	local vector End,Start,Ex,HL,HN;
-
-	local vector S, E, sHL[4],sHN[4], ePointsOffSet[4], MLoc, CrossedVect[2], GVTLoc;
-	local actor Ac[4];
-	local int b, AcCount;
 	local actor PossibleBase;
-	local vector WZRange;
 	local bool ret;
-	
-	if (Location == LastCheckOnGroundLocation && 
+
+	if (Location == LastCheckOnGroundLocation &&
 		Level.TimeSeconds < LastCheckOnGroundTime + 0.2 && Mover(Base) == None)
 		return bLastCheckOnGroundResult;
 
@@ -2242,132 +3094,35 @@ simulated function bool CheckOnGround()
 	Start.Z -= CollisionHeight - 1;
 	End = Start;
 	End.Z -= 6;
+	if (Level.NetMode == NM_Client && !bCollideWorld)
+		End.Z -= 18; // someone else's vehicle is only near the floor here
 	Ex.X = CollisionRadius;
 	Ex.Y = Ex.X;
 
 	PossibleBase = Trace(HL, HN, End, Start, False, Ex);
 	if (PossibleBase == None)
 	{
-		End.Z -= CollisionHeight;
-		if (Trace(HL, HN, End, Start, False, Ex) != None)
+		if (bGroundSim)
 		{
-			ePointsOffSet[0] = FrontWide;
-			ePointsOffSet[1] = ePointsOffSet[0];
-			ePointsOffSet[1].Y = -FrontWide.Y;
-			ePointsOffSet[2] = BackWide;
-			ePointsOffSet[3] = ePointsOffSet[2];
-			ePointsOffSet[3].Y = -BackWide.Y;
-			
-			WZRange.Z = -Abs(ZRange);
-			WZRange = WZRange >> Rotation;
-	
-			for (b = 0; b < 4; b++)
-			{
-				S = Location + (ePointsOffSet[b] >> Rotation);
-				E = S + WZRange;
-				Ac[b] = Trace(sHL[b], sHN[b], E, S, False);
-				if (Abs(int(sHL[b].X)) > 900100200.0 || // check if got nan as HitLocation
-					Abs(int(sHL[b].Y)) > 900100200.0 || // such can happen if trace start already inside mover
-					Abs(int(sHL[b].Z)) > 900100200.0)
-					Ac[b] = None;
-				if (Ac[b] != None)
-					AcCount++;
-			}
-	
-			if (AcCount == 4)
-			{
-				Disable('Bump');
-				Disable('HitWall');
-				MoveSmooth(vect(0,0,-1));
-				Enable('Bump');
-				Enable('HitWall');
-				if (GVT != None)
-				{
-					MLoc = (sHL[0] + sHL[1] + sHL[2] + sHL[3]) / 4 - 
-						(vect(0.5,0,0)*(FrontWide.X + BackWide.X) >> Rotation);
-					CrossedVect[0] = Normal(sHL[0] - sHL[3]);
-					CrossedVect[1] = Normal(sHL[1] - sHL[2]);
-					ActualGVTNormal = Normal(CrossedVect[0] cross CrossedVect[1]);
-					if (ActualGVTNormal.Z < 0)
-						ActualGVTNormal = -ActualGVTNormal;
-					GVTLoc = MLoc - Normal(WZRange)*CollisionHeight;
-					GVT.PrePivot = GVTLoc - Location;
-					S = ActualGVTNormal;
-					S.Z = 0;
-					GVT.PrePivot.Z = FClamp(GVT.PrePivot.Z, -FMax(MaxObstclHeight, 
-						CollisionRadius*FMin(1.0, VSize(S)/FMax(0.707, S.Z))), 0);
-				}
-	
-				ActualFloorNormal = ActualGVTNormal;
-				ret = ActualFloorNormal.Z >= 0.7;
-			}
+			if (bOnGround && bSlopedPhys && GVT != None)
+				SampleCorners();
+			else
+				RideOffset = vect(0,0,0);
 		}
-		else
+		else if (bLastCheckOnGroundResult)
 		{ // No ground - preserve old vehicle rotation in air.
-			if (bLastCheckOnGroundResult)
-			{
-				ActualFloorNormal = NormalWeightSum(0.1, ActualFloorNormal, FloorNormal);
-				ActualGVTNormal = NormalWeightSum(0.1, ActualGVTNormal, GVTNormal);
-			}
+			ActualFloorNormal = NormalWeightSum(0.1, ActualFloorNormal, FloorNormal);
+			ActualGVTNormal = NormalWeightSum(0.1, ActualGVTNormal, GVTNormal);
 		}
 	}
 	else
 	{
-		if (bSlopedPhys && GVT != None)
-		{
-			ePointsOffSet[0] = FrontWide;
-			ePointsOffSet[1] = ePointsOffSet[0];
-			ePointsOffSet[1].Y = -FrontWide.Y;
-			ePointsOffSet[2] = BackWide;
-			ePointsOffSet[3] = ePointsOffSet[2];
-			ePointsOffSet[3].Y = -BackWide.Y;
-			
-			WZRange.Z = -Abs(ZRange);
-			WZRange = WZRange >> Rotation;
-
-			for (b = 0; b < 4; b++)
-			{
-				S = Location + (ePointsOffSet[b] >> Rotation);
-				E = S + WZRange;
-				Ac[b] = Trace(sHL[b], sHN[b], E, S, False);
-				if (Abs(int(sHL[b].X)) > 900100200.0 || // check if got nan as HitLocation
-					Abs(int(sHL[b].Y)) > 900100200.0 || // such can happen if trace start already inside mover
-					Abs(int(sHL[b].Z)) > 900100200.0)
-					Ac[b] = None;
-				if (Ac[b] != None)
-					AcCount++;
-			}
-	
-			if (bArcMovement && AcCount > 2)
-			{
-				ArcInitDir[0] = FloorNormal;
-				ArcInitDir[1] = GVTNormal;
-			}
-	
-			if (AcCount == 4)
-			{
-				MLoc = (sHL[0] + sHL[1] + sHL[2] + sHL[3]) / 4 - 
-					(vect(0.5,0,0)*(FrontWide.X + BackWide.X) >> Rotation);
-				CrossedVect[0] = Normal(sHL[0] - sHL[3]);
-				CrossedVect[1] = Normal(sHL[1] - sHL[2]);
-				ActualGVTNormal = Normal(CrossedVect[0] cross CrossedVect[1]);
-				if (ActualGVTNormal.Z < 0)
-					ActualGVTNormal = -ActualGVTNormal;
-				GVTLoc = MLoc - Normal(WZRange)*CollisionHeight;
-				GVT.PrePivot = GVTLoc - Location;
-				S = ActualGVTNormal;
-				S.Z = 0;
-				GVT.PrePivot.Z = FClamp(GVT.PrePivot.Z, -FMax(MaxObstclHeight, 
-					CollisionRadius*FMin(1.0, VSize(S)/FMax(0.707, S.Z))), 0);
-			}
-			else
-				ActualGVTNormal = HN;
-		}
-	
 		ActualFloorNormal = HN;
-		ret = ActualFloorNormal.Z >= 0.7;
+		if (bSlopedPhys && GVT != None)
+			SampleCorners();
+		ret = ActualFloorNormal.Z >= WalkableZ;
 	}
-	CheckBase(PossibleBase, Ac);
+	CheckBase(PossibleBase);
 	LastCheckOnGroundLocation = Location;
 	LastCheckOnGroundTime = Level.TimeSeconds;
 	bLastCheckOnGroundResult = ret;
@@ -2560,6 +3315,12 @@ simulated function ReadDriverInput( PlayerPawn Other, float DeltaTime )
 			Other.bPressedJump = False;
 			Rising = -1;
 		}
+		else if (bGroundSim)
+		{
+			// held, not pressed, the press stays set in this state and locks the handbrake on
+			Other.bPressedJump = False;
+			Rising = int(Other.aUp > 0);
+		}
 		else if( Other.bPressedJump )
 			Rising = 1;
 		else Rising = 0;
@@ -2680,6 +3441,91 @@ function bool CrewFit(Pawn Other)
 	// Defend, Hold and other unknown possible orders
 	return DBot.Orders == Bot.Orders && Bot.OrderObject == DBot.OrderObject;
 }
+// True when a bot has no reason to be moving right now.
+function bool BotIsBusy(Bot B)
+{
+	if (B.IsInState('RangedAttack') || (B.Enemy != None && B.LineOfSightTo(B.Enemy)))
+		return true;
+	if ((B.Orders == 'Hold' || B.Orders == 'Defend') && B.OrderObject != None &&
+		VSize(B.OrderObject.Location - Location) < 1500)
+		return true;
+	if (B.Orders == 'Follow' && B.OrderObject != None && VSize(B.OrderObject.Location - Location) < 1000)
+		return true;
+	return FlagPassenger() != None && VSize(Velocity) < 50;
+}
+
+// A bot driver that stops getting anywhere first repaths, then backs off, then gets out.
+function CheckBotProgress()
+{
+	local Bot B;
+	local float Moved;
+
+	B = Bot(Driver);
+	if (B == None || StationaryPhys(self) != None || Level.TimeSeconds < BotCheckTime + BotCheckDelay)
+		return;
+	Moved = VSize(Location - BotCheckPos);
+	BotCheckTime = Level.TimeSeconds;
+	if (Moved >= BotMinProgress)
+		BotIdle = 0;
+	else if (BotIdle < 255)
+		BotIdle++;
+	if (Moved >= BotMinProgress || BotIsBusy(B))
+	{
+		BotCheckPos = Location;
+		BotStrikes = 0;
+		return;
+	}
+	BotStrikes++;
+	if (BotStrikes >= BotMaxStrikes)
+	{
+		BotStrikes = 0;
+		BotBanTime = Level.TimeSeconds + BotBanSeconds;
+		DriverLeft(False, "Stuck");
+		if (Driver != None)
+			DriverLeft(True, "Stuck forced");
+	}
+	else if (BotStrikes == 1)
+	{
+		B.MoveTimer = -1;
+		bHasMoveTarget = False;
+	}
+	else
+	{
+		Reverse = -GetMovementDir();
+		ReverseTime = Level.TimeSeconds + 1.5;
+	}
+}
+
+// Passenger holding a flag that the driver does not hold.
+function Pawn FlagPassenger()
+{
+	local int i;
+	if (Driver != None && Driver.PlayerReplicationInfo != None && Driver.PlayerReplicationInfo.HasFlag != None)
+		return None;
+	for (i = 0; i < ArrayCount(Passengers); i++)
+		if (Passengers[i] != None && Passengers[i].PlayerReplicationInfo != None &&
+			Passengers[i].PlayerReplicationInfo.HasFlag != None)
+			return Passengers[i];
+	return None;
+}
+
+// Flag carrier riding with a bot is home and just has to get out
+function bool CarrierIsHome()
+{
+	local CTFReplicationInfo R;
+	local Pawn P;
+	local byte Team;
+
+	P = FlagPassenger();
+	if (P == None || Driver.PlayerReplicationInfo == None)
+		return false;
+	R = CTFReplicationInfo(Level.Game.GameReplicationInfo);
+	Team = Driver.PlayerReplicationInfo.Team;
+	if (R == None || Team >= ArrayCount(R.FlagList) || R.FlagList[Team] == None)
+		return false;
+	return VSize(R.FlagList[Team].HomeBase.Location - Location) < 800;
+}
+
 // Figure out a good move for bots
 function ReadBotInput( float Delta )
 {
@@ -2687,7 +3533,8 @@ function ReadBotInput( float Delta )
 	local float S;
 	local int Dir;
 	local Bot Bot;
-	
+	local bool bFits;
+
 	if ((Driver != None && (Driver.IsInState('GameEnded') || Driver.IsInState('Dying'))) || Level.Game.bGameEnded)
 		return;
 	
@@ -2725,6 +3572,14 @@ function ReadBotInput( float Delta )
 	Bot = Bot(Driver);
 	if (Bot != None && Bot.EnemyDropped != None)
 		Bot.EnemyDropped = None; // Driver not chase for dropped weapons
+
+	if (CarrierIsHome())
+	{
+		Accel = 0;
+		Turning = 0;
+		Rising = 0;
+		return;
+	}
 	
 	S = Min(100, CollisionRadius - 20);
 
@@ -2759,10 +3614,11 @@ function ReadBotInput( float Delta )
 					
 					Driver.SetCollisionSize(CollisionRadius, CollisionHeight);
 					//log(self @ driver @ MoveDest @ Driver.PointReachable(MoveDest));
-					if (!Driver.PointReachable(MoveDest))
+					bFits = Driver.PointReachable(MoveDest);
+					Driver.SetCollisionSize(Driver.default.CollisionRadius, Driver.default.CollisionHeight);
+					// next to a wall nothing that size reaches anything, so only leave if stuck
+					if (!bFits && BotIdle >= 2)
 						DriverLeft(False, "PointReachable");
-					else
-						Driver.SetCollisionSize(Driver.default.CollisionRadius, Driver.default.CollisionHeight);
 					if (Driver == None)
 						return;
 				}
@@ -3055,8 +3911,9 @@ function bool CanEnter(Pawn Other, optional bool bIgnoreDuck, optional bool bIgn
 		Other.IsInState('PlayerWaiting') || 
 		Other.IsInState('GameEnded') || 
 		Level.Game.bGameEnded || 
-		!Other.bCollideActors || 
-		(!bIgnoreDuck && PlayerPawn(Other) != None && (Other.bDuck == 0 || 
+		!Other.bCollideActors ||
+		(Other == LastExitPawn && Level.TimeSeconds < LastExitTime + 0.75) || // just got out, on purpose
+		(!bIgnoreDuck && PlayerPawn(Other) != None && (Other.bDuck == 0 ||
 		(PreventEnter != None && PreventEnter.Instigator == Other))))
 		return false;
 	if (bIgnoreTrace)
@@ -3229,6 +4086,7 @@ State VehicleDriving
 			// sometimes wrong order of events produce pickup flag after pass enter check, so it fixed here
 			if (DropFlag != DF_None)
 				TryDropFlag(Driver);
+			CheckBotProgress();
 		}
 		if (DropFlag == DF_All)
 			for (i = 0; i < ArrayCount(Passengers); i++)
@@ -3267,8 +4125,17 @@ simulated function vector FixCameraPos(vector V, vector S)
 {
 	local vector HL,HN,X,Y,Z;
 	local float P;
-	if( Trace(HL,HN,V,S,False) != None )
-		V = HL+HN*5;
+	const ViewGap = 20.0;
+
+	// trace past the view so it eases in before the wall
+	X = Normal(V - S)*ViewGap;
+	if( Trace(HL,HN,V + X,S,False) != None )
+	{
+		if (VSize(HL - S) > ViewGap + 5)
+			V = HL - X;
+		else
+			V = HL+HN*5;
+	}
 	GetAxes(Rotation, X, Y, Z);
 	P = (V - S) dot Z;
 	if (P < 0)
@@ -3305,7 +4172,11 @@ simulated function CalcCameraPos( out vector Pos, out rotator Rot, float Mult, o
 		else
 			S = Location+((PassengerSeats[SeatNumber].PassengerWOffset+PassengerSeats[SeatNumber].CameraOffset*Mult) >> Rotation);
 		V = S+((PassengerSeats[SeatNumber].CamBehindviewOffset*Mult) >> Rot);
+		if (Cam != None)
+			V.Z += Cam.HeightLag;
 		Pos = FixCameraPos(V, S);
+		if (Cam != None)
+			Pos = Cam.EasePull(V, Pos, Rot);
 		Return;
 	}
 	Gun = DriverGun;
@@ -3345,21 +4216,17 @@ simulated function CalcCameraPos( out vector Pos, out rotator Rot, float Mult, o
 		Return;
 	}
 	bOwnerNoSee = False;
-	if (bSlopedPhys && GVT!=None)
-	{
-		if (!bDriverWOffset || Gun == None)
-			V = GVT.PrePivot + Location+((BehinViewViewOffset*Mult) >> Rot);
-		else
-			V = GVT.PrePivot + Gun.Location+((BehinViewViewOffset*Mult) >> Rot);
-	}
+	if (bDriverWOffset && Gun != None)
+		V = GunPlace(Gun)+((BehinViewViewOffset*Mult) >> Rot);
+	else if (bSlopedPhys && GVT!=None)
+		V = GVT.PrePivot + Location+((BehinViewViewOffset*Mult) >> Rot);
 	else
-	{
-		if (!bDriverWOffset || Gun == None)
-			V = Location+((BehinViewViewOffset*Mult) >> Rot);
-		else
-			V = Gun.Location+((BehinViewViewOffset*Mult) >> Rot);
-	}
+		V = Location+((BehinViewViewOffset*Mult) >> Rot);
+	if (Cam != None)
+		V.Z += Cam.HeightLag;
 	Pos = FixCameraPos(V, Location);
+	if (Cam != None)
+		Pos = Cam.EasePull(V, Pos, Rot);
 }
 function rotator GetFiringRot( float ProjSpeed, bool bInstantHit, vector PStartPos, optional byte SeatN )
 {
@@ -3880,12 +4747,12 @@ simulated function SingularBump(Actor Other)
 		else if (Other.Mass/Mass >= 2.0 || StationaryPhys(Other) != None)
 		{
 			Velocity = Other.Velocity * 1.15;
-			Move((Other.Location - Other.OldLocation)*1.5);
+			Move((Veh.Location - Veh.LastLocation)*1.5);
 		}
 		else if ((Mass/Other.Mass >= 2.0 && (Velocity Dot Dir) > 0) || StationaryPhys(self) != None)
 		{
 			Other.Velocity = Velocity * 1.15;
-			Other.Move((Location - OldLocation)*1.5);
+			Other.Move((Location - LastLocation)*1.5);
 			bHitASmallerVehicle = True;
 		}
 		else if (Mass/Other.Mass >= 2.0)
@@ -4149,6 +5016,12 @@ simulated singular function HitWall( vector HitNormal, Actor Wall )
 		return;
 	}
 */
+
+	if (bGroundSim)
+	{
+		AirContact(HitNormal, Wall);
+		return;
+	}
 
 	if (!bOnGround && HitNormal.Z > 0.65)
 		FellToGround();
@@ -4821,7 +5694,8 @@ simulated function bool HasPassengers()
 	{
 		if( PassengerSeats[i].bIsAvailable && Passengers[i]!=None )
 		{
-			CurrentTeam = Passengers[i].PlayerReplicationInfo.Team;
+			if (Passengers[i].PlayerReplicationInfo != None)
+				CurrentTeam = Passengers[i].PlayerReplicationInfo.Team;
 			bHasPassengers = true;
 			Return True;
 		}
@@ -4914,11 +5788,26 @@ function PassengerEnter( Pawn Other, byte Seat, optional int MyPitch, optional i
 }
 function PassengerLeave( byte Seat, optional bool bForcedLeave )
 {
-	local vector ExitVect;
+	local vector ExitVect, Spot;
 	local Pawn Other;
+	local bool bFree;
 
 	if (Passengers[Seat] != None)
 	{
+		if (!Passengers[Seat].bDeleteMe && !DoChangeSeat)
+		{
+			ExitVect = GetExitOffset(Passengers[Seat]);
+			if (Bot(Passengers[Seat]) == None && (Normal(Velocity) Dot Normal(ExitVect >> Rotation)) > 0.35 &&
+				(Normal(Velocity) Dot Normal((ExitVect + vect(0,-2,0)*ExitVect.Y) >> Rotation)) <= 0.35)
+				ExitVect.Y = -ExitVect.Y;
+			bFree = FindExitSpot(Passengers[Seat], ExitVect, Spot);
+			if (!bFree && !bForcedLeave)
+			{
+				if (PlayerPawn(Passengers[Seat]) != None)
+					Passengers[Seat].ClientMessage("No room to get out here.", 'CriticalEvent');
+				return;
+			}
+		}
 		if (Passengers[Seat].bDeleteMe)
 			Passengers[Seat] = None;
 		else
@@ -4930,26 +5819,16 @@ function PassengerLeave( byte Seat, optional bool bForcedLeave )
 			RestartPawn(Passengers[Seat]);
 			ChangeCollision(Passengers[Seat], false, Seat + 1);
 
-			ExitVect = GetExitOffset(Passengers[Seat]);
-			if (Bot(Passengers[Seat]) == None && (Normal(Velocity) Dot Normal(ExitVect >> Rotation)) > 0.35 && 
-				(Normal(Velocity) Dot Normal((ExitVect + vect(0,-2,0)*ExitVect.Y) >> Rotation)) <= 0.35)
-				ExitVect.Y = -ExitVect.Y;
-			if (!Passengers[Seat].Move(Location + (ExitVect >> Rotation) - Passengers[Seat].Location) && !bForcedLeave)
-			{
-				ExitVect.Y = -ExitVect.Y;
-				if (!Passengers[Seat].Move(Location + (ExitVect >> Rotation) - Passengers[Seat].Location) && !bForcedLeave)
-				{
-					ChangeCollision(Passengers[Seat], true, Seat + 1);
-					if (PlayerPawn(Passengers[Seat]) != None)
-						Passengers[Seat].GoToState('PlayerFlying');
-						
-					HasPassengers();
-					CheckForEmpty();
-					ShowState();
-					Return;
-				}
-			}
+			if (DoChangeSeat)
+				; // stays aboard, ChangeSeat puts the pawn in its new seat
+			else if (!bFree || !Passengers[Seat].SetLocation(Spot))
+				Passengers[Seat].Move(Location + (ExitVect >> Rotation) - Passengers[Seat].Location);
 			ProcessExit(Passengers[Seat], PassengerSeats[Seat].PassengerCam);
+			if (!DoChangeSeat)
+			{
+				LastExitPawn = Passengers[Seat];
+				LastExitTime = Level.TimeSeconds;
+			}
 		}
 	}
 	if (PassengerSeats[Seat].PGun != None)
