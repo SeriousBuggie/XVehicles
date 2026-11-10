@@ -7,9 +7,10 @@ var WeaponAttachment GunAttachM;
 var float DesiredViewMult, CurrentViewMult, OldDesiredViewMult, KeepWait;
 
 // Chase view: height lags a bit, a view pulled in by a wall comes back out slowly
-var float HeightLag, SmoothHeight, ViewDistance, LastDelta;
+var float HeightLag, SmoothHeight, LastDelta;
 var vector SafeView;		// where the view goes if the eased one would end up inside a wall
-var float SafeDistance, ViewRate;
+var vector ViewPull;		// how far walls hold the view in, eased, in the view's frame
+var vector SafePull;		// same, as the walls have it this frame
 
 replication
 {
@@ -62,29 +63,21 @@ function ChangeView()
 	}
 }
 
-// Called from CalcCameraPos with the place the view wants to be.
-simulated function vector EaseDistance(vector Pos, vector Focus)
+// Called from CalcCameraPos with the place the view wants and the place walls leave it.
+// The pull eases in fast and lets go slowly, in the view's frame so turning the view doesn't lag
+simulated function vector EasePull(vector Want, vector Clear, rotator Rot)
 {
-	local vector Dir;
-	local float Dist, Rate, Off, Part;
+	local vector Pull;
+	local float Rate;
 
-	Dir = Pos - Focus;
-	Dist = VSize(Dir);
-	SafeView = Pos;
-	SafeDistance = Dist;
-	if (ViewDistance <= 0)
-		ViewDistance = Dist;
-	if (Dist <= 0)
-		return Pos;
-	// critically damped, quick in and slow out
-	Rate = 5.0;
-	if (Dist < ViewDistance)
+	SafeView = Clear;
+	Pull = (Want - Clear) << Rot;
+	SafePull = Pull;
+	Rate = 6.0;
+	if (VSize(Pull) > VSize(ViewPull))
 		Rate = 30.0;
-	Off = ViewDistance - Dist;
-	Part = (ViewRate + Off*Rate)*LastDelta;
-	ViewRate = (ViewRate - Part*Rate)*Exp(-Rate*LastDelta);
-	ViewDistance = Dist + (Off + Part)*Exp(-Rate*LastDelta);
-	return Focus + Dir*(ViewDistance/Dist);
+	ViewPull += (Pull - ViewPull)*(1.0 - Exp(-Rate*LastDelta));
+	return Want - (ViewPull >> Rot);
 }
 
 simulated function Tick( float Delta )
@@ -171,14 +164,14 @@ simulated function UpdateView(float Delta)
 		Height += VehicleOwner.GVT.PrePivot.Z;
 	if (SmoothHeight == 0 || Abs(Height - SmoothHeight) > 300)
 		SmoothHeight = Height;
-	SmoothHeight += (Height - SmoothHeight)*(1.0 - Exp(-14.0*Delta));
+	SmoothHeight += (Height - SmoothHeight)*(1.0 - Exp(-40.0*Delta));
 	HeightLag = SmoothHeight - Height;
 	VehicleOwner.CalcCameraPos(V,R,CurrentViewMult,SeatNum,self);
 	Move(V-Location);
-	if (Region.iLeaf == -1 && ViewDistance > SafeDistance)
+	if (Region.iLeaf == -1)
 	{
-		ViewDistance = SafeDistance;
-		ViewRate = 0;
+		// eased into a wall: go where the wall leaves the view
+		ViewPull = SafePull;
 		Move(SafeView-Location);
 	}
 

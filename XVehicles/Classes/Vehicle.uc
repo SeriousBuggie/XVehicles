@@ -4176,7 +4176,7 @@ simulated function CalcCameraPos( out vector Pos, out rotator Rot, float Mult, o
 			V.Z += Cam.HeightLag;
 		Pos = FixCameraPos(V, S);
 		if (Cam != None)
-			Pos = Cam.EaseDistance(Pos, S);
+			Pos = Cam.EasePull(V, Pos, Rot);
 		Return;
 	}
 	Gun = DriverGun;
@@ -4226,7 +4226,7 @@ simulated function CalcCameraPos( out vector Pos, out rotator Rot, float Mult, o
 		V.Z += Cam.HeightLag;
 	Pos = FixCameraPos(V, Location);
 	if (Cam != None)
-		Pos = Cam.EaseDistance(Pos, Location);
+		Pos = Cam.EasePull(V, Pos, Rot);
 }
 function rotator GetFiringRot( float ProjSpeed, bool bInstantHit, vector PStartPos, optional byte SeatN )
 {
