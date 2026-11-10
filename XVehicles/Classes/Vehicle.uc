@@ -2713,8 +2713,8 @@ simulated function FollowYaw(int WantYaw, float MaxRate, float Delta)
 {
 	local float Want;
 
-	Want = FClamp(((WantYaw - VehicleYaw) << 16 >> 16)*7.0, -MaxRate, MaxRate);
-	TurnRate += (Want - TurnRate)*(1.0 - Exp(-13.0*Delta));
+	Want = FClamp(((WantYaw - VehicleYaw) << 16 >> 16)*12.0, -MaxRate, MaxRate);
+	TurnRate += (Want - TurnRate)*(1.0 - Exp(-22.0*Delta));
 	AddYaw(TurnRate*Delta);
 }
 

@@ -32,16 +32,14 @@ const HoverDuck = 40.0f;
 const LookAhead = 0.14f;	// seconds
 const Clearance = 12.0f;	// kept under the collision cylinder
 const ClimbShare = 0.1f;	// part of the ground the spring follows, the craft rides low on a climb
-const HillDrag = 1.8f;		// speed lost per second on a climb, times tan(grade)
 const NoseUp = 0.85f;		// part of a slope the nose takes going up
 const NoseMost = 0.27f;		// ~15 degrees
 const NoseDown = 0.25f;		// same going down
 const RollShare = 0.60f;	// same for a side slope
 const RollMost = 0.2f;		// ~11 degrees
 const RestNose = 0.028f;	// ~1.6 degrees nose up when parked, gone at speed
-const SideThrust = 0.74f;	// strafing is weaker than main thrust
-const WallDrag = 0.85f;		// speed lost along a wall for each uu/s into it
-const BankDrag = 0.5f;		// same along a bank
+const WallDrag = 0.05f;		// speed lost along a wall for each uu/s into it
+const BankDrag = 0.05f;		// same along a bank
 const WallZ = 0.35f;		// steeper than this is a wall, not a bank
 
 replication
@@ -317,7 +315,7 @@ simulated function UpdateDriverInput( float Delta )
 	if (bDriving || bHoverWhenNotDriving)
 	{
 		DesiredHoverHeight = RideHeight;
-		GoDown = 0.83;
+		GoDown = 0.75;
 		Spring = 11;
 		Damp = 0.8;
 		Most = 1500;
@@ -361,8 +359,6 @@ simulated function UpdateDriverInput( float Delta )
 			Least = -Abs(Region.Zone.ZoneGravity.Z)*VehicleGravityScale*GoDown;
 			Velocity.Z += FClamp(Spring*Spring*(DesiredHoverHeight - ActualHoverHeight) +
 				2*Damp*Spring*(Climb - Velocity.Z), Least, Most)*Delta;
-			if (Slope > 0 && Run > 1)
-				Velocity -= Flat*FMin(0.5, HillDrag*Slope/Run*Delta);
 		}
 	}
 	else if (bOnGround)
@@ -422,12 +418,10 @@ simulated function UpdateDriverInput( float Delta )
 	else if (Turning == 0)
 	{
 		GetAxes(rot(0, 1, 0)*VehicleYaw, X, Y, Z);
-		Velocity -= 5.5*FMin(0.18, Delta)*(Y dot Velocity)*Y;
+		Velocity -= 4*FMin(0.25, Delta)*(Y dot Velocity)*Y;
 	}
 
 	Ac = GetAccelDir(Turning, Rising, Accel);
-	GetAxes(rot(0, 1, 0)*VehicleYaw, X, Y, Z);
-	Ac -= Y*(Y dot Ac)*(1.0 - SideThrust);
 	if (Ac dot Velocity > 0)
 		Ac *= WAccelRate;
 	else
@@ -474,7 +468,7 @@ simulated singular function HitWall( vector HitNormal, Actor Wall )
 		GetAxes(rot(0, 1, 0)*VehicleYaw, X, Y, Z);
 		Swing = X.X*HitNormal.Y - X.Y*HitNormal.X;
 		if ((X dot HitNormal) < 0)
-			TurnRate += FClamp(Swing*Into/30.0, -60, 60)*3900.0;
+			TurnRate += FClamp(Swing*Into/30.0, -60, 60)*1000.0;
 	}
 	if (Wall != Level && Wall.Brush == None)
 		return;

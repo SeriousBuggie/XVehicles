@@ -133,8 +133,8 @@ simulated function UpdateDriverInput( float Delta )
 		{
 			Tilt = Velocity*MaxYawRates[0]/MaxAirSpeed/10430.0;
 			Tilt.Z = 0;
-			if (VSize(Tilt) > 0.6)
-				Tilt = Normal(Tilt)*0.6;
+			// an angle so far, the lean is a slope
+			Tilt = Normal(Tilt)*Tan(FMin(VSize(Tilt), 0.65));
 		}
 		UpdateLean(Tilt, Delta);
 	}
@@ -172,7 +172,12 @@ simulated function UpdateDriverInput( float Delta )
 		Return;
 	if (Driver != None && !Driver.IsInState('GameEnded') && (Level.Game == None || !Level.Game.bGameEnded))
 	{
-		FollowYaw(Driver.ViewRotation.Yaw, YawTurnSpeed, Delta);
+		// turn builds up over two seconds, as it always did
+		if (Abs((Driver.ViewRotation.Yaw - VehicleYaw) << 16 >> 16) < 16)
+			CurrentYawSpeed = 5;
+		else
+			CurrentYawSpeed = FMin(YawTurnSpeed, CurrentYawSpeed + Delta*0.5*YawTurnSpeed);
+		FollowYaw(Driver.ViewRotation.Yaw, CurrentYawSpeed, Delta);
 	}
 	Ac = WAccelRate*Delta*GetAccelDir(Turning, Rising, Accel);
 /*	
