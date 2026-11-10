@@ -326,6 +326,8 @@ var vector PivotShift;		// part of the next move that comes from turning about t
 var vector LastLocation;	// where the last frame started, OldLocation needs native physics
 var float NextScrapeTime;
 var float SimDelta;			// length of the step in hand
+var vector DriveVel;		// speed GroundDrive left it with, anything on top of that came from outside
+var bool bDriveVel;
 
 const SimStep = 0.0166667;
 const WalkableZ = 0.7;
@@ -2359,6 +2361,7 @@ simulated function AirMove(float Delta)
 	Ex.X = CollisionRadius;
 	Ex.Y = CollisionRadius;
 	Ex.Z = CollisionHeight;
+	bDriveVel = false;
 	for (i = 0; i < 3 && Delta > 0.0001; i++)
 	{
 		Want = Velocity*Delta;
@@ -2553,28 +2556,42 @@ simulated function AirContact(vector HitNormal, Actor Wall)
 	}
 }
 
-// Ground speed, all per second so the path doesn't depend on the step
-simulated function GroundDrive(float Delta, float TopSpeed, float Friction, float SideGrip, bool bHandbrake)
+// Plane the speed lies in: the four corners where it has them, so a crest turns it over the length of the car
+simulated function vector DrivePlane()
 {
-	local vector X, Y, Z, Slope;
-	local rotator R;
-	local float F, S, Cur, Top, Grip, Brake;
+	if (bSlopedPhys && GVT != None && ActualGVTNormal.Z >= WalkableZ)
+		return ActualGVTNormal;
+	return ActualFloorNormal;
+}
 
-	// plane it really rests on, speed out of that plane gets lost every step
-	Z = ActualFloorNormal;
+// Ground speed as the original drove it: one speed, aimed where the wheels point. Per second, so the step doesn't matter
+simulated function GroundDrive(float Delta, float TopSpeed, float Friction, int SteerYaw, bool bHandbrake)
+{
+	local vector X, Y, Z, Slope, Flat;
+	local rotator R;
+	local float F, S, Cur, Brake, Speed, Rate;
+
 	// a blast can throw it, anything less stays on the ground
-	if ((Velocity dot Z) > LaunchSpeed()*1.5)
+	if (bDriveVel && ((Velocity - DriveVel) dot ActualFloorNormal) > LaunchSpeed()*1.5)
 	{
 		bOnGround = false;
+		bDriveVel = false;
 		return;
 	}
-	R.Yaw = VehicleYaw;
+	Z = DrivePlane();
+	R.Yaw = VehicleYaw + SteerYaw;
 	X = vector(R);
 	X = Normal(X - Z*(X dot Z));
 	Y = Normal(Z cross X);
-	F = Velocity dot X;
-	S = Velocity dot Y;
-	Grip = FClamp(Friction/8.0, 0.03, 1.25);
+	// the plane turned under it: the speed turns too, none is lost. A push off the ground isn't speed
+	Flat = Velocity - Z*(Velocity dot Z);
+	Speed = VSize(Flat);
+	if (bDriveVel)
+		Speed = FMin(VSize(Velocity), FMax(Speed, VSize(DriveVel)));
+	if ((Flat dot Flat) > 0.01)
+		Flat = Normal(Flat)*Speed;
+	F = Flat dot X;
+	S = Flat dot Y;
 
 	if (ActualGVTNormal.Z >= 0.5)
 		Slope = CalcGravityStrength(Region.Zone.ZoneGravity*(VehicleGravityScale/GroundPower), ActualGVTNormal);
@@ -2583,6 +2600,22 @@ simulated function GroundDrive(float Delta, float TopSpeed, float Friction, floa
 	Slope /= Friction/8.f + 1.f;
 	F += (Slope dot X)*Delta;
 	S += (Slope dot Y)*Delta;
+
+	// the original turned its speed to the wheels a frame at a time, this is that at 100 frames a second
+	Rate = 100.0*Loge(1.0 + TopSpeed*Friction/10.0/FMax(50.0, Abs(F) + Abs(S)));
+	if (bHandbrake)
+		Rate *= 0.05;
+	Cur = S*Exp(-Rate*Delta);
+	// what the slide gives up goes back into the speed, a turn costs none
+	if (Abs(F) > Abs(S))
+	{
+		Brake = Sqrt(F*F + S*S - Cur*Cur);
+		if (F < 0)
+			F = -Brake;
+		else
+			F = Brake;
+	}
+	S = Cur;
 
 	if (Accel != 0 && F*Accel < -16)
 	{
@@ -2599,12 +2632,13 @@ simulated function GroundDrive(float Delta, float TopSpeed, float Friction, floa
 	else if (Accel != 0)
 	{
 		OldAccelD = Accel;
-		Top = TopSpeed;
 		Cur = F*Accel;
-		if (Cur < Top)
-			Cur = FMin(Top, Cur + WAccelRate*FMin(1.0, Grip*1.5)*(1.3 - 0.6*FMax(0, Cur)/Top)*Delta);
-		else
-			Cur += WAccelRate*Delta/100; // a hill gave it this, stays until a climb or corner takes it
+		// a slide is part of the speed too
+		Brake = Sqrt(FMax(0, TopSpeed*TopSpeed - S*S));
+		if (Cur < Brake)
+			Cur = FMin(Brake, Cur + WAccelRate*Delta);
+		else if (Abs(S) < 50)
+			Cur += WAccelRate*Delta/100; // a hill gave it this, stays until a climb takes it
 		F = Cur*Accel;
 		if (Accel < 0)
 		{
@@ -2629,16 +2663,9 @@ simulated function GroundDrive(float Delta, float TopSpeed, float Friction, floa
 			SetSignalLights(SL_None);
 	}
 
-	// Grip grows with slip up to what the tires can give, so corners have some weight
-	Brake = FMin(SideGrip*Grip*Delta, Abs(S)*(1.0 - Exp(-11.0*Delta)));
-	if (bHandbrake)
-		Brake *= 0.2;
-	if (S > 0)
-		S -= Brake;
-	else
-		S += Brake;
-
 	Velocity = X*F + Y*S;
+	DriveVel = Velocity;
+	bDriveVel = true;
 }
 
 // How hard the vehicle is pushed, the body leans against this

@@ -139,12 +139,12 @@ simulated function FellToGround()
 simulated function UpdateDriverInput( float Delta )
 {
 	local vector Ac, X, Y, Z;
-	local float DesTurn, DesTurnVis, Friction, Forward, YawRate, Rate;
+	local float DesTurn, DesTurnVis, Friction, YawRate;
 	local rotator R, RA, RB;
 	local rotator OldWheeledRot;
 	local bool bDirectVis, bHandbrake;
-	local int YawStep;
-	
+	local int YawStep, Steer;
+
 	if (Driver == None)
 		bWasStuckOnW = false;
 
@@ -196,13 +196,10 @@ simulated function UpdateDriverInput( float Delta )
 	}
 	if (WheelYawVis != DesTurnVis)
 	{
-		Rate = WheelTurnSpeed*Delta;
-		if (bDirectVis && DesTurnVis*WheelYawVis <= 0)
-			Rate *= 2.5; // wheels come back to the middle faster than they go out
 		if (WheelYawVis < DesTurnVis)
-			WheelYawVis += FMin(Rate, DesTurnVis - WheelYawVis);
+			WheelYawVis += FMin(WheelTurnSpeed*Delta, DesTurnVis - WheelYawVis);
 		else
-			WheelYawVis -= FMin(Rate, WheelYawVis - DesTurnVis);
+			WheelYawVis -= FMin(WheelTurnSpeed*Delta, WheelYawVis - DesTurnVis);
 		if (Abs(WheelYawVis) > WheelMaxYaw)
 			WheelYawVis = WheelMaxYaw*WheelYawVis/Abs(WheelYawVis);
 	}
@@ -237,23 +234,23 @@ simulated function UpdateDriverInput( float Delta )
 
 	Friction = FMax(Region.Zone.ZoneGroundFriction, WheelsTraction);
 	bHandbrake = bDirectVis && Rising > 0;
-	GroundDrive(Delta, MaxGroundSpeed, Friction, 2600, bHandbrake);
 
-	// Steering sets the turn radius, full lock at walking pace, under half at 1500uu/s
-	R = rot(0,0,0);
-	R.Yaw = VehicleYaw;
-	Forward = Velocity dot vector(R);
-	YawRate = Forward*WheelYaw/400;
-	if (bDirectVis)
-		YawRate *= 1.0 - 0.56*FMin(Abs(Forward)/1500.0, 1.0);
+	// turns with its speed and the wheels, the same at any speed
+	YawRate = VSize(Velocity)*WheelYaw/400*GetMovementDir();
 	if (Friction <= 4.0)
 		YawRate *= FMin(Friction, 1.0);
-	if (bHandbrake && Abs(Forward) > 200)
+	if (bHandbrake && VSize(Velocity) > 200)
 		YawRate *= 1.35;
-	TurnRate += (YawRate - TurnRate)*(1.0 - Exp(-18.0*Delta));
-	YawStep = AddYaw(TurnRate*Delta);
+	YawStep = AddYaw(YawRate*Delta);
 	if (YawStep != 0 && !bCameraOnBehindView && Driver != None)
 		Driver.ViewRotation.Yaw += YawStep;
+
+	// speed goes where the front wheels point, half the steering off the nose. On ice the other way
+	Steer = WheelYaw/2*GetMovementDir();
+	// X dot X == VSize(X)*VSize(X)
+	if (Friction <= 4.0 && (Velocity dot Velocity) >= 10000 /* 100*100 */)
+		Steer = -Steer;
+	GroundDrive(Delta, MaxGroundSpeed, Friction, Steer, bHandbrake);
 }
 
 const WheelTravel = 16.0;

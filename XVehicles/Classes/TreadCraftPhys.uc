@@ -388,7 +388,7 @@ simulated function UpdateDriverInput( float Delta )
 	if (Level.NetMode != NM_DedicatedServer)
 		UpdateTreads(Delta);
 
-	GroundDrive(Delta, MaxGroundSpeed, FMax(Region.Zone.ZoneGroundFriction, TreadsTraction), 3600, false);
+	GroundDrive(Delta, MaxGroundSpeed, FMax(Region.Zone.ZoneGroundFriction, TreadsTraction), 0, false);
 }
 function int ShouldAccel( vector AcTarget )
 {
