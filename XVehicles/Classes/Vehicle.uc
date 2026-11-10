@@ -4821,7 +4821,8 @@ simulated function bool HasPassengers()
 	{
 		if( PassengerSeats[i].bIsAvailable && Passengers[i]!=None )
 		{
-			CurrentTeam = Passengers[i].PlayerReplicationInfo.Team;
+			if (Passengers[i].PlayerReplicationInfo != None)
+				CurrentTeam = Passengers[i].PlayerReplicationInfo.Team;
 			bHasPassengers = true;
 			Return True;
 		}
