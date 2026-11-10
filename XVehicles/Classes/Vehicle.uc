@@ -2680,6 +2680,86 @@ function bool CrewFit(Pawn Other)
 	// Defend, Hold and other unknown possible orders
 	return DBot.Orders == Bot.Orders && Bot.OrderObject == DBot.OrderObject;
 }
+
+// Human flag carrier riding as a passenger of a bot driver.
+// A bot carrier takes the driver seat itself (see the passenger loop).
+function Pawn FlagPassenger()
+{
+	local int i;
+	if (Bot(Driver) == None || Driver.PlayerReplicationInfo == None || Driver.PlayerReplicationInfo.HasFlag != None)
+		return None;
+	for (i = 0; i < ArrayCount(Passengers); i++)
+		if (PlayerPawn(Passengers[i]) != None && Passengers[i].PlayerReplicationInfo != None &&
+			Passengers[i].PlayerReplicationInfo.HasFlag != None)
+			return Passengers[i];
+	return None;
+}
+
+// Nearest flag base where Carrier scores: the enemy base in OneFlagCTF,
+// the own team base otherwise (CTF, C4F, R4F).
+function FlagBase ScoreBaseFor(Pawn Carrier)
+{
+	local FlagBase FB, Best;
+	local float Dist, BestDist;
+	local bool bEnemyBase;
+
+	bEnemyBase = Level.Game.IsA('OneFlagCTFGame');
+	foreach AllActors(class'FlagBase', FB)
+	{
+		if (FB.IsA('NeutralFlagBase') || (FB.Team != Carrier.PlayerReplicationInfo.Team) != bEnemyBase)
+			continue;
+		Dist = VSize(FB.Location - Location);
+		if (Best == None || Dist < BestDist)
+		{
+			Best = FB;
+			BestDist = Dist;
+		}
+	}
+	return Best;
+}
+
+// Last stretch of a human flag carrier ride: park so the stock exit point
+// (ExitOffset, right side) lands on the flag, the carrier leaves when they want.
+// The spot follows the current Rotation, as PassengerLeave does.
+// The route up to here is XVehiclesCTF.DriveCarrierToFlag.
+function bool ParkCarrierAtFlag()
+{
+	local Pawn Carrier;
+	local FlagBase Base;
+	local vector V;
+	local float S, Speed;
+
+	Carrier = FlagPassenger();
+	if (Carrier == None)
+		return false;
+	Base = ScoreBaseFor(Carrier);
+	if (Base == None || VSize(Base.Location - Location) > 800 || !FastTrace(Base.Location))
+		return false;
+
+	MoveDest = Base.Location - (ExitOffset >> Rotation);
+	bHasMoveTarget = False;
+	Turning = ShouldTurnFor(MoveDest);
+	Rising = ShouldRiseFor(MoveDest);
+	Accel = ShouldAccelFor(MoveDest);
+
+	V = Location - MoveDest;
+	V.Z = 0;
+	S = Min(100, CollisionRadius - 20);
+	// Flyers hold the spot by themselves (BotDrive brakes at MoveDest).
+	if (!bCanFly && (V dot V) < S*S)
+	{
+		Turning = 0;
+		Speed = Velocity dot vector(Rotation);
+		if (Speed > 50)
+			Accel = -1;
+		else if (Speed < -50)
+			Accel = 1;
+		else
+			Accel = 0;
+	}
+	return true;
+}
+
 // Figure out a good move for bots
 function ReadBotInput( float Delta )
 {
@@ -2694,6 +2774,9 @@ function ReadBotInput( float Delta )
 	if (HealthTooLowFor(Driver))
 		DriverLeft(False, "HealthTooLowFor");
 	if (Driver == None)
+		return;
+	// Before NeedStop: in OneFlagCTF the target is the enemy base, where a bot driver would bail out.
+	if (ParkCarrierAtFlag())
 		return;
 	if (NeedStop(Driver))
 	{
