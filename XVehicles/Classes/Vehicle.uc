@@ -165,6 +165,11 @@ var OverlayMatDispRep ReplicOverlayMat;
 
 var float ClientLastTime;
 var float ServerLastTime;
+// Server's idea of the driver's clock: the driver's time minus ours, from the move that got here quickest
+var float ClientClock;
+var Pawn ClockDriver;
+var bool bNewMove;			// a move came in since the last tick
+var int HeldKeys;			// keys before that move, packed and one added, 0 if they didn't change
 
 var SavedMoveXV SavedMoves;
 var SavedMoveXV FreeMoves;
@@ -939,16 +944,44 @@ simulated function ServerPerformMove(int InRise, int InTurn, int InAccel)
 
 function ServerPerformPackedMove(float InClientTime, XVEnums.E28 Bits)
 {
-	local int i;
-	i = int(Bits);
+	// the tick about to run still owes the old keys the time before this move was made
+	if (HeldKeys == 0 && PackKeys() != int(Bits))
+		HeldKeys = PackKeys() + 1;
+	UnpackKeys(int(Bits));
+
+	ClientLastTime = InClientTime;
+	ServerLastTime = Level.TimeSeconds;
+	bNewMove = true;
+}
+
+function int PackKeys()
+{
+	return (Rising + 1)*9 + (Turning + 1)*3 + Accel + 1;
+}
+
+function UnpackKeys(int i)
+{
 	Accel = (i % 3) - 1;
 	i /= 3;
 	Turning = (i % 3) - 1;
 	i /= 3;
 	Rising = (i % 3) - 1;
+}
 
-	ClientLastTime = InClientTime;
-	ServerLastTime = Level.TimeSeconds;
+// How long the newest keys have been down by now, on the driver's clock
+function float MoveAge()
+{
+	local float Sample;
+
+	// a move is at least as old as it looks, so the youngest looking one sets the clock
+	Sample = ClientLastTime - Level.TimeSeconds;
+	if (ClockDriver != Driver || Sample > ClientClock || ClientClock - Sample > 0.5)
+	{
+		ClientClock = Sample;
+		ClockDriver = Driver;
+	}
+	// keys read in a frame count from the start of that frame
+	return Level.TimeSeconds + ClientClock - ClientLastTime + 0.008;
 }
 
 simulated function string GetWeaponName(byte Seat)
@@ -1891,7 +1924,9 @@ function ServerPackState(float Delta)
 		ServerState.YawHigh = byte(VehicleYaw >> 8);
 	}
 	ServerState.ClientTime = ClientLastTime;
-	if (PlayerPawn(Driver) != None && Level.TimeSeconds != ServerLastTime)
+	if (PlayerPawn(Driver) != None && ClientLastTime >= 0 && ClockDriver == Driver)
+		ServerState.ClientTime = Level.TimeSeconds + ClientClock;
+	else if (PlayerPawn(Driver) != None && Level.TimeSeconds != ServerLastTime)
 		ServerState.ClientTime += Level.TimeSeconds - ServerLastTime;
 	else if (ClientLastTime < 0 && PlayerPawn(Driver) == None && Velocity != vect(0,0,0))
 		ServerState.ClientTime = 1; // not the initial state: clients predict from arrival
@@ -1966,8 +2001,9 @@ simulated function AfterTeleport(float YawChange)
 // Main tick
 simulated function Tick( float Delta )
 {
-	local bool bIsNetOwner, bGameEnded, bHere;
-	local float Left, Step;
+	local bool bIsNetOwner, bGameEnded, bHere, bSplit;
+	local float Left, Step, OldFor;
+	local int NewKeys;
 	local SavedMoveXV NewMove;
 
 	if (Pawn(Base) != None)
@@ -2167,14 +2203,47 @@ simulated function Tick( float Delta )
 	if (Level.NetMode == NM_Client && bScriptMove)
 		bCollideWorld = bHere; // remote vehicles just follow the server
 	Left = Delta;
+	if (Level.NetMode != NM_Client && Level.NetMode != NM_Standalone)
+	{
+		// clocks drift, let the estimate come down slowly
+		ClientClock -= 0.005*Delta;
+		if (bNewMove)
+		{
+			OldFor = Delta - MoveAge();
+			if (HeldKeys != 0 && OldFor > 0.002 && bDriving && !bGameEnded && bScriptMove)
+			{
+				// the old keys held until part way through this tick
+				bSplit = true;
+				NewKeys = PackKeys();
+				UnpackKeys(HeldKeys - 1);
+			}
+		}
+		bNewMove = false;
+		HeldKeys = 0;
+	}
 	do
 	{
 		Step = Left;
 		if (bScriptMove && bHere && Step > SimStep*1.25)
 			Step = FMax(SimStep, Delta/8); // a long hitch must not cost more time to catch up on
+		if (bSplit)
+		{
+			if (OldFor > 0.002)
+			{
+				Step = FMin(Step, OldFor);
+				OldFor -= Step;
+			}
+			else
+			{
+				UnpackKeys(NewKeys);
+				bSplit = false;
+			}
+		}
 		Left -= Step;
 		SimulateStep(Step, bHere);
 	} until (Left <= 0 || bDeleteMe);
+	if (bSplit)
+		UnpackKeys(NewKeys);
 	if (bDeleteMe)
 		return;
 
