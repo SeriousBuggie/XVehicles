@@ -2392,7 +2392,7 @@ simulated function AirMove(float Delta)
 	}
 }
 
-// Off a crest it only leaves the ground if the springs can't take the hop
+// Upward speed from outside the drive that throws it off the ground
 simulated function float LaunchSpeed()
 {
 	return Sqrt(2*10*Abs(Region.Zone.ZoneGravity.Z)*VehicleGravityScale);
@@ -2401,8 +2401,8 @@ simulated function float LaunchSpeed()
 // Go up and along, then set down on the floor, so only a wall counts as a hit
 simulated function GroundMove(float Delta)
 {
-	local vector Flat, Start, Ex, HL, HN, Up;
-	local float Z0, Len, Done, Part, Reach, Free, Speed;
+	local vector Flat, Start, Ex, HL, HN, Up, Lost;
+	local float Z0, Len, Done, Part, Reach, Into;
 	local Actor A;
 	local int i;
 
@@ -2439,10 +2439,21 @@ simulated function GroundMove(float Delta)
 		Part *= 1 - Done;
 		A = Trace(HL, HN, Location + Normal(Flat)*10, Location, true, Ex);
 		if (A == None)
+		{
+			// running along a wall it touches: the sweep finds nothing, so slide and work the wall out from what was lost
+			Start = Location;
+			MoveSmooth(Flat);
+			if (bDeleteMe)
+				return;
+			Lost = Flat - (Location - Start);
+			Lost.Z = 0;
+			if ((Lost dot Lost) > 0.01*(Flat dot Flat))
+				GroundHit(-Normal(Lost), Level);
 			break;
+		}
 		if (Pawn(A) != None || Vehicle(A) != None)
 			break; // Bump has dealt with it
-		if (HN.Z < WalkableZ && StepOver(Flat))
+		if (HN.Z < WalkableZ && StepOver(Flat, Z0))
 			break;
 		GroundHit(HN, A);
 		if (bDeleteMe)
@@ -2451,37 +2462,45 @@ simulated function GroundMove(float Delta)
 		Flat.Z = 0;
 	}
 
-	Reach = Location.Z - Z0 + 6 + Len*0.75;
+	// any floor it could have rolled down to keeps it, only a drop lets go
+	Reach = Location.Z - Z0 + 6 + FMax(4, Len*1.5);
 	A = Trace(HL, HN, Location - Up*Reach, Location, false, Ex);
 	if (A != None && HN.Z >= WalkableZ)
 	{
-		Free = Velocity dot HN;
-		if (Free <= LaunchSpeed())
+		Move(Up*(HL.Z - Location.Z));
+		if (HN != ActualFloorNormal)
 		{
-			Move(Up*(HL.Z - Location.Z));
-			Speed = VSize(Velocity);
-			Velocity -= HN*Free;
-			if (Speed > 0)
-				Velocity = Normal(Velocity)*Speed;
-			ActualFloorNormal = HN;
-			return;
+			// running into a rise costs the speed that went into it, as it always did. A crest costs none
+			Lost = Velocity - ActualFloorNormal*(Velocity dot ActualFloorNormal);
+			Into = Normal(Lost) dot HN;
+			if (Into < -0.01)
+				Velocity *= Sqrt(FMax(0, 1.0 - 0.4*Into*Into));
 		}
+		ActualFloorNormal = HN;
+		return;
 	}
 	bOnGround = false;
 	Move(Up*(Z0 + Velocity.Z*Delta - Location.Z));
 }
 
 // Up and along, GroundMove sets it down after and the ride hides the height change
-simulated function bool StepOver(vector Flat)
+simulated function bool StepOver(vector Flat, float Floor)
 {
 	local vector Start;
+	local float Rise;
 
-	if (MaxObstclHeight <= 0)
+	// from the floor the move began on, so what it can climb doesn't depend on the frame
+	Rise = Floor + MaxObstclHeight*1.05 + 1 - Location.Z;
+	if (MaxObstclHeight <= 0 || Rise <= 0)
 		return false;
 	Start = Location;
-	Move(vect(0,0,1)*MaxObstclHeight);
+	Move(vect(0,0,1)*Rise);
 	Move(Flat);
-	return ((Location - Start) dot Flat) > 0.5*(Flat dot Flat);
+	if (((Location - Start) dot Flat) > 0.5*(Flat dot Flat))
+		return true;
+	// too high: back down now, or it hangs there for a frame
+	SetLocation(Start);
+	return false;
 }
 
 // Wall hit on the ground: speed along the wall stays, the rest goes
@@ -2502,7 +2521,11 @@ simulated function GroundHit(vector HitNormal, Actor Wall)
 		return;
 	Old = Velocity;
 	Speed = VSize(Old);
-	Velocity -= N*Hit*1.05;
+	// a real hit comes off the wall a little, leaning on it doesn't, or it hammers
+	if (Hit < -150)
+		Velocity -= N*Hit*1.05;
+	else
+		Velocity -= N*Hit;
 	if (Wall != Level && Wall.Brush == None)
 		return;
 	Along = Normal(Old) dot Normal(Velocity);
@@ -2512,6 +2535,8 @@ simulated function GroundHit(vector HitNormal, Actor Wall)
 	Way -= N*(Way dot N);
 	if ((Way dot Way) > 0.01)
 	{
+		// a touch past the wall's line, or it leans on the wall for good
+		Way = Normal(Way) + N*0.03;
 		Turn = (rotator(Way).Yaw - VehicleYaw) << 16 >> 16;
 		if (Abs(Turn) < 14000)
 		{
@@ -2920,9 +2945,10 @@ simulated function CheckBase(Actor PossibleBase, optional Actor Ac[4])
 // Ground under the four corners, places and tilts the body
 simulated function SampleCorners()
 {
-	local vector S, E, sHL[4], sHN[4], Off[4], Range, MLoc, CrossedVect[2], GVTLoc;
+	local vector S, E, sHL[4], sHN[4], Off[4], Range, MLoc, CrossedVect[2], GVTLoc, Foot;
 	local actor Ac;
-	local int b;
+	local int b, Stand;
+	local byte bHang[4];
 	local float Low, High;
 
 	Off[0] = FrontWide;
@@ -2944,11 +2970,30 @@ simulated function SampleCorners()
 			Abs(int(sHL[b].Y)) > 900100200.0 || // such can happen if trace start already inside mover
 			Abs(int(sHL[b].Z)) > 900100200.0)
 			Ac = None;
-		if (Ac == None)
+		if (Ac == None || sHL[b].Z < Low)
+		{
+			// nothing it could stand on, the wheel hangs
 			sHL[b] = E;
-		sHL[b].Z = FClamp(sHL[b].Z, Low, High);
+			bHang[b] = 1;
+			CornerZ[b] = Low;
+			continue;
+		}
+		sHL[b].Z = FMin(sHL[b].Z, High);
 		CornerZ[b] = sHL[b].Z;
+		Foot += sHL[b];
+		Stand++;
 	}
+	// a hanging corner goes with the floor through the ones that stand: level over an edge, full tilt on a steep slope
+	if (Stand > 0)
+		Foot /= Stand;
+	else
+	{
+		Foot = Location;
+		Foot.Z -= CollisionHeight;
+	}
+	for (b = 0; b < 4; b++)
+		if (bHang[b] != 0)
+			sHL[b].Z = Foot.Z - ((sHL[b].X - Foot.X)*ActualFloorNormal.X + (sHL[b].Y - Foot.Y)*ActualFloorNormal.Y)/FMax(0.5, ActualFloorNormal.Z);
 	MLoc = (sHL[0] + sHL[1] + sHL[2] + sHL[3]) / 4 -
 		(vect(0.5,0,0)*(FrontWide.X + BackWide.X) >> Rotation);
 	CrossedVect[0] = Normal(sHL[0] - sHL[3]);
@@ -3002,9 +3047,9 @@ simulated function bool CheckOnGround()
 	}
 	else
 	{
+		ActualFloorNormal = HN;
 		if (bSlopedPhys && GVT != None)
 			SampleCorners();
-		ActualFloorNormal = HN;
 		ret = ActualFloorNormal.Z >= WalkableZ;
 	}
 	CheckBase(PossibleBase);
