@@ -289,7 +289,12 @@ simulated function UpdateDriverInput( float Delta )
 			else
 			{
 				if (DeAccRat >= DeAcc)
+				{
+					// Stopped: the brake is done, the pressed way is the way to go now. Without this on a slope
+					// gravity adds over 16 per long frame (under ~11 fps) and it brakes against it for ever
 					Velocity = vect(0,0,0);
+					OldAccelD = Accel;
+				}
 				else
 				{
 					Ac = GetAccelDir(Turning,Rising,OldAccelD);
