@@ -375,6 +375,11 @@ var Pawn StubPawn; // used only default value
 
 const SmallDrawScale = 0.0001;
 
+// Chase view and tunnels ahead, see TunnelView
+const TunnelLook = 1600.0;	// how far ahead the view looks for a tunnel mouth
+const TunnelFull = 500.0;	// the view is all the way down this close to it
+const TunnelGap = 200.0;	// the vehicle top's line must get this much further than the view's
+
 replication
 {
 	// Variables the server should send to the client.
@@ -3380,6 +3385,49 @@ simulated event SetInitialState()
 		GotoState( InitialState );
 	else GotoState( 'Auto' );
 }
+// Distance along Dir from Start to the first world hit, up to TunnelLook
+simulated function float LookDist(vector Start, vector Dir)
+{
+	local vector HL, HN;
+
+	if (Trace(HL, HN, Start + Dir*TunnelLook, Start, false) == None)
+		return TunnelLook;
+	return (HL - Start) dot Dir;
+}
+
+// A tunnel or a low overhang ahead: the view's own line hits the wall above it while a line
+// from the top of the vehicle goes in. Lower the view toward the vehicle top before it gets
+// there, so it looks into the tunnel and not at the wall. Part of the wanted view, so the
+// server aims from the same spot.
+simulated function vector TunnelView(vector V, vector Top, rotator Rot)
+{
+	local vector X, Y, Z;
+	local float H, Ahead, Drop, Fade;
+
+	GetAxes(Rot, X, Y, Z);
+	H = (V - Top) dot Z;
+	if (H <= 0.f)
+		return V;
+	Ahead = LookDist(V, X);
+	if (Ahead >= TunnelLook || LookDist(Top, X) < Ahead + TunnelGap)
+		return V;
+	// how far down it has to go to see in: half, then a quarter either way
+	if (LookDist(V - Z*(H*0.5), X) >= Ahead + TunnelGap)
+	{
+		if (LookDist(V - Z*(H*0.25), X) >= Ahead + TunnelGap)
+			Drop = H*0.25;
+		else
+			Drop = H*0.5;
+	}
+	else if (LookDist(V - Z*(H*0.75), X) >= Ahead + TunnelGap)
+		Drop = H*0.75;
+	else
+		Drop = H;
+	// starts when found, all the way down at TunnelFull
+	Fade = FMin(1.0, (TunnelLook - Ahead)/(TunnelLook - TunnelFull));
+	return V - Z*(Drop*Fade);
+}
+
 simulated function vector FixCameraPos(vector V, vector S)
 {
 	local vector HL,HN,X,Y,Z;
@@ -3394,7 +3442,7 @@ simulated function vector FixCameraPos(vector V, vector S)
 }
 simulated function CalcCameraPos( out vector Pos, out rotator Rot, float Mult, optional byte SeatNumber, optional DriverCameraActor Cam )
 {
-	local vector V,S;
+	local vector V,S,Top;
 	local WeaponAttachment Gun;
 	local Pawn WeaponController;
 
@@ -3422,6 +3470,9 @@ simulated function CalcCameraPos( out vector Pos, out rotator Rot, float Mult, o
 		else
 			S = Location+((PassengerSeats[SeatNumber].PassengerWOffset+PassengerSeats[SeatNumber].CameraOffset*Mult) >> Rotation);
 		V = S+((PassengerSeats[SeatNumber].CamBehindviewOffset*Mult) >> Rot);
+		Top = Location;
+		Top.Z += CollisionHeight;
+		V = TunnelView(V, Top, Rot);
 		Pos = FixCameraPos(V, S);
 		if (Cam != None)
 			Pos = Cam.SmoothView(Pos, S, Rot);
@@ -3478,6 +3529,9 @@ simulated function CalcCameraPos( out vector Pos, out rotator Rot, float Mult, o
 		else
 			V = Gun.Location+((BehinViewViewOffset*Mult) >> Rot);
 	}
+	Top = Location;
+	Top.Z += CollisionHeight;
+	V = TunnelView(V, Top, Rot);
 	Pos = FixCameraPos(V, Location);
 	if (Cam != None)
 		Pos = Cam.SmoothView(Pos, Location, Rot);
