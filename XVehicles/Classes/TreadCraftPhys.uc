@@ -296,8 +296,9 @@ simulated function UpdateDriverInput( float Delta )
 	local float DeAcc,DeAccRat;
 	local rotator R;
 	local bool bTurnR;
-	
-	OldVehicleYaw = VehicleYaw;	
+	local int YawStep;
+
+	OldVehicleYaw = VehicleYaw;
 
 	if (bSlopedPhys && GVT!=None)
 		R = TransformForGroundRot(VehicleYaw,GVTNormal);
@@ -374,8 +375,8 @@ simulated function UpdateDriverInput( float Delta )
 		if( CurTurnSpeed>0 )
 			CurTurnSpeed = 0;
 	}
-	VehicleYaw+=CurTurnSpeed*Delta;
-	
+	YawStep = AddYaw(CurTurnSpeed*Delta);
+
 	if (Level.NetMode == NM_Client && !IsNetOwner(Driver))
 	{
 		UpdateTreads(Delta);
@@ -383,7 +384,7 @@ simulated function UpdateDriverInput( float Delta )
 	}
 	
 	if( !bCameraOnBehindView && Driver!=None )
-		Driver.ViewRotation.Yaw+=CurTurnSpeed*Delta;
+		Driver.ViewRotation.Yaw+=YawStep;
 
 	Velocity += CalcGravityStrength(Region.Zone.ZoneGravity*(VehicleGravityScale/GroundPower), FloorNormal)*
 		Delta/(Region.Zone.ZoneGroundFriction/8.f + 1.f);

@@ -296,6 +296,8 @@ var bool DoChangeSeat;
 
 var float BotDriverJumpZ;
 
+var float YawRemainder;		// part of a turn that the int yaw has not taken yet
+
 var PreventEnter PreventEnter;
 
 enum EDropFlag
@@ -1695,6 +1697,17 @@ function ServerPackState(float Delta)
 	ServerState.ClientTime = ClientLastTime;
 	if (PlayerPawn(Driver) != None && Level.TimeSeconds != ServerLastTime)
 		ServerState.ClientTime += Level.TimeSeconds - ServerLastTime;
+}
+
+// Turn the vehicle without losing the fraction of a unit each tick. Returns the whole units applied.
+simulated function int AddYaw(float Change)
+{
+	local int Whole;
+	YawRemainder += Change;
+	Whole = YawRemainder;
+	YawRemainder -= Whole;
+	VehicleYaw += Whole;
+	return Whole;
 }
 
 simulated function DmgFXGen(byte Mode)
