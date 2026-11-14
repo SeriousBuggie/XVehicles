@@ -440,7 +440,7 @@ simulated function UpdateDriverInput( float Delta )
 					Velocity-=Ac*FMax(Region.Zone.ZoneGroundFriction,TreadsTraction)*WDeAccelRate*3*Delta*2.f;
 					Return;
 				}
-				Ac = Ac*MaxGroundSpeed*FMax(Region.Zone.ZoneGroundFriction,TreadsTraction)/10;
+				Ac = Ac*(MaxGroundSpeed*FMax(Region.Zone.ZoneGroundFriction,TreadsTraction)*Delta*6); // 6 = 1/10 * 60 fps
 				Velocity = Normal(Velocity+Ac)*DeAcc;
 			}
 			else
@@ -507,7 +507,7 @@ simulated function UpdateDriverInput( float Delta )
 				Velocity-=Ac*FMax(Region.Zone.ZoneGroundFriction,TreadsTraction)*WDeAccelRate*Delta*2.f;
 				Return;
 			}
-			Ac = Ac*MaxGroundSpeed*FMax(Region.Zone.ZoneGroundFriction,TreadsTraction)/10;
+			Ac = Ac*(MaxGroundSpeed*FMax(Region.Zone.ZoneGroundFriction,TreadsTraction)*Delta*6); // 6 = 1/10 * 60 fps
 			Velocity = Normal(Velocity+Ac)*DeAcc;
 		}
 		else
@@ -539,7 +539,8 @@ simulated function UpdateDriverInput( float Delta )
 	}
 	else DeAcc+=WAccelRate*Delta/100;
 
-	Ac = GetAccelDir(Turning,Rising,OldAccelD)*MaxGroundSpeed*FMax(Region.Zone.ZoneGroundFriction,TreadsTraction)/10;
+	// The pull to the heading is per frame: scaled to what 60 fps gives, so the same at any fps
+	Ac = GetAccelDir(Turning,Rising,OldAccelD)*(MaxGroundSpeed*FMax(Region.Zone.ZoneGroundFriction,TreadsTraction)*Delta*6); // 6 = 1/10 * 60 fps
 	Velocity = Normal(Velocity+Ac)*DeAcc;
 	if (Driver != None)
 		ShouldTurnFor(vector(Driver.ViewRotation)*20000+Location);
@@ -713,7 +714,7 @@ simulated function vector GetVirtualSpeedOnIce( float Delta )
 	}
 	else DeAcc+=WAccelRate*Delta/100;
 
-	Ac = Accel*MaxGroundSpeed*8/10*vector(rotation);
+	Ac = vector(rotation)*(Accel*MaxGroundSpeed*Delta*48); // 48 = 8/10 * 60 fps
 	VelFriction = Normal(VelFriction+Ac)*DeAcc;
 	return VelFriction;
 }
