@@ -283,7 +283,7 @@ simulated function UpdateDriverInput( float Delta )
 					Velocity-=Ac*FMax(Region.Zone.ZoneGroundFriction,WheelsTraction)*WDeAccelRate*3*Delta*2.f;
 					Return;
 				}
-				Ac = Ac*(MaxGroundSpeed*FMax(Region.Zone.ZoneGroundFriction,WheelsTraction)*Delta*6); // 6 = 1/10 * 60 fps
+				Ac = Ac*(MaxGroundSpeed*FMax(Region.Zone.ZoneGroundFriction,WheelsTraction)*Delta*6.f); // 6 = 1/10 * 60 fps
 				Velocity = Normal(Velocity+Ac)*DeAcc;
 			}
 			else
@@ -348,7 +348,7 @@ simulated function UpdateDriverInput( float Delta )
 				Velocity-=Ac*FMax(Region.Zone.ZoneGroundFriction,WheelsTraction)*WDeAccelRate*Delta*2.f;
 				Return;
 			}
-			Ac = Ac*(MaxGroundSpeed*FMax(Region.Zone.ZoneGroundFriction,WheelsTraction)*Delta*6); // 6 = 1/10 * 60 fps
+			Ac = Ac*(MaxGroundSpeed*FMax(Region.Zone.ZoneGroundFriction,WheelsTraction)*Delta*6.f); // 6 = 1/10 * 60 fps
 			Velocity = Normal(Velocity+Ac)*DeAcc;
 		}
 		else
@@ -394,7 +394,7 @@ simulated function UpdateDriverInput( float Delta )
 	}
 
 	// The pull to the heading is per frame: scaled to what 60 fps gives, so the same at any fps
-	Ac = Ac*(MaxGroundSpeed*FMax(Region.Zone.ZoneGroundFriction, WheelsTraction)*Delta*6); // 6 = 1/10 * 60 fps
+	Ac = Ac*(MaxGroundSpeed*FMax(Region.Zone.ZoneGroundFriction, WheelsTraction)*Delta*6.f); // 6 = 1/10 * 60 fps
 	Velocity = Normal(Velocity + Ac)*DeAcc;
 }
 
@@ -560,7 +560,7 @@ local vector Ac;
 	}
 	else DeAcc+=WAccelRate*Delta/100;
 
-	Ac = vector(Rotation)*(Accel*MaxGroundSpeed*Delta*48); // 48 = 8/10 * 60 fps
+	Ac = vector(Rotation)*(Accel*MaxGroundSpeed*Delta*48.f); // 48 = 8/10 * 60 fps
 	VelFriction = Normal(VelFriction+Ac)*DeAcc;
 
 	Return VelFriction;

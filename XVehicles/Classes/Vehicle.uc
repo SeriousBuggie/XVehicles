@@ -2763,7 +2763,7 @@ function bool HoldForFlagCarrier()
 		return false;
 
 	// Same spot as the FlagBase approach in VAIBehaviour.GetNextMoveTargetInternal.
-	V = Base.Location - (Normal(ExitOffset)*(CollisionRadius + 10 + Base.CollisionRadius/2) >> Rotation);
+	V = Base.Location - (Normal(ExitOffset)*(CollisionRadius + 10.f + Base.CollisionRadius/2.f) >> Rotation);
 	V -= Location;
 	V.Z = 0;
 	S = Min(100, CollisionRadius - 20);
@@ -2780,9 +2780,9 @@ function bool HoldForFlagCarrier()
 	{
 		Turning = 0;
 		Speed = Velocity dot vector(Rotation);
-		if (Speed > 50)
+		if (Speed > 50.f)
 			Accel = -1;
-		else if (Speed < -50)
+		else if (Speed < -50.f)
 			Accel = 1;
 		else
 			Accel = 0;
