@@ -385,9 +385,11 @@ simulated function UpdateDriverInput( float Delta )
 	Ac = GetAccelDir(Turning, Rising, Accel);
 	NVeloc = Normal(Velocity);
 
-	if (DeAcc > 50 && (Ac dot NVeloc) < 0.4)
+	// Real speed over 50 (50*50), not DeAcc: DeAcc already holds this frame's WAccelRate*Delta,
+	// which at 10 fps alone passed 50 and kicked a standing car to near top speed
+	if ((Velocity dot Velocity) > 2500.f && (Ac dot NVeloc) < 0.4)
 	{
-		Velocity += Ac*FMax(Region.Zone.ZoneGroundFriction, WheelsTraction)*WAccelRate*2.f*Delta;
+		Velocity += Ac*(FMax(Region.Zone.ZoneGroundFriction, WheelsTraction)*WAccelRate*2.f*Delta);
 		Return;
 	}
 
