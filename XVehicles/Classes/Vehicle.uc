@@ -3423,6 +3423,8 @@ simulated function CalcCameraPos( out vector Pos, out rotator Rot, float Mult, o
 			S = Location+((PassengerSeats[SeatNumber].PassengerWOffset+PassengerSeats[SeatNumber].CameraOffset*Mult) >> Rotation);
 		V = S+((PassengerSeats[SeatNumber].CamBehindviewOffset*Mult) >> Rot);
 		Pos = FixCameraPos(V, S);
+		if (Cam != None)
+			Pos = Cam.SmoothView(Pos, S, Rot);
 		Return;
 	}
 	Gun = DriverGun;
@@ -3477,6 +3479,8 @@ simulated function CalcCameraPos( out vector Pos, out rotator Rot, float Mult, o
 			V = Gun.Location+((BehinViewViewOffset*Mult) >> Rot);
 	}
 	Pos = FixCameraPos(V, Location);
+	if (Cam != None)
+		Pos = Cam.SmoothView(Pos, Location, Rot);
 }
 function rotator GetFiringRot( float ProjSpeed, bool bInstantHit, vector PStartPos, optional byte SeatN )
 {
