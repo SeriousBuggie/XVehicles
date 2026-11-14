@@ -1356,6 +1356,8 @@ function Timer()
 function Actor GetFlagGoal(Pawn Pawn)
 {
 	local Actor FlagGoal;
+	if (Pawn == Driver && FlagPassenger() != None)
+		return ScoreBaseFor(FlagPassenger());
 	FlagGoal = FlagBase(Pawn.MoveTarget);
 	if (FlagGoal == None)
 	{
@@ -2718,11 +2720,30 @@ function FlagBase ScoreBaseFor(Pawn Carrier)
 	return Best;
 }
 
-// Last stretch of a human flag carrier ride: park so the stock exit point
-// (ExitOffset, right side) lands on the flag, the carrier leaves when they want.
-// The spot follows the current Rotation, as PassengerLeave does.
-// The route up to here is XVehiclesCTF.DriveCarrierToFlag.
-function bool ParkCarrierAtFlag()
+// Human flag carrier aboard: steer by the route to the base, whatever the bot itself
+// planned. Runs right before each new steering point, so the bot's own re-plans
+// in between cannot pull the vehicle elsewhere.
+function RouteForFlagCarrier()
+{
+	local FlagBase Base;
+	local Actor Next;
+
+	if (FlagPassenger() == None)
+		return;
+	Base = ScoreBaseFor(FlagPassenger());
+	if (Base == None)
+		return;
+	Next = Driver.FindPathToward(Base);
+	if (Next != None)
+		Driver.MoveTarget = Next;
+}
+
+// A bot driving a human flag carrier drives exactly like a bot carrier:
+// route to the base (ReadBotInput), the FlagBase approach in VAIBehaviour
+// lines the exit side up with the flag, AboutToCrash brakes early.
+// Where a bot carrier would get out, this holds the vehicle instead and the
+// human leaves when they want.
+function bool HoldForFlagCarrier()
 {
 	local Pawn Carrier;
 	local FlagBase Base;
@@ -2733,20 +2754,24 @@ function bool ParkCarrierAtFlag()
 	if (Carrier == None)
 		return false;
 	Base = ScoreBaseFor(Carrier);
-	if (Base == None || VSize(Base.Location - Location) > 800 || !FastTrace(Base.Location))
+	if (Base == None)
 		return false;
 
-	MoveDest = Base.Location - (ExitOffset >> Rotation);
+	// Same spot as the FlagBase approach in VAIBehaviour.GetNextMoveTargetInternal.
+	V = Base.Location - (Normal(ExitOffset)*(CollisionRadius + 10 + Base.CollisionRadius/2) >> Rotation);
+	V -= Location;
+	V.Z = 0;
+	S = Min(100, CollisionRadius - 20);
+	if ((V dot V) >= S*S)
+		return false;
+
+	MoveDest = Location + V;
 	bHasMoveTarget = False;
 	Turning = ShouldTurnFor(MoveDest);
 	Rising = ShouldRiseFor(MoveDest);
 	Accel = ShouldAccelFor(MoveDest);
-
-	V = Location - MoveDest;
-	V.Z = 0;
-	S = Min(100, CollisionRadius - 20);
-	// Flyers hold the spot by themselves (BotDrive brakes at MoveDest).
-	if (!bCanFly && (V dot V) < S*S)
+	// Flyers and hover craft hold the spot by themselves (BotDrive brakes at MoveDest).
+	if (!bCanFly)
 	{
 		Turning = 0;
 		Speed = Velocity dot vector(Rotation);
@@ -2775,8 +2800,7 @@ function ReadBotInput( float Delta )
 		DriverLeft(False, "HealthTooLowFor");
 	if (Driver == None)
 		return;
-	// Before NeedStop: in OneFlagCTF the target is the enemy base, where a bot driver would bail out.
-	if (ParkCarrierAtFlag())
+	if (HoldForFlagCarrier())
 		return;
 	if (NeedStop(Driver))
 	{
@@ -2815,6 +2839,7 @@ function ReadBotInput( float Delta )
 	{
 		bHasMoveTarget = True;
 		V = MoveDest;
+		RouteForFlagCarrier();
 		MoveDest = VehicleAI.GetNextMoveTarget();
 //		log(Level.TimeSeconds @ self @ "GetNextMoveTarget" @ MoveDest);
 		if (V == MoveDest)
@@ -2901,6 +2926,9 @@ function bool AtFlagBase(Pawn pDriver)
 	local CTFFlag CTFFlag;
 	FlagBase = FlagBase(pDriver.MoveTarget);
 	if (FlagBase == None)
+		return false;
+	// Driving a human flag carrier: HoldForFlagCarrier stops at the base, the driver stays in.
+	if (pDriver == Driver && FlagPassenger() != None)
 		return false;
 	if (pDriver.PlayerReplicationInfo.HasFlag == None && 
 		pDriver.PlayerReplicationInfo.Team == FlagBase.Team)
@@ -3003,7 +3031,8 @@ function bool AboutToCrash(out int Accel)
 	if (Dir > 100)
 	{
 		FlagGoal = GetFlagGoal(Driver);
-		if (FlagGoal != None && NeedReturnBackAfter(FlagGoal) &&
+		// A carried human flag carrier gets the same early brake, whatever DropFlag says.
+		if (FlagGoal != None && (NeedReturnBackAfter(FlagGoal) || FlagPassenger() != None) &&
 			VSize(FlagGoal.Location - Location) < 
 			(class'FlagBase'.default.CollisionRadius + CollisionRadius + Dir/4))
 		{
