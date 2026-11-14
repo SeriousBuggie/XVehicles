@@ -145,7 +145,7 @@ function vector GetNextMoveTargetInternal()
 	
 	// A bot carrier flees home in Fallback and never chases; do the same with a human carrier aboard.
 	if (VehicleOwner.Driver.Target != None && Vehicle(VehicleOwner.Driver.Target) == None &&
-		VehicleOwner.FlagPassenger() == None &&
+		!VehicleOwner.HasFlagPassenger() &&
 		(Pawn(VehicleOwner.Driver.Target) == None || !VehicleOwner.Driver.Target.IsInState('Dying')) &&
 		!VehicleOwner.Driver.IsInState('Fallback') && !VehicleOwner.Driver.IsInState('RangedAttack') && 
 		VehicleOwner.Driver.LineOfSightTo(VehicleOwner.Driver.Target) &&

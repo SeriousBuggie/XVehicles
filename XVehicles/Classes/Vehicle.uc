@@ -1356,8 +1356,8 @@ function Timer()
 function Actor GetFlagGoal(Pawn Pawn)
 {
 	local Actor FlagGoal;
-	if (Pawn == Driver && FlagPassenger() != None)
-		return ScoreBaseFor(FlagPassenger());
+	if (Pawn == Driver && HasFlagPassenger())
+		return ScoreBase();
 	FlagGoal = FlagBase(Pawn.MoveTarget);
 	if (FlagGoal == None)
 	{
@@ -2683,23 +2683,17 @@ function bool CrewFit(Pawn Other)
 	return DBot.Orders == Bot.Orders && Bot.OrderObject == DBot.OrderObject;
 }
 
-// Human flag carrier riding as a passenger of a bot driver.
-// A bot carrier takes the driver seat itself (see the passenger loop).
-function Pawn FlagPassenger()
+// A bot drives a passenger's flag: a flag is on the roof but not the driver's.
+// A bot carrier takes the driver seat itself (see the passenger loop), so this is a human.
+function bool HasFlagPassenger()
 {
-	local int i;
-	if (Bot(Driver) == None || Driver.PlayerReplicationInfo == None || Driver.PlayerReplicationInfo.HasFlag != None)
-		return None;
-	for (i = 0; i < ArrayCount(Passengers); i++)
-		if (PlayerPawn(Passengers[i]) != None && Passengers[i].PlayerReplicationInfo != None &&
-			Passengers[i].PlayerReplicationInfo.HasFlag != None)
-			return Passengers[i];
-	return None;
+	return VehicleFlag != None && Bot(Driver) != None && Driver.PlayerReplicationInfo != None &&
+		Driver.PlayerReplicationInfo.HasFlag == None;
 }
 
-// Nearest flag base where Carrier scores: the enemy base in OneFlagCTF,
+// Nearest flag base where the driver's team scores: the enemy base in OneFlagCTF,
 // the own team base otherwise (CTF, C4F, R4F).
-function FlagBase ScoreBaseFor(Pawn Carrier)
+function FlagBase ScoreBase()
 {
 	local FlagBase FB, Best;
 	local float Dist, BestDist;
@@ -2708,7 +2702,7 @@ function FlagBase ScoreBaseFor(Pawn Carrier)
 	bEnemyBase = Level.Game.IsA('OneFlagCTFGame');
 	foreach AllActors(class'FlagBase', FB)
 	{
-		if (FB.IsA('NeutralFlagBase') || (FB.Team != Carrier.PlayerReplicationInfo.Team) != bEnemyBase)
+		if (FB.IsA('NeutralFlagBase') || (FB.Team != Driver.PlayerReplicationInfo.Team) != bEnemyBase)
 			continue;
 		Dist = VSize(FB.Location - Location);
 		if (Best == None || Dist < BestDist)
@@ -2728,9 +2722,9 @@ function RouteForFlagCarrier()
 	local FlagBase Base;
 	local Actor Next;
 
-	if (FlagPassenger() == None)
+	if (!HasFlagPassenger())
 		return;
-	Base = ScoreBaseFor(FlagPassenger());
+	Base = ScoreBase();
 	if (Base == None)
 		return;
 	Next = Driver.FindPathToward(Base);
@@ -2745,15 +2739,13 @@ function RouteForFlagCarrier()
 // human leaves when they want.
 function bool HoldForFlagCarrier()
 {
-	local Pawn Carrier;
 	local FlagBase Base;
 	local vector V;
 	local float S, Speed;
 
-	Carrier = FlagPassenger();
-	if (Carrier == None)
+	if (!HasFlagPassenger())
 		return false;
-	Base = ScoreBaseFor(Carrier);
+	Base = ScoreBase();
 	if (Base == None)
 		return false;
 
@@ -2928,7 +2920,7 @@ function bool AtFlagBase(Pawn pDriver)
 	if (FlagBase == None)
 		return false;
 	// Driving a human flag carrier: HoldForFlagCarrier stops at the base, the driver stays in.
-	if (pDriver == Driver && FlagPassenger() != None)
+	if (pDriver == Driver && HasFlagPassenger())
 		return false;
 	if (pDriver.PlayerReplicationInfo.HasFlag == None && 
 		pDriver.PlayerReplicationInfo.Team == FlagBase.Team)
@@ -3032,7 +3024,7 @@ function bool AboutToCrash(out int Accel)
 	{
 		FlagGoal = GetFlagGoal(Driver);
 		// A carried human flag carrier gets the same early brake, whatever DropFlag says.
-		if (FlagGoal != None && (NeedReturnBackAfter(FlagGoal) || FlagPassenger() != None) &&
+		if (FlagGoal != None && (NeedReturnBackAfter(FlagGoal) || HasFlagPassenger()) &&
 			VSize(FlagGoal.Location - Location) < 
 			(class'FlagBase'.default.CollisionRadius + CollisionRadius + Dir/4))
 		{
