@@ -5,7 +5,7 @@ var(Projectile) float    DamageRadius;
 function HurtRadiusOwned( float DamageAmount, float DamageRadius, name DamageName, float Momentum, vector HitLocation )
 {
     local actor Victims;
-    local float damageScale, dist;
+    local float damageScale, dist, VictimDamage;
     local vector dir;
     local int CurrentTeam;
     
@@ -25,11 +25,14 @@ function HurtRadiusOwned( float DamageAmount, float DamageRadius, name DamageNam
             dist = FMax(1,VSize(dir));
             dir = dir/dist; 
             damageScale = 1 - FMax(0,(dist - Victims.CollisionRadius)/DamageRadius);
+            // per victim: zeroing DamageAmount itself spared everything after the first teammate
             if (IsSameTeam(CurrentTeam, Pawn(Victims)))
-            	DamageAmount = 0;
+            	VictimDamage = 0;
+            else
+            	VictimDamage = DamageAmount;
             Victims.TakeDamage
             (
-                damageScale * DamageAmount,
+                damageScale * VictimDamage,
                 Instigator, 
                 Victims.Location - 0.5 * (Victims.CollisionHeight + Victims.CollisionRadius) * dir,
                 (damageScale * Momentum * dir),
