@@ -181,7 +181,13 @@ function vector GetNextMoveTargetInternal()
 			T.Z -= NP.CollisionHeight - HeightDiff;
 			NextT = T;
 			bHasNext = true;
-			
+
+			// The bot has moved on from node 0 (its MoveTarget is node 1): never steer back to node 0.
+			// On a steep slope node 1 often fails the checks below from part way, node 0 passes, and the
+			// vehicle goes back and forth between the two. Without node 0 it heads for MoveTarget anyway.
+			if (i == 0 && NP != VehicleOwner.Driver.MoveTarget && VehicleOwner.Driver.MoveTarget == VehicleOwner.Driver.RouteCache[1])
+				continue;
+
 			if (!VehicleOwner.bCanFly)
 			{
 				T2 = T - VehicleOwner.Location;
