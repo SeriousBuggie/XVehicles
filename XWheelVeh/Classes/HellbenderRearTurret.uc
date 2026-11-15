@@ -200,8 +200,8 @@ defaultproperties
 	bAltFireZooms=True
 	TurretPitchActor=Class'HellbenderRearGun'
 	PitchActorOffset=(X=12.000000,Z=55.500000)
-	WeapSettings(0)=(FireStartOffset=(X=53.500000,Y=7.000000,Z=20.500000),RefireRate=0.750000,FireSound=Sound'XWheelVeh.Hellbender.PRVFire04',bInstantHit=True,hitdamage=200,HitType="Energy",HitError=0.000000,HitMomentum=150000.000000)
-	WeapSettings(1)=(ProjectileClass=Class'JSDXLPlasma',FireStartOffset=(X=53.500000,Y=-8.000000,Z=20.500000),RefireRate=0.675000,FireSound=Sound'XWheelVeh.Fire.JSDXLDualFire',DualMode=2,HitError=0.000000)
+	WeapSettings(0)=(FireStartOffset=(X=53.500000,Y=7.000000,Z=20.500000),RefireRate=0.750000,FireSound=Sound'XWheelVeh.Hellbender.PRVFire04',bInstantHit=True,hitdamage=200,HitType="Energy",HitError=0.020000,HitMomentum=150000.000000)
+	WeapSettings(1)=(ProjectileClass=Class'JSDXLPlasma',FireStartOffset=(X=53.500000,Y=-8.000000,Z=20.500000),RefireRate=0.675000,FireSound=Sound'XWheelVeh.Fire.JSDXLDualFire',DualMode=2,HitError=0.020000)
 	bLimitPitchByCarTop=True
 	CarTopRange=0.500000
 	CarTopAllowedPitch=(Max=16400,Min=-2000)

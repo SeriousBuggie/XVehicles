@@ -112,7 +112,7 @@ defaultproperties
 	bAltFireZooms=True
 	TurretPitchActor=Class'ShraliIonGun'
 	PitchActorOffset=(X=-7.500000,Z=32.500000)
-	WeapSettings(0)=(FireStartOffset=(X=88.000000),RefireRate=1.000000,FireSound=Sound'XTreadVeh.Shrali.ShraliIonFire',bInstantHit=True,hitdamage=225,HitType="RedIonize",HitError=0.000000,HitMomentum=170000.000000,HitHeavyness=0)
+	WeapSettings(0)=(FireStartOffset=(X=88.000000),RefireRate=1.000000,FireSound=Sound'XTreadVeh.Shrali.ShraliIonFire',bInstantHit=True,hitdamage=225,HitType="RedIonize",HitError=0.020000,HitMomentum=170000.000000,HitHeavyness=0)
 	bLimitPitchByCarTop=True
 	CarTopRange=0.150000
 	CarTopAllowedPitch=(Max=14000,Min=-1550)

@@ -13,6 +13,8 @@ var() config bool bDisableFastWarShell;
 var() config bool bAllowTranslocator;
 var() config bool bDisableFlagAnnouncer;
 var() config bool bAllowCameraShakeInVehicle;
+// Multiplies every vehicle weapon's spread (WeaponAttachment HitError). Server side only, so not replicated
+var() config float AimSpreadScale;
 
 struct ReplInfo
 {
@@ -110,6 +112,7 @@ static function bool Init(Actor Source, XVehiclesCTF.EPulseForHeal PulseForHeal)
 defaultproperties
 {
 	bPulseAltHeal=True
+	AimSpreadScale=1.000000
 	bAlwaysRelevant=True
 	RemoteRole=ROLE_SimulatedProxy
 }

@@ -48,7 +48,7 @@ defaultproperties
 	PitchRange=(Max=32767,Min=-32767)
 	TurretPitchActor=Class'CybPitch'
 	PitchActorOffset=(X=67.000000,Z=-36.000000)
-	WeapSettings(0)=(ProjectileClass=Class'CybProj',FireStartOffset=(Y=49.000000),RefireRate=0.200000,FireSound=Sound'rfire',DualMode=1)
+	WeapSettings(0)=(ProjectileClass=Class'CybProj',FireStartOffset=(Y=49.000000),RefireRate=0.200000,FireSound=Sound'rfire',DualMode=1,HitError=0.020000)
 	WeapSettings(1)=(ProjectileClass=Class'XV_SeekingRocket',FireStartOffset=(Y=49.000000),RefireRate=3.000000,FireSound=Sound'AvrilFire01',DualMode=1)
 	DrawScale=0.000100
 	CollisionHeight=88.000000

@@ -37,7 +37,7 @@ struct VehWWeapon
 	var() bool bInstantHit;
 	var() int HitDamage;
 	var() name HitType;
-	var() float HitError;
+	var() float HitError;	// spread of every shot (projectile or instant hit), see GetRandomSpread
 	var() float HitMomentum;
 	var() byte HitHeavyness;
 	var() float FireDelay;
@@ -632,7 +632,8 @@ function FireTurret( byte Mode, optional bool bForceFire )
 		ClientFireEffect();
 
 	if (!WeapSettings[Mode].bInstantHit)
-		FixProj(Spawn(WeapSettings[Mode].ProjectileClass,OwnerVehicle,,P,R));
+		FixProj(Spawn(WeapSettings[Mode].ProjectileClass,OwnerVehicle,,P,
+			rotator(vector(R) + GetRandomSpread(R, WeapSettings[Mode].HitError))));
 	else
 	{
 		S = P;
@@ -647,7 +648,8 @@ function FireTurret( byte Mode, optional bool bForceFire )
 	}
 
 	if (WeapSettings[Mode].DualMode == 2 && !WeapSettings[Mode].bInstantHit)
-		FixProj(Spawn(WeapSettings[Mode].ProjectileClass,OwnerVehicle,,Pdual,Rdual));
+		FixProj(Spawn(WeapSettings[Mode].ProjectileClass,OwnerVehicle,,Pdual,
+			rotator(vector(Rdual) + GetRandomSpread(Rdual, WeapSettings[Mode].HitError))));
 	else if (WeapSettings[Mode].DualMode == 2)
 	{
 		S = Pdual;
@@ -666,9 +668,12 @@ function FireTurret( byte Mode, optional bool bForceFire )
 	bFireRestrict = True;
 }
 
+// Random offset inside a disc of radius HitError (scaled by the server's AimSpreadScale), at 1 uu
+// along R: the shot goes within a cone of half angle atan(HitError)
 function vector GetRandomSpread(rotator R, float HitError)
 {
 	local vector Rnd, X, Y, Z;
+	HitError *= class'VehiclesConfig'.default.AimSpreadScale;
 	if (HitError == 0.0)
 		return vect(0, 0, 0);
 	do
@@ -1423,8 +1428,8 @@ defaultproperties
 {
 	RotatingSpeed=16000.000000
 	PitchRange=(Max=10000,Min=-5000)
-	WeapSettings(0)=(RefireRate=0.500000,FireSndRange=32,FireSndVolume=20,HitError=0.015000,HitHeavyness=1)
-	WeapSettings(1)=(RefireRate=0.500000,FireSndRange=32,FireSndVolume=20,HitError=0.015000,HitHeavyness=1)
+	WeapSettings(0)=(RefireRate=0.500000,FireSndRange=32,FireSndVolume=20,HitError=0.025000,HitHeavyness=1)
+	WeapSettings(1)=(RefireRate=0.500000,FireSndRange=32,FireSndVolume=20,HitError=0.025000,HitHeavyness=1)
 	FiringShaking(1)=(ShakeStart=SHK_OnAltFire)
 	FiringShaking(2)=(ShakeStart=SHK_DuringFire)
 	FiringShaking(3)=(ShakeStart=SHK_DuringAltFire)
