@@ -4,6 +4,7 @@ Class VAIBehaviour extends Info;
 var Vehicle VehicleOwner;
 
 var float AirFlyScale;
+var vector WanderDest; // the wandering driver's last spot already fitted to the vehicle, see WanderDestination
 
 const AimError = 0.001;
 const bDebug = false;
@@ -351,9 +352,45 @@ function vector GetNextMoveTargetInternal()
 	}
 //	Log("Use driver Destination" @ VehicleOwner.Driver.Destination @ VSize(VehicleOwner.Driver.Destination - VehicleOwner.Location) @ VSize(VehicleOwner.Driver.Destination - VehicleOwner.Driver.Location));
 //	if (CanReach(VehicleOwner.Driver.Destination)
-	if (VehicleOwner.Driver.IsInState('Wandering') && FixBot(Bot(VehicleOwner.Driver)))
-		return AdjustLocation(VehicleOwner.Driver.MoveTarget);
-	return VehicleOwner.Driver.Destination;	
+	if (VehicleOwner.Driver.IsInState('Wandering'))
+	{
+		if (FixBot(Bot(VehicleOwner.Driver)))
+			return AdjustLocation(VehicleOwner.Driver.MoveTarget);
+		return WanderDestination(Bot(VehicleOwner.Driver));
+	}
+	return VehicleOwner.Driver.Destination;
+}
+
+// A wandering bot picks its spot for its own walker cylinder (Bot.Wandering.TestDirection keeps
+// only 2 * 17 off a wall), so near walls the vehicle cannot fit there and drives into the wall
+// trying. Bring the spot back along the way to where the vehicle's volume still fits, and give it
+// to the bot as well, so its MoveTo ends there. Each new spot is checked once
+function vector WanderDestination(Bot B)
+{
+	local vector S, T, Lift, Ex, HL, HN;
+
+	if (B == None || B.Destination == WanderDest)
+		return VehicleOwner.Driver.Destination;
+	// the vehicle's volume lifted over small steps, as in GetNextMoveTargetInternal; the spot keeps
+	// its height relative to the bot, which sits lower in the vehicle than the vehicle's centre
+	Lift.Z = VehicleOwner.Location.Z - B.Location.Z + VehicleOwner.MaxObstclHeight/2;
+	S = VehicleOwner.Location;
+	S.Z += VehicleOwner.MaxObstclHeight/2;
+	T = B.Destination + Lift;
+	Ex.X = VehicleOwner.CollisionRadius;
+	Ex.Y = Ex.X;
+	Ex.Z = VehicleOwner.CollisionHeight - VehicleOwner.MaxObstclHeight/2;
+	// a walkable slope rising into the way is not a wall (same 0.7 as ReadBotInput)
+	if (VehicleOwner.Trace(HL, HN, T, S, true, Ex) != None && HN.Z < 0.7)
+	{
+		// no room this way at all: end the move here, the bot picks again
+		if (VSize(HL - S) < VehicleOwner.CollisionRadius)
+			B.Destination = B.Location;
+		else
+			B.Destination = HL - Lift;
+	}
+	WanderDest = B.Destination;
+	return B.Destination;
 }
 function bool PawnCanDrive(Pawn Other, optional bool bForce)
 {
