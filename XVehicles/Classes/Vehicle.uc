@@ -1702,6 +1702,10 @@ function ServerPackState(float Delta)
 	ServerState.ClientTime = ClientLastTime;
 	if (PlayerPawn(Driver) != None && Level.TimeSeconds != ServerLastTime)
 		ServerState.ClientTime += Level.TimeSeconds - ServerLastTime;
+	// Never driven by a human, so ClientLastTime is still the -1 that means "initial state" and
+	// clients would chase the last place without moving it on by Velocity. Moving: not initial
+	else if (ClientLastTime < 0 && PlayerPawn(Driver) == None && Velocity != vect(0,0,0))
+		ServerState.ClientTime = 1;
 }
 
 // Turn the vehicle without losing the fraction of a unit each tick. Returns the whole units applied.
