@@ -151,6 +151,7 @@ struct VehState
 var VehState ServerState;
 var int ServerState_Yaw;
 var float ServerStateTime;
+var float PendingYaw;		// someone else's vehicle: yaw still to ease into after an update
 var DriverCameraActor MyCameraAct;
 var OverlayMatDispRep ReplicOverlayMat;
 
@@ -374,6 +375,8 @@ var bool bReplicated;
 var Pawn StubPawn; // used only default value
 
 const SmallDrawScale = 0.0001;
+
+const RemoteYawEase = 20.0;	// someone else's vehicle eases into a new yaw: 63% in 0.05s, 95% in 0.15s
 
 // Chase view and tunnels ahead, see TunnelView
 const TunnelLook = 1600.0;	// how far ahead the view looks for a tunnel mouth
@@ -1603,10 +1606,11 @@ simulated function Destroyed()
 simulated function ClientUpdateState(float Delta)
 {
 	local vector ServerPredictLocation, Diff;
-	local float Dist;
+	local float Dist, Part;
 	local SavedMoveXV CurrentMove;
 	local PlayerPawn LocalPlayer;
 	local bool bNeedUpdateYaw;
+	local int Turn;
 	
 	if (class'VActor'.Default.StaticPP != None)
 		LocalPlayer = class'VActor'.Default.StaticPP.Actor;
@@ -1676,11 +1680,28 @@ simulated function ClientUpdateState(float Delta)
 	if (bNeedUpdateYaw && bShouldRepVehYaw)
 	{
 		ServerState_Yaw = ServerState.YawLow + (ServerState.YawHigh << 8);
-		if (bFPRepYawUpdatesView && !bCameraOnBehindView && Driver != None && IsNetOwner(Driver))
-			Driver.ViewRotation.Yaw += (ServerState_Yaw - VehicleYaw) & 0xffff;
-		VehicleYaw = ServerState_Yaw;
+		Turn = (ServerState_Yaw - VehicleYaw) << 16 >> 16;
+		// Someone else's vehicle: ease into the new yaw. On the vehicle a step is hard to see, but a camera
+		// on it (passenger, spectator) shows it as the whole world turning in jerks. A big turn still jumps
+		if (ServerStateTime != 0 && LocalPlayer != Driver && Abs(Turn) < 8192.f)
+			PendingYaw = Turn;
+		else
+		{
+			if (bFPRepYawUpdatesView && !bCameraOnBehindView && Driver != None && IsNetOwner(Driver))
+				Driver.ViewRotation.Yaw += (ServerState_Yaw - VehicleYaw) & 0xffff;
+			VehicleYaw = ServerState_Yaw;
+			PendingYaw = 0.f;
+		}
 	}
-		
+	if (PendingYaw != 0.f)
+	{
+		Part = PendingYaw*(1.0 - Exp(-RemoteYawEase*Delta));
+		PendingYaw -= Part;
+		AddYaw(Part);
+		if (Abs(PendingYaw) < 1.f)
+			PendingYaw = 0.f;
+	}
+
 	Diff = ServerPredictLocation - Location;
 	Dist = Diff dot Diff; // squared VSize
 	
