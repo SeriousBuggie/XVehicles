@@ -3563,7 +3563,9 @@ simulated function vector TunnelView(vector V, vector Top, rotator Rot)
 	if (H <= 0.f)
 		return V;
 	Ahead = LookDist(V, X);
-	if (Ahead >= TunnelLook || LookDist(Top, X) < Ahead + TunnelGap)
+	// a tunnel is closed from above: a hit below the roof is a ledge or steps, not a lintel
+	if (Ahead >= TunnelLook || ((V + X*Ahead - Top) dot (vect(0,0,1) >> Rotation)) <= 0.f ||
+		LookDist(Top, X) < Ahead + TunnelGap)
 		return V;
 	// how far down it has to go to see in: half, then a quarter either way
 	if (LookDist(V - Z*(H*0.5), X) >= Ahead + TunnelGap)
