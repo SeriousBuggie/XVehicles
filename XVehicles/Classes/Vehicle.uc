@@ -287,6 +287,7 @@ var ZoneInfo FootVehZone[8];
 var float LastTeleportTime; // for fix flicker teleport between two locations
 var int LastTeleportYaw; // for support teleports with change yaw
 var bool bLastTeleport;
+var vector TeleportFrom; // where the last teleport started, for its effects
 
 var int Reverse;
 var float ReverseTime;
@@ -1799,6 +1800,32 @@ simulated function AfterTeleport(float YawChange)
 	VehicleYaw += YawChange;
 	if (Driver != None)
 		Driver.ViewRotation.Yaw += YawChange;
+	// a failed teleport (destination blocked) leaves it where it was
+	if (Role == ROLE_Authority && VSize(Location - TeleportFrom) > CollisionRadius)
+		PlayTeleportEffects(TeleportFrom);
+}
+
+// What a pawn gets from a Teleporter (Teleporter.PlayTeleportEffect): the flash and the sound at both
+// ends. The flash inside the body would be hidden by it, so the body also gets the spawn shimmer
+function PlayTeleportEffects(vector From)
+{
+	TeleportFlash(From);
+	TeleportFlash(Location);
+	SetOverlayMat(TeamOverlays[CurrentTeam], 0.5);
+}
+
+// The flash and sound at one end, scaled by our height to a player's (the flash is made for one).
+// The sound plays from the flash: a server sound from the vehicle skips its owner, the driver
+function TeleportFlash(vector Loc)
+{
+	local Effects E;
+
+	// upright, not tilted with the body on a slope
+	E = Spawn(class'VehTeleportEffect',,, Loc, rot(0,0,0));
+	if (E == None)
+		return;
+	E.DrawScale *= CollisionHeight/class'TournamentPlayer'.default.CollisionHeight;
+	E.PlaySound(Sound'Botpack.General.Resp2A',, 10.0);
 }
 
 // Main tick
@@ -5431,6 +5458,7 @@ simulated function bool PreTeleport( Teleporter InTeleporter )
 		return true; // block
 	LastTeleportTime = Level.TimeSeconds;
 	LastTeleportYaw = Rotation.Yaw;
+	TeleportFrom = Location;
 	bLastTeleport = true;
 	return false; // allow
 }
