@@ -56,12 +56,12 @@ simulated function PostBeginPlay()
 	
 	if (Bot(Instigator) != None)
 	{
-		if (IsGoodTarget(Instigator, Instigator.Enemy) && 
-			Instigator.FastTrace(Instigator.Enemy.Location, Instigator.Location))
-			Seeking = Instigator.Enemy;
-		else if (IsGoodTarget(Instigator, Instigator.Target) && 
-			Instigator.FastTrace(Instigator.Target.Location, Instigator.Location))
-			Seeking = Instigator.Target;
+		// seek the vehicle, not its driver: the pawn has no velocity to lead
+		V = GoodTarget(Instigator, Instigator.Enemy);
+		if (V == None || !Instigator.FastTrace(V.Location, Instigator.Location))
+			V = GoodTarget(Instigator, Instigator.Target);
+		if (V != None && Instigator.FastTrace(V.Location, Instigator.Location))
+			Seeking = V;
 	}
 	else
 	{
@@ -83,19 +83,28 @@ simulated function PostBeginPlay()
 
 simulated static function bool IsGoodTarget(Pawn Instigator, Actor Other)
 {
+	return GoodTarget(Instigator, Other) != None;
+}
+
+// The enemy flying vehicle Other stands for (the vehicle, its driver, or something riding on it), or None
+simulated static function Vehicle GoodTarget(Pawn Instigator, Actor Other)
+{
+	local Vehicle V;
+
 	if (Other == None)
-		return false;
+		return None;
 	if (Pawn(Other) != None && DriverWeapon(Pawn(Other).Weapon) != None)
 		Other = DriverWeapon(Pawn(Other).Weapon).VehicleOwner;
-	if (Vehicle(Other) == None && Vehicle(Other.Base) != None)
-		Other = Vehicle(Other.Base);
-	if (Vehicle(Other) == None || !Vehicle(Other).bCanFly)
-		return false;
-	if (Instigator == None || Instigator.PlayerReplicationInfo == None || 
-		(Instigator.PlayerReplicationInfo.TeamName != "" && 
-		Vehicle(Other).CurrentTeam == Instigator.PlayerReplicationInfo.Team))
-		return false;
-	return true;
+	V = Vehicle(Other);
+	if (V == None && Other != None)
+		V = Vehicle(Other.Base);
+	if (V == None || !V.bCanFly)
+		return None;
+	if (Instigator == None || Instigator.PlayerReplicationInfo == None ||
+		(Instigator.PlayerReplicationInfo.TeamName != "" &&
+		V.CurrentTeam == Instigator.PlayerReplicationInfo.Team))
+		return None;
+	return V;
 }
 
 function BlowUp(vector HitLocation)
