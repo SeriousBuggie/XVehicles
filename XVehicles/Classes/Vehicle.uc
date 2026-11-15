@@ -177,6 +177,7 @@ var(SlopedPhys) float ZRange;
 var(SlopedPhys) float MaxObstclHeight;
 var() bool bDestroyUpsideDown;
 var GVehTrailer GVT;
+var float GroundGap;	// floor of the collision over the ground plane under the middle, before GVT.PrePivot's clamp
 var bool bDisableTeamSpawn; // replaced by class'VehiclesConfig'.default.bDisableTeamSpawn
 var() float WDeAccelRate;
 var int OldAccelD, VirtOldAccel;
@@ -2340,6 +2341,7 @@ simulated function bool CheckOnGround()
 						ActualGVTNormal = -ActualGVTNormal;
 					GVTLoc = MLoc - Normal(WZRange)*CollisionHeight;
 					GVT.PrePivot = GVTLoc - Location;
+					GroundGap = -GVT.PrePivot.Z;
 					S = ActualGVTNormal;
 					S.Z = 0;
 					GVT.PrePivot.Z = FClamp(GVT.PrePivot.Z, -FMax(MaxObstclHeight, 
@@ -2403,6 +2405,7 @@ simulated function bool CheckOnGround()
 					ActualGVTNormal = -ActualGVTNormal;
 				GVTLoc = MLoc - Normal(WZRange)*CollisionHeight;
 				GVT.PrePivot = GVTLoc - Location;
+				GroundGap = -GVT.PrePivot.Z;
 				S = ActualGVTNormal;
 				S.Z = 0;
 				GVT.PrePivot.Z = FClamp(GVT.PrePivot.Z, -FMax(MaxObstclHeight, 
@@ -2461,13 +2464,34 @@ simulated function SwitchWeapon(Pawn Other, Weapon Weap)
 
 simulated function ResetPawn(Pawn Other, rotator R, Weapon Weap)
 {
-	local vector L;
-	local float Radius;
+	local vector L, Low, HL, HN, Ex;
+	local float Radius, Drop;
 	local bool CollideActors;
-	
+
 	L = Location;
 	L.Z += Other.default.CollisionHeight - CollisionHeight;
-	
+	Low = L;
+	// A bot driving: on a steep slope the vehicle rests on its uphill edge and its floor floats over
+	// the ground under its middle (GroundGap, from the four corners, so a hole under the middle does
+	// not fool it; unclamped, since against the world the cylinder is a box and on a slope at 45 degrees
+	// to the axes its corner lifts it R*1.41*tan). A nav point there is grounded by its centre,
+	// CollisionHeight up, and a bot standing on the vehicle's floor never takes that centre in, so it
+	// grinds the slope for ever. Lower the bot just enough for the centre to be 5 inside it, never
+	// into anything.
+	if (Bot(Other) != None && Other == Driver && GVT != None && bOnGround && Level.NetMode < NM_Client)
+	{
+		Drop = GroundGap - (class'NavigationPoint'.default.CollisionHeight - 5.f);
+		if (Drop > 0.f)
+		{
+			Low.Z -= Drop;
+			Ex.X = Other.default.CollisionRadius;
+			Ex.Y = Ex.X;
+			Ex.Z = Other.default.CollisionHeight;
+			if (Trace(HL, HN, Low, L, false, Ex) != None)
+				Low.Z = HL.Z + 1.f;
+		}
+	}
+
 	if (PlayerPawn(Other) == None)
 		Radius = Other.default.CollisionRadius;
 	else
@@ -2476,7 +2500,8 @@ simulated function ResetPawn(Pawn Other, rotator R, Weapon Weap)
 	if (Other.CollisionRadius != Radius && Level.NetMode < NM_Client)
 		Other.SetCollisionSize(Radius, Other.CollisionHeight);
 
-	if (Other.Location != L)
+	// the lowered spot did not take: stay on the vehicle's floor rather than lag behind it
+	if (Other.Location != Low && !Other.SetLocation(Low) && Low != L)
 		Other.SetLocation(L);
 		
 	if (Weap != None && Other.Weapon != Weap)
