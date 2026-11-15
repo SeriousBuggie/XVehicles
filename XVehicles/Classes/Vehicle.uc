@@ -177,6 +177,9 @@ var(SlopedPhys) float ZRange;
 var(SlopedPhys) float MaxObstclHeight;
 var() bool bDestroyUpsideDown;
 var GVehTrailer GVT;
+// Bot driving: the node it just passed and the one after it, see KeepPassedNode
+var NavigationPoint PassedNode, AfterPassed;
+var Bot PassedBy;
 var bool bDisableTeamSpawn; // replaced by class'VehiclesConfig'.default.bDisableTeamSpawn
 var() float WDeAccelRate;
 var int OldAccelD, VirtOldAccel;
@@ -2459,6 +2462,47 @@ simulated function SwitchWeapon(Pawn Other, Weapon Weap)
 	Other.Weapon = Weap;
 }
 
+// A bot driving has just passed Node: remember it and the node after it on its path (KeepPassedNode)
+function PassNode(Bot B, NavigationPoint Node)
+{
+	local int i;
+
+	PassedNode = Node;
+	PassedBy = B;
+	AfterPassed = None;
+	for (i = 0; i < ArrayCount(B.RouteCache) - 1; i++)
+		if (B.RouteCache[i] == Node)
+		{
+			AfterPassed = B.RouteCache[i + 1];
+			break;
+		}
+}
+
+// A bot driving that has passed a node goes on to the next one. Re-planned (XV re-plans it on every
+// steering update) from a spot on a steep slope where the next node cannot be traced, the engine
+// starts the path at the passed node again, and the vehicle goes back and forth between the two.
+// When the new path is the same one (the passed node, then the one after it), skip the passed node.
+// Shifting leaves the last slot as it was, so a full cache keeps its last node twice and is not
+// taken for a path that ends there.
+function KeepPassedNode()
+{
+	local Bot B;
+	local int i;
+
+	B = Bot(Driver);
+	if (B == None || B != PassedBy || PassedNode == None || AfterPassed == None || B.MoveTarget != PassedNode)
+		return;
+	if (B.RouteCache[0] != PassedNode || B.RouteCache[1] != AfterPassed)
+	{
+		PassedNode = None; // another path now
+		return;
+	}
+	for (i = 0; i < ArrayCount(B.RouteCache) - 1; i++)
+		B.RouteCache[i] = B.RouteCache[i + 1];
+	B.MoveTarget = AfterPassed;
+	B.Destination = AfterPassed.Location;
+}
+
 simulated function ResetPawn(Pawn Other, rotator R, Weapon Weap)
 {
 	local vector L, Low, Start, Off, HL, HN, Ex;
@@ -2483,16 +2527,21 @@ simulated function ResetPawn(Pawn Other, rotator R, Weapon Weap)
 		Node = NavigationPoint(Other.MoveTarget);
 		// a stale MoveTarget does not count: the bot moves to Destination (MoveToward keeps it on the
 		// node), and the vehicle must be steering to that node, not past it after a shortcut
-		if (Node != None && VSize(Other.Destination - Node.Location) < 10.f)
+		if (Node != None)
+		{
+			Off = MoveDest - Node.Location;
+			Off.Z = 0.f;
+			if (VSize(Other.Destination - Node.Location) >= 10.f || (Off dot Off) >= Square(CollisionRadius))
+				Node = None;
+		}
+		if (Node != None)
 		{
 			Ex.X = Other.default.CollisionRadius;
 			Ex.Y = Ex.X;
 			Ex.Z = Other.default.CollisionHeight;
-			Off = MoveDest - Node.Location;
-			Off.Z = 0.f;
 			Start = Node.Location - Location;
 			Start.Z = 0.f;
-			if ((Off dot Off) < Square(CollisionRadius) && (Start dot Start) <= Square(CollisionRadius - Ex.X))
+			if ((Start dot Start) <= Square(CollisionRadius - Ex.X))
 			{
 				// along the floor first, the bot's own volume swept so it goes into nothing
 				Low = Node.Location;
@@ -2508,6 +2557,15 @@ simulated function ResetPawn(Pawn Other, rotator R, Weapon Weap)
 					if (Trace(HL, HN, Low, Start, false, Ex) != None)
 						Low = HL + HN;
 				}
+			}
+			// counted by any visit, slid there or not: the node's centre is inside the bot where it ends up,
+			// so remember the node and the one after it
+			Off = Node.Location - Low;
+			if (Abs(Off.Z) < Ex.Z)
+			{
+				Off.Z = 0.f;
+				if ((Off dot Off) < Square(Ex.X))
+					PassNode(Bot(Other), Node);
 			}
 		}
 	}
@@ -2883,6 +2941,7 @@ function ReadBotInput( float Delta )
 		DriverLeft(False, "HealthTooLowFor");
 	if (Driver == None)
 		return;
+	KeepPassedNode();
 	if (HoldForFlagCarrier())
 		return;
 	if (NeedStop(Driver))
