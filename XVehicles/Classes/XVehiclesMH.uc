@@ -56,6 +56,8 @@ Function SetShield()
 	
 	class'VehiclesConfig'.default.bHideState = true;
 	class'VehiclesConfig'.default.bDisableTeamSpawn = true;
+	// the projectile spread is against vehicles sniping players from afar; MH is against monsters
+	class'VehiclesConfig'.default.AimSpreadScale = 0;
 	class'VehiclesConfig'.static.Update(self);
 	
 	SetPropertyText("DynClass", "Class'JSDXLPlasma'");
