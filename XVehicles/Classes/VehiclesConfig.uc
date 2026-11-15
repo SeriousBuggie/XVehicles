@@ -13,7 +13,7 @@ var() config bool bDisableFastWarShell;
 var() config bool bAllowTranslocator;
 var() config bool bDisableFlagAnnouncer;
 var() config bool bAllowCameraShakeInVehicle;
-// Multiplies every vehicle weapon's spread (WeaponAttachment HitError). Server side only, so not replicated
+// Multiplies the projectile spread of vehicle weapons (WeaponAttachment.ProjSpread). Server side only, so not replicated
 var() config float AimSpreadScale;
 
 struct ReplInfo

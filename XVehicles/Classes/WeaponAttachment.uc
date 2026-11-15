@@ -37,7 +37,7 @@ struct VehWWeapon
 	var() bool bInstantHit;
 	var() int HitDamage;
 	var() name HitType;
-	var() float HitError;	// spread of every shot (projectile or instant hit), see GetRandomSpread
+	var() float HitError;	// spread: a fixed cone for instant hits, growing with distance for projectiles (ProjSpread)
 	var() float HitMomentum;
 	var() byte HitHeavyness;
 	var() float FireDelay;
@@ -48,6 +48,9 @@ struct VehWWeapon
 };
 
 var() VehWWeapon WeapSettings[2];
+// Projectile spread, see ProjSpread
+const SpreadRange = 5000.0;		// HitError is the spread at this distance
+const SpreadMaxRange = 10000.0;	// it stops widening here, so a shot never visibly leaves the barrel askew
 var() bool bFireRateByAnim;
 var bool bTurnFire;
 var() bool bLimitPitchByCarTop;
@@ -633,7 +636,7 @@ function FireTurret( byte Mode, optional bool bForceFire )
 
 	if (!WeapSettings[Mode].bInstantHit)
 		FixProj(Spawn(WeapSettings[Mode].ProjectileClass,OwnerVehicle,,P,
-			rotator(vector(R) + GetRandomSpread(R, WeapSettings[Mode].HitError))));
+			ProjSpread(R, WeapSettings[Mode].HitError, P)));
 	else
 	{
 		S = P;
@@ -649,7 +652,7 @@ function FireTurret( byte Mode, optional bool bForceFire )
 
 	if (WeapSettings[Mode].DualMode == 2 && !WeapSettings[Mode].bInstantHit)
 		FixProj(Spawn(WeapSettings[Mode].ProjectileClass,OwnerVehicle,,Pdual,
-			rotator(vector(Rdual) + GetRandomSpread(Rdual, WeapSettings[Mode].HitError))));
+			ProjSpread(Rdual, WeapSettings[Mode].HitError, Pdual)));
 	else if (WeapSettings[Mode].DualMode == 2)
 	{
 		S = Pdual;
@@ -668,12 +671,27 @@ function FireTurret( byte Mode, optional bool bForceFire )
 	bFireRestrict = True;
 }
 
-// Random offset inside a disc of radius HitError (scaled by the server's AimSpreadScale), at 1 uu
-// along R: the shot goes within a cone of half angle atan(HitError)
+// Projectile aim with spread, for a shot from Start along R. The cone grows with how far the shot
+// flies (to the first hit along R, capped at SpreadMaxRange), so the miss grows with the square of
+// the distance: precise up close, scattered far away, the way drag and wind spread a real shell.
+// HitError is the cone's radius at SpreadRange, scaled by the server's AimSpreadScale. Nothing hit
+// (a shot into the sky, leading a flyer) counts as SpreadRange
+function rotator ProjSpread(rotator R, float HitError, vector Start)
+{
+	local vector X, HL, HN;
+
+	HitError *= class'VehiclesConfig'.default.AimSpreadScale;
+	if (HitError == 0.0)
+		return R;
+	X = vector(R);
+	if (OwnerVehicle.Trace(HL, HN, Start + 40000*X, Start, True) != None)
+		HitError *= FMin(VSize(HL - Start), SpreadMaxRange)/SpreadRange;
+	return rotator(X + GetRandomSpread(R, HitError));
+}
+
 function vector GetRandomSpread(rotator R, float HitError)
 {
 	local vector Rnd, X, Y, Z;
-	HitError *= class'VehiclesConfig'.default.AimSpreadScale;
 	if (HitError == 0.0)
 		return vect(0, 0, 0);
 	do
