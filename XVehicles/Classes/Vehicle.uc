@@ -177,7 +177,6 @@ var(SlopedPhys) float ZRange;
 var(SlopedPhys) float MaxObstclHeight;
 var() bool bDestroyUpsideDown;
 var GVehTrailer GVT;
-var float GroundGap;	// floor of the collision over the ground plane under the middle, before GVT.PrePivot's clamp
 var bool bDisableTeamSpawn; // replaced by class'VehiclesConfig'.default.bDisableTeamSpawn
 var() float WDeAccelRate;
 var int OldAccelD, VirtOldAccel;
@@ -2341,7 +2340,6 @@ simulated function bool CheckOnGround()
 						ActualGVTNormal = -ActualGVTNormal;
 					GVTLoc = MLoc - Normal(WZRange)*CollisionHeight;
 					GVT.PrePivot = GVTLoc - Location;
-					GroundGap = -GVT.PrePivot.Z;
 					S = ActualGVTNormal;
 					S.Z = 0;
 					GVT.PrePivot.Z = FClamp(GVT.PrePivot.Z, -FMax(MaxObstclHeight, 
@@ -2405,7 +2403,6 @@ simulated function bool CheckOnGround()
 					ActualGVTNormal = -ActualGVTNormal;
 				GVTLoc = MLoc - Normal(WZRange)*CollisionHeight;
 				GVT.PrePivot = GVTLoc - Location;
-				GroundGap = -GVT.PrePivot.Z;
 				S = ActualGVTNormal;
 				S.Z = 0;
 				GVT.PrePivot.Z = FClamp(GVT.PrePivot.Z, -FMax(MaxObstclHeight, 
@@ -2464,31 +2461,54 @@ simulated function SwitchWeapon(Pawn Other, Weapon Weap)
 
 simulated function ResetPawn(Pawn Other, rotator R, Weapon Weap)
 {
-	local vector L, Low, HL, HN, Ex;
+	local vector L, Low, Start, Off, HL, HN, Ex;
 	local float Radius, Drop;
 	local bool CollideActors;
+	local NavigationPoint Node;
 
 	L = Location;
 	L.Z += Other.default.CollisionHeight - CollisionHeight;
 	Low = L;
-	// A bot driving: on a steep slope the vehicle rests on its uphill edge and its floor floats over
-	// the ground under its middle (GroundGap, from the four corners, so a hole under the middle does
-	// not fool it; unclamped, since against the world the cylinder is a box and on a slope at 45 degrees
-	// to the axes its corner lifts it R*1.41*tan). A nav point there is grounded by its centre,
-	// CollisionHeight up, and a bot standing on the vehicle's floor never takes that centre in, so it
-	// grinds the slope for ever. Lower the bot just enough for the centre to be 5 inside it, never
-	// into anything.
-	if (Bot(Other) != None && Other == Driver && GVT != None && bOnGround && Level.NetMode < NM_Client)
+	// A bot driving keeps a walker's cylinder (r 17), so it still plans paths as on foot. A node
+	// counts as reached only when its centre is inside that small circle, while the vehicle around
+	// it (r 80) cannot steer that fine, least of all with bots changing their minds every few ticks;
+	// and on a steep slope the vehicle's floor floats over the ground and the node's centre
+	// (grounded at CollisionHeight) is below the bot too. So it grinds round a node it is already
+	// over. The bot stands on the vehicle's floor anywhere inside its outline: while the node it
+	// really heads for is under the vehicle by at least the bot's radius, the bot slides along the
+	// floor onto it, and down only as far as a slope needs for the centre to be 5 inside. The node
+	// counts, the bot moves on, and it is back in the middle.
+	if (Bot(Other) != None && Other == Driver && Level.NetMode < NM_Client)
 	{
-		Drop = GroundGap - (class'NavigationPoint'.default.CollisionHeight - 5.f);
-		if (Drop > 0.f)
+		Node = NavigationPoint(Other.MoveTarget);
+		// a stale MoveTarget does not count: the bot moves to Destination (MoveToward keeps it on the
+		// node), and the vehicle must be steering to that node, not past it after a shortcut
+		if (Node != None && VSize(Other.Destination - Node.Location) < 10.f)
 		{
-			Low.Z -= Drop;
 			Ex.X = Other.default.CollisionRadius;
 			Ex.Y = Ex.X;
 			Ex.Z = Other.default.CollisionHeight;
-			if (Trace(HL, HN, Low, L, false, Ex) != None)
-				Low.Z = HL.Z + 1.f;
+			Off = MoveDest - Node.Location;
+			Off.Z = 0.f;
+			Start = Node.Location - Location;
+			Start.Z = 0.f;
+			if ((Off dot Off) < Square(CollisionRadius) && (Start dot Start) <= Square(CollisionRadius - Ex.X))
+			{
+				// along the floor first, the bot's own volume swept so it goes into nothing
+				Low = Node.Location;
+				Low.Z = L.Z;
+				if (Trace(HL, HN, Low, L, false, Ex) != None)
+					Low = HL + HN;
+				// then down, only if the node's centre is still under the bot and not further than a slope explains
+				Drop = Low.Z - Ex.Z - (Node.Location.Z - 5.f);
+				if (Drop > 0.f && Drop <= CollisionRadius*1.5)
+				{
+					Start = Low;
+					Low.Z -= Drop;
+					if (Trace(HL, HN, Low, Start, false, Ex) != None)
+						Low = HL + HN;
+				}
+			}
 		}
 	}
 
