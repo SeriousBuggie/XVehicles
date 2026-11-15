@@ -377,6 +377,9 @@ var Pawn StubPawn; // used only default value
 const SmallDrawScale = 0.0001;
 
 const RemoteYawEase = 20.0;	// someone else's vehicle eases into a new yaw: 63% in 0.05s, 95% in 0.15s
+// A smoothed floor normal this close to its target has arrived, about 0.26 degrees.
+// It was 0.999 (2.56 degrees), which ended every tilt with a 2.5 degree snap
+const NormalDone = 0.99999;
 
 // Chase view and tunnels ahead, see TunnelView
 const TunnelLook = 1600.0;	// how far ahead the view looks for a tunnel mouth
@@ -2004,7 +2007,7 @@ simulated function Tick( float Delta )
 		else
 			FloorNormal = NormalWeightSum(6*f*Delta, ActualFloorNormal, FloorNormal);
 
-		if ( (ActualFloorNormal Dot FloorNormal) > 0.999 )
+		if ( (ActualFloorNormal Dot FloorNormal) > NormalDone )
 			FloorNormal = ActualFloorNormal;
 	}
 	//Arc movement physics
@@ -2046,7 +2049,7 @@ simulated function Tick( float Delta )
 		if (ActualFloorNormal!=FloorNormal && (Velocity dot Velocity) > 0)
 		{
 			FloorNormal = NormalWeightSum(ArcAmount(Velocity)*f*Delta, ActualFloorNormal, FloorNormal);
-			if ( (ActualFloorNormal Dot FloorNormal) > 0.999 )
+			if ( (ActualFloorNormal Dot FloorNormal) > NormalDone )
 				FloorNormal = ActualFloorNormal;
 		}
 
@@ -2066,7 +2069,7 @@ simulated function Tick( float Delta )
 			if (GVTNormal!=ActualGVTNormal)
 			{
 				GVTNormal = NormalWeightSum(ArcAmount(Velocity)*f*Delta, ActualGVTNormal, GVTNormal);
-				if ( (ActualGVTNormal Dot GVTNormal) > 0.999 )
+				if ( (ActualGVTNormal Dot GVTNormal) > NormalDone )
 					GVTNormal = ActualGVTNormal;
 			}
 		}
@@ -2079,7 +2082,7 @@ simulated function Tick( float Delta )
 		else
 			GVTNormal = NormalWeightSum(14*f*Delta, ActualGVTNormal, GVTNormal);
 
-		if ( (ActualGVTNormal Dot GVTNormal) > 0.999 )
+		if ( (ActualGVTNormal Dot GVTNormal) > NormalDone )
 			GVTNormal = ActualGVTNormal;
 	}
 	bOwnerNoSee = False;
