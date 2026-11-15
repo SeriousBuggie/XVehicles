@@ -12,6 +12,18 @@ var bool bHasRotorDmg;
 
 var vector BotAccelDir;
 
+// Hovering is not standing still: UT2004 choppers drift and rock a little in the air
+// (ONSChopperCraft MaxRandForce / RandForceInterval). Smooth sines rather than random kicks, so the
+// server and the driver's client, each running this on its own clock, stay together
+var float HoverTime, HoverBlend;	// time hovering, and 0..1 fade in and out
+var vector HoverDrift;				// drift velocity in Velocity now
+var rotator HoverTilt;				// rock in Rotation now
+const HoverSpeed = 60.0;	// slower than this the chopper is hovering
+const FloatSpeed = 15.0;	// drift speed; it swings up to 2 * FloatSpeed / rate from where it stopped
+const FloatRoll = 300.0;	// rock, rotator units (300 is about 1.6 degrees)
+const FloatPitch = 200.0;
+const FloatYaw = 150.0;
+
 simulated function PostBeginPlay()
 {
 	Super.PostBeginPlay();
@@ -127,11 +139,13 @@ simulated function UpdateDriverInput( float Delta )
 			}
 		}
 	}
+	UpdateHoverFloat(Delta);
 	if( bOnGround )
 		R = TransformForGroundRot(VehicleYaw,FloorNormal);
 	else
 	{
-		R = Normalize(Rotation);
+		// without last tick's rock, or it would build up in the halving
+		R = Normalize(Rotation - HoverTilt);
 		R.Yaw = VehicleYaw;
 		R.Roll/=2;
 		R.Pitch/=2;
@@ -139,8 +153,10 @@ simulated function UpdateDriverInput( float Delta )
 	if (!bDriving && !bOnGround)
 	{
 		Velocity += Region.Zone.ZoneGravity*Delta*VehicleGravityScale;
+		HoverDrift = vect(0,0,0); // what is in Velocity now is just momentum
 		return;
 	}
+	HoverTilt = rot(0,0,0);
 	if( Level.NetMode!=NM_DedicatedServer && !bOnGround && bDriving )
 	{
 		Rr.Yaw = VehicleYaw;
@@ -157,6 +173,9 @@ simulated function UpdateDriverInput( float Delta )
 			R.Roll = Ac.Y;
 		if( Abs(R.Pitch)<Abs(Ac.X) )
 			R.Pitch = -Ac.X;
+		// the hover rock on top of the lean, before the axes so the rotor rocks with the body
+		HoverTilt = FloatTilt();
+		R += HoverTilt;
 		GetAxes(R,X,Y,Z);
 		ActualFloorNormal = Z;
 		FloorNormal = Z;
@@ -170,6 +189,7 @@ simulated function UpdateDriverInput( float Delta )
 		if (DeAccRat > DeAcc)
 			DeAccRat = DeAcc;
 		Velocity -= Normal(Velocity)*DeAccRat;
+		HoverDrift = vect(0,0,0);
 		Return;
 	}
 	if (Level.NetMode == NM_Client && !IsNetOwner(Owner))
@@ -187,7 +207,9 @@ simulated function UpdateDriverInput( float Delta )
 				CurrentYawSpeed = YawTurnSpeed;
 		}
 		VehicleYaw += Changed;
-	}	
+	}
+	// the drift is put back after the input and the braking below, so they never eat it
+	Velocity -= HoverDrift;
 	Ac = WAccelRate*Delta*GetAccelDir(Turning, Rising, Accel);
 /*	
 	if( VSize(Velocity)>MaxAirSpeed && VSize(Normal(Velocity)-Normal(Ac))<0.85 )
@@ -209,6 +231,52 @@ simulated function UpdateDriverInput( float Delta )
 			Velocity.Y*=FMax(0f, 1.f-Delta);
 		}
 	}
+	HoverDrift = vect(0,0,0);
+	if (!bOnGround)
+		HoverDrift = FloatDrift();
+	Velocity += HoverDrift;
+}
+
+// Hovering or not this tick, faded over a second so nothing snaps when the chopper stops or sets off
+simulated function UpdateHoverFloat(float Delta)
+{
+	local float Target;
+
+	if (bDriving && !bOnGround && VSize(Velocity - HoverDrift) < HoverSpeed)
+		Target = 1.f;
+	if (HoverBlend < Target)
+		HoverBlend = FMin(Target, HoverBlend + Delta);
+	else
+		HoverBlend = FMax(Target, HoverBlend - Delta);
+	if (HoverBlend > 0.f)
+		HoverTime += Delta;
+	else
+		HoverTime = 0.f;
+}
+
+// Rates in rad/s, picked so the axes do not line up; each starts at zero, so the float starts smoothly
+simulated function vector FloatDrift()
+{
+	local vector V;
+
+	if (HoverBlend == 0.f)
+		return V;
+	V.X = Sin(HoverTime*0.8);
+	V.Y = Sin(HoverTime*1.1);
+	V.Z = Sin(HoverTime*1.5)*0.6;
+	return V*(FloatSpeed*HoverBlend);
+}
+
+simulated function rotator FloatTilt()
+{
+	local rotator R;
+
+	if (HoverBlend == 0.f)
+		return R;
+	R.Roll = FloatRoll*HoverBlend*Sin(HoverTime*0.9);
+	R.Pitch = FloatPitch*HoverBlend*Sin(HoverTime*1.3);
+	R.Yaw = FloatYaw*HoverBlend*Sin(HoverTime*0.6);
+	return R;
 }
 
 function int ShouldTurnFor( vector AcTarget, optional float YawAdjust, optional float DeadZone )
