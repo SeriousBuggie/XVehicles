@@ -89,7 +89,7 @@ simulated function bool CheckOnGround()
 			
 			Dest = Rep;
 			Dest.Z -= HoveringHeight;
-			PossibleBase = Trace(HL, HN, Dest, Rep, false);
+			PossibleBase = FloorTrace(HL, HN, Dest, Rep); // solid actors hold it up too
 			if (PossibleBase == None)
 				HL = Dest;
 			else if (HN.Z < 0.7) // preven climb on walls by repulsors

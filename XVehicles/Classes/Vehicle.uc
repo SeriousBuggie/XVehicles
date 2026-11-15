@@ -2245,6 +2245,27 @@ local VehicleAttachment vat;
 */
 }
 
+// A solid actor a vehicle can stand on as it would on the world: still, and blocking everything
+// (BlockAll and the like, often standing in for mesh collision). Not pawns and not other vehicles;
+// pushable decorations are not solid, Bump pushes them
+simulated function bool IsSolidActor(Actor A)
+{
+	return A != None && !A.bIsPawn && VActor(A) == None && (A.bStatic || !A.bMovable) &&
+		A.bBlockActors && A.bBlockPlayers;
+}
+
+// Ground trace: the world, movers and solid actors (IsSolidActor), nearest first. Anything else
+// in the way (a pawn) is looked past, at the world only
+simulated function Actor FloorTrace(out vector HitLocation, out vector HitNormal, vector End, vector Start, optional vector Extent)
+{
+	local Actor A;
+
+	A = Trace(HitLocation, HitNormal, End, Start, true, Extent);
+	if (A == None || A == Level || Mover(A) != None || IsSolidActor(A))
+		return A;
+	return Trace(HitLocation, HitNormal, End, Start, false, Extent);
+}
+
 simulated function CheckBase(Actor PossibleBase, optional Actor Ac[4])
 {
 	local int i, j, score, best, all;
@@ -2296,11 +2317,12 @@ simulated function bool CheckOnGround()
 	Ex.X = CollisionRadius;
 	Ex.Y = Ex.X;
 
-	PossibleBase = Trace(HL, HN, End, Start, False, Ex);
+	// FloorTrace: a solid actor (a BlockAll standing in for mesh collision) is ground too
+	PossibleBase = FloorTrace(HL, HN, End, Start, Ex);
 	if (PossibleBase == None)
 	{
 		End.Z -= CollisionHeight;
-		if (Trace(HL, HN, End, Start, False, Ex) != None)
+		if (FloorTrace(HL, HN, End, Start, Ex) != None)
 		{
 			ePointsOffSet[0] = FrontWide;
 			ePointsOffSet[1] = ePointsOffSet[0];
@@ -2316,7 +2338,7 @@ simulated function bool CheckOnGround()
 			{
 				S = Location + (ePointsOffSet[b] >> Rotation);
 				E = S + WZRange;
-				Ac[b] = Trace(sHL[b], sHN[b], E, S, False);
+				Ac[b] = FloorTrace(sHL[b], sHN[b], E, S);
 				if (Abs(int(sHL[b].X)) > 900100200.0 || // check if got nan as HitLocation
 					Abs(int(sHL[b].Y)) > 900100200.0 || // such can happen if trace start already inside mover
 					Abs(int(sHL[b].Z)) > 900100200.0)
@@ -2380,7 +2402,7 @@ simulated function bool CheckOnGround()
 			{
 				S = Location + (ePointsOffSet[b] >> Rotation);
 				E = S + WZRange;
-				Ac[b] = Trace(sHL[b], sHN[b], E, S, False);
+				Ac[b] = FloorTrace(sHL[b], sHN[b], E, S);
 				if (Abs(int(sHL[b].X)) > 900100200.0 || // check if got nan as HitLocation
 					Abs(int(sHL[b].Y)) > 900100200.0 || // such can happen if trace start already inside mover
 					Abs(int(sHL[b].Z)) > 900100200.0)
@@ -4233,6 +4255,12 @@ simulated function SingularBump(Actor Other)
 		}
 		
 	}
+	else if (IsSolidActor(Other) &&
+		Location.Z - CollisionHeight >= Other.Location.Z + Other.CollisionHeight - FMax(MaxObstclHeight, 2.f))
+	{
+		// Standing on it or stepping up onto it: ground, not a crash (CheckOnGround takes it as floor).
+		// The direction to its middle below says nothing for a big one, a BlockAll can be 3000 across
+	}
 	else if( (Normal(Velocity) Dot Normal(Other.Location-Location))>0 ) // We ran into this object.
 	{
 		if (!Other.bStatic && Other.bMovable)
@@ -4266,7 +4294,8 @@ simulated function SingularBump(Actor Other)
 					Other.MoveSmooth(Dir*3); */
 			}
 		}
-		else if (Role == ROLE_Authority && VSize(VeryOldVel[1]) > 500)
+		// a solid actor also sends HitWall, which deals the damage as for the world (by speed and angle)
+		else if (Role == ROLE_Authority && VSize(VeryOldVel[1]) > 500 && !IsSolidActor(Other))
 			TakeImpactDamage((VSize(VeryOldVel[1]) - 500)/2,None, "Bump");
 	}
 }
@@ -4519,7 +4548,8 @@ simulated singular function HitWall( vector HitNormal, Actor Wall )
 		if( (Normal(Velocity) Dot HitNormal)>0 )
 			Velocity = SetUpNewMVelocity(Velocity,HitNormal,0.5);
 		else Velocity = SetUpNewMVelocity(Velocity,HitNormal,0.05);
-		if( Wall!=Level && Wall.Brush==None )
+		// a solid actor (a BlockAll standing in for mesh collision) hurts as the world does
+		if( Wall!=Level && Wall.Brush==None && !IsSolidActor(Wall) )
 			Return;
 		BMulti = (Normal(V) Dot Normal(Velocity));
 		VSpee = VSize(V);
