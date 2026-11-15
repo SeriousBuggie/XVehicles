@@ -3342,6 +3342,56 @@ function bool CanEnter(Pawn Other, optional bool bIgnoreDuck, optional bool bIgn
 		return false;
 	return true;
 }
+
+// Would this vehicle take Other right now: the driver seat when empty, else a free passenger seat.
+// CanEnter wants a PlayerPawn crouching
+function bool HasRoomFor(Pawn Other)
+{
+	local byte Seat;
+
+	if (IsInState('EmptyVehicle'))
+		return CanEnter(Other);
+	return IsInState('VehicleDriving') && CanAddPassenger(Other, Seat);
+}
+
+// The vehicle P enters on the enter key: the one under the crosshair, else the closest one.
+// Only vehicles in reach that would take P (HasRoomFor) count; reach is the same as for the enter
+// message and icon, centres closer than both radii + 100 (RadiusActors adds the found radius)
+static function Vehicle EnterTarget(Pawn P)
+{
+	local Vehicle V, Best;
+	local vector HL, HN, Eye;
+	local float Dist, BestDist, Look;
+	local bool bMany;
+
+	foreach P.RadiusActors(class'Vehicle', V, P.CollisionRadius + 100)
+		if (V.HasRoomFor(P))
+		{
+			if (Best != None)
+				bMany = true;
+			Dist = VSize(V.Location - P.Location);
+			// the crosshair trace must reach the far side of every candidate
+			Look = FMax(Look, Dist + V.CollisionRadius + V.CollisionHeight);
+			if (Best == None || Dist < BestDist)
+			{
+				Best = V;
+				BestDist = Dist;
+			}
+		}
+	if (!bMany)
+		return Best;
+	Eye = P.Location;
+	Eye.Z += P.EyeHeight;
+	foreach P.TraceActors(class'Vehicle', V, HL, HN, Eye + vector(P.ViewRotation)*(Look + P.CollisionHeight), Eye)
+		if (V.IsA('Vehicle')) // can be LevelInfo in v436
+		{
+			if (VSize(V.Location - P.Location) < V.CollisionRadius + P.CollisionRadius + 100 && V.HasRoomFor(P))
+				Best = V;
+			break;
+		}
+	return Best;
+}
+
 function bool IsTeamLockedFor(Pawn Other)
 {
 	return Level.Game.bTeamGame && Other.PlayerReplicationInfo != None && 
@@ -3440,7 +3490,7 @@ Auto State EmptyVehicle
 		local PlayerPawn PP;
 		Global.Timer();
 		foreach RadiusActors(class'PlayerPawn', PP, CollisionRadius + 100)
-			if (CanEnter(PP)) {
+			if (CanEnter(PP) && EnterTarget(PP) == self) {
 				Bump(PP);
 				if (!IsInState('EmptyVehicle'))
 					break;
@@ -3511,7 +3561,7 @@ State VehicleDriving
 				if (Passengers[i] != None)
 					TryDropFlag(Passengers[i]);
 		foreach RadiusActors(class'PlayerPawn', PP, CollisionRadius + 100)
-			if (CanAddPassenger(PP, fr))
+			if (CanAddPassenger(PP, fr) && EnterTarget(PP) == self)
 				Bump(PP);
 	}
 	function Touch(Actor Other)

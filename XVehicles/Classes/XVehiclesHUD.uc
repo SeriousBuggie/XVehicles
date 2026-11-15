@@ -70,7 +70,6 @@ function Vehicle GetVehicle(PlayerPawn Sender)
 function Mutate(string MutateString, PlayerPawn Sender)
 {	
 	local Vehicle Veh, Best;
-	local float Dist, BestDist;
 	local byte bDuck;
 	Super.Mutate(MutateString, Sender);
 	
@@ -87,23 +86,13 @@ function Mutate(string MutateString, PlayerPawn Sender)
 	
 	if (Left(MutateString, 12) ~= "VehicleEnter")
 	{
-		foreach Sender.RadiusActors(class'Vehicle', Veh, Sender.CollisionRadius + 100)
-			if (Veh.CanEnter(Sender, true))
-			{
-				Dist = VSize(Veh.Location - Sender.Location);
-				if (Dist < BestDist || Best == None)
-				{
-					BestDist = Dist;
-					Best = Veh;
-				}
-			}
+		// the key enters without a crouch, CanEnter wants one
+		bDuck = Sender.bDuck;
+		Sender.bDuck = 1;
+		Best = class'Vehicle'.static.EnterTarget(Sender);
 		if (Best != None)
-		{
-			bDuck = Sender.bDuck;
-			Sender.bDuck = 1;
 			Best.Bump(Sender);
-			Sender.bDuck = bDuck;
-		}
+		Sender.bDuck = bDuck;
 	} 
 	else if (Left(MutateString, 11) ~= "VehicleExit")
 	{
