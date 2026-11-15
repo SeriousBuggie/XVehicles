@@ -1368,8 +1368,10 @@ function bool SeeEnemy(Actor Enemy)
 			P += (WeapSettings[0].FireStartOffset >> R);
 			
 			Dir = EnemyLocation - P;
-			
-			VProj = Fmax(1, WeapSettings[0].ProjectileClass.default.Speed);
+
+			// the mean speed over this distance, not the launch speed: a Manta plasma leaves at 500
+			// and accelerates to 7000 (GetProjSpeed knows that, the class default does not)
+			VProj = Fmax(1, GetProjSpeed(0, P, rotator(Dir)));
 			V1 = Normal(Dir) dot Enemy.Velocity;		
 			V = VProj*VProj + V1*V1 - V*V; 
 			
