@@ -28,6 +28,9 @@
 //
 //  - JumpAngle will be limited to 1-89 degrees.
 //
+//  - A negative ParticlesSpeed turns the streaks off, a negative GridsSpeed
+//    the grids.
+//
 //  - A launch faster than the zone's ZoneTerminalVelocity (default 2500) is
 //    cut by the engine and falls short; a warning is broadcasted every time
 //    someone jumps. Raise ZoneTerminalVelocity of the zone with the JumpPad.
@@ -137,8 +140,8 @@ var enum EParticleColor
 var() EParticleColor ParticlesColor;
 var() EParticleColor GridsColor;
 
-var() float ParticlesSpeed;
-var() float GridsSpeed;
+var() float ParticlesSpeed;	// negative: no streaks
+var() float GridsSpeed;		// negative: no grids
 
 var() bool bAutoSize;
 
@@ -694,10 +697,10 @@ local JPadEmitGrid JGrid;
 		InitParticles();
 	}
 
-	if (TCountA >= 0.15)
+	if (TCountA >= 0.15 && ParticlesSpeed >= 0)
 	{
 		TCountA = 0;
-		
+
 		For (j=0; j<4; j++)
 		{
 			rX = (Rand(57) - 28) * DrawScale;
@@ -724,7 +727,7 @@ local JPadEmitGrid JGrid;
 		}
 	}
 
-	if (TCountB >= 0.25)
+	if (TCountB >= 0.25 && GridsSpeed >= 0)
 	{
 		TCountB = 0;
 
