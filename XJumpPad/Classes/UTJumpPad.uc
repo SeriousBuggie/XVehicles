@@ -378,6 +378,7 @@ simulated function vector CalcVelocity( Actor Other )
     local float impactheight, impactspeedz;
     local vector impactspeedxy;
     local Bot B;
+    local JumpPadAirControl AC;
     
     
     // Player location
@@ -525,7 +526,11 @@ simulated function vector CalcVelocity( Actor Other )
         B.SetFall();
         B.DesiredRotation = rotator(targetrange);
         RestoreAmbushSpot(B);
-    }        
+        // keeps it heading for the target if a wall takes its speed
+        AC = Spawn(class'JumpPadAirControl', B);
+        if( AC != None )
+            AC.Init(targetloc, speedxy, time);
+    }
     
     return vel;
 }
