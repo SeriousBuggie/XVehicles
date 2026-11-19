@@ -28,6 +28,12 @@
 //
 //  - JumpAngle will be limited to 1-89 degrees.
 //
+//  - Or set ApexHeight instead of hunting for an angle: the peak of the jump
+//    will be that many units above the higher of the start and the target,
+//    whatever the distance (a vertical pad next to a wall included), and the
+//    path is the same wherever the player steps on the pad. JumpAngle and
+//    AngleRand are ignored then. 0 (default) keeps the JumpAngle launch.
+//
 //  - If the JumpAngle is too low, a theoretically valid one will be calculated 
 //    ingame and warning message will be broadcasted every time someone jumps.
 //
@@ -154,6 +160,7 @@ enum EAngleMode
 // ============================================================================
 
 var(JumpPad) float          JumpAngle;          // Jump angle
+var(JumpPad) float          ApexHeight;         // Peak this high above the higher of start and target; 0 = use JumpAngle
 
 var(JumpPad) byte           TeamNumber;         // Team number
 var(JumpPad) bool           bTeamOnly;          // Other teams can't use it
@@ -390,43 +397,62 @@ simulated function vector CalcVelocity( Actor Other )
     
     // Get gravity
     grav = -Region.Zone.ZoneGravity.Z;
-    
-    // Get Angle
-    //JumpAngle=10;
-    angled = FClamp(GetAngle(Other),MinAngle,MaxAngle);
 
-    // Check minimum angle
-    angledmin = FClamp(int(targetdir.Pitch * URotToDegree)+1,MinAngle,MaxAngle);
-    if( angledmin > angled )
+    if( ApexHeight > 0 )
     {
-        minalpha = (1-(1-(angledmin / MaxAngle))**MinAngleCurve);
-        angledtry = FClamp(angledmin+(MaxAngle-angledmin)*MinAngleFinder*minalpha,MinAngle,MaxAngle);
-        ShowMessage( "WARNING: Minimum theoretical jump angle is" @int(angledmin)$ ". JumpAngle=" $int(angled)$ ". Trying angle=" $int(angledtry), Other, true );
-        angled = angledtry;
+        // The peak is given, the angle follows. The rise depends only on the height the player
+        // starts at, and the horizontal speed is whatever lands on the target in the flight time,
+        // so every entry point peaks at the same height on nearly the same path, and a steep
+        // (vertical) pad is as stable as a flat one. Always solvable, no angle hunting.
+        peak = FMax(0, targetz) + ApexHeight; // above the start
+        speedz = Sqrt(2*grav*peak);
+        time = speedz/grav + Sqrt(2*(peak - targetz)/grav);
+        vel = Normal(targetrange) * (targetdist/time);
+        vel.Z = speedz;
+        speed = VSize(vel);
+        // for bLogParams
+        angled = rotator(vel).Pitch * URotToDegree;
+        angler = angled * DegreeToRadian;
     }
+    else
+    {
+        // Get Angle
+        //JumpAngle=10;
+        angled = FClamp(GetAngle(Other),MinAngle,MaxAngle);
 
-    // Convert angle
-    angler = angled * DegreeToRadian; // radians
-    pitch = angled * DegreeToURot; // ru
-    
-    // Target direction
-    jumpdir = targetdir;
-    jumpdir.Pitch = pitch;
-    
-    // Speed
-    tanr = tan(angler);
-    speed = targetdist * Sqrt( (grav*((tanr*tanr) + 1)) / (2*(targetdist*tanr-targetz)) );
-    if( speed == 0 )
-    {
-        ShowMessage( "ERROR: Could not calculate JumpSpeed", Other, true );
-        if (Pawn(Other) != None)
-	        speed = Pawn(Other).JumpZ;
-	    else
-	    	speed = class'Pawn'.default.JumpZ;
+        // Check minimum angle
+        angledmin = FClamp(int(targetdir.Pitch * URotToDegree)+1,MinAngle,MaxAngle);
+        if( angledmin > angled )
+        {
+            minalpha = (1-(1-(angledmin / MaxAngle))**MinAngleCurve);
+            angledtry = FClamp(angledmin+(MaxAngle-angledmin)*MinAngleFinder*minalpha,MinAngle,MaxAngle);
+            ShowMessage( "WARNING: Minimum theoretical jump angle is" @int(angledmin)$ ". JumpAngle=" $int(angled)$ ". Trying angle=" $int(angledtry), Other, true );
+            angled = angledtry;
+        }
+
+        // Convert angle
+        angler = angled * DegreeToRadian; // radians
+        pitch = angled * DegreeToURot; // ru
+
+        // Target direction
+        jumpdir = targetdir;
+        jumpdir.Pitch = pitch;
+
+        // Speed
+        tanr = tan(angler);
+        speed = targetdist * Sqrt( (grav*((tanr*tanr) + 1)) / (2*(targetdist*tanr-targetz)) );
+        if( speed == 0 )
+        {
+            ShowMessage( "ERROR: Could not calculate JumpSpeed", Other, true );
+            if (Pawn(Other) != None)
+                speed = Pawn(Other).JumpZ;
+            else
+                speed = class'Pawn'.default.JumpZ;
+        }
+
+        // Velocity
+        vel = speed * vector(jumpdir);
     }
-    
-    // Velocity
-    vel = speed * vector(jumpdir);
 
     // Velocity components
     speedxy = VSize(vel*vect(1,1,0));
