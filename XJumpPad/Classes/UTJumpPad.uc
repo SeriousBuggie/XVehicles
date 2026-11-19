@@ -28,6 +28,10 @@
 //
 //  - JumpAngle will be limited to 1-89 degrees.
 //
+//  - A launch faster than the zone's ZoneTerminalVelocity (default 2500) is
+//    cut by the engine and falls short; a warning is broadcasted every time
+//    someone jumps. Raise ZoneTerminalVelocity of the zone with the JumpPad.
+//
 //  - Or set ApexHeight instead of hunting for an angle: the peak of the jump
 //    will be that many units above the higher of the start and the target,
 //    whatever the distance (a vertical pad next to a wall included), and the
@@ -453,6 +457,11 @@ simulated function vector CalcVelocity( Actor Other )
         // Velocity
         vel = speed * vector(jumpdir);
     }
+
+    // The zone caps a falling pawn's speed at ZoneTerminalVelocity (default 2500): past it the
+    // launch is cut and the jump falls short, at any angle or height. Checked where it starts
+    if( Other.Region.Zone != None && VSize(vel) > Other.Region.Zone.ZoneTerminalVelocity )
+        ShowMessage( "WARNING: Jump speed" @int(VSize(vel))@ "is above ZoneTerminalVelocity" @int(Other.Region.Zone.ZoneTerminalVelocity)@ "of" @Other.Region.Zone.Name$ ", the jump will fall short. Raise it in that zone.", Other, true );
 
     // Velocity components
     speedxy = VSize(vel*vect(1,1,0));
